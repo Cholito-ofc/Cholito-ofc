@@ -9,39 +9,25 @@ const handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
-  // ======= DEBUG: VER LA ESTRUCTURA REAL DEL MENSAJE =======
-  console.log('===== NUEVO REPORTE =====');
-  console.log(JSON.stringify(msg, null, 2));
-  // =========================================================
-
-  // Intentar todas las formas posibles:
+  // === OBTENCIÓN DEL NÚMERO REAL EN TU ESTRUCTURA ===
   let senderId = "";
-
-  // CASO 1: Mensaje de grupo (lo más común)
   if (msg.key && msg.key.participant) {
-    senderId = msg.key.participant;
-  }
-  // CASO 2: Algunos handlers usan msg.participant directamente
-  else if (msg.participant) {
+    senderId = msg.key.participant; // <-- ESTE ES TU CASO!
+  } else if (msg.participant) {
     senderId = msg.participant;
-  }
-  // CASO 3: Mensaje privado
-  else if (msg.key && msg.key.remoteJid && !msg.key.remoteJid.endsWith('@g.us')) {
+  } else if (msg.key && msg.key.remoteJid && !msg.key.remoteJid.endsWith('@g.us')) {
     senderId = msg.key.remoteJid;
   }
-  // CASO 4: Otros (puedes extender aquí si tu consola muestra otro campo)
 
-  // Limpiar el número
+  // Quitar el @lid o cualquier sufijo tipo @xxx
   let senderNum = "";
-  if (senderId) {
-    if (senderId.includes('@')) {
-      senderNum = senderId.split('@')[0];
-    } else {
-      senderNum = senderId.replace(/[^0-9]/g, "");
-    }
+  if (senderId.includes('@')) {
+    senderNum = senderId.split('@')[0];
+  } else {
+    senderNum = senderId.replace(/[^0-9]/g, "");
   }
 
-  // Si después de esto sigue sin salir, te ayudará el console.log de arriba ;)
+  // Validar
   if (!senderNum || senderNum.length < 8) senderNum = "NO_DETECTADO";
 
   const ownerNum = global.owner[0][0] + "@s.whatsapp.net";
