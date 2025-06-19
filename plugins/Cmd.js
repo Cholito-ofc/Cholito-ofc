@@ -1,14 +1,14 @@
 global.cmGroupCache = global.cmGroupCache || {};
 
 let handler = async (msg, { conn, args }) => {
-  // Lee el comando y posible número de página
   const body = (msg.message?.conversation || msg.message?.extendedTextMessage?.text || '').trim();
   if (!body.toLowerCase().startsWith('.cmd')) return;
 
-  // Página solicitada (por default, página 1)
+  // Página solicitada (default 1)
   const page = parseInt(args[0], 10) || 1;
   const PAGE_SIZE = 10;
 
+  // Obtener todos los grupos
   let groups = [];
   try {
     groups = Object.values(await conn.groupFetchAllParticipating());
@@ -32,6 +32,10 @@ let handler = async (msg, { conn, args }) => {
     return conn.sendMessage(msg.key.remoteJid, { text: 'El bot no es admin en ningún grupo.' }, { quoted: msg });
   }
 
+  // Guarda la lista COMPLETA para el usuario
+  const userKey = (msg.key.participant || msg.key.remoteJid);
+  global.cmGroupCache[userKey] = groupList;
+
   // PAGINACIÓN
   const totalPages = Math.ceil(groupList.length / PAGE_SIZE);
   if (page > totalPages || page < 1) {
@@ -42,14 +46,10 @@ let handler = async (msg, { conn, args }) => {
   const end = start + PAGE_SIZE;
   const groupPage = groupList.slice(start, end);
 
-  // Guarda solo la página ACTUAL en cache (para relación con .cm salir)
-  const userKey = (msg.key.participant || msg.key.remoteJid);
-  global.cmGroupCache[userKey] = groupPage;
-
+  // La numeración siempre es global, no por página
   const resultado = groupPage.map((g, i) => `${start + i + 1}: ${g.name}\nID: ${g.id}`).join('\n\n');
 
-  let texto = `*Grupos donde el bot es admin (Página ${page}/${totalPages})*\n\n${resultado}`;
-  if (totalPages > 1) texto += `\n\nEscribe *.cmd <número de página>* para ver más.\n(Ejemplo: *.cmd 2* para la segunda página)`;
+ página>* para ver más.\n(Ejemplo: *.cmd 2* para la segunda página)`;
 
   return conn.sendMessage(msg.key.remoteJid, { text: texto }, { quoted: msg });
 };
