@@ -1,3 +1,4 @@
+import fs from 'fs'
 import path from 'path'
 
 let partidasVS4 = {}
@@ -51,7 +52,7 @@ handler.command = /^(vs4|masc4)$/i
 handler.group = true
 handler.admin = true
 
-module.exports = handler;
+export default handler
 
 global.conn.ev.on('messages.upsert', async ({ messages }) => {
   let m = messages[0]
