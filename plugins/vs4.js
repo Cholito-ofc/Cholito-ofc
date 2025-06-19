@@ -48,7 +48,7 @@ let handler = async (m, { conn, args }) => {
 
 handler.help = ['4vs4']
 handler.tags = ['freefire']
-handler.command = /^(vs4|4vs4|masc4)$/i
+handler.command = /^(vs4|masc4)$/i
 handler.group = true
 handler.admin = true
 
