@@ -1,12 +1,8 @@
 let handler = async (msg, { conn }) => {
-  const sender = msg.key.participant || msg.key.remoteJid;
-  const senderNum = sender.replace(/[^0-9]/g, "");
-
-  // Lee el texto del mensaje para detectar el comando .cmd
+  // Detecta el comando .cmd
   const body = (msg.message?.conversation || msg.message?.extendedTextMessage?.text || '').trim();
   if (!body.toLowerCase().startsWith('.cmd')) return;
 
-  // Obtener todos los grupos donde está el bot
   let groups = [];
   try {
     groups = Object.values(await conn.groupFetchAllParticipating());
@@ -14,19 +10,22 @@ let handler = async (msg, { conn }) => {
     return conn.sendMessage(msg.key.remoteJid, { text: 'No se pudo obtener la lista de grupos.' }, { quoted: msg });
   }
 
+  // El ID del bot (puede ser user.id o conn.user.id, depende de tu versión)
+  const botNumber = (conn.user?.id || conn.user?.jid || conn.user).split(':')[0].replace(/\D/g, '') + '@s.whatsapp.net';
+
   let resultado = [];
   for (let group of groups) {
-    // Buscar si el usuario que ejecuta el comando es admin
-    let isAdmin = (group.participants || []).find(p =>
-      (p.id === sender) && (p.admin === 'admin' || p.admin === 'superadmin')
+    // Busca si el BOT es admin en ese grupo
+    let botParticipant = (group.participants || []).find(p =>
+      (p.id === botNumber) && (p.admin === 'admin' || p.admin === 'superadmin')
     );
-    if (isAdmin) {
+    if (botParticipant) {
       resultado.push(`${resultado.length + 1}: ${group.subject}\nID: ${group.id}`);
     }
   }
 
   if (!resultado.length) {
-    return conn.sendMessage(msg.key.remoteJid, { text: 'No eres administrador en ningún grupo donde esté el bot.' }, { quoted: msg });
+    return conn.sendMessage(msg.key.remoteJid, { text: 'El bot no es admin en ningún grupo.' }, { quoted: msg });
   }
 
   const respuesta = resultado.join('\n\n');
