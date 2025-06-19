@@ -10,8 +10,7 @@ let handler = async (msg, { conn, args }) => {
   }
 
   // Extrae el número del grupo del comando
-  const parts = body.split(' ').filter(Boolean);
-  const num = parseInt(parts[2] || args[0], 10);
+  const num = parseInt(body.replace(/[^0-9]/g, ''), 10);
 
   if (!num || num < 1 || num > groupList.length) {
     return conn.sendMessage(msg.key.remoteJid, { text: 'Número de grupo inválido. Usa el comando .cmd para ver la lista.', quoted: msg });
