@@ -1,3 +1,4 @@
+console.log(JSON.stringify(msg, null, 2));
 // plugins/reporte.js
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
