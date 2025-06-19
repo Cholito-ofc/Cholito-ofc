@@ -150,5 +150,5 @@ ${data.horaMsg}
   })
 }
 
-handler.command = ['vs4']
+handler.command = ['4vs4']
 module.exports = handler
