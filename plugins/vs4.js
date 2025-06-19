@@ -90,7 +90,7 @@ ${horaMsg}
   }
 }
 
-handler.command = ['4vs4']
+handler.command = ['vs4']
 module.exports = handler
 
 global.conn.ev.on('messages.upsert', async ({ messages }) => {
