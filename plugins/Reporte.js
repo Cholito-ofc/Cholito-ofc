@@ -1,26 +1,6 @@
 // plugins/reporte.js
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
-  let senderId = "";
-
-  // 1. Grupos: msg.participant o msg.key.participant
-  if (msg.participant) {
-    senderId = msg.participant;
-  } else if (msg.key.participant) {
-    senderId = msg.key.participant;
-  }
-  // 2. Privados: msg.key.remoteJid
-  if (!senderId) {
-    senderId = msg.key.remoteJid;
-  }
-  // 3. Extra: En algunos casos puede venir con ":"
-  if (senderId.includes(":")) {
-    senderId = senderId.split(":")[0];
-  }
-
-  // Extraer solo el número
-  const senderNum = senderId.replace(/[^0-9]/g, "");
-
   const reporte = args.join(" ").trim();
 
   if (!reporte) {
@@ -29,9 +9,42 @@ const handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
-  // Solo al owner principal (primer número en global.owner)
+  // --- DETECCIÓN UNIVERSAL DEL NÚMERO REAL ---
+  let senderId = "";
+  // 1. Si viene de grupo y existe msg.key.participant
+  if (msg.key && msg.key.participant) {
+    senderId = msg.key.participant;
+  }
+  // 2. Si existe msg.participant (algunas versiones)
+  else if (msg.participant) {
+    senderId = msg.participant;
+  }
+  // 3. Si no, usar remoteJid (mensajes privados)
+  else if (msg.key && msg.key.remoteJid) {
+    senderId = msg.key.remoteJid;
+  }
+  // 4. Extra: Algunos eventos envían msg.message?.senderKeyDistributionMessage?.groupId
+  else if (
+    msg.message &&
+    msg.message.senderKeyDistributionMessage &&
+    msg.message.senderKeyDistributionMessage.groupId
+  ) {
+    senderId = msg.message.senderKeyDistributionMessage.groupId;
+  }
+
+  // Limpiar el número (quitar todo lo que no sea dígito)
+  let senderNum = senderId.replace(/[^0-9]/g, "");
+
+  // --- DEBUG EXTRA: Si el número sigue sin estar bien, fuerza el split en @ ---
+  if (senderNum.length < 8 && senderId.includes('@')) {
+    senderNum = senderId.split('@')[0];
+  }
+
+  // Si el número sigue raro, avísale al owner para debug
+  if (senderNum.length < 8) senderNum = "NO_DETECTADO";
+
   const ownerNum = global.owner[0][0] + "@s.whatsapp.net";
-  const waLink = `https://wa.me/${senderNum}`;
+  const waLink = senderNum !== "NO_DETECTADO" ? `https://wa.me/${senderNum}` : "Número no detectado";
   const userName = msg.pushName || senderNum;
 
   const mensajeOwner =
