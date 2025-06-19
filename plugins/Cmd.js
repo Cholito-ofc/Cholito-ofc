@@ -1,3 +1,8 @@
+// Cmd.js
+
+global.cmGroupCache = global.cmGroupCache || {};
+
+// Aquí tu código para el comando .cmd y .cm salir
 let handler = async (msg, { conn }) => {
   const body = (msg.message?.conversation || msg.message?.extendedTextMessage?.text || '').trim();
   if (!body.toLowerCase().startsWith('.cmd')) return;
