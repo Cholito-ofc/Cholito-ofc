@@ -42,7 +42,7 @@ let handler = async (msg, { conn, args }) => {
 
   const zonas = [
     { pais: "🇲🇽 MÉXICO", offset: 0 },
-    { pais: "🇨🇴 COLOMBIA", offset: 0 }
+    { pais: "🇨🇴 COLOMBIA", offset: 1 }
   ]
 
   const horaMsg = zonas.map(z => {
