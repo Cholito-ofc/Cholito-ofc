@@ -1,6 +1,6 @@
 let partidasVS4 = {}
 
-const handler = async (msg, { conn, args }) => {
+let handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid
   const sender = msg.key.participant || msg.key.remoteJid
   const senderNum = sender.replace(/[^0-9]/g, "")
@@ -88,39 +88,35 @@ ${horaMsg}
     horaMsg,
     idPartida
   }
-}
 
-handler.command = ['vs4']
-module.exports = handler
+    conn.ev.on('messages.upsert', async ({ messages }) => {
+    let m = messages[0]
+    if (!m?.message?.reactionMessage) return
 
-global.conn.ev.on('messages.upsert', async ({ messages }) => {
-  let m = messages[0]
-  if (!m?.message?.reactionMessage) return
+    let reaction = m.message.reactionMessage
+    let key = reaction.key
+    let emoji = reaction.text
+    let sender = m.key.participant || m.key.remoteJid
 
-  let reaction = m.message.reactionMessage
-  let key = reaction.key
-  let emoji = reaction.text
-  let sender = m.key.participant || m.key.remoteJid
+    let data = partidasVS4[key.id]
+    if (!data) return
 
-  let data = partidasVS4[key.id]
-  if (!data) return
+    const emojisParticipar = ['❤️', '❤', '♥', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '❤️‍🔥']
+    const emojisSuplente = ['👍', '👍🏻', '👍🏼', '👍🏽', '👍🏾', '👍🏿']
 
-  const emojisParticipar = ['❤️', '❤', '♥', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '❤️‍🔥']
-  const emojisSuplente = ['👍', '👍🏻', '👍🏼', '👍🏽', '👍🏾', '👍🏿']
+    data.jugadores = data.jugadores.filter(u => u !== sender)
+    data.suplentes = data.suplentes.filter(u => u !== sender)
 
-  data.jugadores = data.jugadores.filter(u => u !== sender)
-  data.suplentes = data.suplentes.filter(u => u !== sender)
+    if (emojisParticipar.includes(emoji)) {
+      if (data.jugadores.length < 4) data.jugadores.push(sender)
+    } else if (emojisSuplente.includes(emoji)) {
+      if (data.suplentes.length < 2) data.suplentes.push(sender)
+    } else return
 
-  if (emojisParticipar.includes(emoji)) {
-    if (data.jugadores.length < 4) data.jugadores.push(sender)
-  } else if (emojisSuplente.includes(emoji)) {
-    if (data.suplentes.length < 2) data.suplentes.push(sender)
-  } else return
+    let jugadores = data.jugadores.map(u => `@${u.split('@')[0]}`)
+    let suplentes = data.suplentes.map(u => `@${u.split('@')[0]}`)
 
-  let jugadores = data.jugadores.map(u => `@${u.split('@')[0]}`)
-  let suplentes = data.suplentes.map(u => `@${u.split('@')[0]}`)
-
-  let plantilla = `
+    let plantilla = `
 *𝟒 𝐕𝐄𝐑𝐒𝐔𝐒 𝟒*
 
 ⏱ 𝐇𝐎𝐑𝐀𝐑𝐈𝐎                            
@@ -145,10 +141,14 @@ ${data.horaMsg}
 • Lista Activa Por 5 Minutos
 `.trim()
 
-  await conn.sendMessage(data.chat, { delete: data.originalMsgKey })
-  let newMsg = await conn.sendMessage(data.chat, { text: plantilla, mentions: [...data.jugadores, ...data.suplentes] })
+    await conn.sendMessage(data.chat, { delete: data.originalMsgKey })
+    let newMsg = await conn.sendMessage(data.chat, { text: plantilla, mentions: [...data.jugadores, ...data.suplentes] })
 
-  partidasVS4[newMsg.key.id] = data
-  partidasVS4[newMsg.key.id].originalMsgKey = newMsg.key
-  delete partidasVS4[key.id]
-})
+    partidasVS4[newMsg.key.id] = data
+    partidasVS4[newMsg.key.id].originalMsgKey = newMsg.key
+    delete partidasVS4[key.id]
+  })
+}
+
+handler.command = ['vs4']
+module.exports = handler
