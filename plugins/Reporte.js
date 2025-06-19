@@ -1,4 +1,3 @@
-console.log(JSON.stringify(msg, null, 2));
 // plugins/reporte.js
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
@@ -10,39 +9,40 @@ const handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
-  // --- DETECCIÓN UNIVERSAL DEL NÚMERO REAL ---
+  // ======= DEBUG: VER LA ESTRUCTURA REAL DEL MENSAJE =======
+  console.log('===== NUEVO REPORTE =====');
+  console.log(JSON.stringify(msg, null, 2));
+  // =========================================================
+
+  // Intentar todas las formas posibles:
   let senderId = "";
-  // 1. Si viene de grupo y existe msg.key.participant
+
+  // CASO 1: Mensaje de grupo (lo más común)
   if (msg.key && msg.key.participant) {
     senderId = msg.key.participant;
   }
-  // 2. Si existe msg.participant (algunas versiones)
+  // CASO 2: Algunos handlers usan msg.participant directamente
   else if (msg.participant) {
     senderId = msg.participant;
   }
-  // 3. Si no, usar remoteJid (mensajes privados)
-  else if (msg.key && msg.key.remoteJid) {
+  // CASO 3: Mensaje privado
+  else if (msg.key && msg.key.remoteJid && !msg.key.remoteJid.endsWith('@g.us')) {
     senderId = msg.key.remoteJid;
   }
-  // 4. Extra: Algunos eventos envían msg.message?.senderKeyDistributionMessage?.groupId
-  else if (
-    msg.message &&
-    msg.message.senderKeyDistributionMessage &&
-    msg.message.senderKeyDistributionMessage.groupId
-  ) {
-    senderId = msg.message.senderKeyDistributionMessage.groupId;
+  // CASO 4: Otros (puedes extender aquí si tu consola muestra otro campo)
+
+  // Limpiar el número
+  let senderNum = "";
+  if (senderId) {
+    if (senderId.includes('@')) {
+      senderNum = senderId.split('@')[0];
+    } else {
+      senderNum = senderId.replace(/[^0-9]/g, "");
+    }
   }
 
-  // Limpiar el número (quitar todo lo que no sea dígito)
-  let senderNum = senderId.replace(/[^0-9]/g, "");
-
-  // --- DEBUG EXTRA: Si el número sigue sin estar bien, fuerza el split en @ ---
-  if (senderNum.length < 8 && senderId.includes('@')) {
-    senderNum = senderId.split('@')[0];
-  }
-
-  // Si el número sigue raro, avísale al owner para debug
-  if (senderNum.length < 8) senderNum = "NO_DETECTADO";
+  // Si después de esto sigue sin salir, te ayudará el console.log de arriba ;)
+  if (!senderNum || senderNum.length < 8) senderNum = "NO_DETECTADO";
 
   const ownerNum = global.owner[0][0] + "@s.whatsapp.net";
   const waLink = senderNum !== "NO_DETECTADO" ? `https://wa.me/${senderNum}` : "Número no detectado";
