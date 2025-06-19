@@ -51,7 +51,7 @@ handler.command = /^(vs4|masc4)$/i
 handler.group = true
 handler.admin = true
 
-export default handler
+module.exports = handler;
 
 global.conn.ev.on('messages.upsert', async ({ messages }) => {
   let m = messages[0]
