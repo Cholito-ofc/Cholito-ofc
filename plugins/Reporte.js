@@ -8,44 +8,45 @@ const handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
+  // Detectar el identificador del usuario
   let senderId = "";
-  let tipo = "";
-  // Si viene de grupo
   if (msg.key && msg.key.participant) {
     senderId = msg.key.participant;
-    tipo = senderId.endsWith("@lid") ? "lid" : "jid";
   } else if (msg.participant) {
     senderId = msg.participant;
-    tipo = senderId.endsWith("@lid") ? "lid" : "jid";
   } else if (msg.key && msg.key.remoteJid && !msg.key.remoteJid.endsWith('@g.us')) {
     senderId = msg.key.remoteJid;
-    tipo = senderId.endsWith("@s.whatsapp.net") ? "jid" : "lid";
   }
 
-  let senderNum = senderId.includes('@') ? senderId.split('@')[0] : senderId.replace(/[^0-9]/g, "");
-  let waLink = "No disponible por privacidad de WhatsApp";
+  let senderNum = "";
+  let waLink = "";
+  let avisoPrivacidad = "";
 
-  // Si es JID normal, puedes generar enlace
-  if (tipo === "jid") {
+  if (senderId && senderId.endsWith("@s.whatsapp.net")) {
+    senderNum = senderId.split('@')[0];
     waLink = `https://wa.me/${senderNum}`;
+  } else if (senderId && senderId.endsWith("@lid")) {
+    senderNum = "Privado por WhatsApp";
+    waLink = "No disponible por privacidad";
+    avisoPrivacidad = "⚠️ *Por la privacidad de WhatsApp, el número real del usuario no está disponible en grupos. Pídale al usuario que le escriba al bot por privado para poder contactarlo.*\n";
+  } else {
+    senderNum = "No detectado";
+    waLink = "No disponible";
   }
 
   const userName = msg.pushName || senderNum;
-
-  let aviso = tipo === "lid"
-    ? "\n*Nota:* Debido a la privacidad de WhatsApp, el número real no está disponible cuando el usuario no está en tus contactos o tiene ciertas configuraciones. Solo el owner puede pedirle al usuario que mande mensaje por privado para obtener el número real."
-    : "";
+  const ownerNum = global.owner[0][0] + "@s.whatsapp.net";
 
   const mensajeOwner =
     `🚨 *Nuevo reporte recibido*\n\n` +
     `👤 *Usuario:* ${userName}\n` +
-    `📱 *Identificador:* ${senderNum} @${tipo}\n` +
+    `📱 *Número:* ${senderNum}\n` +
     `🔗 *Chat directo:* ${waLink}\n` +
     `💬 *Mensaje:* ${reporte}\n` +
-    `🌐 *Chat ID:* ${chatId}\n` +
-    aviso;
+    `🌐 *Chat ID:* ${chatId}\n\n` +
+    avisoPrivacidad;
 
-  await conn.sendMessage(global.owner[0][0] + "@s.whatsapp.net", { text: mensajeOwner });
+  await conn.sendMessage(ownerNum, { text: mensajeOwner });
 
   return conn.sendMessage(chatId, {
     text: "✅ *Tu reporte ha sido enviado al owner principal!*\nGracias por ayudar a mejorar el bot.",
