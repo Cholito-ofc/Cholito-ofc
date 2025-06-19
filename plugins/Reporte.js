@@ -1,60 +1,56 @@
+const yts = require('yt-search');
+const ytdl = require('ytdl-core');
+const fs = require('fs');
+const path = require('path');
+
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
-  const reporte = args.join(" ").trim();
+  const texto = args.join(" ").trim();
 
-  if (!reporte) {
+  if (!texto) {
     return conn.sendMessage(chatId, {
-      text: "❗ *Escribe el motivo del reporte.*\n\nEjemplo: .reporte El bot no responde correctamente.",
+      text: "❗ *Escribe el nombre de la canción o artista que deseas buscar.*\n\nEjemplo: .play Shakira - Waka Waka",
     }, { quoted: msg });
   }
 
-  // Detectar el identificador del usuario
-  let senderId = "";
-  if (msg.key && msg.key.participant) {
-    senderId = msg.key.participant;
-  } else if (msg.participant) {
-    senderId = msg.participant;
-  } else if (msg.key && msg.key.remoteJid && !msg.key.remoteJid.endsWith('@g.us')) {
-    senderId = msg.key.remoteJid;
+  try {
+    const search = await yts(texto);
+    const video = search.videos[0];
+    if (!video) return conn.sendMessage(chatId, { text: "No se encontró ningún resultado." }, { quoted: msg });
+
+    const info = await ytdl.getInfo(video.url);
+    const format = ytdl.chooseFormat(info.formats, { quality: 'highestaudio' });
+
+    // Ruta temporal para guardar el audio
+    const tempFilePath = path.join(__dirname, '../tmp', `${video.videoId}.mp3`);
+    const writeStream = fs.createWriteStream(tempFilePath);
+
+    ytdl(video.url, { filter: 'audioonly' })
+      .pipe(writeStream)
+      .on('finish', async () => {
+        await conn.sendMessage(chatId, {
+          audio: { url: tempFilePath },
+          mimetype: 'audio/mp4',
+          fileName: `${video.title}.mp3`,
+          ptt: false
+        }, { quoted: msg });
+        fs.unlinkSync(tempFilePath);
+      })
+      .on('error', (err) => {
+        conn.sendMessage(chatId, { text: "Ocurrió un error al descargar la canción." }, { quoted: msg });
+        if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
+      });
+
+    await conn.sendMessage(chatId, {
+      text: `🎵 *${video.title}*\n🕒 *${video.timestamp}*\n🔗 ${video.url}\n\n_Descargando audio..._`
+    }, { quoted: msg });
+
+  } catch (e) {
+    await conn.sendMessage(chatId, { text: "Hubo un error al buscar o descargar la música." }, { quoted: msg });
   }
-
-  let senderNum = "";
-  let waLink = "";
-  let avisoPrivacidad = "";
-
-  if (senderId && senderId.endsWith("@s.whatsapp.net")) {
-    senderNum = senderId.split('@')[0];
-    waLink = `https://wa.me/${senderNum}`;
-  } else if (senderId && senderId.endsWith("@lid")) {
-    senderNum = "Privado por WhatsApp";
-    waLink = "No disponible por privacidad";
-    avisoPrivacidad = "⚠️ *Por la privacidad de WhatsApp, el número real del usuario no está disponible en grupos. Pídale al usuario que le escriba al bot por privado para poder contactarlo.*\n";
-  } else {
-    senderNum = "No detectado";
-    waLink = "No disponible";
-  }
-
-  const userName = msg.pushName || senderNum;
-  const ownerNum = global.owner[0][0] + "@s.whatsapp.net";
-
-  const mensajeOwner =
-    `🚨 *Nuevo reporte recibido*\n\n` +
-    `👤 *Usuario:* ${userName}\n` +
-    `📱 *Número:* ${senderNum}\n` +
-    `🔗 *Chat directo:* ${waLink}\n` +
-    `💬 *Mensaje:* ${reporte}\n` +
-    `🌐 *Chat ID:* ${chatId}\n\n` +
-    avisoPrivacidad;
-
-  await conn.sendMessage(ownerNum, { text: mensajeOwner });
-
-  return conn.sendMessage(chatId, {
-    text: "✅ *Tu reporte ha sido enviado al owner principal!*\nGracias por ayudar a mejorar el bot.",
-    quoted: msg
-  });
 };
 
-handler.command = ["reporte"];
-handler.tags = ["tools"];
-handler.help = ["reporte <texto>"];
+handler.command = ["playy"];
+handler.tags = ["music", "audio"];
+handler.help = ["play <nombre de la canción o artista>"];
 module.exports = handler;
