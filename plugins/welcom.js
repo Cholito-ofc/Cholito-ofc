@@ -15,7 +15,6 @@ const handler = async (msg, { conn, args }) => {
   const isGroup = chatId.endsWith("@g.us");
   if (!isGroup) return; // Solo grupos
 
-  // Comando de activación/desactivación
   const action = (args[0] || "").toLowerCase();
   if (!["on", "off", "teston", "testoff"].includes(action)) {
     return conn.sendMessage(chatId, {
@@ -36,7 +35,6 @@ const handler = async (msg, { conn, args }) => {
     });
   }
 
-  // Activar/desactivar welcome
   if (action === "on") {
     welcomeGroups[chatId] = welcomeGroups[chatId] || {};
     welcomeGroups[chatId].welcome = true;
@@ -55,8 +53,6 @@ const handler = async (msg, { conn, args }) => {
       quoted: msg
     });
   }
-
-  // Activar/desactivar test Bot
   if (action === "teston") {
     welcomeGroups[chatId] = welcomeGroups[chatId] || {};
     welcomeGroups[chatId].testBot = true;
@@ -81,25 +77,28 @@ handler.command = ["welcom"];
 handler.tags = ["group"];
 handler.help = ["welcome on/off/teston/testoff"];
 
-// Evento de bienvenida
-handler.onJoin = async (m, { conn }) => {
-  const chatId = m.key.remoteJid;
-  if (!welcomeGroups[chatId]?.welcome) return;
+// CORRECCIÓN AQUÍ: Manejo correcto del evento group-participants.update de Baileys
+handler.participantsUpdate = async (update, { conn }) => {
+  const { id, participants, action } = update;
+  if (action !== "add") return; // Solo cuando alguien entra
 
-  const metadata = await conn.groupMetadata(chatId);
+  if (!welcomeGroups[id]?.welcome) return;
+
+  const metadata = await conn.groupMetadata(id);
   const groupName = metadata.subject;
   const groupDesc = metadata.desc || "Sin descripción.";
 
-  const user = m.key.participant || m.key.remoteJid;
-  const username = "@" + user.split("@")[0];
+  for (const user of participants) {
+    const username = "@" + user.split("@")[0];
 
-  let welcomeMsg = `👋 ¡Bienvenid@ ${username}!\n*Grupo:* ${groupName}\n*Descripción:* ${groupDesc}`;
-  if (welcomeGroups[chatId]?.testBot) welcomeMsg += `\n🧪 *Test Bot activo en este grupo.*`;
+    let welcomeMsg = `👋 ¡Bienvenid@ ${username}!\n*Grupo:* ${groupName}\n*Descripción:* ${groupDesc}`;
+    if (welcomeGroups[id]?.testBot) welcomeMsg += `\n🧪 *Test Bot activo en este grupo.*`;
 
-  await conn.sendMessage(chatId, {
-    text: welcomeMsg,
-    mentions: [user]
-  });
+    await conn.sendMessage(id, {
+      text: welcomeMsg,
+      mentions: [user]
+    });
+  }
 };
 
 module.exports = handler;
