@@ -13,19 +13,17 @@ const handler = async (msg, { conn, args }) => {
 
   // Solo al owner principal (primer número en global.owner)
   const ownerNum = global.owner[0][0] + "@s.whatsapp.net";
-  const mentionId = senderNum + "@s.whatsapp.net";
-  const waMention = `@${senderNum}`;
+  const waLink = `https://wa.me/${senderNum}`;
+  const userName = msg.pushName || senderNum;
 
   const mensajeOwner = 
     `🚨 *Nuevo reporte recibido*\n\n` +
-    `👤 *Usuario:* ${waMention}\n` + // Esto mostrará @521XXXXXXXXXX y será clickeable
+    `👤 *Usuario:* ${userName}\n` +
+    `🔗 *Chat directo:* ${waLink}\n` +
     `💬 *Mensaje:* ${reporte}\n` +
-    `🌐 *Chat:* ${chatId}\n`;
+    `🌐 *Chat ID:* ${chatId}\n`;
 
-  await conn.sendMessage(ownerNum, { 
-    text: mensajeOwner,
-    mentions: [mentionId]
-  });
+  await conn.sendMessage(ownerNum, { text: mensajeOwner });
 
   return conn.sendMessage(chatId, {
     text: "✅ *Tu reporte ha sido enviado al owner principal!*\nGracias por ayudar a mejorar el bot.",
