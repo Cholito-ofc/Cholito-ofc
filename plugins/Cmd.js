@@ -9,6 +9,7 @@ let handler = async (msg, { conn }) => {
     return conn.sendMessage(msg.key.remoteJid, { text: 'No se pudo obtener la lista de grupos.' }, { quoted: msg });
   }
 
+  // Detectar el JID del bot
   const botNumber = (conn.user?.id || conn.user?.jid || conn.user).split(':')[0].replace(/\D/g, '') + '@s.whatsapp.net';
 
   let resultado = [];
@@ -23,7 +24,7 @@ let handler = async (msg, { conn }) => {
     }
   }
 
-  // Guarda la lista para el usuario actual
+  // Guarda la lista para el usuario actual (por participante)
   const userKey = (msg.key.participant || msg.key.remoteJid);
   global.cmGroupCache[userKey] = groupList;
 
