@@ -166,5 +166,5 @@ ${data.horaMsg}
   })
 }
 
-handler.command = ['vs12']
+handler.command = ['12vs12']
 module.exports = handler
