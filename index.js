@@ -363,8 +363,8 @@ sock.ev.on("group-participants.update", async (update) => {
     // **************** FIN LÓGICA ANTIARABE ****************
 
     // **************** LÓGICA BIENVENIDA/DESPEDIDA ****************
-//const welcomeActivo = activos.welcome?.[update.id];
-//const despedidasActivo = activos.despedidas?.[update.id];
+const welcomeActivo = activos.welcome?.[update.id];
+const despedidasActivo = activos.despedidas?.[update.id];
 
 if (!welcomeActivo && !despedidasActivo) return;
 
