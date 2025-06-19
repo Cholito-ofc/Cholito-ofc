@@ -55,7 +55,7 @@ let handler = async (msg, { conn, args }) => {
   const idPartida = new Date().getTime().toString()
 
   let plantilla = `
-*𝟒 𝐕𝐄𝐑𝐒𝐔𝐒 𝟒*
+*𝟔 𝐕𝐄𝐑𝐒𝐔𝐒 𝟔*
 
 ⏱ 𝐇𝐎𝐑𝐀𝐑𝐈𝐎                            
 ${horaMsg}
