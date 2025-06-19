@@ -110,7 +110,7 @@ ${horaMsg}
     data.suplentes = data.suplentes.filter(u => u !== sender)
 
     if (emojisParticipar.includes(emoji)) {
-      if (data.jugadores.length < 4) data.jugadores.push(sender)
+      if (data.jugadores.length < 6) data.jugadores.push(sender)
     } else if (emojisSuplente.includes(emoji)) {
       if (data.suplentes.length < 2) data.suplentes.push(sender)
     } else return
