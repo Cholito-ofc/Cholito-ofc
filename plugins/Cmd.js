@@ -1,5 +1,4 @@
 global.cmGroupCache = global.cmGroupCache || {};
-
 let handler = async (msg, { conn, args }) => {
   const body = (msg.message?.conversation || msg.message?.extendedTextMessage?.text || '').trim();
   if (!body.toLowerCase().startsWith('.cmd')) return;
