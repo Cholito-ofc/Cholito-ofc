@@ -1,23 +1,69 @@
-//import fs from 'fs'
-//import path from 'path'
-
 let partidasVS4 = {}
 
-let handler = async (m, { conn, args }) => {
-  const modalidad = args.join(' ') || ''
+const handler = async (msg, { conn, args }) => {
+  const chatId = msg.key.remoteJid
+  const sender = msg.key.participant || msg.key.remoteJid
+  const senderNum = sender.replace(/[^0-9]/g, "")
+  const isOwner = global.owner.some(([id]) => id === senderNum)
+  const isFromMe = msg.key.fromMe
+
+  if (!chatId.endsWith("@g.us")) {
+    return conn.sendMessage(chatId, { text: "❌ Este comando solo puede usarse en grupos." }, { quoted: msg })
+  }
+
+  const meta = await conn.groupMetadata(chatId)
+  const isAdmin = meta.participants.find(p => p.id === sender)?.admin
+
+  if (!isAdmin && !isOwner && !isFromMe) {
+    return conn.sendMessage(chatId, { text: "❌ Solo *admins* o *el dueño del bot* pueden usar este comando." }, { quoted: msg })
+  }
+
+  const horaTexto = args[0]
+  const modalidad = args.slice(1).join(' ') || '🔫 Clásico'
+  if (!horaTexto) {
+    return conn.sendMessage(chatId, { text: "✳️ Usa el comando así:\n*.4vs4 [hora] [modalidad]*\nEjemplo: *.4vs4 5:00pm vs sala normal*" }, { quoted: msg })
+  }
+
+  const to24Hour = (str) => {
+    let [time, modifier] = str.toLowerCase().split(/(am|pm)/)
+    let [h, m] = time.split(":").map(n => parseInt(n))
+    if (modifier === 'pm' && h !== 12) h += 12
+    if (modifier === 'am' && h === 12) h = 0
+    return { h, m: m || 0 }
+  }
+
+  const to12Hour = (h, m) => {
+    const suffix = h >= 12 ? 'pm' : 'am'
+    h = h % 12 || 12
+    return `${h}:${m.toString().padStart(2, '0')}${suffix}`
+  }
+
+  const base = to24Hour(horaTexto)
+
+  const zonas = [
+    { pais: "🇲🇽 MÉXICO", offset: 0 },
+    { pais: "🇨🇴 COLOMBIA", offset: 0 }
+  ]
+
+  const horaMsg = zonas.map(z => {
+    let newH = base.h + z.offset
+    let newM = base.m
+    if (newH >= 24) newH -= 24
+    return `${z.pais} : ${to12Hour(newH, newM)}`
+  }).join("\n")
+
   const idPartida = new Date().getTime().toString()
 
   let plantilla = `
-𝟒 𝐕𝐄𝐑𝐒𝐔𝐒 𝟒
+*𝟒 𝐕𝐄𝐑𝐒𝐔𝐒 𝟒*
 
 ⏱ 𝐇𝐎𝐑𝐀𝐑𝐈𝐎                            
-🇲🇽 𝐌𝐄𝐗𝐈𝐂𝐎 : 
-🇨🇴 𝐂𝐎𝐋𝐎𝐌𝐁𝐈𝐀 :                
+${horaMsg}
 
 ➥ 𝐌𝐎𝐃𝐀𝐋𝐈𝐃𝐀𝐃: ${modalidad}
 ➥ 𝐉𝐔𝐆𝐀𝐃𝐎𝐑𝐄𝐒:
 
-      𝗘𝗦𝗖𝗨𝗔𝐃𝐑𝐀 1
+      𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔 1
     
     👑 ┇  
     🥷🏻 ┇  
@@ -29,30 +75,23 @@ let handler = async (m, { conn, args }) => {
     🥷🏻 ┇
 
 ❤️ = Participar | 👍 = Suplente
-  `.trim()
+`.trim()
 
-  let msg = await conn.sendMessage(m.chat, { text: plantilla }, { quoted: m })
+  let tempMsg = await conn.sendMessage(chatId, { text: plantilla }, { quoted: msg })
 
-  partidasVS4[msg.key.id] = {
-    chat: m.chat,
+  partidasVS4[tempMsg.key.id] = {
+    chat: chatId,
     jugadores: [],
     suplentes: [],
-    originalMsgKey: msg.key,
+    originalMsgKey: tempMsg.key,
     modalidad,
+    horaMsg,
     idPartida
   }
-
-  let filePath = path.join('./isFree', `${idPartida}.json`)
-  fs.writeFileSync(filePath, JSON.stringify(partidasVS4[msg.key.id], null, 2))
 }
 
-handler.help = ['4vs4']
-handler.tags = ['freefire']
-handler.command = /^(vs4|masc4)$/i
-handler.group = true
-handler.admin = true
-
-export default handler
+handler.command = ['4vs4']
+module.exports = handler
 
 global.conn.ev.on('messages.upsert', async ({ messages }) => {
   let m = messages[0]
@@ -66,9 +105,6 @@ global.conn.ev.on('messages.upsert', async ({ messages }) => {
   let data = partidasVS4[key.id]
   if (!data) return
 
-  let filePath = path.join('./isFree', `${data.idPartida}.json`)
-  if (!fs.existsSync(filePath)) return
-
   const emojisParticipar = ['❤️', '❤', '♥', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '❤️‍🔥']
   const emojisSuplente = ['👍', '👍🏻', '👍🏼', '👍🏽', '👍🏾', '👍🏿']
 
@@ -81,22 +117,19 @@ global.conn.ev.on('messages.upsert', async ({ messages }) => {
     if (data.suplentes.length < 2) data.suplentes.push(sender)
   } else return
 
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
-
   let jugadores = data.jugadores.map(u => `@${u.split('@')[0]}`)
   let suplentes = data.suplentes.map(u => `@${u.split('@')[0]}`)
 
   let plantilla = `
-𝟒 𝐕𝐄𝐑𝐒𝐔𝐒 𝟒
+*𝟒 𝐕𝐄𝐑𝐒𝐔𝐒 𝟒*
 
 ⏱ 𝐇𝐎𝐑𝐀𝐑𝐈𝐎                            
-🇲🇽 𝐌𝐄𝐗𝐈𝐂𝐎 : 
-🇨🇴 𝐂𝐎𝐋𝐎𝐌𝐁𝐈𝐀 :                
+${data.horaMsg}
 
 ➥ 𝐌𝐎𝐃𝐀𝐋𝐈𝐃𝐀𝐃: ${data.modalidad}
 ➥ 𝐉𝐔𝐆𝐀𝐃𝐎𝐑𝐄𝐒:
 
-      𝗘𝗦𝗖𝗨𝐀𝐃𝐑𝐀 1
+      𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔 1
     
     👑 ┇ ${jugadores[0] || ''}
     🥷🏻 ┇ ${jugadores[1] || ''}
@@ -110,7 +143,7 @@ global.conn.ev.on('messages.upsert', async ({ messages }) => {
 ❤️ = Participar | 👍 = Suplente
 
 • Lista Activa Por 5 Minutos
-  `.trim()
+`.trim()
 
   await conn.sendMessage(data.chat, { delete: data.originalMsgKey })
   let newMsg = await conn.sendMessage(data.chat, { text: plantilla, mentions: [...data.jugadores, ...data.suplentes] })
