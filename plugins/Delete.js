@@ -57,5 +57,5 @@ const handler = async (msg, { conn }) => {
   }
 };
 
-handler.command = ["delete"];
+handler.command = ["del"];
 module.exports = handler;
