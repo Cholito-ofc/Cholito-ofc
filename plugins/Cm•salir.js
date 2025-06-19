@@ -1,39 +1,31 @@
-let handler = async (msg, { conn }) => {
+let handler = async (msg, { conn, args }) => {
   const body = (msg.message?.conversation || msg.message?.extendedTextMessage?.text || '').trim();
-  if (!body.toLowerCase().startsWith('.cmd')) return;
+  if (!body.toLowerCase().startsWith('.cm salir')) return;
 
-  let groups = [];
-  try {
-    groups = Object.values(await conn.groupFetchAllParticipating());
-  } catch (e) {
-    return conn.sendMessage(msg.key.remoteJid, { text: 'No se pudo obtener la lista de grupos.' }, { quoted: msg });
-  }
-
-  const botNumber = (conn.user?.id || conn.user?.jid || conn.user).split(':')[0].replace(/\D/g, '') + '@s.whatsapp.net';
-
-  let resultado = [];
-  let groupList = [];
-  for (let group of groups) {
-    let botParticipant = (group.participants || []).find(p =>
-      (p.id === botNumber) && (p.admin === 'admin' || p.admin === 'superadmin')
-    );
-    if (botParticipant) {
-      resultado.push(`${resultado.length + 1}: ${group.subject}\nID: ${group.id}`);
-      groupList.push({ id: group.id, name: group.subject });
-    }
-  }
-
-  // Guarda la lista para el usuario actual
   const userKey = (msg.key.participant || msg.key.remoteJid);
-  global.cmGroupCache[userKey] = groupList;
+  const groupList = global.cmGroupCache[userKey];
 
-  if (!resultado.length) {
-    return conn.sendMessage(msg.key.remoteJid, { text: 'El bot no es admin en ningún grupo.' }, { quoted: msg });
+  if (!groupList || !groupList.length) {
+    return conn.sendMessage(msg.key.remoteJid, { text: 'Primero usa el comando .cmd para ver la lista de grupos.', quoted: msg });
   }
 
-  const respuesta = resultado.join('\n\n');
-  return conn.sendMessage(msg.key.remoteJid, { text: respuesta }, { quoted: msg });
+  // Extrae el número del grupo del comando
+  const parts = body.split(' ').filter(Boolean);
+  const num = parseInt(parts[2] || args[0], 10);
+
+  if (!num || num < 1 || num > groupList.length) {
+    return conn.sendMessage(msg.key.remoteJid, { text: 'Número de grupo inválido. Usa el comando .cmd para ver la lista.', quoted: msg });
+  }
+
+  const grupo = groupList[num - 1];
+  if (!grupo) {
+    return conn.sendMessage(msg.key.remoteJid, { text: 'No se encontró el grupo.', quoted: msg });
+  }
+
+  // Mensaje de aviso
+  await conn.sendMessage(grupo.id, { text: 'El admin solicita abandonar este grupo.' });
+  return conn.sendMessage(msg.key.remoteJid, { text: `Aviso enviado al grupo: ${grupo.name}`, quoted: msg });
 };
 
-handler.command = ['cmd'];
+handler.command = ['cm'];
 module.exports = handler;
