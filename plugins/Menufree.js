@@ -26,6 +26,7 @@ const handler = async (msg, { conn }) => {
 🛡️ ➤ ${prefix}16vs16  
 🛡️ ➤ ${prefix}20vs20  
 🛡️ ➤ ${prefix}24vs24  
+🛡️ ➤ ${prefix}scrims
 🏹 ➤ ${prefix}guerr
 
 ───────────────────
