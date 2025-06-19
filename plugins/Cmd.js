@@ -1,34 +1,43 @@
 let handler = async (msg, { conn }) => {
+  // Solo responde a .cmd (no importa mayús/minús ni espacios)
+  const body = (msg.message?.conversation || msg.message?.extendedTextMessage?.text || '').trim();
+  if (!body.toLowerCase().startsWith('.cmd')) return;
+
   const sender = msg.key.participant || msg.key.remoteJid;
-  const senderNum = sender.replace(/[^0-9]/g, "");
 
-  // Solo responde al comando .cmd (puedes cambiarlo según tu prefijo)
-  const body = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
-  if (!body.trim().startsWith('.cmd')) return;
-
-  // Obtener todos los chats tipo grupo donde está el bot
-  const allGroups = Object.entries(conn.chats)
-    .filter(([jid, chat]) => jid.endsWith('@g.us'));
+  // Obtener la lista de grupos donde está el bot
+  let groups = [];
+  try {
+    const res = await conn.groupFetchAllParticipating();
+    groups = Object.values(res);
+  } catch (e) {
+    // Si tu versión de Baileys no soporta groupFetchAllParticipating(), usa conn.chats alternativo:
+    groups = Object.entries(conn.chats || {})
+      .filter(([jid]) => jid.endsWith('@g.us'))
+      .map(([jid, chat]) => ({ id: jid, subject: chat?.name || 'Grupo', participants: [] }));
+  }
 
   let resultado = [];
-  for (const [jid, chat] of allGroups) {
-    try {
-      // Obtener metadata de cada grupo
-      let meta = await conn.groupMetadata(jid);
-      // Buscar si el usuario actual es admin en ese grupo
-      let esAdmin = meta.participants.find(
-        p => p.id === sender && (p.admin === 'admin' || p.admin === 'superadmin')
-      );
-      if (esAdmin) {
-        resultado.push(`${resultado.length + 1}: ${meta.subject}\nID: ${jid}`);
-      }
-    } catch (e) {
-      // Puede fallar si el bot fue eliminado de un grupo o no tiene permisos
-      continue;
+  for (let group of groups) {
+    // Si usaste groupFetchAllParticipating(), group ya tiene subject e participants
+    // Si no, hay que pedir metadata:
+    if (!group.participants || !group.subject) {
+      try {
+        let meta = await conn.groupMetadata(group.id || group.jid);
+        group.subject = meta.subject;
+        group.participants = meta.participants;
+      } catch { continue; }
+    }
+    // Verifica si el que ejecutó el comando es admin
+    let isAdmin = (group.participants || []).find(p =>
+      (p.id === sender) && (p.admin === 'admin' || p.admin === 'superadmin')
+    );
+    if (isAdmin) {
+      resultado.push(`${resultado.length + 1}: ${group.subject}\nID: ${group.id || group.jid}`);
     }
   }
 
-  if (resultado.length === 0) {
+  if (!resultado.length) {
     return conn.sendMessage(msg.key.remoteJid, { text: 'No eres administrador en ningún grupo donde esté el bot.' }, { quoted: msg });
   }
 
