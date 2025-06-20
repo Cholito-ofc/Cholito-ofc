@@ -30,7 +30,7 @@ Por favor, describe el error o sugerencia.
 
 ¡Entre más detalles brindes, mejor podremos ayudarte!
 
-╰━━━━━━━━━━━━━━━━━━━━━━━━━╯`
+╰━━━━━━━━━━━━━━━━━━━━━━━╯`
     }, { quoted: msg });
   }
 
@@ -50,7 +50,7 @@ Por favor, describe el error o sugerencia.
 🆔 *ID del grupo:*
    ${chatId}
 
-╰━━━━━━━━━━━━━━━━━━━━━━━━╯`;
+╰━━━━━━━━━━━━━━━━━━━━━━╯`;
 
   await conn.sendMessage(ownerNumber + "@s.whatsapp.net", { 
     text: ownerMsg,
@@ -67,7 +67,7 @@ Tu mensaje ha sido enviado con éxito al dueño del bot.
 
 🔎 Tu ayuda es importante para mejorar el servicio.
 
-╰━━━━━━━━━━━━━━━━━━━━━━━━╯`
+╰━━━━━━━━━━━━━━━━━━━━━━╯`
   }, { quoted: msg });
 };
 
