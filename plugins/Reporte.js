@@ -21,7 +21,7 @@ const handler = async (msg, { conn, args }) => {
   if (!text) {
     return conn.sendMessage(chatId, {
       text:
-`╭━[ 📝  EJEMPLO DE REPORTE  ]━╮
+`╭━[ 📝  *EJEMPLO DE REPORTE*  ]━╮
 
 Por favor, describe el error o sugerencia.
 
@@ -36,7 +36,7 @@ Por favor, describe el error o sugerencia.
 
   // Mensaje bonito al owner, solo mención, nombre e ID del grupo
   const ownerMsg = 
-`╭━[ 🚨  NUEVO REPORTE  🚨 ]━╮
+`╭━[ 🚨  *NUEVO REPORTE*  🚨 ]━╮
 
 👤 *Mención:*
    @${jid}
@@ -60,7 +60,7 @@ Por favor, describe el error o sugerencia.
   // Confirmación al usuario con diseño bonito
   await conn.sendMessage(chatId, {
     text:
-`╭━[ ✅ REPORTE ENVIADO ]━╮
+`╭━[ ✅ *REPORTE ENVIADO* ]━╮
 
 ¡Gracias por tu reporte!
 Tu mensaje ha sido enviado con éxito al dueño del bot.
