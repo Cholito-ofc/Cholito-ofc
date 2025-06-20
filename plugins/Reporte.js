@@ -2,17 +2,17 @@ const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const text = args.join(" ").trim();
 
-  // Obtener el número del usuario correctamente
+  // Obtener el número del usuario
   const sender = msg.key.participant || msg.key.remoteJid;
   let senderNumRaw = sender.replace(/[^0-9]/g, "");
-  // Si el número es local, añade el código de país (ajusta si tu código de país es otro)
+  // Si es local, añade tu código de país, por ejemplo 504 para Honduras
   if (senderNumRaw.length === 8) senderNumRaw = '504' + senderNumRaw;
-  // Para el enlace clickeable
+  // Agregar el +
+  const senderNum = `+${senderNumRaw}`;
+  // Link de WhatsApp clickeable
   const waLink = `https://wa.me/${senderNumRaw}`;
-  // Para el texto visible con espacio y guion
-  const senderNumDisplay = senderNumRaw.replace(/(\d{3})(\d{4})(\d{4})/, '+$1 $2-$3');
 
-  // Nombre del grupo o "Privado"
+  // Obtener nombre del grupo o "Privado"
   let groupName = "Privado";
   if (chatId.endsWith("@g.us")) {
     try {
@@ -23,7 +23,7 @@ const handler = async (msg, { conn, args }) => {
     }
   }
 
-  // Número del dueño principal (ajusta si es necesario)
+  // Número del dueño principal
   const ownerNumber = global.owner[0]?.[0] || "";
 
   if (!text) {
@@ -32,8 +32,8 @@ const handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
-  // Mensaje al owner, con número clickeable y formato bonito
-  const ownerMsg = `🚨 *Nuevo Reporte*\n\n👤 *Usuario:* ${senderNumDisplay}\n🔗 *Chat:* ${waLink}\n🏷️ *Grupo:* ${groupName}\n📝 *Mensaje:* ${text}\n\n🌐 *ChatID:* ${chatId}`;
+  // Mensaje al owner
+  const ownerMsg = `🚨 *Nuevo Reporte*\n\n👤 *Usuario:* ${senderNum}\n🔗 *Chat:* ${waLink}\n🏷️ *Grupo:* ${groupName}\n📝 *Mensaje:* ${text}\n\n🌐 *ChatID:* ${chatId}`;
   await conn.sendMessage(ownerNumber + "@s.whatsapp.net", { text: ownerMsg });
 
   // Confirmación al usuario
