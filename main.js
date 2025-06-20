@@ -1083,7 +1083,7 @@ case 'whatmusic': {
         const channel = video.author.name || 'Desconocido';
 
         const banner = `
-╭〔 💿 𝗖𝗢𝗥𝗧𝗔𝗡𝗔 2.0 𝗕𝗢𝗧 〕╮
+╭〔 💿 𝗞𝗜𝗟𝗟𝗨𝗔 2.0 𝗕𝗢𝗧 〕╮
 
 🎧 𝙈𝙪𝙨𝙞𝙘 𝘿𝙚𝙩𝙚𝙘𝙩𝙚𝙙 🎶
 
@@ -1226,7 +1226,7 @@ case 'whatmusic6': {
         if (!video) throw new Error("No se encontró la canción en YouTube");
 
         const banner = `
-╭〔 💿 𝗖𝗢𝗥𝗧𝗔𝗡𝗔 2.0 𝗕𝗢𝗧 〕╮
+╭〔 💿 𝗞𝗜𝗟𝗟𝗨𝗔 2.0 𝗕𝗢𝗧 〕╮
 
 🎧 𝙈𝙪𝙨𝙞𝙘 𝘿𝙚𝙩𝙚𝙘𝙩𝙚𝙙 🎶
 
@@ -3845,6 +3845,7 @@ case 'menu': {
 📌 Usa el prefijo antes de cada comando.
 
 ╭━━[ 𝗜𝗡𝗙𝗢𝗥𝗠𝗔𝗖𝗜𝗢́𝗡 💻 ]━⬣
+┃➜ ${global.prefix}𝗋𝖾𝗉𝗈𝗋𝗍
 ┃➜ ${global.prefix}𝗌𝗉𝖾𝖾𝖽𝗍𝖾𝗌𝗍
 ┃➜ ${global.prefix}𝗉𝗂𝗇𝗀
 ┃➜ ${global.prefix}𝖼𝗋𝖾𝖺𝖽𝗈𝗋
@@ -4000,6 +4001,8 @@ case 'menugrupo': {
 ⤷ ${global.prefix}setname  
 ⤷ ${global.prefix}delwelcome  
 ⤷ ${global.prefix}setwelcome  
+⤷ ${global.prefix}setbye 
+⤷ ${global.prefix}delbye
 ⤷ ${global.prefix}antiporno on o off  
 ⤷ ${global.prefix}antidelete on o off  
 ⤷ ${global.prefix}setfoto  
