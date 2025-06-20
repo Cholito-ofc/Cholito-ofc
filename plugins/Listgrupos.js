@@ -11,12 +11,10 @@ const handler = async (msg, { conn }) => {
 
   let listaTexto = '✨ *Grupos donde soy administrador*\n\n';
   let index = 1;
-  // Corrección aquí
   const botId = conn.user.id.endsWith('@s.whatsapp.net') ? conn.user.id : conn.user.id + '@s.whatsapp.net';
 
   for (const id in groupMetadatas) {
     const metadata = groupMetadatas[id];
-    // Busca todos los administradores
     const admins = metadata.participants
       .filter(p => p.admin === 'admin' || p.admin === 'superadmin')
       .map(p => p.id);
@@ -35,6 +33,10 @@ const handler = async (msg, { conn }) => {
 
   if (index === 1) {
     return conn.sendMessage(chatId, { text: '🚫 No soy administrador en ningún grupo.', quoted: msg });
+  }
+
+  if (index <= 6) {
+    listaTexto += `\n⚠️ *Nota:* WhatsApp solo entregó ${index - 1} grupos. Si eres admin en más, prueba interactuar con ellos o reiniciar el bot para actualizar la lista.\n`;
   }
 
   listaTexto += `\n🤖 *Total de grupos donde soy admin:* ${index - 1}`;
