@@ -7,7 +7,10 @@ const handler = async (msg, { conn }) => {
   try {
     groupMetadatas = await conn.groupFetchAllParticipating();
   } catch (e) {
-    return conn.sendMessage(chatId, { text: '❌ Ocurrió un error al obtener la lista TODOS los grupos donde estoy:*\n\n';
+    return conn.sendMessage(chatId, { text: '❌ Ocurrió un error al obtener la lista de TODOS los grupos.' }, { quoted: msg });
+  }
+
+  let listaTexto = '📋 *Lista de TODOS los grupos donde estoy:*\n\n';
   let index = 1;
   let todosIds = '';
   let adminIds = '';
@@ -17,8 +20,6 @@ const handler = async (msg, { conn }) => {
     const metadata = groupMetadatas[id];
     const botParticipant = metadata.participants.find(p => p.id === botId);
     const esAdmin = botParticipant && (botParticipant.admin === 'admin' || botParticipant.admin === 'superadmin');
-
-    // Para lista global de admins, útil si lo necesitas en otros comandos
     if (esAdmin) global.gruposAdmin.push({ id, name: metadata.subject });
 
     listaTexto += `*${index}*. ${metadata.subject}\n🆔 ${id}\n${esAdmin ? '⭐️ Soy admin aquí ⭐️' : '─ No soy admin aquí'}\n\n`;
@@ -31,7 +32,11 @@ const handler = async (msg, { conn }) => {
     return conn.sendMessage(chatId, { text: '❌ No estoy en ningún grupo.' }, { quoted: msg });
   }
 
- '*⭐️ IDs donde soy admin:*\n' + adminIds.trim()
+  listaTexto += '━━━━━━━━━━━━━━━━━━━━\n';
+  listaTexto += '*🆔 Todos los IDs de los grupos:*\n';
+  listaTexto += todosIds.trim() + '\n\n';
+  listaTexto += adminIds
+    ? '*⭐️ IDs donde soy admin:*\n' + adminIds.trim()
     : '*No soy admin en ningún grupo.*';
 
   return conn.sendMessage(chatId, { text: listaTexto }, { quoted: msg });
