@@ -33,7 +33,7 @@ const handler = async (msg, { conn, args }) => {
   }
 
   // Mensaje al owner
-  const ownerMsg = `🚨 *Nuevo Reporte*\n\n👤 *Usuario:* ${senderNum}\n🔗 *Chat:* ${waLink}\n🏷️ *Grupo:* ${groupName}\n📝 *Mensaje:* ${text}\n\n🌐 *ChatID:* ${chatId}`;
+  const ownerMsg = `🚨 *Nuevo Reporte*\n\n👤 *Usuario:* @${jid}\n}\n🔗 *Chat:* ${waLink}\n🏷️ *Grupo:* ${groupName}\n📝 *Mensaje:* ${text}\n\n🌐 *ChatID:* ${chatId}`;
   await conn.sendMessage(ownerNumber + "@s.whatsapp.net", { text: ownerMsg });
 
   // Confirmación al usuario
