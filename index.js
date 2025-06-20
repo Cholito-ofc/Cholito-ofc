@@ -460,7 +460,6 @@ if (update.action === "add" && welcomeActivo) {
       });
     }
   }
-}
 // **************** FIN LÓGICA BIENVENIDA/DESPEDIDA ****************
     // **************** FIN LÓGICA BIENVENIDA/DESPEDIDA ****************
 
