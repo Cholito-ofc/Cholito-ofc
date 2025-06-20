@@ -1,5 +1,4 @@
 const handler = async (msg, { conn, args }) => {
-  console.log("Comando reportar recibido"); // Para debug
   const chatId = msg.key.remoteJid;
   const isGroup = chatId.endsWith("@g.us");
   const reportMsg = args.join(" ").trim();
@@ -12,11 +11,31 @@ const handler = async (msg, { conn, args }) => {
     return;
   }
 
-  // Obtener el número real del usuario (formato correcto)
+  // Obtener el número real, sin sufijos, por ejemplo: 50489115621
   let senderId = msg.key.participant || msg.key.remoteJid;
   let senderNum = "";
   if (typeof senderId === "string") {
     senderNum = senderId.split("@")[0].replace(/\D/g, "");
+  }
+
+  // Formatear el número en formato internacional bonito
+  // Puedes ajustar el formato según tu país (aquí ejemplo para +504 8911-5621)
+  function formatPhone(num) {
+    // Si el número tiene 12 dígitos, asume formato internacional (ej: 50489115621)
+    if (num.length >= 11) {
+      const pais = "+" + num.slice(0, num.length - 8);
+      const parte1 = num.slice(-8, -4);
+      const parte2 = num.slice(-4);
+      return `${pais} ${parte1}-${parte2}`;
+    } else if (num.length === 10) {
+      // Ejemplo para México
+      const pais = "+52";
+      const parte1 = num.slice(0, 4);
+      const parte2 = num.slice(4, 8);
+      const parte3 = num.slice(8);
+      return `${pais} ${parte1}-${parte2}-${parte3}`;
+    }
+    return "+" + num;
   }
 
   let senderName = msg.pushName || "Sin nombre";
@@ -32,22 +51,23 @@ const handler = async (msg, { conn, args }) => {
   const now = new Date();
   const fechaHora = now.toLocaleString("es-MX", { timeZone: "America/Mexico_City" });
 
-  // Notificar a cada owner
-  for (const [ownerNum] of global.owner) {
-    const ownerJid = ownerNum.includes("@s.whatsapp.net") ? ownerNum : ownerNum + "@s.whatsapp.net";
-    let text = `*🚨 NUEVO REPORTE AL BOT 🚨*\n\n`;
-    text += `*Fecha y hora:* ${fechaHora}\n\n`;
-    text += `*De:* wa.me/${senderNum}\n`;
-    text += `\n*Nombre:* ${senderName}\n`;
-    if (isGroup) {
-      text += `\n*Grupo:* ${groupName}\n`;
-      text += `*ID Grupo:* ${chatId}\n`;
-    } else {
-      text += `\n*Chat privado*\n`;
-    }
-    text += `\n*Mensaje del reporte:*\n${reportMsg}\n`;
-    await conn.sendMessage(ownerJid, { text });
+  // Solo envía al owner principal
+  const [ownerNum] = global.owner;
+  const ownerJid = ownerNum.includes("@s.whatsapp.net") ? ownerNum : ownerNum + "@s.whatsapp.net";
+
+  let text = `*🚨 NUEVO REPORTE AL BOT 🚨*\n\n`;
+  text += `*Fecha y hora:* ${fechaHora}\n\n`;
+  text += `*Número:* ${formatPhone(senderNum)}\n\n`;
+  text += `*Nombre:* ${senderName}\n\n`;
+  if (isGroup) {
+    text += `*Grupo:* ${groupName}\n`;
+    text += `*ID Grupo:* ${chatId}\n\n`;
+  } else {
+    text += `*Chat privado*\n\n`;
   }
+  text += `*Mensaje del reporte:*\n${reportMsg}\n`;
+
+  await conn.sendMessage(ownerJid, { text });
 
   // Responde al usuario confirmando el envío
   await conn.sendMessage(chatId, {
