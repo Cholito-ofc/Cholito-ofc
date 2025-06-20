@@ -1,13 +1,15 @@
 const handler = async (msg, { conn, args }) => {
+  console.log("Comando reportar recibido"); // Para debug
   const chatId = msg.key.remoteJid;
   const isGroup = chatId.endsWith("@g.us");
   const reportMsg = args.join(" ").trim();
 
   if (!reportMsg) {
-    return conn.sendMessage(chatId, {
+    await conn.sendMessage(chatId, {
       text: "❌ *Indica el mensaje de error o reporte, ejemplo:*\n.reportar El bot no responde los comandos.",
       quoted: msg
     });
+    return;
   }
 
   // Obtener el número real del usuario (formato correcto)
