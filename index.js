@@ -438,9 +438,6 @@ if (update.action === "add" && welcomeActivo) {
 }
 
 // DESPEDIDA: solo cuando alguien sale
-const fs = require("fs");
-const path = require("path");
-
 if (update.action === "remove" && despedidasActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
