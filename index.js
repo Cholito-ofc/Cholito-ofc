@@ -403,58 +403,43 @@ if (fs.existsSync(welcomePath)) {
 
 // Si alguien entra y la bienvenida está activa
 if (update.action === "add" && welcomeActivo) {
+  // Obtén la descripción del grupo UNA SOLA VEZ para todos los que entran
+  let groupDesc = "";
+  try {
+    const metadata = await sock.groupMetadata(update.id);
+    groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
+  } catch (err) {
+    groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
+  }
+
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
 
     // Obtener foto de perfil (o predeterminada si falla)
-let profilePicUrl;
-try {
-  profilePicUrl = await sock.profilePictureUrl(participant, "image");
-} catch (err) {
-  profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg"; // URL de tu imagen predeterminada
-                                               }
+    let profilePicUrl;
+    try {
+      profilePicUrl = await sock.profilePictureUrl(participant, "image");
+    } catch (err) {
+      profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
+    }
 
+    // El mensaje siempre será la descripción del grupo (personalizado si existe)
     if (customMessage) {
-      // Enviar mensaje personalizado
       await sock.sendMessage(update.id, {
         image: { url: profilePicUrl },
-        caption: `👋🏻 𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 ${mention}\n\n${customMessage}`,
+        caption: `👋🏻 𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 ${mention}\n\n${customMessage}${groupDesc}`,
         mentions: [participant]
       });
     } else {
-      // Elegir mensaje aleatorio
-      const mensajeTexto = welcomeTexts[Math.floor(Math.random() * welcomeTexts.length)];
-      const option = Math.random();
-
-      if (option < 0.33) {
-        await sock.sendMessage(update.id, {
-          image: { url: profilePicUrl },
-          caption: `👋🏻 𝑩𝒊𝒆𝒏𝒃𝒆𝒏𝒊𝒅𝒐/𝒂 ${mention}\n\n${mensajeTexto}`,
-          mentions: [participant]
-        });
-      } else if (option < 0.66) {
-        let groupDesc = "";
-        try {
-          const metadata = await sock.groupMetadata(update.id);
-          groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "";
-        } catch (err) {
-          groupDesc = "";
-        }
-
-        await sock.sendMessage(update.id, {
-          text: `👋 ${mention}\n\n${mensajeTexto}${groupDesc}`,
-          mentions: [participant]
-        });
-      } else {
-        await sock.sendMessage(update.id, {
-          text: `👋 ${mention}\n\n${mensajeTexto}`,
-          mentions: [participant]
-        });
-      }
+      await sock.sendMessage(update.id, {
+        image: { url: profilePicUrl },
+        caption: `👋🏻 𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 ${mention}${groupDesc}`,
+        mentions: [participant]
+      });
     }
   }
-} else if (update.action === "remove" && despedidasActivo) {
+}
   // Si alguien se va y despedidas está activado
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
