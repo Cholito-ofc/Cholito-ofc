@@ -55,9 +55,16 @@ Por favor, describe el error o sugerencia.
   });
 
   await conn.sendMessage(chatId, {
-    text: "✅ Tu reporte ha sido enviado al dueño del bot. ¡Gracias por ayudar a mejorar el servicio!"
-  }, { quoted: msg });
-};
+  text:
+`╭━[ ✅ REPORTE ENVIADO ]━╮
+
+¡Gracias por tu reporte!
+Tu mensaje ha sido enviado con éxito al dueño del bot.
+
+🔎 Tu ayuda es importante para mejorar el servicio.
+
+╰━━━━━━━━━━━━━━━━━━━━━━━━╯`
+}, { quoted: msg });
 
 handler.command = ['report'];
 module.exports = handler;
