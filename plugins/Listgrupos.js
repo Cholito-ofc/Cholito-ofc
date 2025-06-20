@@ -11,13 +11,14 @@ const handler = async (msg, { conn }) => {
 
   let listaTexto = '✨ *Grupos donde soy administrador*\n\n';
   let index = 1;
-  const botId = conn.user.id.split(':')[0] + '@s.whatsapp.net';
+  // Corrección aquí
+  const botId = conn.user.id.endsWith('@s.whatsapp.net') ? conn.user.id : conn.user.id + '@s.whatsapp.net';
 
   for (const id in groupMetadatas) {
     const metadata = groupMetadatas[id];
     // Busca todos los administradores
     const admins = metadata.participants
-      .filter(p => p.admin === 'admin' || p.admin === 'superadmin' || p.isAdmin === true || p.isSuperAdmin === true || p.admin === true)
+      .filter(p => p.admin === 'admin' || p.admin === 'superadmin')
       .map(p => p.id);
 
     const esAdmin = admins.includes(botId);
