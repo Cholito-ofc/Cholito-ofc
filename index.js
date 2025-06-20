@@ -403,7 +403,6 @@ if (fs.existsSync(welcomePath)) {
 
 // Si alguien entra y la bienvenida está activa
 if (update.action === "add" && welcomeActivo) {
-  // Obtén la descripción del grupo UNA SOLA VEZ para todos los que entran
   let groupDesc = "";
   try {
     const metadata = await sock.groupMetadata(update.id);
@@ -416,28 +415,23 @@ if (update.action === "add" && welcomeActivo) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
 
-    // Obtener foto de perfil (o predeterminada si falla)
-    let profilePicUrl;
+    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
     try {
       profilePicUrl = await sock.profilePictureUrl(participant, "image");
     } catch (err) {
-      profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
+      // Usa la imagen por defecto
     }
 
-    // El mensaje siempre será la descripción del grupo (personalizado si existe)
-    if (customMessage) {
-      await sock.sendMessage(update.id, {
-        image: { url: profilePicUrl },
-        caption: `👋🏻 𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 ${mention}\n\n${customMessage}${groupDesc}`,
-        mentions: [participant]
-      });
-    } else {
-      await sock.sendMessage(update.id, {
-        image: { url: profilePicUrl },
-        caption: `👋🏻 𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 ${mention}${groupDesc}`,
-        mentions: [participant]
-      });
-    }
+    // Siempre manda la descripción del grupo
+    const textoFinal = customMessage
+      ? `👋🏻 𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 ${mention}\n\n${customMessage}${groupDesc}`
+      : `👋🏻 𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 ${mention}${groupDesc}`;
+
+    await sock.sendMessage(update.id, {
+      image: { url: profilePicUrl },
+      caption: textoFinal,
+      mentions: [participant]
+    });
   }
 }
   // Si alguien se va y despedidas está activado
