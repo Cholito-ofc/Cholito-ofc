@@ -405,10 +405,10 @@ if (fs.existsSync(welcomePath)) {
 if (update.action === "add" && welcomeActivo) {
   let groupDesc = "";
   try {
-    const metadata = await sock.groupMetadata(update.id);
-    groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
-  } catch (err) {
-    groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
+  const metadata = await sock.groupMetadata(update.id);
+  groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
+} catch (err) {
+  groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
   }
 
   for (const participant of update.participants) {
