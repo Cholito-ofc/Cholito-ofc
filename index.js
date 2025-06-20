@@ -455,24 +455,27 @@ if (update.action === "remove" && despedidasActivo) {
       profilePicUrl = await sock.profilePictureUrl(participant, "image");
     } catch (err) {}
 
-    if (customBye) {
-      let byeText = "";
-      // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio
-      if (/(@user)/gi.test(customBye)) {
-        byeText = customBye.replace(/@user/gi, mention);
-      } else {
-        byeText = `${mention} ${customBye}`;
-      }
+    // Mensaje predeterminado con cuadritos
+    const defaultBye = `╔═══════════════════\n║  👋  Hasta pronto, ${mention}!\n║  Esperamos verte de nuevo en el grupo.\n╚═══════════════════`;
 
-      await sock.sendMessage(update.id, {
-        image: { url: profilePicUrl },
-        caption: byeText,
-        mentions: [participant]
-      });
+    // Usa el personalizado si existe, si no el predeterminado
+    let byeText;
+    if (customBye) {
+      // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio
+      byeText = /@user/gi.test(customBye)
+        ? customBye.replace(/@user/gi, mention)
+        : `${mention} ${customBye}`;
+    } else {
+      byeText = defaultBye;
     }
-    // Si no hay mensaje personalizado, no manda nada
+
+    await sock.sendMessage(update.id, {
+      image: { url: profilePicUrl },
+      caption: byeText,
+      mentions: [participant]
+    });
   }
-}    
+}
 // **************** FIN LÓGICA BIENVENIDA/DESPEDIDA ****************
     // **************** FIN LÓGICA BIENVENIDA/DESPEDIDA ****************
 
