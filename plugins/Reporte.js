@@ -2,16 +2,10 @@ const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const text = args.join(" ").trim();
 
-  // Obtener el JID del usuario que reporta
+  // Obtener el JID (mención) del usuario que reporta
   const jid = msg.key.participant || msg.key.remoteJid;
 
-  // Formato internacional del número (todo pegado, con +)
-  let senderNumRaw = jid.replace(/[^0-9]/g, "");
-  if (senderNumRaw.length === 8) senderNumRaw = '504' + senderNumRaw; // Ajusta tu código de país si no es 504
-  const senderNum = `+${senderNumRaw}`;
-  const waLink = `https://wa.me/${senderNumRaw}`;
-
-  // Obtener nombre del grupo o "Privado"
+  // Nombre del grupo o "Privado"
   let groupName = "Privado";
   if (chatId.endsWith("@g.us")) {
     try {
@@ -22,7 +16,7 @@ const handler = async (msg, { conn, args }) => {
     }
   }
 
-  // Número del dueño principal
+  // Número del dueño principal (ajusta si tu owner es distinto)
   const ownerNumber = global.owner[0]?.[0] || "";
 
   if (!text) {
@@ -31,11 +25,11 @@ const handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
-  // Mensaje al owner con la mención como @${jid} y el número correcto
-  const ownerMsg = `🚨 *Nuevo Reporte*\n\n👤 *Usuario:* ${senderNum}\n🗣️ *Mención:* @${jid}\n🔗 *Chat:* ${waLink}\n🏷️ *Grupo:* ${groupName}\n📝 *Mensaje:* ${text}\n\n🌐 *ChatID:* ${chatId}`;
+  // Mensaje bonito al owner, solo mención, nombre e ID del grupo
+  const ownerMsg = `🚨 *Nuevo Reporte*\n\n👤 *Mención:*\n@${jid}\n\n📝 *Mensaje:*\n${text}\n\n🏷️ *Grupo:*\n${groupName}\n\n🆔 *ID del grupo:*\n${chatId}`;
   await conn.sendMessage(ownerNumber + "@s.whatsapp.net", { 
     text: ownerMsg,
-    mentions: [jid] // Así el mensaje es una mención real y azul/clickeable
+    mentions: [jid]
   });
 
   // Confirmación al usuario
