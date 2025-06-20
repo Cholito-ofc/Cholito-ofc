@@ -19,7 +19,7 @@ const handler = async (msg, { conn, args }) => {
   if (!text) {
   return conn.sendMessage(chatId, {
     text:
-`╭━━━[ 📝  EJEMPLO DE REPORTE  ]━━━╮
+`╭━━[ 📝  EJEMPLO DE REPORTE  ]━━╮
 
 Por favor, describe el error o sugerencia.
 
@@ -28,12 +28,12 @@ Por favor, describe el error o sugerencia.
 
 ¡Entre más detalles brindes, mejor podremos ayudarte!
 
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`
   }, { quoted: msg });
 }
 
   const ownerMsg = 
-`╭━━━[ 🚨  NUEVO REPORTE  🚨 ]━━━╮
+`╭━━[ 🚨  NUEVO REPORTE  🚨 ]━━╮
 
 👤 *Usuario:*
    @${jid}
@@ -47,7 +47,7 @@ Por favor, describe el error o sugerencia.
 🆔 *ID del grupo:*
    ${chatId}
 
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`;
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`;
 
   await conn.sendMessage(ownerNumber + "@s.whatsapp.net", { 
     text: ownerMsg,
