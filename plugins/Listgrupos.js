@@ -2,24 +2,28 @@ const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
   const botNumber = conn.user.id.split(':')[0] + '@s.whatsapp.net';
 
-  global.gruposAdmin = []; // reinicia lista
+  // Reiniciamos la lista global
+  global.gruposAdmin = [];
 
-  const allChats = Object.entries(conn.chats).filter(([jid, chat]) => jid.endsWith('@g.us'));
-
-  let index = 1;
   let texto = '📋 *Grupos donde soy administrador:*\n\n';
+  let index = 1;
 
-  for (const [id] of allChats) {
+  // Obtener todos los IDs de grupos activos
+  const groupJids = Object.keys(conn.chats).filter(jid => jid.endsWith('@g.us'));
+
+  for (const jid of groupJids) {
     try {
-      const metadata = await conn.groupMetadata(id);
+      const metadata = await conn.groupMetadata(jid);
+
+      // Verificar si el bot es administrador
       const isAdmin = metadata.participants.some(p => p.id === botNumber && p.admin);
       if (isAdmin) {
-        global.gruposAdmin.push({ id, name: metadata.subject });
+        global.gruposAdmin.push({ id: jid, name: metadata.subject });
         texto += `*${index}*. ${metadata.subject}\n`;
         index++;
       }
     } catch (e) {
-      // si el bot fue eliminado del grupo, ignora
+      // Si el bot no puede acceder al grupo (por ejemplo, fue eliminado), lo ignoramos
       continue;
     }
   }
@@ -30,8 +34,10 @@ const handler = async (msg, { conn }) => {
     }, { quoted: msg });
   }
 
-  return conn.sendMessage(chatId, { text: texto }, { quoted: msg });
+  return conn.sendMessage(chatId, {
+    text: texto
+  }, { quoted: msg });
 };
 
-handler.command = ['listargrupos'];
+handler.command = ['listgrupos'];
 module.exports = handler;
