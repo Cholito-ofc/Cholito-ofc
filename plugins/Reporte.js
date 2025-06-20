@@ -38,7 +38,7 @@ Por favor, describe el error o sugerencia.
   const ownerMsg = 
 `╭━[ 🚨  *NUEVO REPORTE*  🚨 ]━╮
 
-👤 *Mención:*
+👤 *Usuario:*
    @${jid}
 
 📝 *Mensaje:*
