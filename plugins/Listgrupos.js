@@ -15,15 +15,13 @@ const handler = async (msg, { conn }) => {
 
   for (const id in groupMetadatas) {
     const metadata = groupMetadatas[id];
-    // Buscamos al bot en la lista de participantes
-    const botParticipant = metadata.participants.find(p => p.id === botId);
-    // Chequeamos TODAS las opciones posibles para admin
-    const esAdmin =
-      (botParticipant && botParticipant.admin === 'admin') ||
-      (botParticipant && botParticipant.admin === 'superadmin') ||
-      (botParticipant && botParticipant.isAdmin === true) ||
-      (botParticipant && botParticipant.isSuperAdmin === true) ||
-      (botParticipant && botParticipant.admin === true);
+    // La lista de administradores puede estar en metadata['participants'] o metadata['participants'].filter(p => p.admin)
+    // Buscamos los admin reales:
+    const admins = metadata.participants
+      .filter(p => p.admin === 'admin' || p.admin === 'superadmin' || p.isAdmin === true || p.isSuperAdmin === true || p.admin === true)
+      .map(p => p.id);
+
+    const esAdmin = admins.includes(botId);
 
     if (esAdmin) global.gruposAdmin.push({ id, name: metadata.subject });
 
