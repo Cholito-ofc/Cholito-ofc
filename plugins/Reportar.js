@@ -1,8 +1,17 @@
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const isGroup = chatId.endsWith("@g.us");
-  const senderId = msg.key.participant || msg.key.remoteJid;
-  const senderNum = senderId.replace(/[^0-9]/g, "");
+  let senderId;
+if (msg.key.participant) {
+  senderId = msg.key.participant;
+} else if (msg.key.remoteJid) {
+  senderId = msg.key.remoteJid;
+} else if (msg.participant) {
+  senderId = msg.participant;
+} else {
+  senderId = ""; // fallback
+}
+const senderNum = senderId.replace(/@s\.whatsapp\.net$/, "");
   const reportMsg = args.join(" ").trim();
 
   if (!reportMsg) {
