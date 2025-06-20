@@ -64,7 +64,7 @@ Tu mensaje ha sido enviado con éxito al dueño del bot.
 🔎 Tu ayuda es importante para mejorar el servicio.
 
 ╰━━━━━━━━━━━━━━━━━━━━━━━━╯`
-}, { quoted: msg });
+}
 
 handler.command = ['report'];
 module.exports = handler;
