@@ -2,19 +2,17 @@ const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const text = args.join(" ").trim();
 
-  // Obtener el número del usuario en formato internacional y con guion
+  // Obtener el número del usuario correctamente
   const sender = msg.key.participant || msg.key.remoteJid;
   let senderNumRaw = sender.replace(/[^0-9]/g, "");
-  // Si ya incluye el código de país (ej: 504 para Honduras)
-  if (senderNumRaw.length === 12) { // ejemplo: 50489115621
-    senderNumRaw = '+' + senderNumRaw;
-  } else if (senderNumRaw.length === 8) { // sólo número local
-    senderNumRaw = '+504' + senderNumRaw; // ajusta el código de país aquí si es necesario
-  }
-  // Separar y poner guion: +504 8911-5621
-  let senderNum = senderNumRaw.replace(/(\+\d{3})(\d{4})(\d{4})/, '$1 $2-$3');
+  // Si el número es local, añade el código de país (ajusta si tu código de país es otro)
+  if (senderNumRaw.length === 8) senderNumRaw = '504' + senderNumRaw;
+  // Para el enlace clickeable
+  const waLink = `https://wa.me/${senderNumRaw}`;
+  // Para el texto visible con espacio y guion
+  const senderNumDisplay = senderNumRaw.replace(/(\d{3})(\d{4})(\d{4})/, '+$1 $2-$3');
 
-  // Obtener nombre del grupo o "Privado"
+  // Nombre del grupo o "Privado"
   let groupName = "Privado";
   if (chatId.endsWith("@g.us")) {
     try {
@@ -25,7 +23,7 @@ const handler = async (msg, { conn, args }) => {
     }
   }
 
-  // Número del dueño principal (ajustar si tu global.owner es diferente)
+  // Número del dueño principal (ajusta si es necesario)
   const ownerNumber = global.owner[0]?.[0] || "";
 
   if (!text) {
@@ -34,11 +32,11 @@ const handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
-  // Mensaje al owner
-  const ownerMsg = `🚨 *Nuevo Reporte*\n\n👤 *Usuario:* ${senderNum}\n🏷️ *Grupo:* ${groupName}\n📝 *Mensaje:* ${text}\n\n🌐 *Chat:* ${chatId}`;
+  // Mensaje al owner, con número clickeable y formato bonito
+  const ownerMsg = `🚨 *Nuevo Reporte*\n\n👤 *Usuario:* ${senderNumDisplay}\n🔗 *Chat:* ${waLink}\n🏷️ *Grupo:* ${groupName}\n📝 *Mensaje:* ${text}\n\n🌐 *ChatID:* ${chatId}`;
   await conn.sendMessage(ownerNumber + "@s.whatsapp.net", { text: ownerMsg });
 
-  // Respuesta al usuario
+  // Confirmación al usuario
   await conn.sendMessage(chatId, {
     text: "✅ Tu reporte ha sido enviado al dueño del bot. ¡Gracias por ayudar a mejorar el servicio!"
   }, { quoted: msg });
