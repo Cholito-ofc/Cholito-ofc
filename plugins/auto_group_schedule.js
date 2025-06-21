@@ -1,17 +1,21 @@
 const fs = require("fs");
 const path = require("path");
+const { DateTime } = require("luxon");
 const horariosPath = path.resolve("./horarios_grupo.json");
 
-// Función para comparar hora actual con la programada
-function horaActualHHMM() {
-    let now = new Date();
-    // Si quieres hora local, quita el .toUTCString y usa .toLocaleTimeString()
-    let hh = now.getHours().toString().padStart(2, "0");
-    let mm = now.getMinutes().toString().padStart(2, "0");
-    return `${hh}:${mm}`;
+// Obtiene la hora actual en formato HH:MM para una zona horaria específica
+function horaGrupo(zona) {
+    try {
+        const now = DateTime.now().setZone(zona);
+        return `${now.hour.toString().padStart(2, "0")}:${now.minute.toString().padStart(2, "0")}`;
+    } catch (e) {
+        // Si la zona falla, usa UTC
+        const now = DateTime.now().setZone("UTC");
+        return `${now.hour.toString().padStart(2, "0")}:${now.minute.toString().padStart(2, "0")}`;
+    }
 }
 
-// Función para abrir/cerrar grupo
+// Cambia el estado del grupo a abierto o cerrado y envía mensaje
 async function cambiarEstadoGrupo(conn, chatId, abrirGrupo) {
     try {
         await conn.groupSettingUpdate(chatId, abrirGrupo ? "not_announcement" : "announcement");
@@ -21,11 +25,12 @@ async function cambiarEstadoGrupo(conn, chatId, abrirGrupo) {
                 : "🔒 *El grupo ha sido CERRADO automáticamente por horario programado!*"
         });
     } catch (e) {
-        // Error típico si el bot no es admin
+        // Si el bot no es admin o hay otro error, simplemente ignora
+        // console.error(`Error cambiando estado del grupo ${chatId}:`, e);
     }
 }
 
-// Loop principal
+// Loop principal: revisa cada minuto si debe abrir o cerrar
 function iniciarAutoHorario(conn) {
     setInterval(async () => {
         let horarios = {};
@@ -35,18 +40,18 @@ function iniciarAutoHorario(conn) {
             }
         } catch { return; }
 
-        let actual = horaActualHHMM();
-
         for (const chatId in horarios) {
-            let { abrir, cerrar } = horarios[chatId] || {};
-            // Apertura
+            let { abrir, cerrar, zona } = horarios[chatId] || {};
+            if (!zona) zona = "America/Mexico_City"; // Zona por defecto
+
+            const actual = horaGrupo(zona);
+
             if (abrir && abrir === actual)
                 await cambiarEstadoGrupo(conn, chatId, true);
-            // Cierre
             if (cerrar && cerrar === actual)
                 await cambiarEstadoGrupo(conn, chatId, false);
         }
-    }, 60 * 1000); // cada minuto
+    }, 60 * 1000); // Cada minuto
 }
 
 module.exports = { iniciarAutoHorario };
