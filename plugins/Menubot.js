@@ -1,15 +1,10 @@
 const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
 
-  // Cambia la URL o path según tu archivo multimedia (imagen o video)
-  // Ejemplo de imagen: const mediaPath = 'https://cdn.russellxz.click/1ce86032.mp4';
-  // Ejemplo de video: const mediaPath = 'https://telegra.ph/file/1a4f0e9c1a37f3a5be36d.mp4';
-  const mediaPath = 'https://cdn.russellxz.click/1ce86032.mp4'; // Cambia por tu imagen o video
+  // Pon aquí tu URL de video (mp4, mov, webm, etc.)
+  const videoUrl = 'https://cdn.russellxz.click/1ce86032.mp4';
 
-  // Si es video, cambia el tipo abajo a 'video', si es imagen deja 'image'
-  const mediaType = 'image'; // Cambia a 'video' si usas video
-
-  // Personaliza tu menú aquí:
+  // Personaliza el texto del menú aquí:
   const menuText = `
 ╭━━━〔 *🤖 MENÚ DEL BOT* 〕━━━✦
 │
@@ -25,11 +20,14 @@ const handler = async (msg, { conn }) => {
 *Bot de Cholito-ofc*
   `;
 
-  const mediaMessage = {};
-  mediaMessage[mediaType] = { url: mediaPath };
-  mediaMessage.caption = menuText.trim();
-
-  await conn.sendMessage(chatId, mediaMessage, { quoted: msg });
+  await conn.sendMessage(
+    chatId,
+    {
+      video: { url: videoUrl },
+      caption: menuText.trim()
+    },
+    { quoted: msg }
+  );
 };
 
 handler.command = ['menu', 'soy'];
