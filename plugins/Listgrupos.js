@@ -7,7 +7,7 @@ const handler = async (msg, { conn }) => {
     return conn.sendMessage(chatId, { text: '❌ Error obteniendo la lista de grupos.' }, { quoted: msg });
   }
 
-  // Extrae la base del ID del bot, sin sufijo
+  // Solo la parte antes del @ para comparar correctamente
   const botIdBase = (conn.user.id || '').split('@')[0];
 
   let listaTexto = '✨ *Grupos donde soy administrador*\n\n';
@@ -15,10 +15,9 @@ const handler = async (msg, { conn }) => {
 
   for (const id in groupMetadatas) {
     const metadata = groupMetadatas[id];
-    // Extrae la base del ID de cada admin
     const adminIdsBase = metadata.participants
       .filter(p => p.admin === 'admin' || p.admin === 'superadmin')
-      .map(p => (p.id || '').split('@')[0]);
+      .map(p => (p.id || '').split('@')[0]); // Solo la base del ID
 
     if (adminIdsBase.includes(botIdBase)) {
       listaTexto += `*${index}*️⃣  *${metadata.subject}*\n`;
