@@ -1,17 +1,22 @@
 const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
-
-  // Carga la info del grupo
   const groupMetadata = await conn.groupMetadata(chatId);
-  const botNumber = conn.user.id.split(':')[0] + '@s.whatsapp.net'; // Corrige para Baileys MD
 
-  // Verifica que el bot es admin
-  const isBotAdmin = groupMetadata.participants.some(p => p.id === botNumber && (p.admin === 'admin' || p.admin === 'superadmin'));
+  // Normaliza el ID del bot en todos los formatos posibles
+  const myNumbers = [
+    conn.user.id,
+    conn.user.id.split(':')[0] + '@s.whatsapp.net'
+  ];
+
+  // Verifica admin para el bot
+  const isBotAdmin = groupMetadata.participants.some(
+    p => myNumbers.includes(p.id) && (p.admin === 'admin' || p.admin === 'superadmin')
+  );
   if (!isBotAdmin) {
     return conn.sendMessage(chatId, { text: '❌ Debo ser admin para usar este comando.' }, { quoted: msg });
   }
 
-  // Verifica que quien ejecuta el comando es admin
+  // Verifica admin para quien ejecuta el comando
   const sender = msg.key.participant || msg.participant || msg.key.remoteJid;
   const isSenderAdmin = groupMetadata.participants.some(
     p => p.id === sender && (p.admin === 'admin' || p.admin === 'superadmin')
@@ -20,7 +25,7 @@ const handler = async (msg, { conn }) => {
     return conn.sendMessage(chatId, { text: '❌ Solo los admins pueden usar este comando.' }, { quoted: msg });
   }
 
-  // Selección del usuario: mención o respuesta
+  // Selección de usuario (mención o respuesta)
   let user = null;
   if (msg.message?.extendedTextMessage?.contextInfo?.mentionedJid?.length) {
     user = msg.message.extendedTextMessage.contextInfo.mentionedJid[0];
@@ -46,7 +51,7 @@ const handler = async (msg, { conn }) => {
   // Promueve a admin
   await conn.groupParticipantsUpdate(chatId, [user], 'promote');
 
-  // Mensaje especial
+  // Mensaje con diseño
   return conn.sendMessage(chatId, {
     text: `
 ╭━━〔 *¡NUEVO ADMIN!* 〕━━⬣
