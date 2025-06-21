@@ -6,9 +6,9 @@ const handler = async (msg, { conn }) => {
   } catch (e) {
     return conn.sendMessage(chatId, { text: '❌ Error obteniendo grupos.' }, { quoted: msg });
   }
-  // El botId puede ser tipo "50489115621:38@s.whatsapp.net"
+  // ID del bot como está en conn.user.id
   const botId = conn.user.id;
-  // Pero en grupos, aparece como "50489115621:38@lid" (hay que convertirlo)
+  // El mismo ID pero con @lid (por si acaso)
   const botIdLid = botId.replace(/@s\.whatsapp\.net$/, '@lid');
 
   let listaTexto = '✨ *Grupos donde soy administrador*\n\n';
@@ -19,7 +19,7 @@ const handler = async (msg, { conn }) => {
       .filter(p => p.admin === 'admin' || p.admin === 'superadmin')
       .map(p => p.id);
 
-    // Comprobar ambos formatos
+    // Compara ambos formatos de ID
     const esAdmin = adminIds.includes(botId) || adminIds.includes(botIdLid);
 
     if (esAdmin) {
