@@ -9,11 +9,9 @@ const handler = async (msg, { conn }) => {
     return conn.sendMessage(chatId, { text: '❌ Error al obtener grupos.' }, { quoted: msg });
   }
 
-  const entries = Object.entries(fetched || {});
-  const myIds = [
-    conn.user.id,
-    conn.user.id.split(':')[0] + '@s.whatsapp.net'
-  ];
+  const entries = fetched instanceof Map
+    ? Array.from(fetched.entries())
+    : Object.entries(fetched || {});
 
   const grupos = [];
 
@@ -21,44 +19,50 @@ const handler = async (msg, { conn }) => {
     if (!meta || !meta.subject) continue;
     if (!jid.endsWith('@g.us')) continue;
 
-    let metaFull;
-    try {
-      metaFull = await conn.groupMetadata(jid); // Aquí garantizas tener la lista de participantes SIEMPRE
-    } catch (e) {
-      // Si falla obtener metadata, pasa al siguiente grupo
-      continue;
+    let miembros = 0;
+    if (Array.isArray(meta.participants)) {
+      miembros = meta.participants.length;
+    } else {
+      try {
+        const gm = await conn.groupMetadata(jid);
+        miembros = Array.isArray(gm.participants) ? gm.participants.length : 0;
+      } catch {
+        miembros = 0;
+      }
     }
 
-    const soyAdmin = metaFull.participants.some(
-      p => myIds.includes(p.id) && (p.admin === 'admin' || p.admin === 'superadmin')
-    );
-    if (!soyAdmin) continue;
-
     grupos.push({
-      name: metaFull.subject,
-      id: jid
+      name: meta.subject,
+      id: jid,
+      count: miembros
     });
   }
 
   if (grupos.length === 0) {
     global.gruposAdmin = [];
-    return conn.sendMessage(chatId, { text: '🚫 No soy admin en ningún grupo.' }, { quoted: msg });
+    return conn.sendMessage(chatId, { text: '🚫 No estoy en ningún grupo.' }, { quoted: msg });
   }
+
+  // Asignar código numérico: 1, 2, 3, ...
+  grupos.forEach((g, idx) => {
+    g.code = String(idx + 1);
+  });
 
   global.gruposAdmin = grupos;
 
-  let texto = '✨ *Grupos donde el bot es admin*\n\n';
-  grupos.forEach((g, i) => {
-    texto += `*${i + 1}.* ${g.name}\n`;
+  let texto = '✨ *Grupos donde está el bot (enumerados con números)*\n\n';
+  grupos.forEach((g) => {
+    texto += `🔹 *${g.name}*\n`;
+    texto += `• Código: *${g.code}*\n`;
+    texto += `• Miembros: ${g.count}\n`;
     texto += `• JID: ${g.id}\n`;
     texto += `━━━━━━━━━━━━━━━━━━━━━\n`;
   });
-  texto += `\n👑 *Total de grupos como admin:* ${grupos.length}`;
-  texto += `\n\n*Usa:* .aviso <número> <mensaje>`;
-  texto += `\n*Ejemplo:* .aviso 1 Este es un aviso importante.`;
+  texto += `\n🤖 *Total de grupos:* ${grupos.length}`;
+  texto += `\n\nUsa: .aviso <código> <mensaje>\nEjemplo: .aviso 1 Este es un aviso importante.`;
 
   return conn.sendMessage(chatId, { text: texto.trim() }, { quoted: msg });
 };
 
-handler.command = ['listgrupos', 'gruposbot'];
+handler.command = ['listgrupos', 'vergrupos', 'gruposbot'];
 module.exports = handler;
