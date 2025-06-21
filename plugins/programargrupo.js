@@ -7,6 +7,13 @@ const zonas = [
   "America/Lima",
   "America/Argentina/Buenos_Aires"
 ];
+const zonasAlias = {
+  "méxico": "America/Mexico_City",
+  "mexico": "America/Mexico_City",
+  "bogota": "America/Bogota",
+  "lima": "America/Lima",
+  "argentina": "America/Argentina/Buenos_Aires"
+};
 
 function convertirHora(horaStr) {
     const match = horaStr.match(/(\d{1,2}):(\d{2})\s*(am|pm)/i);
@@ -67,23 +74,55 @@ const handler = async (msg, { conn, args }) => {
         });
     }
 
-    // Parseo de argumentos: permite "abrir 8:30 am cerrar 10:45 pm"
-    const text = args.join(" ");
-    let abrir = text.match(/abrir\s+(\d{1,2}:\d{2}\s*(?:am|pm))/i);
-    let cerrar = text.match(/cerrar\s+(\d{1,2}:\d{2}\s*(?:am|pm))/i);
+    // --- PERSONALIZADO: Permitir "abrir 8:00 cerrar 8:10 am México" ---
+    const text = args.join(" ").trim().toLowerCase();
+
+    // Detectar si hay una zona horaria al final tipo "méxico"
+    let zonaDetectada;
+    for (let alias in zonasAlias) {
+        if (text.endsWith(alias)) {
+            zonaDetectada = zonasAlias[alias];
+            break;
+        }
+    }
+
+    let comando = text;
+    if (zonaDetectada) {
+        comando = comando.replace(new RegExp(`\\s*${Object.keys(zonasAlias).join("|")}$`, "i"), "").trim();
+    }
+
+    // Ver si am/pm solo viene al final
+    let ampmMatch = comando.match(/\b(am|pm)\b$/i);
+    let ampm = ampmMatch ? ampmMatch[1].toLowerCase() : null;
+    let abrir, cerrar;
+
+    if (ampm) {
+        // Buscar abrir/cerrar HH:MM y aplicar el am/pm final a ambos
+        abrir = comando.match(/abrir\s+(\d{1,2}:\d{2})/i);
+        cerrar = comando.match(/cerrar\s+(\d{1,2}:\d{2})/i);
+        if (abrir) abrir[1] = abrir[1] + " " + ampm;
+        if (cerrar) cerrar[1] = cerrar[1] + " " + ampm;
+    } else {
+        // Formato clásico: abrir 8:00 am cerrar 8:10 pm
+        abrir = comando.match(/abrir\s+(\d{1,2}:\d{2}\s*(?:am|pm))/i);
+        cerrar = comando.match(/cerrar\s+(\d{1,2}:\d{2}\s*(?:am|pm))/i);
+    }
 
     if (!abrir && !cerrar) {
         return conn.sendMessage(chatId, {
             text: `🌅 *Programación de grupo*\n\n` +
                   `*Uso correcto:*\n` +
                   `» .programargrupo abrir 8:00 am cerrar 10:30 pm\n` +
+                  `» .programargrupo abrir 8:00 cerrar 10:30 pm\n` +
+                  `» .programargrupo abrir 8:00 cerrar 8:10 am México\n` +
                   `» .programargrupo zona America/Mexico_City\n\n` +
                   `*Ejemplos:*\n` +
                   `• .programargrupo abrir 7:45 am\n` +
                   `• .programargrupo cerrar 11:15 pm\n` +
                   `• .programargrupo abrir 8:30 am cerrar 10:00 pm\n` +
+                  `• .programargrupo abrir 8:30 cerrar 10:00 pm México\n` +
                   `• .programargrupo zona America/Bogota\n\n` +
-                  `⏰ *Puedes usar hora y minutos, y debes especificar am o pm.*\n` +
+                  `⏰ *Puedes usar hora y minutos, y puedes poner am o pm solo al final.*\n` +
                   `🌎 *Zonas soportadas:* ${zonas.map(z=>`\n• ${z}`).join("")}`,
             quoted: msg
         });
@@ -94,18 +133,21 @@ const handler = async (msg, { conn, args }) => {
     let msgBonito = "🕑 *Nuevos horarios programados:*\n";
 
     if (abrir) {
-        const hora24 = convertirHora(abrir[1]);
+        const hora24 = convertirHora(abrir[1].trim());
         if (!hora24) return conn.sendMessage(chatId, { text: "❌ *Formato de hora inválido para abrir.*\nEjemplo: 7:30 am", quoted: msg });
         data[chatId].abrir = hora24;
         msgBonito += `🌤️  Abrir grupo: *${abrir[1].toUpperCase()}* (${hora24})\n`;
     }
     if (cerrar) {
-        const hora24 = convertirHora(cerrar[1]);
+        const hora24 = convertirHora(cerrar[1].trim());
         if (!hora24) return conn.sendMessage(chatId, { text: "❌ *Formato de hora inválido para cerrar.*\nEjemplo: 11:15 pm", quoted: msg });
         data[chatId].cerrar = hora24;
         msgBonito += `🌙  Cerrar grupo: *${cerrar[1].toUpperCase()}* (${hora24})\n`;
     }
 
+    if (zonaDetectada) {
+        data[chatId].zona = zonaDetectada;
+    }
     if (!data[chatId].zona) data[chatId].zona = "America/Mexico_City"; // Default México
 
     guardarHorarios(data);
@@ -117,5 +159,5 @@ const handler = async (msg, { conn, args }) => {
 
 handler.command = ["programargrupo"];
 handler.tags = ["group"];
-handler.help = ["programargrupo abrir HH:MM am/pm cerrar HH:MM am/pm", "programargrupo zona America/Mexico_City"];
+handler.help = ["programargrupo abrir HH:MM am/pm cerrar HH:MM am/pm", "programargrupo abrir HH:MM cerrar HH:MM am/pm México", "programargrupo zona America/Mexico_City"];
 module.exports = handler;
