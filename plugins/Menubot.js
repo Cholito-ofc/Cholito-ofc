@@ -2,7 +2,7 @@ const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
 
   // Pon aquí tu URL de video (mp4, mov, webm, etc.)
-  const videoUrl = 'https://cdn.russellxz.click/1ce86032.mp4';
+  const videoUrl = 'https://cdn.russellxz.click/5ffab283.mp4';
 
   // Personaliza el texto del menú aquí:
   const menuText = `
