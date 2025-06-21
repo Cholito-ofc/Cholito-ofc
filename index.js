@@ -415,9 +415,9 @@ if (update.action === "add" && welcomeActivo) {
     if (customMessage) {
       // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio, siempre con manito y salto de línea
       if (/(@user)/gi.test(customMessage)) {
-        textoFinal = `👋🏻 ${customMessage.replace(/@user/gi, mention)}`;
+        textoFinal = `𝑩𝒊𝒆𝒏𝒃𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${customMessage.replace(/@user/gi, mention)}`;
       } else {
-        textoFinal = `👋🏻 ${mention}\n\n${customMessage}`;
+        textoFinal = `𝑩𝒊𝒆𝒏𝒃𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${customMessage}`;
       }
     } else {
       // Si no hay mensaje personalizado, solo manda la descripción del grupo
@@ -428,7 +428,7 @@ if (update.action === "add" && welcomeActivo) {
       } catch (err) {
         groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
       }
-      textoFinal = `👋🏻 ${mention}${groupDesc}`;
+      textoFinal = `𝑩𝒊𝒆𝒏𝒃𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
     }
 
     await sock.sendMessage(update.id, {
@@ -645,7 +645,7 @@ try {
     if (['1', 'audio', '3', 'musicadoc'].includes(texto)) {
       const docMode = texto === '3' || texto === 'musicadoc';
       await sock.sendMessage(chatId, { react: { text: docMode ? '📄' : '🎵', key: msg.key } });
-      await sock.sendMessage(chatId, { text: `🎶 Descargando y comprimiendo audio...` }, { quoted: msg });
+      await sock.sendMessage(chatId, { text: `*[🛠️] 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈 𝖾𝗌𝗉𝖾𝗋𝖾...*` }, { quoted: msg });
 
       const res = await axios.get(`https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(data.videoUrl)}&type=audio&quality=128kbps&apikey=russellxz`);
       const download = await axios.get(res.data.data.url, { responseType: 'arraybuffer' });
@@ -703,7 +703,7 @@ try {
         [docMode ? 'document' : 'video']: fs.readFileSync(filePath),
         mimetype: 'video/mp4',
         fileName: `${data.title}.mp4`,
-        caption: docMode ? undefined : `🎬 Aquí tiene su video.\n\nDisfrútelo y continúe explorando el mundo digital.\n\n©Cortana 2.0 bot`
+        caption: docMode ? undefined : `🎬 Aquí tiene su video.\n\nDisfrútelo y continúe explorando el mundo digital.\n\n® 𝗞𝗶𝗹𝗹𝘂𝗮𝗕𝗼𝘁 ⚡`
       }, { quoted: msg });
 
       fs.unlinkSync(filePath);
