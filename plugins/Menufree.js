@@ -46,5 +46,5 @@ const handler = async (msg, { conn }) => {
   }
 };
 
-handler.command = ['menufree'];
+handler.command = ['menuff'];
 module.exports = handler;
