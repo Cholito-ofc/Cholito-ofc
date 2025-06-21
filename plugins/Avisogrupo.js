@@ -1,49 +1,74 @@
-const handler = async (msg, { conn, args }) => {
+const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
 
-  if (!global.gruposAdmin || global.gruposAdmin.length === 0) {
-    return conn.sendMessage(chatId, {
-      text: '⚠️ No hay lista de grupos disponible. Usa primero el comando *!listargrupos* para obtener los códigos de los grupos donde soy admin.'
-    }, { quoted: msg });
-  }
-
-  if (!args[0]) {
-    return conn.sendMessage(chatId, {
-      text: '❌ Debes especificar el código de 3 dígitos y el mensaje.\n\n*Uso:* .aviso <código> <mensaje>\nEjemplo: .aviso 123 Este es un aviso.'
-    }, { quoted: msg });
-  }
-
-  const codigo = args[0].trim();
-  if (!/^\d{3}$/.test(codigo)) {
-    return conn.sendMessage(chatId, {
-      text: '❌ Formato de código inválido. Debe ser un número de 3 dígitos. Usa *!listargrupos* para ver los códigos.'
-    }, { quoted: msg });
-  }
-
-  const textoAviso = args.slice(1).join(' ');
-  if (!textoAviso) {
-    return conn.sendMessage(chatId, {
-      text: '⚠️ Debes escribir un mensaje para enviar.\n\n*Ejemplo:*\n.aviso 123 Este es un aviso importante.'
-    }, { quoted: msg });
-  }
-
-  const grupo = global.gruposAdmin.find(g => g.code === codigo);
-  if (!grupo) {
-    return conn.sendMessage(chatId, {
-      text: `❌ No se encontró ningún grupo con el código *${codigo}*. Usa *!listargrupos* para ver los códigos disponibles.`
-    }, { quoted: msg });
-  }
-
+  let fetched;
   try {
-    await conn.sendMessage(grupo.id, { text: `📢 *AVISO DEL BOT:*\n\n${textoAviso}` });
+    fetched = await conn.groupFetchAllParticipating();
   } catch (e) {
-    return conn.sendMessage(chatId, { text: `❌ Error al enviar mensaje al grupo ${grupo.name}.` }, { quoted: msg });
+    console.error('Error en groupFetchAllParticipating:', e);
+    return conn.sendMessage(chatId, { text: '❌ Error al obtener grupos.' }, { quoted: msg });
   }
 
-  return conn.sendMessage(chatId, {
-    text: `✅ Aviso enviado correctamente al grupo *${grupo.name}* (código ${grupo.code}).`
-  }, { quoted: msg });
+  const entries = fetched instanceof Map
+    ? Array.from(fetched.entries())
+    : Object.entries(fetched || {});
+
+  // ID base del bot (sin sufijo)
+  const botIdBase = (conn.user.id || '').split('@')[0];
+
+  const grupos = [];
+
+  for (const [jid, meta] of entries) {
+    if (!meta || !meta.subject) continue;
+    if (!jid.endsWith('@g.us')) continue;
+
+    // Detectar si el bot ES admin en este grupo
+    const adminIdsBase = Array.isArray(meta.participants)
+      ? meta.participants
+          .filter(p => p.admin === 'admin' || p.admin === 'superadmin')
+          .map(p => (p.id || '').split('@')[0])
+      : [];
+
+    if (!adminIdsBase.includes(botIdBase)) continue; // Solo si el bot es admin
+
+    let miembros = 0;
+    if (Array.isArray(meta.participants)) {
+      miembros = meta.participants.length;
+    } else {
+      try {
+        const gm = await conn.groupMetadata(jid);
+        miembros = Array.isArray(gm.participants) ? gm.participants.length : 0;
+      } catch {
+        miembros = 0;
+      }
+    }
+
+    grupos.push({
+      name: meta.subject,
+      id: jid,
+      count: miembros
+    });
+  }
+
+  if (grupos.length === 0) {
+    global.gruposAdmin = [];
+    return conn.sendMessage(chatId, { text: '🚫 No soy admin en ningún grupo.', quoted: msg });
+  }
+
+  global.gruposAdmin = grupos;
+
+  let texto = '✨ *Grupos donde soy administrador*\n\n';
+  grupos.forEach((g, idx) => {
+    texto += `*${idx + 1}.* ${g.name}\n`;
+    texto += `• Miembros: ${g.count}\n`;
+    texto += `• JID: ${g.id}\n`;
+    texto += `━━━━━━━━━━━━━━━━━━━━━\n`;
+  });
+  texto += `\n🤖 *Total de grupos donde soy admin:* ${grupos.length}`;
+  texto += `\n\nUsa: .aviso <número> <mensaje>\nEjemplo: .aviso 1 Este es un aviso importante.`;
+
+  return conn.sendMessage(chatId, { text: texto.trim() }, { quoted: msg });
 };
 
-handler.command = ['aviso'];
+handler.command = ['listgrupos', 'gruposadmin'];
 module.exports = handler;
