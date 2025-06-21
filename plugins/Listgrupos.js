@@ -7,18 +7,18 @@ const handler = async (msg, { conn }) => {
     return conn.sendMessage(chatId, { text: '❌ Error obteniendo la lista de grupos.' }, { quoted: msg });
   }
 
-  // Saca la base del ID del bot, sin sufijo
-  const botIdBase = conn.user.id.split('@')[0];
+  // Extrae la base del ID del bot, sin sufijo
+  const botIdBase = (conn.user.id || '').split('@')[0];
 
   let listaTexto = '✨ *Grupos donde soy administrador*\n\n';
   let index = 1;
 
   for (const id in groupMetadatas) {
     const metadata = groupMetadatas[id];
-    // Busca todos los administradores
+    // Extrae la base del ID de cada admin
     const adminIdsBase = metadata.participants
       .filter(p => p.admin === 'admin' || p.admin === 'superadmin')
-      .map(p => p.id.split('@')[0]); // Solo la base del ID
+      .map(p => (p.id || '').split('@')[0]);
 
     if (adminIdsBase.includes(botIdBase)) {
       listaTexto += `*${index}*️⃣  *${metadata.subject}*\n`;
