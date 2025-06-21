@@ -1,49 +1,62 @@
-const handler = async (msg, { sock, isBotAdmin, isAdmin, participants }) => {
+const handler = async (msg, { conn, participants }) => {
   const chatId = msg.key.remoteJid;
 
-  if (!isBotAdmin)
-    return sock.sendMessage(chatId, { text: '❌ Debo ser admin para usar este comando.' }, { quoted: msg });
-  if (!isAdmin)
-    return sock.sendMessage(chatId, { text: '❌ Solo los admins pueden usar este comando.' }, { quoted: msg });
+  // 1. Verifica que el bot sea admin
+  const groupMetadata = await conn.groupMetadata(chatId);
+  const isBotAdmin = groupMetadata.participants.some(p => p.id === (await conn.user.id) && (p.admin === 'admin' || p.admin === 'superadmin'));
+  if (!isBotAdmin) {
+    return conn.sendMessage(chatId, {
+      text: '❌ Debo ser admin para usar este comando.'
+    }, { quoted: msg });
+  }
 
-  // Selección del usuario a promover a admin
+  // 2. Verifica que el que ejecuta el comando sea admin
+  const sender = msg.key.participant || msg.participant || msg.key.remoteJid;
+  const isSenderAdmin = groupMetadata.participants.some(
+    p => p.id === sender && (p.admin === 'admin' || p.admin === 'superadmin')
+  );
+  if (!isSenderAdmin) {
+    return conn.sendMessage(chatId, {
+      text: '❌ Solo los admins pueden usar este comando.'
+    }, { quoted: msg });
+  }
+
+  // 3. Selecciona al usuario objetivo: por mención o por respuesta
   let user = null;
-
-  // Si hay menciones, toma la primera mención
   if (msg.message?.extendedTextMessage?.contextInfo?.mentionedJid?.length) {
     user = msg.message.extendedTextMessage.contextInfo.mentionedJid[0];
   }
-
-  // Si no hay menciones pero es respuesta, toma el autor del mensaje respondido
   if (!user && msg.message?.extendedTextMessage?.contextInfo?.participant) {
     user = msg.message.extendedTextMessage.contextInfo.participant;
   }
-
-  // Si no hay nada, muestra error
   if (!user) {
-    return sock.sendMessage(chatId, { text: '❌ Debes mencionar (@) o responder al mensaje del usuario que quieres hacer admin.' }, { quoted: msg });
+    return conn.sendMessage(chatId, {
+      text: '❌ Debes mencionar (@) o responder al mensaje del usuario que quieres hacer admin.'
+    }, { quoted: msg });
   }
 
-  // Verifica que el usuario está en el grupo
-  const participante = participants.find(p => p.id === user);
-  if (!participante)
-    return sock.sendMessage(chatId, { text: '❌ El usuario no está en el grupo.' }, { quoted: msg });
+  // 4. Verifica que el usuario esté en el grupo
+  const participante = groupMetadata.participants.find(p => p.id === user);
+  if (!participante) {
+    return conn.sendMessage(chatId, {
+      text: '❌ El usuario no está en el grupo.'
+    }, { quoted: msg });
+  }
+  if (participante.admin === 'admin' || participante.admin === 'superadmin') {
+    return conn.sendMessage(chatId, {
+      text: '⚠️ Ese usuario ya es admin.'
+    }, { quoted: msg });
+  }
 
-  // Si ya es admin, avisa
-  if (participante.admin)
-    return sock.sendMessage(chatId, { text: '⚠️ Ese usuario ya es admin.' }, { quoted: msg });
+  // 5. Promueve a admin
+  await conn.groupParticipantsUpdate(chatId, [user], 'promote');
 
-  // Promueve a admin
-  await sock.groupParticipantsUpdate(chatId, [user], 'promote');
-
-  // Mensaje de confirmación con diseño especial
-  return sock.sendMessage(chatId, {
+  // 6. Mensaje de confirmación con diseño
+  return conn.sendMessage(chatId, {
     text: `
-╭━━〔 *¡NUEVO ADMINISTRADOR!* 〕━━⬣
+╭━━〔 *¡NUEVO ADMIN!* 〕━━⬣
 ┃✨ Felicidades @${user.split('@')[0]}
-┃
-┃🔰 Ahora eres *Administrador(a)* del grupo.
-┃
+┃🔰 Ahora eres *Administrador* del grupo.
 ┃⚠️ Usa tus poderes con sabiduría.
 ╰━━━━━━━━━━━━━━━━━━━━━━⬣
     `.trim(),
@@ -51,7 +64,7 @@ const handler = async (msg, { sock, isBotAdmin, isAdmin, participants }) => {
   }, { quoted: msg });
 };
 
-handler.command = ['promote'];
+handler.command = ["promote"];
 handler.group = true;
 handler.admin = true;
 handler.botAdmin = true;
