@@ -43,27 +43,17 @@ const handler = async (msg, { conn }) => {
     return conn.sendMessage(chatId, { text: '🚫 No estoy en ningún grupo.' }, { quoted: msg });
   }
 
-  if (grupos.length > 900) {
-    return conn.sendMessage(chatId, { text: '❌ Demasiados grupos (>900) para asignar códigos únicos de 3 dígitos.' }, { quoted: msg });
-  }
-
-  grupos.forEach((g, idx) => {
-    const num = 100 + idx;
-    g.code = String(num);
-  });
-
   global.gruposAdmin = grupos;
 
-  let texto = '✨ *Grupos donde está el bot (código único 3 dígitos)*\n\n';
-  grupos.forEach((g) => {
-    texto += `🔹 *${g.name}*\n`;
-    texto += `• Código: *${g.code}*\n`;
+  let texto = '✨ *Grupos donde está el bot*\n\n';
+  grupos.forEach((g, idx) => {
+    texto += `*${idx + 1}.* ${g.name}\n`;
     texto += `• Miembros: ${g.count}\n`;
     texto += `• JID: ${g.id}\n`;
     texto += `━━━━━━━━━━━━━━━━━━━━━\n`;
   });
   texto += `\n🤖 *Total de grupos:* ${grupos.length}`;
-  texto += `\n\nUsa: .aviso <código> <mensaje>\nEjemplo: .aviso ${grupos[0].code} Este es un aviso importante.`;
+  texto += `\n\nUsa: .aviso <número> <mensaje>\nEjemplo: .aviso 1 Este es un aviso importante.`;
 
   return conn.sendMessage(chatId, { text: texto.trim() }, { quoted: msg });
 };
