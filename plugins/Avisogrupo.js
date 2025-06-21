@@ -3,30 +3,45 @@ const handler = async (msg, { conn, args }) => {
 
   if (!global.gruposAdmin || global.gruposAdmin.length === 0) {
     return conn.sendMessage(chatId, {
-      text: '⚠️ Debes usar primero el comando *!listargrupos* para obtener la lista de grupos donde soy admin.'
+      text: '⚠️ No hay lista de grupos disponible. Usa primero el comando *!listargrupos* para obtener los códigos de los grupos donde soy admin.'
     }, { quoted: msg });
   }
 
-  const numeroGrupo = parseInt(args[0]);
-  const texto = args.slice(1).join(' ');
-
-  if (isNaN(numeroGrupo) || numeroGrupo < 1 || numeroGrupo > global.gruposAdmin.length) {
+  if (!args[0]) {
     return conn.sendMessage(chatId, {
-      text: '❌ Número de grupo inválido. Usa *!listargrupos* para ver los grupos disponibles.'
+      text: '❌ Debes especificar el código de 3 dígitos y el mensaje.\n\n*Uso:* .aviso <código> <mensaje>\nEjemplo: .aviso 123 Este es un aviso.'
     }, { quoted: msg });
   }
 
-  if (!texto) {
+  const codigo = args[0].trim();
+  if (!/^\d{3}$/.test(codigo)) {
     return conn.sendMessage(chatId, {
-      text: '⚠️ Debes escribir un mensaje para enviar.\n\n*Ejemplo:*\n!avisogrupo 1 Este es un aviso importante.'
+      text: '❌ Formato de código inválido. Debe ser un número de 3 dígitos. Usa *!listargrupos* para ver los códigos.'
     }, { quoted: msg });
   }
 
-  const grupo = global.gruposAdmin[numeroGrupo - 1];
-  await conn.sendMessage(grupo.id, { text: `📢 *AVISO DEL BOT:*\n\n${texto}` });
+  const textoAviso = args.slice(1).join(' ');
+  if (!textoAviso) {
+    return conn.sendMessage(chatId, {
+      text: '⚠️ Debes escribir un mensaje para enviar.\n\n*Ejemplo:*\n.aviso 123 Este es un aviso importante.'
+    }, { quoted: msg });
+  }
+
+  const grupo = global.gruposAdmin.find(g => g.code === codigo);
+  if (!grupo) {
+    return conn.sendMessage(chatId, {
+      text: `❌ No se encontró ningún grupo con el código *${codigo}*. Usa *!listargrupos* para ver los códigos disponibles.`
+    }, { quoted: msg });
+  }
+
+  try {
+    await conn.sendMessage(grupo.id, { text: `📢 *AVISO DEL BOT:*\n\n${textoAviso}` });
+  } catch (e) {
+    return conn.sendMessage(chatId, { text: `❌ Error al enviar mensaje al grupo ${grupo.name}.` }, { quoted: msg });
+  }
 
   return conn.sendMessage(chatId, {
-    text: `✅ Aviso enviado correctamente al grupo *${grupo.name}*.`
+    text: `✅ Aviso enviado correctamente al grupo *${grupo.name}* (código ${grupo.code}).`
   }, { quoted: msg });
 };
 
