@@ -41,5 +41,5 @@ const handler = async (msg, { conn }) => {
   return conn.sendMessage(chatId, { text: listaTexto.trim() }, { quoted: msg });
 };
 
-handler.command = ['listgrupos', 'vergrupos', 'gruposadmin'];
+handler.command = ['listgrupos', 'grupos', 'gruposadmin'];
 module.exports = handler;
