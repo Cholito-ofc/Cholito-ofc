@@ -3,9 +3,6 @@ const handler = async (msg, { conn, args }) => {
   const text = args.join(" ").trim();
   const jid = msg.key.participant || msg.key.remoteJid;
 
-  // Solo el número limpio para mención
-  const userNumber = jid.replace(/[^0-9]/g, "");
-
   // Obtener nombre del grupo o "Privado"
   let groupName = "Privado";
   if (chatId.endsWith("@g.us")) {
@@ -37,12 +34,12 @@ Por favor, describe el error o sugerencia.
     }, { quoted: msg });
   }
 
-  // Mensaje bonito al owner, solo mención del usuario con @numero
+  // Mensaje bonito al owner, solo mención, nombre e ID del grupo
   const ownerMsg = 
 `╭━[ 🚨  *NUEVO REPORTE*  🚨 ]━╮
 
 👤 *Usuario:*
-   @${userNumber}
+   @${jid}
 
 📝 *Mensaje:*
    ${text}
@@ -57,7 +54,7 @@ Por favor, describe el error o sugerencia.
 
   await conn.sendMessage(ownerNumber + "@s.whatsapp.net", { 
     text: ownerMsg,
-    mentions: [userNumber + "@s.whatsapp.net"]
+    mentions: [jid]
   });
 
   // Confirmación al usuario con diseño bonito
