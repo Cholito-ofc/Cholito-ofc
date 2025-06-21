@@ -19,22 +19,9 @@ const handler = async (msg, { conn }) => {
     if (!meta || !meta.subject) continue;
     if (!jid.endsWith('@g.us')) continue;
 
-    let miembros = 0;
-    if (Array.isArray(meta.participants)) {
-      miembros = meta.participants.length;
-    } else {
-      try {
-        const gm = await conn.groupMetadata(jid);
-        miembros = Array.isArray(gm.participants) ? gm.participants.length : 0;
-      } catch {
-        miembros = 0;
-      }
-    }
-
     grupos.push({
       name: meta.subject,
-      id: jid,
-      count: miembros
+      id: jid
     });
   }
 
@@ -48,12 +35,12 @@ const handler = async (msg, { conn }) => {
   let texto = '✨ *Grupos donde está el bot*\n\n';
   grupos.forEach((g, idx) => {
     texto += `*${idx + 1}.* ${g.name}\n`;
-    texto += `• Miembros: ${g.count}\n`;
     texto += `• JID: ${g.id}\n`;
     texto += `━━━━━━━━━━━━━━━━━━━━━\n`;
   });
   texto += `\n🤖 *Total de grupos:* ${grupos.length}`;
-  texto += `\n\nUsa: .aviso <número> <mensaje>\nEjemplo: .aviso 1 Este es un aviso importante.`;
+  texto += `\n\n*Usa:* .aviso <número> <mensaje>`;
+  texto += `\n*Ejemplo:* .aviso 1 Este es un aviso importante.`;
 
   return conn.sendMessage(chatId, { text: texto.trim() }, { quoted: msg });
 };
