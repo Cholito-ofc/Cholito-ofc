@@ -13,24 +13,34 @@ const handler = async (msg, { conn }) => {
     ? Array.from(fetched.entries())
     : Object.entries(fetched || {});
 
-  const grupos = [];
+  // IDs posibles del bot (por seguridad)
   const myIds = [
     conn.user.id,
     conn.user.id.split(':')[0] + '@s.whatsapp.net'
   ];
 
+  const grupos = [];
+  let idx = 1;
+
   for (const [jid, meta] of entries) {
     if (!meta || !meta.subject) continue;
     if (!jid.endsWith('@g.us')) continue;
 
-    // Verifica si el bot es admin en este grupo
-    const botParticipant = meta.participants?.find(p =>
-      myIds.includes(p.id) && (p.admin === 'admin' || p.admin === 'superadmin')
+    // Tienes que pedir metadata completa de cada grupo
+    let groupMeta;
+    try {
+      groupMeta = await conn.groupMetadata(jid);
+    } catch (e) {
+      continue;
+    }
+    // ¿El bot es admin aquí?
+    const soyAdmin = groupMeta.participants.some(
+      p => myIds.includes(p.id) && (p.admin === 'admin' || p.admin === 'superadmin')
     );
-    if (!botParticipant) continue;
+    if (!soyAdmin) continue;
 
     grupos.push({
-      name: meta.subject,
+      name: groupMeta.subject,
       id: jid
     });
   }
@@ -43,8 +53,8 @@ const handler = async (msg, { conn }) => {
   global.gruposAdmin = grupos;
 
   let texto = '✨ *Grupos donde el bot es admin*\n\n';
-  grupos.forEach((g, idx) => {
-    texto += `*${idx + 1}.* ${g.name}\n`;
+  grupos.forEach((g, i) => {
+    texto += `*${i + 1}.* ${g.name}\n`;
     texto += `• JID: ${g.id}\n`;
     texto += `━━━━━━━━━━━━━━━━━━━━━\n`;
   });
