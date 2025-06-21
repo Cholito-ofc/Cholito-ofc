@@ -9,38 +9,33 @@ const handler = async (msg, { conn }) => {
     return conn.sendMessage(chatId, { text: '❌ Error al obtener grupos.' }, { quoted: msg });
   }
 
-  const entries = fetched instanceof Map
-    ? Array.from(fetched.entries())
-    : Object.entries(fetched || {});
-
-  // IDs posibles del bot (por seguridad)
+  const entries = Object.entries(fetched || {});
   const myIds = [
     conn.user.id,
     conn.user.id.split(':')[0] + '@s.whatsapp.net'
   ];
 
   const grupos = [];
-  let idx = 1;
 
   for (const [jid, meta] of entries) {
     if (!meta || !meta.subject) continue;
     if (!jid.endsWith('@g.us')) continue;
 
-    // Tienes que pedir metadata completa de cada grupo
-    let groupMeta;
+    let metaFull;
     try {
-      groupMeta = await conn.groupMetadata(jid);
+      metaFull = await conn.groupMetadata(jid); // Aquí garantizas tener la lista de participantes SIEMPRE
     } catch (e) {
+      // Si falla obtener metadata, pasa al siguiente grupo
       continue;
     }
-    // ¿El bot es admin aquí?
-    const soyAdmin = groupMeta.participants.some(
+
+    const soyAdmin = metaFull.participants.some(
       p => myIds.includes(p.id) && (p.admin === 'admin' || p.admin === 'superadmin')
     );
     if (!soyAdmin) continue;
 
     grupos.push({
-      name: groupMeta.subject,
+      name: metaFull.subject,
       id: jid
     });
   }
