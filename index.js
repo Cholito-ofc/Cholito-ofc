@@ -163,6 +163,8 @@ let modos = cargarModos();
 
             const sock = makeWASocket(socketSettings);
 setupConnection(sock)
+          const { iniciarAutoHorario } = require('./plugins/auto_group_schedule.js');
+iniciarAutoHorario(sock);
             // Si la sesión no existe y se usa el código de 8 dígitos
             if (!fs.existsSync("./sessions/creds.json") && method === "2") {
                 let phoneNumber = await question("😎Fino vamos aya😎: ");
