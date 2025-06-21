@@ -14,10 +14,20 @@ const handler = async (msg, { conn }) => {
     : Object.entries(fetched || {});
 
   const grupos = [];
+  const myIds = [
+    conn.user.id,
+    conn.user.id.split(':')[0] + '@s.whatsapp.net'
+  ];
 
   for (const [jid, meta] of entries) {
     if (!meta || !meta.subject) continue;
     if (!jid.endsWith('@g.us')) continue;
+
+    // Verifica si el bot es admin en este grupo
+    const botParticipant = meta.participants?.find(p =>
+      myIds.includes(p.id) && (p.admin === 'admin' || p.admin === 'superadmin')
+    );
+    if (!botParticipant) continue;
 
     grupos.push({
       name: meta.subject,
@@ -27,18 +37,18 @@ const handler = async (msg, { conn }) => {
 
   if (grupos.length === 0) {
     global.gruposAdmin = [];
-    return conn.sendMessage(chatId, { text: '🚫 No estoy en ningún grupo.' }, { quoted: msg });
+    return conn.sendMessage(chatId, { text: '🚫 No soy admin en ningún grupo.' }, { quoted: msg });
   }
 
   global.gruposAdmin = grupos;
 
-  let texto = '✨ *Grupos donde está el bot*\n\n';
+  let texto = '✨ *Grupos donde el bot es admin*\n\n';
   grupos.forEach((g, idx) => {
     texto += `*${idx + 1}.* ${g.name}\n`;
     texto += `• JID: ${g.id}\n`;
     texto += `━━━━━━━━━━━━━━━━━━━━━\n`;
   });
-  texto += `\n🤖 *Total de grupos:* ${grupos.length}`;
+  texto += `\n👑 *Total de grupos como admin:* ${grupos.length}`;
   texto += `\n\n*Usa:* .aviso <número> <mensaje>`;
   texto += `\n*Ejemplo:* .aviso 1 Este es un aviso importante.`;
 
