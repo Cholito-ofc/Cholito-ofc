@@ -110,5 +110,5 @@ ${horaMsg}
   }
 };
 
-handler.command = ['guerr'];
+handler.command = ['guerra'];
 module.exports = handler;
