@@ -19,22 +19,10 @@ const handler = async (msg, { conn }) => {
     if (!meta || !meta.subject) continue;
     if (!jid.endsWith('@g.us')) continue;
 
-    let miembros = 0;
-    if (Array.isArray(meta.participants)) {
-      miembros = meta.participants.length;
-    } else {
-      try {
-        const gm = await conn.groupMetadata(jid);
-        miembros = Array.isArray(gm.participants) ? gm.participants.length : 0;
-      } catch {
-        miembros = 0;
-      }
-    }
-
+    // Ya no calculamos ni mostramos miembros
     grupos.push({
       name: meta.subject,
-      id: jid,
-      count: miembros
+      id: jid
     });
   }
 
@@ -54,7 +42,7 @@ const handler = async (msg, { conn }) => {
   grupos.forEach((g) => {
     texto += `🔹 *${g.name}*\n`;
     texto += `• Código: *${g.code}*\n`;
-    texto += `• Miembros: ${g.count}\n`;
+    // Ya no mostramos la línea de miembros
     texto += `• JID: ${g.id}\n`;
     texto += `━━━━━━━━━━━━━━━━━━━━━\n`;
   });
