@@ -2,6 +2,19 @@ const fs = require("fs");
 const path = require("path");
 const horariosPath = path.resolve("./horarios_grupo.json");
 
+// Convierte "8:30 pm" a "20:30"
+function convertirHora(horaStr) {
+    const match = horaStr.match(/(\d{1,2}):(\d{2})\s*(am|pm)/i);
+    if (!match) return null;
+    let [_, h, m, ap] = match;
+    h = parseInt(h);
+    m = m.padStart(2, "0");
+    ap = ap.toLowerCase();
+    if (ap === "pm" && h !== 12) h += 12;
+    if (ap === "am" && h === 12) h = 0;
+    return `${h.toString().padStart(2, "0")}:${m}`;
+}
+
 function cargarHorarios() {
     if (!fs.existsSync(horariosPath)) return {};
     return JSON.parse(fs.readFileSync(horariosPath, "utf-8"));
@@ -31,32 +44,50 @@ const handler = async (msg, { conn, args }) => {
         return conn.sendMessage(chatId, { text: "🚫 *Solo el owner o el bot pueden usar este comando en privado.*" }, { quoted: msg });
     }
 
-    // Parseo de argumentos
+    // Parseo de argumentos: permite "abrir 8:30 am cerrar 10:45 pm"
     const text = args.join(" ");
-    let abrir = text.match(/abrir\s+(\d{1,2}:\d{2})/i);
-    let cerrar = text.match(/cerrar\s+(\d{1,2}:\d{2})/i);
+    let abrir = text.match(/abrir\s+(\d{1,2}:\d{2}\s*(?:am|pm))/i);
+    let cerrar = text.match(/cerrar\s+(\d{1,2}:\d{2}\s*(?:am|pm))/i);
 
     if (!abrir && !cerrar) {
         return conn.sendMessage(chatId, {
-            text: "❌ *Uso correcto:* programargrupo abrir HH:MM cerrar HH:MM\n_Ejemplo:_ .programargrupo abrir 08:00 cerrar 22:00",
+            text: `🌅 *Programación de grupo*\n\n` +
+                  `*Uso correcto:*\n` +
+                  `» .programargrupo abrir 8:00 am cerrar 10:30 pm\n\n` +
+                  `*Ejemplos:*\n` +
+                  `• .programargrupo abrir 7:45 am\n` +
+                  `• .programargrupo cerrar 11:15 pm\n` +
+                  `• .programargrupo abrir 8:30 am cerrar 10:00 pm\n\n` +
+                  `⏰ *Puedes usar hora y minutos, y debes especificar am o pm.*`,
             quoted: msg
         });
     }
 
     let data = cargarHorarios();
     if (!data[chatId]) data[chatId] = {};
-    if (abrir) data[chatId].abrir = abrir[1];
-    if (cerrar) data[chatId].cerrar = cerrar[1];
+
+    let msgBonito = "🕑 *Nuevos horarios programados:*\n";
+
+    if (abrir) {
+        const hora24 = convertirHora(abrir[1]);
+        if (!hora24) return conn.sendMessage(chatId, { text: "❌ *Formato de hora inválido para abrir.*\nEjemplo: 7:30 am", quoted: msg });
+        data[chatId].abrir = hora24;
+        msgBonito += `🌤️  Abrir grupo: *${abrir[1].toUpperCase()}* (${hora24})\n`;
+    }
+    if (cerrar) {
+        const hora24 = convertirHora(cerrar[1]);
+        if (!hora24) return conn.sendMessage(chatId, { text: "❌ *Formato de hora inválido para cerrar.*\nEjemplo: 11:15 pm", quoted: msg });
+        data[chatId].cerrar = hora24;
+        msgBonito += `🌙  Cerrar grupo: *${cerrar[1].toUpperCase()}* (${hora24})\n`;
+    }
 
     guardarHorarios(data);
 
-    await conn.sendMessage(chatId, {
-        text: `✅ *Horarios programados:*\n${abrir ? `🟢 Abrir: ${abrir[1]}\n` : ""}${cerrar ? `🔴 Cerrar: ${cerrar[1]}\n` : ""}`,
-        quoted: msg
-    });
+    msgBonito += "\n🔄 *El bot abrirá y cerrará el grupo automáticamente a esas horas!*";
+    await conn.sendMessage(chatId, { text: msgBonito, quoted: msg });
 };
 
 handler.command = ["programargrupo"];
 handler.tags = ["group"];
-handler.help = ["programargrupo abrir HH:MM cerrar HH:MM"];
+handler.help = ["programargrupo abrir HH:MM am/pm cerrar HH:MM am/pm"];
 module.exports = handler;
