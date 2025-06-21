@@ -39,7 +39,8 @@ const handler = async (msg, { conn }) => {
     texto += `━━━━━━━━━━━━━━━━━━━━━\n`;
   });
   texto += `\n🤖 *Total de grupos:* ${grupos.length}`;
-  texto += `\n\nUsa: .aviso <número> <mensaje>\nEjemplo: .aviso 1 Este es un aviso importante.`;
+  texto += `\n\n*Usa:* .aviso <número> <mensaje>`;
+  texto += `\n*Ejemplo:* .aviso 1 Este es un aviso importante.`;
 
   return conn.sendMessage(chatId, { text: texto.trim() }, { quoted: msg });
 };
