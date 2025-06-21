@@ -4,11 +4,11 @@ const handler = async (msg, { conn }) => {
   try {
     groupMetadatas = await conn.groupFetchAllParticipating();
   } catch (e) {
-    return conn.sendMessage(chatId, { text: '❌ Error obteniendo grupos.' }, { quoted: msg });
+    return conn.sendMessage(chatId, { text: '❌ Error obteniendo la lista de grupos.' }, { quoted: msg });
   }
-  
-  // Obtén tu ID de usuario, pero lo convertimos a @lid para comparar
-  const botIdBase = conn.user.id.replace(/(@s\.whatsapp\.net|@lid)$/, '');
+
+  // Saca la base del ID del bot, sin sufijo
+  const botIdBase = conn.user.id.split('@')[0];
 
   let listaTexto = '✨ *Grupos donde soy administrador*\n\n';
   let index = 1;
@@ -16,14 +16,11 @@ const handler = async (msg, { conn }) => {
   for (const id in groupMetadatas) {
     const metadata = groupMetadatas[id];
     // Busca todos los administradores
-    const adminIds = metadata.participants
+    const adminIdsBase = metadata.participants
       .filter(p => p.admin === 'admin' || p.admin === 'superadmin')
-      .map(p => p.id);
+      .map(p => p.id.split('@')[0]); // Solo la base del ID
 
-    // Compara base del ID, sin importar el sufijo
-    const esAdmin = adminIds.some(pid => pid.replace(/(@s\.whatsapp\.net|@lid)$/, '') === botIdBase);
-
-    if (esAdmin) {
+    if (adminIdsBase.includes(botIdBase)) {
       listaTexto += `*${index}*️⃣  *${metadata.subject}*\n`;
       listaTexto += `🆔 *ID:* ${id}\n`;
       listaTexto += `👑 *Soy admin aquí*\n`;
@@ -31,7 +28,7 @@ const handler = async (msg, { conn }) => {
       index++;
     }
   }
-  
+
   if (index === 1) {
     return conn.sendMessage(chatId, { text: '🚫 No soy admin en ningún grupo.', quoted: msg });
   }
