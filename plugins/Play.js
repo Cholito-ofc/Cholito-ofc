@@ -49,17 +49,7 @@ async function sendAudioNormal(conn, chatId, audioUrl, videoTitle, quotedMsg) {
         chatId,
         {
           audio: { url: audioUrl },
-          mimetype: 'audio/mpeg',
-          contextInfo: {
-            externalAdReply: {
-              title: videoTitle,
-              body: 'Barboza Music',
-              previewType: 'NONE',
-              mediaType: 1,
-              renderLargerThumbnail: false,
-              showAdAttribution: false,
-            }
-          }
+          mimetype: 'audio/mpeg'
         },
         { quoted: quotedMsg }
       );
@@ -84,7 +74,7 @@ const handler = async (msg, { conn, args }) => {
 
   if (!args || !args.length) {
     return conn.sendMessage(chatId, {
-      text: "Uso: .play <nombre de la canción>\n> Ejemplo: .play Mi Vida Eres Tu"
+      text: "Uso: .play <nombre de la canción>\n> Ejemplo: .play Mi Vida Eres Tú"
     }, { quoted: msg });
   }
 
@@ -103,14 +93,14 @@ const handler = async (msg, { conn, args }) => {
       thumbnailBuffer = Buffer.from(response.data, 'binary');
     } catch {}
 
-    const description = `╭─⬣「 *Barboza-Ai* 」⬣
+    const description = `╭─⬣「 *KilluaBot* 」⬣
 │  ≡◦ 🎵 Título ∙ ${title}
 │  ≡◦ ⏱ Duración ∙ ${duration || 'Desconocida'}
 │  ≡◦ 👀 Vistas ∙ ${views.toLocaleString()}
 │  ≡◦ 📅 Publicado ∙ ${ago || 'Desconocido'}
 │  ≡◦ 🔗 URL ∙ ${videoUrl}
 ╰─⬣
-> © Powered By Barboza™`;
+> ® ⍴᥆ᥕᥱrᥱძ ᑲᥡ kіᥣᥣᥙᥲᑲ᥆𝗍 ™`;
 
     await conn.sendMessage(chatId, {
       image: thumbnailBuffer,
