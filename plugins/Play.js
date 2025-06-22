@@ -4,26 +4,33 @@ const axios = require('axios');
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const MAX_RETRIES = 2;
-const TIMEOUT_MS = 10000;
+const TIMEOUT_MS = 20000; // más largo
 const RETRY_DELAY_MS = 12000;
 
 const getDownloadUrl = async (videoUrl) => {
-  const apis = [{ url: 'https://api.vreden.my.id/api/ytmp3?url=', type: 'vreden' }];
+  // Puedes agregar aquí más apis si tienes otras confiables
+  const apis = [
+    { url: 'https://api.vreden.my.id/api/ytmp3?url=', type: 'vreden' },
+    { url: 'https://aemt.me/download/ytmp3?url=', type: 'aemt' }
+  ];
   for (const api of apis) {
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       try {
         const response = await axios.get(`${api.url}${encodeURIComponent(videoUrl)}`, { timeout: TIMEOUT_MS });
-        if (
-          response.data?.status === 200 &&
-          response.data?.result?.download?.url &&
-          response.data?.result?.download?.status === true
-        ) {
-          return {
-            url: response.data.result.download.url.trim(),
-            title: response.data.result.metadata.title
-          };
+        // Para ambas APIs busca el campo url/mp3
+        let audioUrl = '';
+        let title = '';
+        if (api.type === 'vreden' && response.data?.status === 200 && response.data?.result?.download?.url) {
+          audioUrl = response.data.result.download.url.trim();
+          title = response.data.result.metadata.title;
+        } else if (api.type === 'aemt' && response.data?.status && response.data?.result?.url) {
+          audioUrl = response.data.result.url;
+          title = response.data.result.title;
         }
-      } catch {
+        if (audioUrl) {
+          return { url: audioUrl, title: title || 'Audio' };
+        }
+      } catch (e) {
         if (attempt < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
       }
     }
@@ -49,7 +56,7 @@ const handler = async (msg, { conn, args, usedPrefix, command }) => {
   try {
     searchResults = await yts(text);
   } catch (e) {
-    return conn.sendMessage(chatId, { text: '❌ Hubo un error buscando en YouTube.' }, { quoted: msg });
+    return conn.sendMessage(chatId, { text: ' error buscando en YouTube.' }, { quoted: msg });
   }
   if (!searchResults?.videos?.length) {
     return conn.sendMessage(chatId, { text: '❌ No se encontraron resultados en YouTube.' }, { quoted: msg });
@@ -61,21 +68,24 @@ const handler = async (msg, { conn, args, usedPrefix, command }) => {
   // Descargar la portada grande y enviarla como imagen normal
   let thumbnailBuffer = null;
   try {
-    const response = await axios.get(image, { responseType: 'arraybuffer' });
+    const response = await axios.get(image, { responseType: 'arraybuffer', timeout: TIMEOUT_MS });
     thumbnailBuffer = Buffer.from(response.data, 'binary');
-  } catch {}
+  } catch (e) {
+    // Si falla la portada, ignora y sigue
+    thumbnailBuffer = null;
+  }
 
   const description = `╭─⬣「 *Barboza-Ai* 」⬣
 │  ≡◦ 🎵 Título ∙ ${title}
 │  ≡◦ ⏱ Duración ∙ ${duration || 'Desconocida'}
-│  ≡◦ 👀 Vistas ∙ ${views.toLocaleString()}
+│  ≡◦ 👀 Vistas ∙ ${views ? views.toLocaleString() : 'Desconocidas'}
 │  ≡◦ 📅 Publicado ∙ ${ago || 'Desconocido'}
 │  ≡◦ 🔗 URL ∙ ${videoUrl}
 ╰─⬣
 > © Powered By Barboza™`;
 
   await conn.sendMessage(chatId, {
-    image: { buffer: thumbnailBuffer },
+    image: thumbnailBuffer ? { buffer: thumbnailBuffer } : undefined,
     caption: description
   }, { quoted: msg });
 
