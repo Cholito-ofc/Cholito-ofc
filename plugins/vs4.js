@@ -1,4 +1,5 @@
 let partidasVS4 = {}
+let jugadoresGlobal = new Set()
 
 let handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid
@@ -89,7 +90,7 @@ ${horaMsg}
     idPartida
   }
 
-    conn.ev.on('messages.upsert', async ({ messages }) => {
+  conn.ev.on('messages.upsert', async ({ messages }) => {
     let m = messages[0]
     if (!m?.message?.reactionMessage) return
 
@@ -104,13 +105,26 @@ ${horaMsg}
     const emojisParticipar = ['❤️', '❤', '♥', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '❤️‍🔥']
     const emojisSuplente = ['👍', '👍🏻', '👍🏼', '👍🏽', '👍🏾', '👍🏿']
 
-    data.jugadores = data.jugadores.filter(u => u !== sender)
-    data.suplentes = data.suplentes.filter(u => u !== sender)
+    if (jugadoresGlobal.has(sender)) return
+
+    if (data.jugadores.includes(sender)) return
 
     if (emojisParticipar.includes(emoji)) {
-      if (data.jugadores.length < 4) data.jugadores.push(sender)
+      if (data.jugadores.length < 4) {
+        let index = data.suplentes.indexOf(sender)
+        if (index !== -1) {
+          data.suplentes.splice(index, 1)
+          data.jugadores.push(sender)
+          jugadoresGlobal.add(sender)
+        } else {
+          data.jugadores.push(sender)
+          jugadoresGlobal.add(sender)
+        }
+      }
     } else if (emojisSuplente.includes(emoji)) {
-      if (data.suplentes.length < 2) data.suplentes.push(sender)
+      if (data.suplentes.length < 2 && !data.suplentes.includes(sender)) {
+        data.suplentes.push(sender)
+      }
     } else return
 
     let jugadores = data.jugadores.map(u => `@${u.split('@')[0]}`)
