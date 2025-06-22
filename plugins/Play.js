@@ -43,6 +43,18 @@ const handler = async (msg, { conn, args }) => { // <-- Aquí args ya está incl
   }
 };
 
+// Enviar información con imagen
+    await conn.sendMessage(chatId, {
+      image: { url: thumb },
+      caption:
+        `🎵 *${title}*\n` +
+        `🗣️ *Artista:* ${artist}\n` +
+        `⏱️ *Duración:* ${duration}\n` +
+        `👁️ *Vistas:* ${views}\n\n` +
+        `🔗 ${url}\n\n` +
+        `🎧 Enviando audio...`
+    }, { quoted: msg });
+
 handler.command = ["spotifyplay", "music", "spotify"];
 handler.tags = ["descargas"];
 handler.help = ["spotifyplay <nombre de la canción>", "music <nombre>", "spotify <nombre>"];
