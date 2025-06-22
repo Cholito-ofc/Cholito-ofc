@@ -1,6 +1,6 @@
 const fetch = require('node-fetch');
 
-const handler = async (msg, { conn,  }) => {
+const handler = async (msg, { conn, args }) => { // <-- Aquí args ya está incluido
   const chatId = msg.key.remoteJid;
   const text = args.join(" ").trim();
 
