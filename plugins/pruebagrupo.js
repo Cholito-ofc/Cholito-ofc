@@ -93,14 +93,20 @@ handler.before = async (msg, { conn }) => {
   // El owner siempre puede usar el bot:
   if (isOwner) return;
 
-  // Permitir SIEMPRE el comando pruebagrupo (sin importar el prefijo ni mayúsculas/minúsculas)
-  const commandText =
-    (msg.message?.conversation ||
-      msg.message?.extendedTextMessage?.text ||
-      ""
-    ).trim().toLowerCase();
+  // Detecta el texto de comando de forma robusta
+  let text = "";
+  if (msg.message?.conversation) text = msg.message.conversation;
+  else if (msg.message?.extendedTextMessage?.text) text = msg.message.extendedTextMessage.text;
+  else if (msg.message?.imageMessage?.caption) text = msg.message.imageMessage.caption;
+  else if (msg.message?.videoMessage?.caption) text = msg.message.videoMessage.caption;
+  else if (msg.message?.buttonsResponseMessage?.selectedButtonId) text = msg.message.buttonsResponseMessage.selectedButtonId;
+  else if (msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId) text = msg.message.listResponseMessage.singleSelectReply.selectedRowId;
+  else text = "";
 
-  if (/^[\.\!\/]?pruebagrupo\b/.test(commandText)) return;
+  text = text.trim().toLowerCase();
+
+  // Permite SIEMPRE el comando pruebagrupo sin importar el prefijo, espacios o mayúsculas
+  if (text.replace(/^\W+/g, '').startsWith('pruebagrupo')) return;
 
   // Permitir TODO si hay prueba activa:
   let pruebas = cargarPruebas();
