@@ -4126,16 +4126,14 @@ case 'promote':
 case 'daradmins': {
   try {
     const chatId = msg.key.remoteJid;
-    // Verificar que se use en un grupo
     if (!chatId.endsWith("@g.us")) {
       await sock.sendMessage(chatId, { text: "⚠️ Este comando solo funciona en grupos.", mentions: [msg.key.participant] }, { quoted: msg });
       return;
     }
-    // Reacción inicial
     await sock.sendMessage(chatId, { react: { text: "🔑", key: msg.key } });
 
-    // Metadata y permisos
     const groupMetadata = await sock.groupMetadata(chatId);
+    const groupName = groupMetadata.subject || "este grupo";
     const senderId = msg.key.participant || msg.key.remoteJid;
     const senderParticipant = groupMetadata.participants.find(p => p.id === senderId);
     const isSenderAdmin = senderParticipant && (senderParticipant.admin === "admin" || senderParticipant.admin === "superadmin");
@@ -4144,24 +4142,15 @@ case 'daradmins': {
       return;
     }
 
-    // Elegir target
     let targetId = null;
-    // Reply
     if (msg.message?.extendedTextMessage?.contextInfo?.participant) {
       targetId = msg.message.extendedTextMessage.contextInfo.participant;
-    } 
-    // Mención en reply
-    else if (
+    } else if (
       msg.message?.extendedTextMessage?.contextInfo?.mentionedJid &&
       msg.message.extendedTextMessage.contextInfo.mentionedJid.length > 0
     ) {
       targetId = msg.message.extendedTextMessage.contextInfo.mentionedJid[0];
-    }
-    // Mención directa
-    else if (
-      msg.mentionedJid &&
-      msg.mentionedJid.length > 0
-    ) {
+    } else if (msg.mentionedJid && msg.mentionedJid.length > 0) {
       targetId = msg.mentionedJid[0];
     }
 
@@ -4170,7 +4159,6 @@ case 'daradmins': {
       return;
     }
 
-    // Verificar si ya es admin
     const targetParticipant = groupMetadata.participants.find(p => p.id === targetId);
     if (targetParticipant && (targetParticipant.admin === "admin" || targetParticipant.admin === "superadmin")) {
       await sock.sendMessage(chatId, {
@@ -4179,17 +4167,31 @@ case 'daradmins': {
       return;
     }
 
-    // Promover a admin
-    await sock.groupParticipantsUpdate(chatId, [targetId], "promote");
-    await sock.sendMessage(
-      chatId,
-      { text: `🎉 ¡Felicidades @${targetId.split("@")[0]}!\nAhora eres administrador del grupo.\nPromovido por: @${senderId.split("@")[0]}`, mentions: [targetId, senderId] },
-      { quoted: msg }
-    );
-    // Mensaje privado al promovido (opcional)
-    await sock.sendMessage(targetId, { text: `Has sido promovido a administrador en el grupo: ${groupMetadata.subject}\n👑 ¡Felicidades!` });
+    // Obtener nombres para los mensajes
+    const getName = (jid) => {
+      const p = groupMetadata.participants.find(x => x.id === jid);
+      return (p?.notify || p?.name || p?.vname || `@${jid.split("@")[0]}`);
+    };
+    const targetName = getName(targetId);
+    const senderName = getName(senderId);
 
-    // Reacción de éxito
+    await sock.groupParticipantsUpdate(chatId, [targetId], "promote");
+    await sock.sendMessage(chatId, {
+      text:
+`➤ \`INFORMATIVO\` ❕
+
+\`\`\`✅ ${targetName.toUpperCase()} ASCENDIDO
+COMO ADMIN DE ${groupName.toUpperCase()}
+
+» OPERACIÓN POR:
+» ${senderName}\`\`\``,
+      mentions: [targetId, senderId]
+    }, { quoted: msg });
+
+    await sock.sendMessage(targetId, {
+      text: `¡Felicitaciones! Ahora eres ADMINISTRADOR de ${groupName} 🎉`
+    });
+
     await sock.sendMessage(chatId, { react: { text: "✅", key: msg.key } });
   } catch (error) {
     console.error("❌ Error en el comando daradmin(s):", error);
@@ -4483,11 +4485,10 @@ case 'quitaradmins': {
       await sock.sendMessage(chatId, { text: "⚠️ Este comando solo funciona en grupos.", mentions: [msg.key.participant] }, { quoted: msg });
       return;
     }
-    // Reacción inicial
     await sock.sendMessage(chatId, { react: { text: "🔑", key: msg.key } });
 
-    // Metadata y permisos
     const groupMetadata = await sock.groupMetadata(chatId);
+    const groupName = groupMetadata.subject || "este grupo";
     const senderId = msg.key.participant || msg.key.remoteJid;
     const senderParticipant = groupMetadata.participants.find(p => p.id === senderId);
     const isSenderAdmin = senderParticipant && (senderParticipant.admin === "admin" || senderParticipant.admin === "superadmin");
@@ -4496,24 +4497,15 @@ case 'quitaradmins': {
       return;
     }
 
-    // Elegir target
     let targetId = null;
-    // Reply
     if (msg.message?.extendedTextMessage?.contextInfo?.participant) {
       targetId = msg.message.extendedTextMessage.contextInfo.participant;
-    }
-    // Mención en reply
-    else if (
+    } else if (
       msg.message?.extendedTextMessage?.contextInfo?.mentionedJid &&
       msg.message.extendedTextMessage.contextInfo.mentionedJid.length > 0
     ) {
       targetId = msg.message.extendedTextMessage.contextInfo.mentionedJid[0];
-    }
-    // Mención directa
-    else if (
-      msg.mentionedJid &&
-      msg.mentionedJid.length > 0
-    ) {
+    } else if (msg.mentionedJid && msg.mentionedJid.length > 0) {
       targetId = msg.mentionedJid[0];
     }
 
@@ -4522,7 +4514,6 @@ case 'quitaradmins': {
       return;
     }
 
-    // Verificar si YA NO es admin
     const targetParticipant = groupMetadata.participants.find(p => p.id === targetId);
     if (!targetParticipant || (targetParticipant.admin !== "admin" && targetParticipant.admin !== "superadmin")) {
       await sock.sendMessage(chatId, {
@@ -4531,17 +4522,31 @@ case 'quitaradmins': {
       return;
     }
 
-    // Quitar admin
-    await sock.groupParticipantsUpdate(chatId, [targetId], "demote");
-    await sock.sendMessage(
-      chatId,
-      { text: `🗝️ @${targetId.split("@")[0]} ha sido removido del equipo de administradores.\nDecisión tomada por: @${senderId.split("@")[0]}`, mentions: [targetId, senderId] },
-      { quoted: msg }
-    );
-    // Mensaje privado al removido (opcional)
-    await sock.sendMessage(targetId, { text: `Se te han quitado los derechos de administrador en el grupo: ${groupMetadata.subject}.\nSi tienes dudas, contacta a @${senderId.split("@")[0]}.`, mentions: [senderId] });
+    // Obtener nombres para los mensajes
+    const getName = (jid) => {
+      const p = groupMetadata.participants.find(x => x.id === jid);
+      return (p?.notify || p?.name || p?.vname || `@${jid.split("@")[0]}`);
+    };
+    const targetName = getName(targetId);
+    const senderName = getName(senderId);
 
-    // Reacción de éxito
+    await sock.groupParticipantsUpdate(chatId, [targetId], "demote");
+    await sock.sendMessage(chatId, {
+      text:
+`➤ \`INFORMATIVO\` ❕
+
+\`\`\`🗝️ ${targetName.toUpperCase()} DESCENDIDO
+YA NO ES ADMIN DE ${groupName.toUpperCase()}
+
+» OPERACIÓN POR:
+» ${senderName}\`\`\``,
+      mentions: [targetId, senderId]
+    }, { quoted: msg });
+
+    await sock.sendMessage(targetId, {
+      text: `Se te han removido los derechos de ADMINISTRADOR en ${groupName}.`
+    });
+
     await sock.sendMessage(chatId, { react: { text: "✅", key: msg.key } });
   } catch (error) {
     console.error("❌ Error en el comando quitaradmin(s):", error);
