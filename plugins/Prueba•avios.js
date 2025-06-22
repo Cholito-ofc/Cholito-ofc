@@ -1,49 +1,82 @@
-const fs = require('fs');
-const path = require('path');
-const PRUEBAS_FILE = path.resolve('./pruebas_grupo.json');
+const fs = require("fs");
+const path = require("path");
 
-// Lee y guarda el estado de las pruebas
-function cargarPruebas() {
-  if (!fs.existsSync(PRUEBAS_FILE)) return {};
-  return JSON.parse(fs.readFileSync(PRUEBAS_FILE, 'utf-8'));
-}
-function guardarPruebas(data) {
-  fs.writeFileSync(PRUEBAS_FILE, JSON.stringify(data, null, 2));
-}
+const handler = async (msg, { conn, args }) => {
+  const chatId = msg.key.remoteJid;
+  const sender = msg.key.participant || msg.key.remoteJid;
+  const senderNum = sender.replace(/[^0-9 isOwner = global.owner.some(([id]) => id === senderNum);
 
-// Middleware global para filtrar mensajes y avisar cuando termina la prueba
-async function before(m, { conn }) {
-  if (!m.isGroup) return;
-  if (m.fromMe) return; // Owner siempre puede usar
-  const pruebas = cargarPruebas();
-  const prueba = pruebas[m.chat];
-  if (!prueba) return m.reply('⏳ El bot está en modo prueba y no está habilitado para este grupo.');
-  if (Date.now() > prueba.fin) {
-    // Envía el aviso SOLO UNA VEZ y elimina la prueba
-    await conn.sendMessage(m.chat, { text: '⏰ *El tiempo de prueba ha finalizado.*\nContacta al owner para contratar el bot permanentemente.' });
-    delete pruebas[m.chat];
-    guardarPruebas(pruebas);
-    return false; // El bot ya no responde
+  if (!isOwner) {
+    return conn.sendMessage(chatId, {
+      text: "❌ Este comando solo puede usarlo el *dueño del bot*."
+    }, { quoted: msg });
   }
-  // Si está en tiempo de prueba, deja pasar
-}
-exports.before = before;
 
-// Comando para activar la prueba
-const handler = async (m, { conn, args, isOwner }) => {
-  if (!isOwner) return m.reply('🚫 Solo el owner puede usar este comando.');
   const minutos = parseInt(args[0]);
-  if (!minutos || minutos < 1 || minutos > 1440) return m.reply('❌ Especifica los minutos de prueba (1 a 1440).\nEjemplo: .pruebagrupo 30');
-  let pruebas = cargarPruebas();
-  pruebas[m.chat] = {
+  if (!minutos || minutos < 1 || minutos > 1440) {
+    return conn.sendMessage(chatId, {
+      text: "❌ Especifica los minutos de prueba (entre 1 y 1440).\nEjemplo: .pruebagrupo 30"
+    }, { quoted: msg });
+  }
+
+  const filePath = "./pruebas_grupo.json";
+  const data = fs.existsSync(filePath)
+    ? JSON.parse(fs.readFileSync(filePath, "utf-8"))
+    : {};
+
+  data[chatId] = {
     fin: Date.now() + minutos * 60 * 1000,
     minutos
   };
-  guardarPruebas(pruebas);
-  return m.reply(`✅ Modo prueba activado por ${minutos} minutos.\nEl bot responderá aquí hasta que termine el tiempo.`);
-};
-handler.command = ['pruebagrupo'];
-handler.group = true;
-handler.owner = true;
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
 
+  await conn.sendMessage(chatId, {
+    text: `✅ *Modo prueba activado.*\nEl bot responderá aquí por *${minutos} minutos*.`
+  }, { quoted: msg });
+
+  // Temporizador para aviso y desactivar prueba
+  setTimeout(async () => {
+    const updatedData = fs.existsSync(filePath)
+      ? JSON.parse(fs.readFileSync(filePath, "utf-8"))
+      : {};
+    if (updatedData[chatId]) {
+      await conn.sendMessage(chatId, {
+        text: "⏰ *El tiempo de prueba ha finalizado.*\nContacta al owner para contratar el bot permanentemente."
+      });
+      delete updatedData[chatId];
+      fs.writeFileSync(filePath, JSON.stringify(updatedData, null, 2));
+    }
+  }, minutos * 60 * 1000);
+};
+
+handler.command = ["pruebagrupo"];
 module.exports = handler;
+
+// Middleware: pon esto en tu handler global, normalmente en el index.js o crea un archivo plugins/filtroPrueba.js si tu bot soporta middlewares
+
+handler.before = async (msg, { conn }) => {
+  if (!msg.key.remoteJid.endsWith('@g.us')) return;
+  const sender = msg.key.participant || msg.key.remoteJid;
+  const senderNum = sender.replace(/[^0-9]/g, "");
+  const isOwner = global.owner.some(([id]) => id === senderNum);
+
+  // Permite que el owner siempre use el bot
+  if (isOwner) return;
+
+  const filePath = "./pruebas_grupo.json";
+  const data = fs.existsSync(filePath)
+    ? JSON.parse(fs.readFileSync(filePath, "utf-8"))
+    : {};
+
+  const prueba = data[msg.key.remoteJid];
+  if (!prueba) {
+    return !1; // No hay prueba activa, bloquea el uso del bot
+  }
+  if (Date.now() > prueba.fin) {
+    // Si se acabó el tiempo, borra la prueba y bloquea el uso
+    delete data[msg.key.remoteJid];
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    return !1;
+  }
+  // Si hay prueba vigente, deja pasar
+};
