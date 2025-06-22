@@ -66,15 +66,19 @@ const handler = async (msg, { conn, args }) => {
   const sender = msg.key.participant || msg.key.remoteJid;
   const senderNum = sender.replace(/[^0-9]/g, "");
 
+  // ✅ Reacción al recibir el comando
+  await conn.sendMessage(chatId, { react: { text: '🎶', key: msg.key } });
+
   if (isUserBlocked(senderNum)) {
     return conn.sendMessage(chatId, {
       text: "🚫 Lo siento, estás en la lista de usuarios bloqueados."
     }, { quoted: msg });
   }
 
+  // ✅ Si no escriben el nombre de la canción
   if (!args || !args.length) {
     return conn.sendMessage(chatId, {
-      text: "Uso: .play <nombre de la canción>\n> Ejemplo: .play Mi Vida Eres Tú"
+      text: "❗Uso correcto: *.play <nombre de la canción>*\n📌 Ejemplo: *.play Ojitos Lindos*"
     }, { quoted: msg });
   }
 
@@ -93,14 +97,14 @@ const handler = async (msg, { conn, args }) => {
       thumbnailBuffer = Buffer.from(response.data, 'binary');
     } catch {}
 
-    const description = `╭─⬣「 *KilluaBot* 」⬣
+    const description = `╭─⬣「 *Barboza-Ai* 」⬣
 │  ≡◦ 🎵 Título ∙ ${title}
 │  ≡◦ ⏱ Duración ∙ ${duration || 'Desconocida'}
 │  ≡◦ 👀 Vistas ∙ ${views.toLocaleString()}
 │  ≡◦ 📅 Publicado ∙ ${ago || 'Desconocido'}
 │  ≡◦ 🔗 URL ∙ ${videoUrl}
 ╰─⬣
-> ® ⍴᥆ᥕᥱrᥱძ ᑲᥡ kіᥣᥣᥙᥲᑲ᥆𝗍 ™`;
+> © Powered By Barboza™`;
 
     await conn.sendMessage(chatId, {
       image: thumbnailBuffer,
