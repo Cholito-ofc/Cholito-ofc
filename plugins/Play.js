@@ -7,10 +7,10 @@ const handler = async (msg, { conn, args }) => {
   if (!text) {
     return conn.sendMessage(chatId, {
       text:
-        `╭─⬣「 *Barboza AI* 」⬣\n` +
+        `╭─⬣「 *KilluaBot* 」⬣\n` +
         `│ ≡◦ 🎧 *Uso correcto del comando:*\n` +
-        `│ ≡◦ .spotify shakira soltera\n` +
-        `╰─⬣\n> © Barboza AI`
+        `│ ≡◦ .play Anuel perfecto\n` +
+        `╰─⬣\n> © ⍴᥆ᥕᥱrᥱძ ᑲᥡ һᥒ ᥴһ᥆ᥣі𝗍᥆`
     }, { quoted: msg });
   }
 
@@ -34,11 +34,10 @@ const handler = async (msg, { conn, args }) => {
     await conn.sendMessage(chatId, {
       image: { url: cover },
       caption:
-        `╭─⬣「 *MÚSICA SPOTIFY* 」⬣\n` +
+        `╭─⬣「 *KILLUA-BOT SPOTIFY* 」⬣\n` +
         `│ ≡◦ 🎵 *Título:* ${title}\n` +
         `│ ≡◦ 👤 *Artista:* ${artist}\n` +
         `│ ≡◦ ⏱️ *Duración:* ${duration}\n` +
-        `│ ≡◦ 🌐 *Spotify:* ${url}\n` +
         `╰─⬣`
     }, { quoted: msg });
 
@@ -54,7 +53,7 @@ const handler = async (msg, { conn, args }) => {
     console.error(e);
     return conn.sendMessage(chatId, {
       text:
-        `╭─⬣「 *Barboza AI* 」⬣\n` +
+        `╭─⬣「 *KilluaBot* 」⬣\n` +
         `│ ≡◦ ⚠️ *Error al procesar la solicitud.*\n` +
         `│ ≡◦ Intenta nuevamente más tarde.\n` +
         `╰─⬣`
@@ -62,7 +61,7 @@ const handler = async (msg, { conn, args }) => {
   }
 };
 
-handler.command = ["music"];
+handler.command = ["play"];
 handler.tags = ["descargas"];
 handler.help = ["spotify <nombre>"];
 module.exports = handler;
