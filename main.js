@@ -254,7 +254,7 @@ async function handleCommand(sock, msg, command, args, sender) {
 case 'play': {
   const chatId = msg.key.remoteJid;
   const yts = require('yt-search');
-  const axios = require('axios');
+  const ytdl = require('ytdl-core');
 
   if (!text) {
     await sock.sendMessage(chatId, {
@@ -275,44 +275,32 @@ case 'play': {
     const videoUrl = video.url;
     const title = video.title;
     const duration = video.timestamp;
-    const views = video.views.toLocaleString();
     const author = video.author.name;
     const thumbnail = video.thumbnail;
 
-    const info = `
-> 𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 🎧
-
-╭───────────────╮
-├ᴛɪᴛᴜʟᴏ 🎼: ${title}
-├ᴅᴜʀᴀᴄɪᴏɴ ⏱️:${duration}
-│00:03 ━━━━⬤─────── 02:56
-├ ᴀᴜᴛᴏʀ 🗣️: ${author}
-╰───────────────╯
-
-╭───────────✦
-➤ sᴇʟᴇᴄᴄɪᴏɴᴀ ᴜɴᴀ ᴏᴘᴄɪᴏ́ɴ
-➤ 𝟏 ᴏ *ᴀᴜᴅɪᴏ* – 𝖬𝗎́𝗌𝗂𝖼𝖺  
-➤ 𝟐 ᴏ *ᴠɪᴅᴇᴏ* – 𝖵𝗂́𝖽𝖾𝗈    
-╰───────────✦
-
-> ⍴᥆ᥕᥱrᥱძ ᑲᥡ kіᥣᥣᥙᥲᑲ᥆𝗍 🎧
-`;
-
-    const sent = await sock.sendMessage(chatId, {
+    // Enviamos portada y datos ANTES de mandar el audio (opcional)
+    await sock.sendMessage(chatId, {
       image: { url: thumbnail },
-      caption: info
+      caption:
+        `🎵 *${title}*\n` +
+        `⏱️ *Duración:* ${duration}\n` +
+        `🗣️ *Autor:* ${author}\n\n` +
+        `🎧 *Enviando audio...*`
     }, { quoted: msg });
 
-    global.cachePlay10[sent.key.id] = {
-      videoUrl: videoUrl,
-      title: title,
-      tipo: 'youtube'
-    };
+    // Obtenemos el stream de audio
+    const audioStream = ytdl(videoUrl, { filter: 'audioonly', quality: 'highestaudio' });
+
+    await sock.sendMessage(chatId, {
+      audio: audioStream,
+      mimetype: 'audio/mp4',
+      ptt: false // true para nota de voz, false para audio normal
+    }, { quoted: msg });
 
   } catch (e) {
-    console.error("❌ Error en play10:", e);
+    console.error("❌ Error en play:", e);
     await sock.sendMessage(chatId, {
-      text: `❌ Error al procesar el video.`
+      text: `❌ Error al procesar el audio.`
     }, { quoted: msg });
   }
 
