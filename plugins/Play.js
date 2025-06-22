@@ -6,74 +6,63 @@ const handler = async (msg, { conn, args }) => {
 
   if (!text) {
     return conn.sendMessage(chatId, {
-      text: "🥞 Por favor, ingresa el nombre de una canción.\n\nEjemplo: .play Shakira - Waka Waka"
+      text:
+        `╭─⬣「 *Barboza AI* 」⬣\n` +
+        `│ ≡◦ 🎧 *Uso correcto del comando:*\n` +
+        `│ ≡◦ .spotify shakira soltera\n` +
+        `╰─⬣\n> © Barboza AI`
     }, { quoted: msg });
   }
 
-  await conn.sendMessage(chatId, {
-    react: { text: '🕒', key: msg.key }
-  });
-
   try {
-    // Buscar la canción en YouTube
-    const search = await fetch(`https://api.akuari.my.id/search/ytsearch?query=${encodeURIComponent(text)}`);
-    const searchJson = await search.json();
-    if (!searchJson.result || !searchJson.result[0]) {
-      return conn.sendMessage(chatId, {
-        text: "❌ No se encontró la canción.",
-        quoted: msg
-      });
-    }
-    const info = searchJson.result[0];
-    const title = info.title;
-    const artist = info.channel;
-    const duration = info.duration;
-    const views = info.views;
-    const thumb = info.thumbnail;
-    const url = info.url;
+    const res = await fetch(`https://api.nekorinn.my.id/downloader/spotifyplay?q=${encodeURIComponent(text)}`);
+    const json = await res.json();
 
-    // Descargar el audio
-    const dl = await fetch(`https://api.akuari.my.id/downloader/yta?link=${encodeURIComponent(url)}`);
-    const dlJson = await dl.json();
-    if (!dlJson || !dlJson.mp3 || !dlJson.mp3.url) {
+    if (!json.status || !json.result?.downloadUrl) {
       return conn.sendMessage(chatId, {
-        text: "❌ No se pudo descargar el audio.",
-        quoted: msg
-      });
+        text:
+          `╭─⬣「 *Barboza AI* 」⬣\n` +
+          `│ ≡◦ ❌ *No se encontró resultado para:* ${text}\n` +
+          `╰─⬣`
+      }, { quoted: msg });
     }
 
-    // Enviar información con imagen
+    const { title, artist, duration, cover, url } = json.result.metadata;
+    const audio = json.result.downloadUrl;
+
+    // Enviar imagen con detalles
     await conn.sendMessage(chatId, {
-      image: { url: thumb },
+      image: { url: cover },
       caption:
-        `🎵 *${title}*\n` +
-        `🗣️ *Artista:* ${artist}\n` +
-        `⏱️ *Duración:* ${duration}\n` +
-        `👁️ *Vistas:* ${views}\n` +
-        `🔗 ${url}\n\n` +
-        `🎧 Enviando audio...`
+        `╭─⬣「 *MÚSICA SPOTIFY* 」⬣\n` +
+        `│ ≡◦ 🎵 *Título:* ${title}\n` +
+        `│ ≡◦ 👤 *Artista:* ${artist}\n` +
+        `│ ≡◦ ⏱️ *Duración:* ${duration}\n` +
+        `│ ≡◦ 🌐 *Spotify:* ${url}\n` +
+        `╰─⬣`
     }, { quoted: msg });
 
-    // Enviar el audio
+    // Enviar el archivo de audio
     await conn.sendMessage(chatId, {
-      audio: { url: dlJson.mp3.url },
-      mimetype: 'audio/mpeg'
+      audio: { url: audio },
+      mimetype: 'audio/mp4',
+      ptt: false,
+      fileName: `${title}.mp3`
     }, { quoted: msg });
 
-    await conn.sendMessage(chatId, {
-      react: { text: '✅', key: msg.key }
-    });
-
-  } catch (err) {
-    console.error("❌ Error en play:", err);
-    await conn.sendMessage(chatId, {
-      text: "❌ Ocurrió un error al procesar la música.",
-      quoted: msg
-    });
+  } catch (e) {
+    console.error(e);
+    return conn.sendMessage(chatId, {
+      text:
+        `╭─⬣「 *Barboza AI* 」⬣\n` +
+        `│ ≡◦ ⚠️ *Error al procesar la solicitud.*\n` +
+        `│ ≡◦ Intenta nuevamente más tarde.\n` +
+        `╰─⬣`
+    }, { quoted: msg });
   }
 };
 
-handler.command = ["play", "ytplay", "ytmp3", "music"];
+handler.command = ["music"];
 handler.tags = ["descargas"];
-handler.help = ["play <nombre de la canción>", "ytplay <nombre>", "ytmp3 <nombre>", "music <nombre>"];
+handler.help = ["spotify <nombre>"];
 module.exports = handler;
