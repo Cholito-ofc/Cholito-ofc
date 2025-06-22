@@ -415,9 +415,9 @@ if (update.action === "add" && welcomeActivo) {
     if (customMessage) {
       // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio, siempre con manito y salto de línea
       if (/(@user)/gi.test(customMessage)) {
-        textoFinal = `𝑩𝒊𝒆𝒏𝒃𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${customMessage.replace(/@user/gi, mention)}`;
+        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${customMessage.replace(/@user/gi, mention)}`;
       } else {
-        textoFinal = `𝑩𝒊𝒆𝒏𝒃𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${customMessage}`;
+        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${customMessage}`;
       }
     } else {
       // Si no hay mensaje personalizado, solo manda la descripción del grupo
@@ -428,7 +428,7 @@ if (update.action === "add" && welcomeActivo) {
       } catch (err) {
         groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
       }
-      textoFinal = `𝑩𝒊𝒆𝒏𝒃𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
+      textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
     }
 
     await sock.sendMessage(update.id, {
