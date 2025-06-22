@@ -251,7 +251,7 @@ async function handleCommand(sock, msg, command, args, sender) {
 
     switch (lowerCommand) {
 
-case 'play': {
+case 'play2': {
   const chatId = msg.key.remoteJid;
   const yts = require('yt-search');
   const axios = require('axios');
@@ -319,7 +319,7 @@ case 'play': {
   break;
 }
         
-case 'play2': {
+case 'play4': {
   const chatId = msg.key.remoteJid;
   const yts = require('yt-search');
   const axios = require('axios');
