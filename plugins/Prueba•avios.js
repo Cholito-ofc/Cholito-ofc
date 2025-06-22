@@ -1,5 +1,4 @@
 const fs = require("fs");
-const path = require("path");
 const filePath = "./pruebas_grupo.json";
 const TIEMPO_PREDETERMINADO = 30; // minutos
 
@@ -31,8 +30,6 @@ const handler = async (msg, { conn, args }) => {
   }
 
   let pruebas = cargarPruebas();
-  const activar = !pruebas[chatId] || Date.now() > pruebas[chatId].fin;
-
   pruebas[chatId] = {
     fin: Date.now() + minutos * 60 * 1000,
     minutos
@@ -40,16 +37,13 @@ const handler = async (msg, { conn, args }) => {
   guardarPruebas(pruebas);
 
   await conn.sendMessage(chatId, {
-    text: activar
-      ? `🎉 *¡Prueba activada!* El bot estará disponible por *${minutos} minutos*.\n\nDisfruta y prueba todas las funciones.`
-      : `⏰ *Prueba extendida!* Ahora tendrás *${minutos} minutos* más para disfrutar el bot.`
+    text: `🎉 *¡Prueba activada!* El bot estará disponible por *${minutos} minutos*.\n\nDisfruta y prueba todas las funciones.`
   }, { quoted: msg });
 
   // Aviso automático al finalizar el tiempo de prueba
   setTimeout(async () => {
     let updatedData = cargarPruebas();
     if (updatedData[chatId] && Date.now() > updatedData[chatId].fin) {
-      // Obtén el número del primer owner de global.owner
       let ownerNumber = "";
       if (Array.isArray(global.owner) && global.owner[0]) {
         ownerNumber = global.owner[0][0] || "";
@@ -57,7 +51,6 @@ const handler = async (msg, { conn, args }) => {
       let ownerMsg = ownerNumber
         ? `\n\n👑 *Contacto del Owner:* wa.me/${ownerNumber}`
         : "";
-
       await conn.sendMessage(chatId, {
         text:
           "🔕 *La prueba ha finalizado.*\n¿Quieres más tiempo o adquirir el bot de forma permanente? ¡Contáctanos!" +
@@ -72,26 +65,27 @@ const handler = async (msg, { conn, args }) => {
 handler.command = ["pruebagrupo"];
 module.exports = handler;
 
-// MIDDLEWARE CORREGIDO, SOLO BLOQUEA MENSAJES A USUARIOS COMUNES CUANDO NO HAY PRUEBA.
-// SIEMPRE DEJA PASAR AL OWNER Y AL COMANDO .pruebagrupo
+// ------------- MIDDLEWARE CORREGIDO -------------
+
 handler.before = async (msg, { conn }) => {
+  // Solo filtra en grupos
   if (!msg.key.remoteJid.endsWith('@g.us')) return;
 
+  const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
   const senderNum = sender.replace(/[^0-9]/g, "");
   const isOwner = global.owner.some(([id]) => id === senderNum);
 
-  // El owner siempre puede usar el bot
+  // El owner SIEMPRE puede usar el bot
   if (isOwner) return;
 
-  // Permitir siempre el comando pruebagrupo, aunque no haya prueba activa
-  const text = (
-    msg.message?.conversation ||
+  // Permitir SIEMPRE el comando pruebagrupo
+  const text =
+    (msg.message?.conversation ||
     msg.message?.extendedTextMessage?.text ||
-    ""
-  ).trim().toLowerCase();
+    "").trim().toLowerCase();
 
-  // Aquí puedes agregar otros prefijos si usas varios, por ejemplo, "!", "#", etc.
+  // Agrega más prefijos si usas otros
   if (
     text.startsWith(".pruebagrupo") ||
     text.startsWith("/pruebagrupo") ||
@@ -100,13 +94,14 @@ handler.before = async (msg, { conn }) => {
     return;
   }
 
+  // --- AQUÍ ESTÁ LA CLAVE: SOLO BLOQUEA SI NO HAY PRUEBA ACTIVA ---
   let pruebas = cargarPruebas();
-  const prueba = pruebas[msg.key.remoteJid];
+  const prueba = pruebas[chatId];
   if (!prueba) return !1;
+  // Si la prueba está activa, deja pasar
   if (Date.now() > prueba.fin) {
-    delete pruebas[msg.key.remoteJid];
+    delete pruebas[chatId];
     guardarPruebas(pruebas);
     return !1;
   }
-  // Si la prueba está activa, deja pasar
 };
