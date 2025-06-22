@@ -78,7 +78,11 @@ const handler = async (msg, { conn, args }) => {
   // Si no se escribe el nombre de la canción
   if (!args || !args.join(" ").trim()) {
   return conn.sendMessage(chatId, {
-    text: `🎧 *Uso correcto del comando .play*\n\n📌 Ejemplo:\n.play Despacito\n\nEste comando busca una canción en YouTube y te la envía en formato MP3.`,
+    text: `╭─⬣「 *KilluaBot* 」⬣
+│ ≡◦ 🎧 *Uso correcto del comando:*
+│ ≡◦ .play Anuel perfecto
+╰─⬣
+> © ⍴᥆ᥕᥱrᥱძ ᑲᥡ һᥒ ᥴһ᥆ᥣі𝗍᥆`,
   }, { quoted: msg });
 }
 
