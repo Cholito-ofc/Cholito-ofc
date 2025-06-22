@@ -54,17 +54,12 @@ const handler = async (msg, { conn, args }) => {
       mentions: participantes
     });
 
-    // Opcional: reacción al comando
-    if (conn.sendMessage) {
-      await conn.sendMessage(chatId, { react: { text: '✅', key: msg.key } });
-    }
-
     return conn.sendMessage(chatId, {
       text: `✅ *Aviso enviado exitosamente al grupo* _${grupo.name}_ (número ${numero}).\n\n📢 Todos los miembros han sido mencionados.`,
     }, { quoted: msg });
 
   } catch (e) {
-    return conn.sendMessage(chatId, { text: `❌ Error al enviar mensaje al grupo ${grupo.name}.` }, { quoted: msg });
+    return conn.sendMessage(chatId, { text: `❌ Error al enviar mensaje al grupo ${grupo.name}.\n\nDetalles: ${e.message || e}` }, { quoted: msg });
   }
 };
 
