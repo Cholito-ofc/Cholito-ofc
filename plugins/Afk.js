@@ -1,6 +1,11 @@
 const handler = async (m, { conn, args }) => {
+  console.log('AFK command received', m.sender, args); // <-- LOG PARA DEPURACIÓN
   const text = args.join(' ');
   const user = global.db.data.users[m.sender];
+  if (!user) {
+    console.error('User not found in database:', m.sender);
+    return conn.sendMessage(m.chat, { text: 'Error interno: usuario no detectado en la base de datos.' }, { quoted: m });
+  }
   user.afk = +new Date;
   user.afkReason = text;
 
