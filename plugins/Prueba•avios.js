@@ -5,17 +5,18 @@ const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
   const senderNum = sender.replace(/[^0-9]/g, "");
+  const isOwner = global.owner.some(([id]) => id === senderNum);
 
   if (!isOwner) {
     return conn.sendMessage(chatId, {
-      text: "❌ Este comando solo puede usarlo el *dueño del bot*."
+      text: "🚫 *Solo el dueño del bot puede activar el modo prueba.*\n\nSi deseas adquirir este servicio, ¡contáctanos! 😉"
     }, { quoted: msg });
   }
 
   const minutos = parseInt(args[0]);
   if (!minutos || minutos < 1 || minutos > 1440) {
     return conn.sendMessage(chatId, {
-      text: "❌ Especifica los minutos de prueba (entre 1 y 1440).\nEjemplo: .pruebagrupo 30"
+      text: "⏳ *Por favor, indica la duración en minutos (entre 1 y 1440).* \n\nEjemplo: *.pruebagrupo 30*"
     }, { quoted: msg });
   }
 
@@ -31,7 +32,7 @@ const handler = async (msg, { conn, args }) => {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
 
   await conn.sendMessage(chatId, {
-    text: `✅ *Modo prueba activado.*\nEl bot responderá aquí por *${minutos} minutos*.`
+    text: `🎉 *¡Modo prueba ACTIVADO!*\n\nEl bot estará disponible en este grupo durante *${minutos} minutos*.\n\nDisfrútalo y comprueba todas sus funciones. Si te gusta, ¡no dudes en adquirirlo!`
   }, { quoted: msg });
 
   // Temporizador para aviso y desactivar prueba
@@ -41,7 +42,7 @@ const handler = async (msg, { conn, args }) => {
       : {};
     if (updatedData[chatId]) {
       await conn.sendMessage(chatId, {
-        text: "⏰ *El tiempo de prueba ha finalizado.*\nContacta al owner para contratar el bot permanentemente."
+        text: "🕒 *¡La prueba ha finalizado!*\n\nEsperamos que hayas disfrutado el bot. Si quieres tenerlo de forma permanente en tu grupo, contacta al owner o solicita tu suscripción.\n\n¡Gracias por tu interés! 💎"
       });
       delete updatedData[chatId];
       fs.writeFileSync(filePath, JSON.stringify(updatedData, null, 2));
@@ -52,15 +53,14 @@ const handler = async (msg, { conn, args }) => {
 handler.command = ["pruebagrupo"];
 module.exports = handler;
 
-// Middleware: pon esto en tu handler global, normalmente en el index.js o crea un archivo plugins/filtroPrueba.js si tu bot soporta middlewares
-
+// Middleware (no toques tu index.js, esto lo toma el sistema de plugins)
 handler.before = async (msg, { conn }) => {
   if (!msg.key.remoteJid.endsWith('@g.us')) return;
   const sender = msg.key.participant || msg.key.remoteJid;
   const senderNum = sender.replace(/[^0-9]/g, "");
   const isOwner = global.owner.some(([id]) => id === senderNum);
 
-  // Permite que el owner siempre use el bot
+  // El owner siempre puede usar el bot
   if (isOwner) return;
 
   const filePath = "./pruebas_grupo.json";
@@ -70,13 +70,13 @@ handler.before = async (msg, { conn }) => {
 
   const prueba = data[msg.key.remoteJid];
   if (!prueba) {
-    return !1; // No hay prueba activa, bloquea el uso del bot
+    return !1; // No hay prueba activa, bloquea el bot para el grupo
   }
   if (Date.now() > prueba.fin) {
-    // Si se acabó el tiempo, borra la prueba y bloquea el uso
+    // Si terminó la prueba, borra y bloquea
     delete data[msg.key.remoteJid];
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
     return !1;
   }
-  // Si hay prueba vigente, deja pasar
+  // Si la prueba está activa, sigue normalmente
 };
