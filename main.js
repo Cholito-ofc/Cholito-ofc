@@ -255,6 +255,9 @@ case 'play': {
   const chatId = msg.key.remoteJid;
   const yts = require('yt-search');
   const ytdl = require('ytdl-core');
+  const ffmpeg = require('fluent-ffmpeg');
+  const fs = require('fs');
+  const path = require('path');
 
   if (!text) {
     await sock.sendMessage(chatId, {
@@ -268,34 +271,47 @@ case 'play': {
   });
 
   try {
+    // Buscar canción en YouTube
     const search = await yts(text);
     const video = search.videos[0];
     if (!video) throw new Error("No se encontraron resultados");
 
     const videoUrl = video.url;
     const title = video.title;
-    const duration = video.timestamp;
     const author = video.author.name;
     const thumbnail = video.thumbnail;
+    const duration = video.timestamp;
 
-    // Enviamos portada y datos ANTES de mandar el audio (opcional)
+    // Mensaje con info y carátula
     await sock.sendMessage(chatId, {
       image: { url: thumbnail },
       caption:
         `🎵 *${title}*\n` +
-        `⏱️ *Duración:* ${duration}\n` +
-        `🗣️ *Autor:* ${author}\n\n` +
-        `🎧 *Enviando audio...*`
+        `🗣️ *Autor:* ${author}\n` +
+        `⏱️ *Duración:* ${duration}\n\n` +
+        `🎧 Enviando audio...`
     }, { quoted: msg });
 
-    // Obtenemos el stream de audio
-    const audioStream = ytdl(videoUrl, { filter: 'audioonly', quality: 'highestaudio' });
+    // Descarga y convierte a mp3 en temporal
+    const tmpFile = path.join(__dirname, 'tmp_' + Date.now() + '.mp3');
+    await new Promise((resolve, reject) => {
+      ffmpeg(ytdl(videoUrl, { filter: 'audioonly', quality: 'highestaudio' }))
+        .audioBitrate(128)
+        .format('mp3')
+        .save(tmpFile)
+        .on('end', resolve)
+        .on('error', reject);
+    });
 
+    // Envía el audio
     await sock.sendMessage(chatId, {
-      audio: audioStream,
-      mimetype: 'audio/mp4',
-      ptt: false // true para nota de voz, false para audio normal
+      audio: fs.readFileSync(tmpFile),
+      mimetype: 'audio/mp3',
+      ptt: false // Cambia a true si prefieres nota de voz
     }, { quoted: msg });
+
+    // Borra el archivo temporal
+    fs.unlinkSync(tmpFile);
 
   } catch (e) {
     console.error("❌ Error en play:", e);
