@@ -1,5 +1,14 @@
 const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
+  const sender = msg.key.participant || msg.key.remoteJid;
+  const senderNum = sender.replace(/[^0-9]/g, "");
+
+  // Solo permite al Owner
+  if (!global.owner.some(([id]) => id === senderNum)) {
+    return conn.sendMessage(chatId, {
+      text: "❌ Solo el *owner* del bot puede usar este comando."
+    }, { quoted: msg });
+  }
 
   let fetched;
   try {
@@ -19,7 +28,6 @@ const handler = async (msg, { conn }) => {
     if (!meta || !meta.subject) continue;
     if (!jid.endsWith('@g.us')) continue;
 
-    // Ya no calculamos ni mostramos miembros
     grupos.push({
       name: meta.subject,
       id: jid
@@ -31,7 +39,7 @@ const handler = async (msg, { conn }) => {
     return conn.sendMessage(chatId, { text: '🚫 No estoy en ningún grupo.' }, { quoted: msg });
   }
 
-  // Asignar código numérico: 1, 2, 3, ...
+  // Asignar código numérico
   grupos.forEach((g, idx) => {
     g.code = String(idx + 1);
   });
@@ -42,7 +50,6 @@ const handler = async (msg, { conn }) => {
   grupos.forEach((g) => {
     texto += `🔹 *${g.name}*\n`;
     texto += `• Código: *${g.code}*\n`;
-    // Ya no mostramos la línea de miembros
     texto += `• JID: ${g.id}\n`;
     texto += `━━━━━━━━━━━━━━━━━━━━━\n`;
   });
