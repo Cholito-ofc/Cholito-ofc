@@ -30,7 +30,12 @@ const handler = async (msg, { conn, args }) => {
   const logPath = path.resolve("./error.log");
   if (!fs.existsSync(logPath)) {
     return conn.sendMessage(chatId, {
-      text: "✅ *No se han registrado errores en el bot hasta ahora.*",
+      text:
+        "╔════════════════════════════╗\n" +
+        "      🟢  *SIN ERRORES*  🟢\n" +
+        "╚════════════════════════════╝\n\n" +
+        "✅ El bot está funcionando correctamente.\n" +
+        "_No se han registrado errores hasta ahora._",
       quoted: msg
     });
   }
@@ -41,9 +46,23 @@ const handler = async (msg, { conn, args }) => {
     .split("\n")
     .slice(-30); // Últimas 30 líneas
 
-  const out = lines.length
-    ? `🛠️ *Últimos errores del bot:*\n\n${lines.join("\n")}`
-    : "✅ *No se han registrado errores en el bot hasta ahora.*";
+  let out = "";
+  if (lines.length) {
+    out =
+      "╔════════════════════════════╗\n" +
+      "      ⚠️ *ERRORES DEL BOT* ⚠️\n" +
+      "╚════════════════════════════╝\n\n" +
+      `*Cantidad de errores recientes:* ${lines.length}\n\n` +
+      lines.map((l, i) => `*${i + 1}.* ${l}`).join("\n") +
+      "\n\n⏳ *Revisa y soluciona estos problemas para un mejor funcionamiento.*";
+  } else {
+    out =
+      "╔════════════════════════════╗\n" +
+      "      🟢  *SIN ERRORES*  🟢\n" +
+      "╚════════════════════════════╝\n\n" +
+      "✅ El bot está funcionando correctamente.\n" +
+      "_No se han registrado errores hasta ahora._";
+  }
 
   // WhatsApp tiene límite, recorta si es necesario
   const maxChars = 4096; // Ajusta si necesitas
