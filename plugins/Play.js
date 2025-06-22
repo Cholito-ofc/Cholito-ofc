@@ -1,5 +1,4 @@
 const yts = require('yt-search');
-const fs = require('fs');
 const axios = require('axios');
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -7,15 +6,6 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const MAX_RETRIES = 2;
 const TIMEOUT_MS = 10000;
 const RETRY_DELAY_MS = 12000;
-
-const isUserBlocked = (userId) => {
-  try {
-    const blockedUsers = JSON.parse(fs.readFileSync('./bloqueados.json', 'utf8'));
-    return blockedUsers.includes(userId);
-  } catch {
-    return false;
-  }
-};
 
 const getDownloadUrl = async (videoUrl) => {
   const apis = [{ url: 'https://api.vreden.my.id/api/ytmp3?url=', type: 'vreden' }];
@@ -43,17 +33,14 @@ const getDownloadUrl = async (videoUrl) => {
 
 const handler = async (msg, { conn, args, usedPrefix, command }) => {
   const chatId = msg.key.remoteJid;
-  const userId = msg.sender || (msg.key.participant || msg.key.remoteJid);
 
-  // Bloqueados
-  if (isUserBlocked(userId)) {
-    return conn.sendMessage(chatId, { text: '🚫 Lo siento, estás en la lista de usuarios bloqueados.' }, { quoted: msg });
-  }
+  // Reacción al usar el comando
+  await conn.sendMessage(chatId, { react: { text: '🎵', key: msg.key } });
 
   const text = args.join(' ').trim();
   if (!text) {
     return conn.sendMessage(chatId, {
-      text: `Uso: ${usedPrefix + command} <nombre de la canción>\nEjemplo: ${usedPrefix + command} Mi Vida Eres Tu`
+      text: `Uso: ${usedPrefix + command} <nombre de la canción>\nEjemplo: ${usedPrefix + command} Mi Vida Eres Tú`
     }, { quoted: msg });
   }
 
@@ -92,7 +79,7 @@ const handler = async (msg, { conn, args, usedPrefix, command }) => {
     caption: description
   }, { quoted: msg });
 
-  // Descargar y enviar audio como archivo "limpio", sin preview ni miniatura
+  // Descargar y enviar audio como archivo limpio
   const downloadData = await getDownloadUrl(videoUrl);
   if (!downloadData || !downloadData.url) {
     return conn.sendMessage(chatId, { text: '❌ No se pudo descargar la música desde ninguna API.' }, { quoted: msg });
