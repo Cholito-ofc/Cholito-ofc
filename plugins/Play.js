@@ -105,7 +105,7 @@ const handler = async (msg, { conn, args }) => {
       imageBuffer = Buffer.from(response.data, 'binary');
     } catch {}
 
-    const caption = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍* 」⬣
+    const caption = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
 │  🎵 *Título:* ${title}
 │  ⏱ *Duración:* ${duration || 'Desconocida'}
 │  👁 *Vistas:* ${views.toLocaleString()}
@@ -113,7 +113,7 @@ const handler = async (msg, { conn, args }) => {
 │  🔗 *URL:* ${videoUrl}
 ╰─⬣
 
-*[🛠️] 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈...*
+*[🛠️] 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈 𝖾𝗌𝗉𝖾𝗋𝖾...*
 
 > ® ⍴᥆ᥕᥱrᥱძ ᑲᥡ kіᥣᥣᥙᥲᑲ᥆𝗍⚡`;
 
