@@ -41,13 +41,16 @@ const handler = async (msg, { conn, args }) => {
     const meta = await conn.groupMetadata(grupo.id);
     const participantes = meta.participants.map(p => p.id);
 
+    // Obtener remitente de manera segura
+    const sender = msg.key.participant || msg.key.remoteJid;
+
     // Enviar aviso personalizado y mencionando a todos
     await conn.sendMessage(grupo.id, {
       text:
         `╔═══════════════════╗\n` +
         `      📢 *A V I S O  D E L  B O T* 📢\n` +
         `╚═══════════════════╝\n\n` +
-        `👤 *Enviado por:* @${msg.sender.split('@')[0]}\n` +
+        `👤 *Enviado por:* @${(sender || '').split('@')[0]}\n` +
         `🏷️ *Para todos los miembros del grupo*\n\n` +
         `${textoAviso}\n\n` +
         `🔔 _Por favor leer con atención_`,
