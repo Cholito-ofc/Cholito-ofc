@@ -43,12 +43,6 @@ async function getDownloadUrl(videoUrl) {
 }
 
 async function sendAudioNormal(conn, chatId, audioUrl, videoTitle, quotedMsg) {
-  let thumbnailBuffer = null;
-  try {
-    const response = await axios.get('https://files.catbox.moe/ltq7ph.jpg', { responseType: 'arraybuffer' });
-    thumbnailBuffer = Buffer.from(response.data, 'binary');
-  } catch {}
-
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
       await conn.sendMessage(
@@ -60,11 +54,10 @@ async function sendAudioNormal(conn, chatId, audioUrl, videoTitle, quotedMsg) {
             externalAdReply: {
               title: videoTitle,
               body: 'Barboza Music',
-              previewType: 'PHOTO',
-              thumbnail: thumbnailBuffer || null,
+              previewType: 'NONE',
               mediaType: 1,
               renderLargerThumbnail: false,
-              showAdAttribution: true,
+              showAdAttribution: false,
             }
           }
         },
@@ -90,34 +83,12 @@ const handler = async (msg, { conn, args }) => {
   }
 
   if (!args || !args.length) {
-    let thumbnailBuffer = null;
-    try {
-      const response = await axios.get('https://files.catbox.moe/ltq7ph.jpg', { responseType: 'arraybuffer' });
-      thumbnailBuffer = Buffer.from(response.data, 'binary');
-    } catch {}
-
     return conn.sendMessage(chatId, {
-      text: "Uso: .play <nombre de la canción>\n> Ejemplo: .play Mi Vida Eres Tu",
-      contextInfo: {
-        externalAdReply: {
-          title: 'Barboza Music',
-          previewType: 'PHOTO',
-          thumbnail: thumbnailBuffer || null,
-          mediaType: 1,
-          renderLargerThumbnail: false,
-          showAdAttribution: true,
-          sourceUrl: 'Ella Nunca Te Quizo'
-        }
-      }
+      text: "Uso: .play <nombre de la canción>\n> Ejemplo: .play Mi Vida Eres Tu"
     }, { quoted: msg });
   }
 
   const text = args.join(" ");
-  const searchMsg = await conn.sendMessage(chatId, {
-    text: `🔍 Buscando la música solicitada...`
-  }, { quoted: msg });
-
-  await conn.sendMessage(chatId, { react: { text: '📀', key: searchMsg.key } }, { quoted: msg });
 
   try {
     const searchResults = await yts(text.trim());
@@ -142,32 +113,18 @@ const handler = async (msg, { conn, args }) => {
 > © Powered By Barboza™`;
 
     await conn.sendMessage(chatId, {
-      text: description,
-      contextInfo: {
-        externalAdReply: {
-          title: title,
-          body: 'Barboza Music',
-          previewType: 'PHOTO',
-          thumbnail: thumbnailBuffer || null,
-          mediaType: 1,
-          renderLargerThumbnail: false,
-          showAdAttribution: true,
-        }
-      }
+      image: thumbnailBuffer,
+      caption: description
     }, { quoted: msg });
 
     const downloadData = await getDownloadUrl(videoUrl);
     if (!downloadData || !downloadData.url) {
-      await conn.sendMessage(chatId, { react: { text: '🔴', key: searchMsg.key } }, { quoted: msg });
       throw new Error('No se pudo descargar la música desde ninguna API.');
     }
 
-    await conn.sendMessage(chatId, { react: { text: '🟢', key: searchMsg.key } }, { quoted: msg });
-    const success = await sendAudioNormal(conn, chatId, downloadData.url, downloadData.title || title, msg);
-    if (!success) throw new Error('No se pudo enviar el audio.');
+    await sendAudioNormal(conn, chatId, downloadData.url, downloadData.title || title, msg);
 
   } catch (error) {
-    await conn.sendMessage(chatId, { react: { text: '🔴', key: searchMsg.key } }, { quoted: msg });
     return conn.sendMessage(chatId, {
       text: `🚨 *Error:* ${error.message || 'Error desconocido'}`
     }, { quoted: msg });
