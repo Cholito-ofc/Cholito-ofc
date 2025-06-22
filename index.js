@@ -402,13 +402,6 @@ const farewellTexts = [
 ];
 
 // BIENVENIDA: solo cuando alguien entra
-// Helper para obtener el buffer de una imagen desde URL (ponlo arriba si ya tienes require de axios, si no, agregalo aquí también)
-const axios = require("axios");
-async function urlToBuffer(url) {
-  const res = await axios.get(url, { responseType: "arraybuffer" });
-  return Buffer.from(res.data, "binary");
-}
-
 sock.ev.on("group-participants.update", async (update) => {
   try {
     if (!update.id.endsWith("@g.us")) return;
@@ -425,7 +418,7 @@ sock.ev.on("group-participants.update", async (update) => {
 
     if (!welcomeActivo && !despedidasActivo) return;
 
-    // BIENVENIDA
+    // =================== BIENVENIDA ===================
     if (update.action === "add" && welcomeActivo) {
       // Mensajes personalizados
       let customWelcomes = {};
@@ -445,38 +438,34 @@ sock.ev.on("group-participants.update", async (update) => {
         const customMessage = customWelcomes[update.id];
         if (customMessage) {
           if (/(@user)/gi.test(customMessage)) {
-            textoFinal = customMessage.replace(/@user/gi, mention);
+            textoFinal = `👋🏻 ${customMessage.replace(/@user/gi, mention)}`;
           } else {
-            textoFinal = `${mention}\n\n${customMessage}`;
+            textoFinal = `👋🏻 ${mention}\n\n${customMessage}`;
           }
         } else {
-          // Si no hay mensaje personalizado, solo manda la descripción del grupo
+          // Si no hay mensaje personalizado, manda la descripción del grupo
           let groupDesc = "";
           try {
             const metadata = await sock.groupMetadata(update.id);
-            groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
+            groupDesc = metadata.desc
+              ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}`
+              : "\n\n📜 *Este grupo no tiene descripción.*";
           } catch (err) {
             groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
           }
-          textoFinal = `${mention}${groupDesc}`;
+          textoFinal = `👋🏻 ${mention}${groupDesc}`;
         }
 
-        const thumbBuf = await urlToBuffer(profilePicUrl);
-
         await sock.sendMessage(update.id, {
-          location: {
-            jpegThumbnail: thumbBuf,
-            name: "👋 Bienvenido/a",
-            address: textoFinal.length > 256 ? textoFinal.slice(0, 256) : textoFinal,
-          },
+          image: { url: profilePicUrl },
+          caption: textoFinal,
           mentions: [participant]
         });
       }
     }
 
-    // DESPEDIDA
+    // =================== DESPEDIDA ===================
     if (update.action === "remove" && despedidasActivo) {
-      // Mensaje personalizado de despedida
       let customBye = {};
       try {
         if (fs.existsSync("./byemsgs.json")) {
@@ -500,14 +489,9 @@ sock.ev.on("group-participants.update", async (update) => {
           byeText = `╔═══════════════════\n║  👋  Hasta pronto, ${mention}!\n║  Esperamos verte de nuevo en el grupo.\n╚═══════════════════╝`;
         }
 
-        const thumbBuf = await urlToBuffer(profilePicUrl);
-
         await sock.sendMessage(update.id, {
-          location: {
-            jpegThumbnail: thumbBuf,
-            name: "👋 Adiós",
-            address: byeText.length > 256 ? byeText.slice(0, 256) : byeText,
-          },
+          image: { url: profilePicUrl },
+          caption: byeText,
           mentions: [participant]
         });
       }
