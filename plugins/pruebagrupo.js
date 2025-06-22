@@ -10,6 +10,7 @@ function guardarPruebas(data) {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
 }
 
+// ACTIVADOR DEL MODO PRUEBA
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
@@ -36,18 +37,41 @@ const handler = async (msg, { conn, args }) => {
   };
   guardarPruebas(pruebas);
 
+  // Obtener el nombre del grupo
+  let nombreGrupo = await conn.getName(chatId).catch(_ => "GRUPO DESCONOCIDO");
+  let fecha = new Date().toLocaleString('es-ES', { hour12: false });
+
+  let mensajePersonalizado = 
+`➤ \`ORDENES RECIBIDAS\` ✅
+
+\`\`\`Finaliza en: ${minutos} minuto${minutos === 1 ? '' : 's'}.\`\`\`
+\`\`\`Fecha: ${fecha}.\`\`\`
+\`\`\`Grupo: ${nombreGrupo}\`\`\`
+`;
+
   await conn.sendMessage(chatId, {
-    text: `🎉 *¡Prueba activada!* El bot estará disponible por *${minutos} minutos*.\n\nDisfruta y prueba todas las funciones.`
+    text: mensajePersonalizado
   }, { quoted: msg });
 
   setTimeout(async () => {
     let updatedData = cargarPruebas();
     if (updatedData[chatId] && Date.now() > updatedData[chatId].fin) {
       let ownerNumber = Array.isArray(global.owner) && global.owner[0] ? global.owner[0][0] : "";
-      let ownerMsg = ownerNumber ? `\n\n👑 *Contacto del Owner:* wa.me/${ownerNumber}` : "";
-      await conn.sendMessage(chatId, {
-        text: "🔕 *La prueba ha finalizado.*\n¿Quieres más tiempo o adquirir el bot de forma permanente? ¡Contáctanos!" + ownerMsg
-      });
+      let ownerMsg = ownerNumber ? `\n\`\`\`Contacto del Owner: wa.me/${ownerNumber}\`\`\`` : "";
+
+      let nombreGrupoFin = await conn.getName(chatId).catch(_ => "GRUPO DESCONOCIDO");
+      let fechaFin = new Date().toLocaleString('es-ES', { hour12: false });
+
+      let mensajeFin = 
+`➤ \`PRUEBA FINALIZADA\` ❌
+
+\`\`\`La prueba ha terminado.\`\`\`
+\`\`\`Fecha: ${fechaFin}.\`\`\`
+\`\`\`Grupo: ${nombreGrupoFin}\`\`\`${ownerMsg}
+
+¿Quieres más tiempo o adquirir el bot de forma permanente? ¡Contáctanos!
+`;
+      await conn.sendMessage(chatId, { text: mensajeFin });
       delete updatedData[chatId];
       guardarPruebas(updatedData);
     }
@@ -57,7 +81,7 @@ const handler = async (msg, { conn, args }) => {
 handler.command = ["pruebagrupo"];
 module.exports = handler;
 
-// MIDDLEWARE TOTALMENTE REVISADO Y GARANTIZADO
+// MIDDLEWARE: BLOQUEO TOTAL SI NO HAY PRUEBA ACTIVA (SALVO OWNER Y ACTIVADOR)
 handler.before = async (msg, { conn }) => {
   if (!msg.key.remoteJid.endsWith('@g.us')) return;
 
@@ -88,5 +112,5 @@ handler.before = async (msg, { conn }) => {
   if (prueba && Date.now() <= prueba.fin) return; // Si hay prueba activa, NO bloquees nada.
 
   // Si NO hay prueba activa, bloquea a todos menos owner y comando.
-  return !1;
+  return !1; // IGNORA TOTALMENTE LOS MENSAJES
 };
