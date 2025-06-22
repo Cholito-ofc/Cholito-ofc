@@ -104,8 +104,6 @@ const handler = async (msg, { conn, args }) => {
     const caption = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
 │  🎵 *Título:* ${title}
 │  ⏱ *Duración:* ${duration || 'Desconocida'}
-│  👁 *Vistas:* ${views.toLocaleString()}
-│  📅 *Publicado:* ${ago || 'Desconocido'}
 │  🔗 *URL:* ${videoUrl}
 ╰─⬣
 
