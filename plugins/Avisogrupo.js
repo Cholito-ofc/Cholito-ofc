@@ -37,14 +37,35 @@ const handler = async (msg, { conn, args }) => {
   const grupo = global.gruposAdmin[idx];
 
   try {
-    await conn.sendMessage(grupo.id, { text: `📢 *AVISO DEL BOT:*\n\n${textoAviso}` });
+    // Obtener participantes del grupo destino
+    const meta = await conn.groupMetadata(grupo.id);
+    const participantes = meta.participants.map(p => p.id);
+
+    // Enviar aviso personalizado y mencionando a todos
+    await conn.sendMessage(grupo.id, {
+      text:
+        `╔═══════════════════╗\n` +
+        `      📢 *A V I S O  D E L  B O T* 📢\n` +
+        `╚═══════════════════╝\n\n` +
+        `👤 *Enviado por:* @${msg.sender.split('@')[0]}\n` +
+        `🏷️ *Para todos los miembros del grupo*\n\n` +
+        `${textoAviso}\n\n` +
+        `🔔 _Por favor leer con atención_`,
+      mentions: participantes
+    });
+
+    // Opcional: reacción al comando
+    if (conn.sendMessage) {
+      await conn.sendMessage(chatId, { react: { text: '✅', key: msg.key } });
+    }
+
+    return conn.sendMessage(chatId, {
+      text: `✅ *Aviso enviado exitosamente al grupo* _${grupo.name}_ (número ${numero}).\n\n📢 Todos los miembros han sido mencionados.`,
+    }, { quoted: msg });
+
   } catch (e) {
     return conn.sendMessage(chatId, { text: `❌ Error al enviar mensaje al grupo ${grupo.name}.` }, { quoted: msg });
   }
-
-  return conn.sendMessage(chatId, {
-    text: `✅ Aviso enviado correctamente al grupo *${grupo.name}* (número ${numero}).`
-  }, { quoted: msg });
 };
 
 handler.command = ['aviso'];
