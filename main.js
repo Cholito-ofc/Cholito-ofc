@@ -4052,7 +4052,7 @@ case 'menugrupo': {
     await sock.sendMessage2(
       chatId,
       {
-        image: { url: "https://cdn.russellxz.click/54fe2641.jpeg" },
+        image: { url: "https://cdn.russellxz.click/2852bc48.jpeg" },
         caption: captionText
       },
       msg
@@ -12246,7 +12246,7 @@ case 'rpg': {
    *${global.prefix}minar*, *${global.prefix}picar*, *${global.prefix}crime*, *${global.prefix}work*,  
    *${global.prefix}claim*, *${global.prefix}cofre*, *${global.prefix}minar2*, *${global.prefix}robar*  
 
-🚀 ¡Prepárate para la aventura en *Cortana 2.0*! 🏆`;
+🚀 ¡Prepárate para la aventura en *KIlluaBot ⚡*! 🏆`;
 
 await sock.sendMessage(msg.key.remoteJid, { edit: registroMensaje.key, text: "✅ *¡Registro completado!* Generando tu tarjeta de jugador..." }); 
 await new Promise(resolve => setTimeout(resolve, 2000)); 
@@ -13068,7 +13068,7 @@ case 'tiendaper': {
         }
 
         // Explicación de compra al inicio 📜
-        let mensaje = `🏪 *ᴛɪᴇɴᴅᴀ ᴅᴇ ᴘᴇʀsᴏɴᴀᴊᴇs - 𝚌𝚘𝚛𝚝𝚊𝚗𝚊 𝟸.𝟶* 🏪\n\n`;
+        let mensaje = `🏪 *ᴛɪᴇɴᴅᴀ ᴅᴇ ᴘᴇʀsᴏɴᴀᴊᴇs - KILLUA BOT* 🏪\n\n`;
         mensaje += `🎭 *Compra personajes de anime y mejora sus habilidades.*\n`;
         mensaje += `🛒 *Para comprar un personaje usa:* \n`;
         mensaje += `   📌 \`${global.prefix}comprar <nombre_personaje>\`\n`;
@@ -13093,7 +13093,7 @@ case 'tiendaper': {
 
         // Enviar mensaje con imagen estática 🖼️
 await sock.sendMessage(msg.key.remoteJid, { 
-    image: { url: "https://cdn.russellxz.click/1e23db7d.jpeg" }, // Ahora como imagen
+    image: { url: "https://cdn.russellxz.click/06796309.jpeg" }, // Ahora como imagen
     caption: mensaje
 }, { quoted: msg });
 
