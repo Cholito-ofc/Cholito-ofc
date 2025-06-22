@@ -4199,7 +4199,7 @@ COMO ADMIN DE : ${groupName.toUpperCase()}
      
 // Comando para quitar derechos de admin (quitaradmin / quitaradmins)
 
-case 'damelink': {
+case 'link': {
   try {
     const chatId = msg.key.remoteJid;
     // Verificar que se use en un grupo
