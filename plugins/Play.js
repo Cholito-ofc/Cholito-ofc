@@ -75,27 +75,25 @@ const handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
-  // Si no escribe nombre de canción
+  // Si no se escribe el nombre de la canción
   if (!args || !args.length) {
-  let imageBuffer = null;
-  try {
-    const response = await axios.get("https://files.catbox.moe/ltq7ph.jpg", { responseType: "arraybuffer" });
-    imageBuffer = Buffer.from(response.data);
-  } catch {
-    // Si falla, no pasa nada, simplemente se mostrará solo el texto
-  }
+    let imageBuffer = null;
+    try {
+      const response = await axios.get("https://files.catbox.moe/ltq7ph.jpg", { responseType: "arraybuffer" });
+      imageBuffer = Buffer.from(response.data);
+    } catch {
+      imageBuffer = null;
+    }
 
-  return conn.sendMessage(chatId, {
-    ...(imageBuffer
-      ? {
-          image: imageBuffer,
-          caption: `*Uso del comando .play*\n\nEjemplo:\n.play Despacito\n\nEnvía música desde YouTube en formato MP3.`
-        }
-      : {
-          text: `🎵 *Uso del comando .play*\n\nEjemplo:\n.play Despacito\n\nEnvía música desde YouTube en formato MP3.`
-        }),
-  }, { quoted: msg });
-}
+    const caption = `🎧 *Uso correcto del comando .play*\n\n📌 Ejemplo:\n.play Despacito\n\nEste comando busca una canción en YouTube y te la envía en formato MP3.`;
+
+    return conn.sendMessage(chatId, imageBuffer ? {
+      image: imageBuffer,
+      caption
+    } : {
+      text: caption
+    }, { quoted: msg });
+  }
 
   const query = args.join(" ").trim();
 
@@ -122,7 +120,7 @@ const handler = async (msg, { conn, args }) => {
 
 *[🛠️] 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈 𝖾𝗌𝗉𝖾𝗋𝖾...*
 
-> ® ⍴᥆ᥕᥱrᥱძ ᑲᥡ kіᥣᥣᥙᥲᑲ᥆𝗍⚡`;
+> ® ⍴᥆ᥕᥱrᥱძ ᑲᥡ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍⚡`;
 
     await conn.sendMessage(chatId, {
       image: imageBuffer,
