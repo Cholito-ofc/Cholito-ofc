@@ -72,7 +72,8 @@ const handler = async (msg, { conn, args }) => {
 handler.command = ["pruebagrupo"];
 module.exports = handler;
 
-// Middleware para filtrar mensajes en grupos
+// MIDDLEWARE CORREGIDO, SOLO BLOQUEA MENSAJES A USUARIOS COMUNES CUANDO NO HAY PRUEBA.
+// SIEMPRE DEJA PASAR AL OWNER Y AL COMANDO .pruebagrupo
 handler.before = async (msg, { conn }) => {
   if (!msg.key.remoteJid.endsWith('@g.us')) return;
 
@@ -84,8 +85,18 @@ handler.before = async (msg, { conn }) => {
   if (isOwner) return;
 
   // Permitir siempre el comando pruebagrupo, aunque no haya prueba activa
-  const messageContent = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
-  if (messageContent.startsWith(".pruebagrupo") || messageContent.startsWith("/pruebagrupo")) {
+  const text = (
+    msg.message?.conversation ||
+    msg.message?.extendedTextMessage?.text ||
+    ""
+  ).trim().toLowerCase();
+
+  // Aquí puedes agregar otros prefijos si usas varios, por ejemplo, "!", "#", etc.
+  if (
+    text.startsWith(".pruebagrupo") ||
+    text.startsWith("/pruebagrupo") ||
+    text.startsWith("!pruebagrupo")
+  ) {
     return;
   }
 
