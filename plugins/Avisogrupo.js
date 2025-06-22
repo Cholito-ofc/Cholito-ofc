@@ -57,7 +57,7 @@ const handler = async (msg, { conn, args }) => {
     await conn.sendMessage(grupo.id, {
       text:
         `╭─────•◈•─────╮\n` +
-        `      📢 *A V I S O  D E L  B O T* 📢\n` +
+        `      📢 *AVISO DEL BOT* 📢\n` +
         `╰─────•◈•─────╯\n\n` +
         `👤 *Enviado por:* ${senderMention}\n` +
         `🏷️ *Para todos los miembros del grupo*\n\n` +
