@@ -254,10 +254,7 @@ async function handleCommand(sock, msg, command, args, sender) {
 case 'play': {
   const chatId = msg.key.remoteJid;
   const yts = require('yt-search');
-  const ytdl = require('ytdl-core');
-  const ffmpeg = require('fluent-ffmpeg');
-  const fs = require('fs');
-  const path = require('path');
+  const axios = require('axios');
 
   if (!text) {
     await sock.sendMessage(chatId, {
@@ -271,58 +268,57 @@ case 'play': {
   });
 
   try {
-    // Buscar canción en YouTube
     const search = await yts(text);
     const video = search.videos[0];
     if (!video) throw new Error("No se encontraron resultados");
 
     const videoUrl = video.url;
     const title = video.title;
+    const duration = video.timestamp;
+    const views = video.views.toLocaleString();
     const author = video.author.name;
     const thumbnail = video.thumbnail;
-    const duration = video.timestamp;
 
-    // Mensaje con info y carátula
-    await sock.sendMessage(chatId, {
+    const info = `
+> 𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 🎧
+
+╭───────────────╮
+├ᴛɪᴛᴜʟᴏ 🎼: ${title}
+├ᴅᴜʀᴀᴄɪᴏɴ ⏱️:${duration}
+│00:03 ━━━━⬤─────── 02:56
+├ ᴀᴜᴛᴏʀ 🗣️: ${author}
+╰───────────────╯
+
+╭───────────✦
+➤ sᴇʟᴇᴄᴄɪᴏɴᴀ ᴜɴᴀ ᴏᴘᴄɪᴏ́ɴ
+➤ 𝟏 ᴏ *ᴀᴜᴅɪᴏ* – 𝖬𝗎́𝗌𝗂𝖼𝖺  
+➤ 𝟐 ᴏ *ᴠɪᴅᴇᴏ* – 𝖵𝗂́𝖽𝖾𝗈    
+╰───────────✦
+
+> ⍴᥆ᥕᥱrᥱძ ᑲᥡ kіᥣᥣᥙᥲᑲ᥆𝗍 🎧
+`;
+
+    const sent = await sock.sendMessage(chatId, {
       image: { url: thumbnail },
-      caption:
-        `🎵 *${title}*\n` +
-        `🗣️ *Autor:* ${author}\n` +
-        `⏱️ *Duración:* ${duration}\n\n` +
-        `🎧 Enviando audio...`
+      caption: info
     }, { quoted: msg });
 
-    // Descarga y convierte a mp3 en temporal
-    const tmpFile = path.join(__dirname, 'tmp_' + Date.now() + '.mp3');
-    await new Promise((resolve, reject) => {
-      ffmpeg(ytdl(videoUrl, { filter: 'audioonly', quality: 'highestaudio' }))
-        .audioBitrate(128)
-        .format('mp3')
-        .save(tmpFile)
-        .on('end', resolve)
-        .on('error', reject);
-    });
-
-    // Envía el audio
-    await sock.sendMessage(chatId, {
-      audio: fs.readFileSync(tmpFile),
-      mimetype: 'audio/mp3',
-      ptt: false // Cambia a true si prefieres nota de voz
-    }, { quoted: msg });
-
-    // Borra el archivo temporal
-    fs.unlinkSync(tmpFile);
+    global.cachePlay10[sent.key.id] = {
+      videoUrl: videoUrl,
+      title: title,
+      tipo: 'youtube'
+    };
 
   } catch (e) {
-    console.error("❌ Error en play:", e);
+    console.error("❌ Error en play10:", e);
     await sock.sendMessage(chatId, {
-      text: `❌ Error al procesar el audio.`
+      text: `❌ Error al procesar el video.`
     }, { quoted: msg });
   }
 
   break;
 }
-
+        
 case 'play2': {
   const chatId = msg.key.remoteJid;
   const yts = require('yt-search');
