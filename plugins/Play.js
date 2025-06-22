@@ -19,7 +19,6 @@ function isUserBlocked(userId) {
 
 async function getDownloadUrl(videoUrl) {
   const apis = [{ url: 'https://api.vreden.my.id/api/ytmp3?url=', type: 'vreden' }];
-
   for (const api of apis) {
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       try {
@@ -42,7 +41,7 @@ async function getDownloadUrl(videoUrl) {
   return null;
 }
 
-async function sendAudioNormal(conn, chatId, audioUrl, videoTitle, quotedMsg) {
+async function sendAudioNormal(conn, chatId, audioUrl, quotedMsg) {
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
       await conn.sendMessage(
@@ -66,57 +65,69 @@ const handler = async (msg, { conn, args }) => {
   const sender = msg.key.participant || msg.key.remoteJid;
   const senderNum = sender.replace(/[^0-9]/g, "");
 
-  // ✅ Reacción al recibir el comando
+  // Reacción inicial al comando
   await conn.sendMessage(chatId, { react: { text: '🎶', key: msg.key } });
 
+  // Verifica si el usuario está bloqueado
   if (isUserBlocked(senderNum)) {
     return conn.sendMessage(chatId, {
       text: "🚫 Lo siento, estás en la lista de usuarios bloqueados."
     }, { quoted: msg });
   }
 
-  // ✅ Si no escriben el nombre de la canción
+  // Si no escribe nombre de canción
   if (!args || !args.length) {
-    return conn.sendMessage(chatId, {
-      text: "❗Uso correcto: *.play <nombre de la canción>*\n📌 Ejemplo: *.play Ojitos Lindos*"
-    }, { quoted: msg });
+    try {
+      const imageBuffer = (await axios.get("https://files.catbox.moe/ltq7ph.jpg", { responseType: "arraybuffer" })).data;
+      return conn.sendMessage(chatId, {
+        image: Buffer.from(imageBuffer),
+        caption: `*¿Cómo usar el comando .play?*\n\n📌 Ejemplo:\n.play Ojitos Lindos\n\n🎵 Descarga música en MP3 desde YouTube.\n\n© Barboza Bot™`
+      }, { quoted: msg });
+    } catch {
+      return conn.sendMessage(chatId, {
+        text: `❗ Uso correcto: *.play <nombre de la canción>*\n📌 Ejemplo: *.play Ojitos Lindos*`
+      }, { quoted: msg });
+    }
   }
 
-  const text = args.join(" ");
+  const query = args.join(" ").trim();
 
   try {
-    const searchResults = await yts(text.trim());
+    const searchResults = await yts(query);
     if (!searchResults?.videos?.length) throw new Error('No se encontraron resultados en YouTube.');
 
     const videoInfo = searchResults.videos[0];
-    const { title, timestamp: duration, views, ago, url: videoUrl } = videoInfo;
+    const { title, timestamp: duration, views, ago, url: videoUrl, image: thumbnail } = videoInfo;
 
-    let thumbnailBuffer = null;
+    let imageBuffer = null;
     try {
-      const response = await axios.get(videoInfo.image, { responseType: 'arraybuffer' });
-      thumbnailBuffer = Buffer.from(response.data, 'binary');
+      const response = await axios.get(thumbnail, { responseType: 'arraybuffer' });
+      imageBuffer = Buffer.from(response.data, 'binary');
     } catch {}
 
-    const description = `╭─⬣「 *Barboza-Ai* 」⬣
-│  ≡◦ 🎵 Título ∙ ${title}
-│  ≡◦ ⏱ Duración ∙ ${duration || 'Desconocida'}
-│  ≡◦ 👀 Vistas ∙ ${views.toLocaleString()}
-│  ≡◦ 📅 Publicado ∙ ${ago || 'Desconocido'}
-│  ≡◦ 🔗 URL ∙ ${videoUrl}
+    const caption = `╭─⬣「 *Barboza-Ai* 」⬣
+│  🎵 *Título:* ${title}
+│  ⏱ *Duración:* ${duration || 'Desconocida'}
+│  👁 *Vistas:* ${views.toLocaleString()}
+│  📅 *Publicado:* ${ago || 'Desconocido'}
+│  🔗 *URL:* ${videoUrl}
 ╰─⬣
-> © Powered By Barboza™`;
+
+🎧 Descargando audio...
+
+© Barboza™`;
 
     await conn.sendMessage(chatId, {
-      image: thumbnailBuffer,
-      caption: description
+      image: imageBuffer,
+      caption: caption
     }, { quoted: msg });
 
     const downloadData = await getDownloadUrl(videoUrl);
     if (!downloadData || !downloadData.url) {
-      throw new Error('No se pudo descargar la música desde ninguna API.');
+      throw new Error('No se pudo descargar la música.');
     }
 
-    await sendAudioNormal(conn, chatId, downloadData.url, downloadData.title || title, msg);
+    await sendAudioNormal(conn, chatId, downloadData.url, msg);
 
   } catch (error) {
     return conn.sendMessage(chatId, {
