@@ -77,18 +77,25 @@ const handler = async (msg, { conn, args }) => {
 
   // Si no escribe nombre de canción
   if (!args || !args.length) {
-    try {
-      const imageBuffer = (await axios.get("https://files.catbox.moe/ltq7ph.jpg", { responseType: "arraybuffer" })).data;
-      return conn.sendMessage(chatId, {
-        image: Buffer.from(imageBuffer),
-        caption: `*Uso del comando .play*\n\nEjemplo:\n.play Despacito\n\nEnvía música desde YouTube en formato MP3.`
-      }, { quoted: msg });
-    } catch {
-      return conn.sendMessage(chatId, {
-        text: `❗ Uso correcto: *.play <nombre de la canción>*\nEjemplo: *.play Despacito*`
-      }, { quoted: msg });
-    }
+  let imageBuffer = null;
+  try {
+    const response = await axios.get("https://files.catbox.moe/ltq7ph.jpg", { responseType: "arraybuffer" });
+    imageBuffer = Buffer.from(response.data);
+  } catch {
+    // Si falla, no pasa nada, simplemente se mostrará solo el texto
   }
+
+  return conn.sendMessage(chatId, {
+    ...(imageBuffer
+      ? {
+          image: imageBuffer,
+          caption: `*Uso del comando .play*\n\nEjemplo:\n.play Despacito\n\nEnvía música desde YouTube en formato MP3.`
+        }
+      : {
+          text: `🎵 *Uso del comando .play*\n\nEjemplo:\n.play Despacito\n\nEnvía música desde YouTube en formato MP3.`
+        }),
+  }, { quoted: msg });
+}
 
   const query = args.join(" ").trim();
 
