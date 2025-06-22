@@ -1,12 +1,12 @@
 const fetch = require('node-fetch');
 
-const handler = async (msg, { conn, args }) => {
+const handler = async (msg, { conn, args }) => { // <-- Aquí args ya está incluido
   const chatId = msg.key.remoteJid;
   const text = args.join(" ").trim();
 
   if (!text) {
     return conn.sendMessage(chatId, {
-      text: "🥞 Por favor, ingresa el nombre de una canción.\n\nEjemplo: .play Shakira - Waka Waka"
+      text: "🥞 Por favor, ingresa el nombre de una canción de Spotify.\n\nEjemplo: spotifyplay Shakira - Waka Waka"
     }, { quoted: msg });
   }
 
@@ -15,48 +15,18 @@ const handler = async (msg, { conn, args }) => {
   });
 
   try {
-    // Buscar el video en YouTube
-    const search = await fetch(`https://api.zeks.me/api/searchyoutube?q=${encodeURIComponent(text)}&apikey=sonu8280`);
-    const searchJson = await search.json();
-    if (!searchJson.result || !searchJson.result[0]) {
-      return conn.sendMessage(chatId, {
-        text: "❌ No se encontró la canción.",
-        quoted: msg
-      });
-    }
-    const info = searchJson.result[0];
-    const title = info.title;
-    const artist = info.channel;
-    const duration = info.duration;
-    const views = info.views;
-    const thumb = info.thumbnail;
-    const url = info.url;
+    const res = await fetch(`https://api.nekorinn.my.id/downloader/spotifyplay?q=${encodeURIComponent(text)}`);
+    const json = await res.json();
 
-    // Descargar el audio usando zeks.me
-    const dl = await fetch(`https://api.zeks.me/api/ytmp3?url=${encodeURIComponent(url)}&apikey=sonu8280`);
-    const dlJson = await dl.json();
-    if (!dlJson || !dlJson.result || !dlJson.result.audio_url) {
+    if (!json.result || !json.result.downloadUrl) {
       return conn.sendMessage(chatId, {
-        text: "❌ No se pudo descargar el audio.",
+        text: "❌ No se encontró la canción o hubo un error con la API.",
         quoted: msg
       });
     }
 
-    // Enviar información con imagen
     await conn.sendMessage(chatId, {
-      image: { url: thumb },
-      caption:
-        `🎵 *${title}*\n` +
-        `🗣️ *Artista:* ${artist}\n` +
-        `⏱️ *Duración:* ${duration}\n` +
-        `👁️ *Vistas:* ${views}\n\n` +
-        `🔗 ${url}\n\n` +
-        `🎧 Enviando audio...`
-    }, { quoted: msg });
-
-    // Enviar el audio
-    await conn.sendMessage(chatId, {
-      audio: { url: dlJson.result.audio_url },
+      audio: { url: json.result.downloadUrl },
       mimetype: 'audio/mpeg'
     }, { quoted: msg });
 
@@ -65,15 +35,15 @@ const handler = async (msg, { conn, args }) => {
     });
 
   } catch (err) {
-    console.error("❌ Error en play:", err);
+    console.error("❌ Error al descargar Spotify:", err);
     await conn.sendMessage(chatId, {
-      text: "❌ Ocurrió un error al procesar la música.",
+      text: "❌ Ocurrió un error al intentar obtener el audio.",
       quoted: msg
     });
   }
 };
 
-handler.command = ["play", "ytplay", "ytmp3", "music"];
+handler.command = ["spotifyplay", "music", "spotify"];
 handler.tags = ["descargas"];
-handler.help = ["play <nombre de la canción>", "ytplay <nombre>", "ytmp3 <nombre>", "music <nombre>"];
+handler.help = ["spotifyplay <nombre de la canción>", "music <nombre>", "spotify <nombre>"];
 module.exports = handler;
