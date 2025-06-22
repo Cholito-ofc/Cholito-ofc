@@ -21,4 +21,4 @@ handler.tags = ['econ'];
 handler.command = /^afk$/i;
 handler.money = 95
 handler.register = true
-module. exports handler;
+module.exports handler;
