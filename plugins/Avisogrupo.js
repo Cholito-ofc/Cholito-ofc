@@ -56,9 +56,9 @@ const handler = async (msg, { conn, args }) => {
     // Enviar aviso personalizado y mencionando a todos (incluyendo el que manda)
     await conn.sendMessage(grupo.id, {
       text:
-        `╔═══════════════════╗\n` +
+        `╭─────•◈•─────╮\n` +
         `      📢 *A V I S O  D E L  B O T* 📢\n` +
-        `╚═══════════════════╝\n\n` +
+        `╰─────•◈•─────╯\n\n` +
         `👤 *Enviado por:* ${senderMention}\n` +
         `🏷️ *Para todos los miembros del grupo*\n\n` +
         `${textoAviso}\n\n` +
