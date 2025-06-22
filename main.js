@@ -966,7 +966,7 @@ case 'tourl': {
     break;
               }
 
-        
+case 'fix':
 case 'carga': {
   if (!isOwner) {
     await sock.sendMessage(msg.key.remoteJid, {
