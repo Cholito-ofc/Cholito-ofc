@@ -1,23 +1,23 @@
-const handler = async (m, {text}) => {
-const user = global.db.data.users[m.sender];
-user.afk = + new Date;
-user.afkReason = text;
-conn.fakeReply(m.chat, `『 ＡＦＫ 』
+const handler = async (m, { conn, args }) => {
+  const text = args.join(' ');
+  const user = global.db.data.users[m.sender];
+  user.afk = +new Date;
+  user.afkReason = text;
 
-> ᴇʟ ᴜsᴜᴀʀɪᴏ ${conn.getName(m.sender)} ᴇsᴛᴀ ɪɴᴀᴄᴛɪᴠᴏ. 
+  // Puedes usar conn.sendMessage en vez de fakeReply si no tienes fakeReply implementado
+  await conn.sendMessage(m.chat, {
+    text: `『 ＡＦＫ 』
 
-\`💤 ＮＯ ＬＯＳ ＥＴＩＱＵＥＴＥ 💤\`
-*☣️ ᴍᴏᴛɪᴠᴏs :* ${text ? ': ' + text : 'paja'}`, '0@s.whatsapp.net', `💤 NO MOLESTAR 💤`, 'status@broadcast', null, fake)
-/*m.reply(`『 ＡＦＫ 』
-
-> ᴇsᴛᴇ ᴜsᴜᴀʀɪᴏ : ${conn.getName(m.sender)} ᴇsᴛᴀ ɪɴᴀᴄᴛɪᴠᴏ. 
+> ᴇʟ ᴜsᴜᴀʀɪᴏ ${await conn.getName(m.sender)} ᴇsᴛᴀ ɪɴᴀᴄᴛɪᴠᴏ. 
 
 \`💤 ＮＯ ＬＯＳ ＥＴＩＱＵＥＴＥ 💤\`
-*☣️ ᴍᴏᴛɪᴠᴏs :* ${text ? ': ' + text : 'paja'}`);*/
+*☣️ ᴍᴏᴛɪᴠᴏs :* ${text ? ': ' + text : 'paja'}`
+  }, { quoted: m });
 };
-handler.help = ['afk [alasan]'];
+
+handler.help = ['afk [motivo]'];
 handler.tags = ['econ'];
 handler.command = /^afk$/i;
-handler.money = 95
-handler.register = true
+handler.money = 95;
+handler.register = true;
 module.exports = handler;
