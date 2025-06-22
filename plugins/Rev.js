@@ -31,41 +31,44 @@ const handler = async (msg, { conn, args }) => {
   if (!fs.existsSync(logPath)) {
     return conn.sendMessage(chatId, {
       text:
-        "╔═════════════════════╗\n" +
-        "     🟢  *SIN ERRORES*  🟢\n" +
-        "╚═════════════════════╝\n\n" +
-        "✅ El bot está funcionando correctamente.\n" +
-        "_No se han registrado errores hasta ahora._",
+        "━━━━━━━━━━━━━━━━━━━━\n" +
+        "   🟢  𝑺𝑰𝑵 𝑬𝑹𝑹𝑶𝑹𝑬𝑺  🟢\n" +
+        "━━━━━━━━━━━━━━━━━━━━\n\n" +
+        "✨ El bot está funcionando perfectamente\n" +
+        "No se han detectado errores recientes.\n",
       quoted: msg
     });
   }
 
-  // Lee los últimos 30 errores (o menos)
+  // Lee los últimos 20 errores (o menos)
   const lines = fs.readFileSync(logPath, "utf-8")
     .trim()
     .split("\n")
-    .slice(-30); // Últimas 30 líneas
+    .slice(-20); // Últimas 20 líneas
 
   let out = "";
   if (lines.length) {
     out =
-      "╔════════════════════════╗\n" +
-      "   ⚠️ *ERRORES DEL BOT* ⚠️\n" +
-      "╚════════════════════════╝\n\n" +
-      `*Cantidad de errores recientes:* ${lines.length}\n\n` +
-      lines.map((l, i) => `*${i + 1}.* ${l}`).join("\n") +
-      "\n\n⏳ *Revisa y soluciona estos problemas para un mejor funcionamiento.*";
+      "╔══════════════════════════════╗\n" +
+      "   ⚠️  𝙀𝙍𝙍𝙊𝙍𝙀𝙎 𝙍𝙀𝘾𝙄𝙀𝙉𝙏𝙀𝙎  ⚠️\n" +
+      "╚══════════════════════════════╝\n\n" +
+      "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n" +
+      "┃ N°  |      Mensaje de Error      \n" +
+      "┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n" +
+      lines.map((l, i) => `┃ ${String(i+1).padStart(2,"0")} | ${l}`).join("\n") +
+      "\n┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n\n" +
+      "🔎 *Revisa y corrige estos errores para un mejor funcionamiento.*";
   } else {
     out =
-      "╔══════════════════════╗\n" +
-      "      🟢  *SIN ERRORES*  🟢\n" +
-      "╚══════════════════════╝\n\n" +
-      "✅ El bot está funcionando correctamente.\n" +
-      "_No se han registrado errores hasta ahora._";
+      "━━━━━━━━━━━━━━━━━━━━\n" +
+      "   🟢  𝑺𝑰𝑵 𝑬𝑹𝑹𝑶𝑹𝑬𝑺  🟢\n" +
+      "━━━━━━━━━━━━━━━━━━━━\n\n" +
+      "✨ El bot está funcionando perfectamente\n" +
+      "No se han detectado errores recientes.\n";
   }
 
   // WhatsApp tiene límite, recorta si es necesario
-  const maxChars = 4096; // Ajusta si necesitas
+  const maxChars = 4096;
   return conn.sendMessage(chatId, {
     text: out.length > maxChars ? out.slice(-maxChars) : out,
     quoted: msg
