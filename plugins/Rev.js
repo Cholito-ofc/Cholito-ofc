@@ -31,9 +31,9 @@ const handler = async (msg, { conn, args }) => {
   if (!fs.existsSync(logPath)) {
     return conn.sendMessage(chatId, {
       text:
-        "╔═══════════════════════╗\n" +
-        "   🟢  *SIN ERRORES*  🟢\n" +
-        "╚═══════════════════════╝\n\n" +
+        "╔═════════════════════╗\n" +
+        "     🟢  *SIN ERRORES*  🟢\n" +
+        "╚═════════════════════╝\n\n" +
         "✅ El bot está funcionando correctamente.\n" +
         "_No se han registrado errores hasta ahora._",
       quoted: msg
@@ -57,9 +57,9 @@ const handler = async (msg, { conn, args }) => {
       "\n\n⏳ *Revisa y soluciona estos problemas para un mejor funcionamiento.*";
   } else {
     out =
-      "╔════════════════════════╗\n" +
-      "    🟢  *SIN ERRORES*  🟢\n" +
-      "╚════════════════════════╝\n\n" +
+      "╔══════════════════════╗\n" +
+      "      🟢  *SIN ERRORES*  🟢\n" +
+      "╚══════════════════════╝\n\n" +
       "✅ El bot está funcionando correctamente.\n" +
       "_No se han registrado errores hasta ahora._";
   }
