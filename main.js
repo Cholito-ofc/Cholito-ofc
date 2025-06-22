@@ -4181,16 +4181,12 @@ case 'daradmins': {
 `➤ \`INFORMATIVO\` ❕
 
 \`\`\`✅ ${targetName.toUpperCase()} ASCENDIDO
-COMO ADMIN DE ${groupName.toUpperCase()}
+COMO ADMIN DE : ${groupName.toUpperCase()}
 
 » OPERACIÓN POR:
 » ${senderName}\`\`\``,
       mentions: [targetId, senderId]
     }, { quoted: msg });
-
-    await sock.sendMessage(targetId, {
-      text: `¡Felicitaciones! Ahora eres ADMINISTRADOR de ${groupName} 🎉`
-    });
 
     await sock.sendMessage(chatId, { react: { text: "✅", key: msg.key } });
   } catch (error) {
@@ -4536,16 +4532,12 @@ case 'quitaradmins': {
 `➤ \`INFORMATIVO\` ❕
 
 \`\`\`🗝️ ${targetName.toUpperCase()} DESCENDIDO
-YA NO ES ADMIN DE ${groupName.toUpperCase()}
+YA NO ES ADMIN DE : ${groupName.toUpperCase()}
 
 » OPERACIÓN POR:
 » ${senderName}\`\`\``,
       mentions: [targetId, senderId]
     }, { quoted: msg });
-
-    await sock.sendMessage(targetId, {
-      text: `Se te han removido los derechos de ADMINISTRADOR en ${groupName}.`
-    });
 
     await sock.sendMessage(chatId, { react: { text: "✅", key: msg.key } });
   } catch (error) {
