@@ -994,10 +994,10 @@ case 'carga': {
     const output = stdout || stderr;
     if (output.includes("Already up to date")) {
       sock.sendMessage(msg.key.remoteJid, {
-        text: `✅ Actualización completada: Ya está al día.`
+        text: `*[⚙️] 𝖠𝖼𝗍𝗎𝖺𝗅𝗂𝗓𝖺𝖼𝗂𝗈́𝗇 𝖼𝗈𝗆𝗉𝗅𝖾𝗍𝖺𝖽𝖺: 𝖸𝖺 𝖾𝗌𝗍𝖺́ 𝖺𝗅 𝖽𝗂́𝖺. ⚡*`
       }, { quoted: msg });
     } else {
-      const message = `*[🛠️] 𝙲𝚘𝚖𝚙𝚕𝚎𝚝𝚊𝚗𝚍𝚘 𝚊𝚌𝚝𝚞𝚊𝚕𝚒𝚣𝚊𝚌𝚒𝚘́𝚗...*:\n\n${output}\n\n[⚡] *𝘙𝘦𝘪𝘯𝘪𝘤𝘪𝘢𝘯𝘥𝘰 𝘦𝘭 𝘴𝘦𝘳𝘷𝘪𝘥𝘰𝘳 𝘦𝘴𝘱𝘦𝘳𝘦..*`;
+      const message = `*[🛠️] ᴄᴏᴍᴘʟᴇᴛᴀɴᴅᴏ ᴀᴄᴛᴜᴀʟɪᴢᴀᴄɪᴏ́ɴ...*\n\n${output}\n\n[⚡] *𝘙𝘦𝘪𝘯𝘪𝘤𝘪𝘢𝘯𝘥𝘰 𝘦𝘭 𝘴𝘦𝘳𝘷𝘪𝘥𝘰𝘳 𝘦𝘴𝘱𝘦𝘳𝘦..*`;
       
       // Enviar reacción de reinicio
       sock.sendMessage(msg.key.remoteJid, {
