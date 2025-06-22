@@ -4019,7 +4019,7 @@ case 'menugrupo': {
 ┃➣ ${global.prefix}𝘥𝘦𝘮𝘰𝘵𝘦
 ┃➣ ${global.prefix}𝘵𝘰𝘥𝘰𝘴
 ┃➣ ${global.prefix}𝘮𝘰𝘥𝘰𝘢𝘥𝘮𝘪𝘯𝘴 𝘰𝘯/𝘰𝘧𝘧
-┃➣ ${𝘨𝘭𝘰𝘣𝘢𝘭.𝘱𝘳𝘦𝘧𝘪𝘹}𝘵𝘰𝘵𝘢𝘭𝘮𝘦𝘯𝘴𝘢𝘫𝘦
+┃➣ ${global.prefix}𝘵𝘰𝘵𝘢𝘭𝘮𝘦𝘯𝘴𝘢𝘫𝘦
 ┃➣ ${global.prefix}𝘧𝘢𝘯𝘵𝘢𝘴𝘮𝘢𝘴
 ┃➣ ${global.prefix}𝘧𝘢𝘯𝘬𝘪𝘤𝘬
 ┃➣ ${global.prefix}𝘰𝘬𝘧𝘢𝘯
@@ -4031,8 +4031,8 @@ case 'menugrupo': {
 ┃➣ ${global.prefix}𝘶𝘯𝘣𝘢𝘯
 ┃➣ ${global.prefix}𝘢𝘣𝘳𝘪𝘳 / 𝘢𝘶𝘵𝘰𝘮𝘢́𝘵𝘪𝘤𝘢𝘮𝘦𝘯𝘵𝘦
 ┃➣ ${global.prefix}𝘤𝘦𝘳𝘳𝘢𝘳 / 𝘢𝘶𝘵𝘰𝘮𝘢́𝘵𝘪𝘤𝘢𝘮𝘦𝘯𝘵𝘦
-┃➣ ${global.prefix}𝘢𝘣𝘳𝘪𝘳 𝘨𝘳𝘶𝘱𝘰
-┃➣ ${global.prefix} 𝘤𝘦𝘳𝘳𝘢𝘳 𝘨𝘳𝘶𝘱𝘰
+┃➣ ${global.prefix}𝘢𝘣𝘳𝘪𝘳𝘨𝘳𝘶𝘱𝘰
+┃➣ ${global.prefix}𝘤𝘦𝘳𝘳𝘢𝘳𝘨𝘳𝘶𝘱𝘰
 ┗━━━━━━━✦━━━━━━━━☪︎
 
 ┏━ [ 𝗦𝗘𝗚𝗨𝗥𝗜𝗗𝗔𝗗 🔐 ]━☪︎
@@ -4040,7 +4040,7 @@ case 'menugrupo': {
 ┃➣ ${global.prefix}𝘢𝘯𝘵𝘪𝘢𝘳𝘢𝘣𝘦 𝘰𝘯/𝘰𝘧𝘧
 ┃➣ ${global.prefix}𝘢𝘯𝘵𝘪𝘴 𝘰𝘯/𝘰𝘧𝘧
 ┃➣ ${global.prefix}𝘢𝘯𝘵𝘪𝘥𝘦𝘭𝘦𝘵𝘦 𝘰𝘯/𝘰𝘧𝘧
-┃➣ ${𝘨𝘭𝘰𝘣𝘢𝘭.𝘱𝘳𝘦𝘧𝘪𝘹}𝘬𝘪𝘤𝘬 
+┃➣ ${global.prefix}𝘬𝘪𝘤𝘬 
 ┃➣ ${global.prefix}𝘢𝘥𝘥
 ┗━━━━━━━✦━━━━━━━━☪︎
 
