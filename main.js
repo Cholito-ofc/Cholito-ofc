@@ -3991,63 +3991,64 @@ case 'menugrupo': {
     });
 
     const chatId = msg.key.remoteJid;
-    const captionText = `╭─❍ 𝐊𝐈𝐋𝐋𝐔𝐀 𝟐.𝟎 𝐁𝐎𝐓 ❍─╮
-│ 🎭 𝙈𝙀𝙉𝙐́ 𝘿𝙀 𝙂𝙍𝙐𝙋𝙊 🎭
-╰───────────────╯
+    const captionText = `┏━━━━━━✦━━━━━━━☪︎
+┃ *𝙺𝙸𝙻𝙻𝚄𝙰•𝙱𝙾𝚃 𝙿𝚁𝙾 🍃*
+┃ *𝙼𝙴𝙽𝚄́ 𝙿𝙰𝚁𝙰 𝙶𝚁𝚄𝙿𝙾 ⚡*
+┗━━━━━━✦━━━━━━━☪︎
 
-🛠 𝐂𝐎𝐍𝐅𝐈𝐆𝐔𝐑𝐀𝐂𝐈Ó𝐍
-⤷ ${global.prefix}setinfo  
-⤷ ${global.prefix}infogrupo  
-⤷ ${global.prefix}setname  
-⤷ ${global.prefix}delwelcome  
-⤷ ${global.prefix}setwelcome  
-⤷ ${global.prefix}setbye 
-⤷ ${global.prefix}delbye
-⤷ ${global.prefix}antiporno on o off  
-⤷ ${global.prefix}antidelete on o off  
-⤷ ${global.prefix}setfoto  
-⤷ ${global.prefix}setreglas  
-⤷ ${global.prefix}reglas  
-⤷ ${global.prefix}welcome on/off  
-⤷ ${global.prefix}despedidas on/off  
-⤷ ${global.prefix}modocaliente on/off
+┏━ [ 𝗖𝗢𝗡𝗙𝗜𝗚𝗨𝗥𝗔𝗖𝗜𝗢𝗡 🛠️ ]━☪︎
+┃➣ ${global.prefix}𝘴𝘦𝘵𝘪𝘯𝘧𝘰
+┃➣ ${global.prefix}𝘪𝘯𝘧𝘰𝘨𝘳𝘶𝘱𝘰  
+┃➣ ${global.prefix}𝘴𝘦𝘵𝘯𝘢𝘮𝘦 
+┃➣ ${global.prefix}𝘴𝘦𝘵𝘸𝘦𝘭𝘤𝘰𝘮𝘦  
+┃➣ ${global.prefix}𝘥𝘦𝘭𝘸𝘦𝘭𝘤𝘰𝘮𝘦  
+┃➣ ${global.prefix}𝘴𝘦𝘵𝘣𝘺𝘦
+┃➣ ${global.prefix}𝘥𝘦𝘭𝘣𝘺𝘦
+┃➣ ${global.prefix}𝘢𝘯𝘵𝘪𝘱𝘰𝘳𝘯𝘰 𝘰𝘯/𝘰𝘧𝘧
+┃➣ ${global.prefix}𝘢𝘯𝘵𝘪𝘥𝘦𝘭𝘦𝘵𝘦 𝘰𝘯/𝘰𝘧𝘧
+┃➣ ${global.prefix}𝘴𝘦𝘵𝘧𝘰𝘵𝘰 
+┃➣ ${global.prefix}𝘴𝘦𝘵𝘳𝘦𝘨𝘭𝘢𝘢  
+┃➣ ${global.prefix}𝘳𝘦𝘨𝘭𝘢𝘴  
+┃➣ ${global.prefix}𝘸𝘦𝘭𝘤𝘰𝘮𝘦 𝘰𝘯/𝘰𝘧𝘧 
+┃➣ ${global.prefix}𝘥𝘦𝘴𝘯̃𝘦𝘥𝘪𝘥𝘢𝘴 𝘰𝘯/𝘰𝘧𝘧 
+┃➣ ${global.prefix}𝘮𝘰𝘥𝘰𝘤𝘢𝘭𝘪𝘦𝘯𝘵𝘦 𝘰𝘯/𝘰𝘧𝘧
+┗━━━━━━━✦━━━━━━━━☪︎
 
-🔱 𝐀𝐃𝐌𝐈𝐍𝐈𝐒𝐓𝐑𝐀𝐂𝐈Ó𝐍
-⤷ ${global.prefix}daradmins  
-⤷ ${global.prefix}quitaradmins  
-⤷ ${global.prefix}tag  
-⤷ ${global.prefix}tagall  
-⤷ ${global.prefix}modoadmins on o off  
-⤷ ${global.prefix}invocar  
-⤷ ${global.prefix}todos  
-⤷ ${global.prefix}totalmensaje  
-⤷ ${global.prefix}fantasmas  
-⤷ ${global.prefix}fankick  
-⤷ ${global.prefix}okfan  
-⤷ ${global.prefix}delete  
-⤷ ${global.prefix}damelink  
-⤷ ${global.prefix}mute  
-⤷ ${global.prefix}unmute  
-⤷ ${global.prefix}ban  
-⤷ ${global.prefix}unban  
-⤷ ${global.prefix}abrir/ automaticamente  
-⤷ ${global.prefix}cerrar/ automaticamente  
-⤷ ${global.prefix}abrirgrupo  
-⤷ ${global.prefix}cerrargrupo
+┏━ [ 𝗔𝗗𝗠𝗜𝗡𝗜𝗦𝗧𝗥𝗔𝗖𝗜𝗢́𝗡 👑 ]━☪︎
+┃➣ ${global.prefix}𝘱𝘳𝘰𝘮𝘰𝘵𝘦
+┃➣ ${global.prefix}𝘥𝘦𝘮𝘰𝘵𝘦
+┃➣ ${global.prefix}𝘵𝘰𝘥𝘰𝘴
+┃➣ ${global.prefix}𝘮𝘰𝘥𝘰𝘢𝘥𝘮𝘪𝘯𝘴 𝘰𝘯/𝘰𝘧𝘧
+┃➣ ${𝘨𝘭𝘰𝘣𝘢𝘭.𝘱𝘳𝘦𝘧𝘪𝘹}𝘵𝘰𝘵𝘢𝘭𝘮𝘦𝘯𝘴𝘢𝘫𝘦
+┃➣ ${global.prefix}𝘧𝘢𝘯𝘵𝘢𝘴𝘮𝘢𝘴
+┃➣ ${global.prefix}𝘧𝘢𝘯𝘬𝘪𝘤𝘬
+┃➣ ${global.prefix}𝘰𝘬𝘧𝘢𝘯
+┃➣ ${global.prefix}𝘥𝘦𝘭
+┃➣ ${global.prefix}𝘭𝘪𝘯𝘬
+┃➣ ${global.prefix}𝘮𝘶𝘵𝘦
+┃➣ ${global.prefix}𝘶𝘯𝘮𝘶𝘵𝘦
+┃➣ ${global.prefix}𝘣𝘢𝘯
+┃➣ ${global.prefix}𝘶𝘯𝘣𝘢𝘯
+┃➣ ${global.prefix}𝘢𝘣𝘳𝘪𝘳 / 𝘢𝘶𝘵𝘰𝘮𝘢́𝘵𝘪𝘤𝘢𝘮𝘦𝘯𝘵𝘦
+┃➣ ${global.prefix}𝘤𝘦𝘳𝘳𝘢𝘳 / 𝘢𝘶𝘵𝘰𝘮𝘢́𝘵𝘪𝘤𝘢𝘮𝘦𝘯𝘵𝘦
+┃➣ ${global.prefix}𝘢𝘣𝘳𝘪𝘳 𝘨𝘳𝘶𝘱𝘰
+┃➣ ${global.prefix} 𝘤𝘦𝘳𝘳𝘢𝘳 𝘨𝘳𝘶𝘱𝘰
+┗━━━━━━━✦━━━━━━━━☪︎
 
-🛡 𝐒𝐄𝐆𝐔𝐑𝐈𝐃𝐀𝐃
-⤷ ${global.prefix}antilink on/off  
-⤷ ${global.prefix}antiarabe on/off  
-⤷ ${global.prefix}antis on/off  
-⤷ ${global.prefix}antidelete on/off  
-⤷ ${global.prefix}kick  
-⤷ ${global.prefix}add
+┏━ [ 𝗦𝗘𝗚𝗨𝗥𝗜𝗗𝗔𝗗 🔐 ]━☪︎
+┃➣ ${global.prefix}𝘢𝘯𝘵𝘪𝘭𝘪𝘯𝘬 𝘰𝘯/𝘰𝘧𝘧
+┃➣ ${global.prefix}𝘢𝘯𝘵𝘪𝘢𝘳𝘢𝘣𝘦 𝘰𝘯/𝘰𝘧𝘧
+┃➣ ${global.prefix}𝘢𝘯𝘵𝘪𝘴 𝘰𝘯/𝘰𝘧𝘧
+┃➣ ${global.prefix}𝘢𝘯𝘵𝘪𝘥𝘦𝘭𝘦𝘵𝘦 𝘰𝘯/𝘰𝘧𝘧
+┃➣ ${𝘨𝘭𝘰𝘣𝘢𝘭.𝘱𝘳𝘦𝘧𝘪𝘹}𝘬𝘪𝘤𝘬 
+┃➣ ${global.prefix}𝘢𝘥𝘥
+┗━━━━━━━✦━━━━━━━━☪︎
 
 📌 𝐌Á𝐒 𝐂𝐎𝐌𝐀𝐍𝐃𝐎𝐒 𝐏𝐑Ó𝐗𝐈𝐌𝐀𝐌𝐄𝐍𝐓𝐄...
 
 ╭─❍ 𝐊𝐈𝐋𝐋𝐔𝐀-𝐁𝐎𝐓 𝟐.𝟎 ❍─╮  
-│ 𝙐𝙣 𝙗𝙤𝙩 𝙖𝙙𝙖𝙥𝙩𝙖𝙙𝙤 𝙥𝙖𝙧𝙖 𝙩𝙪 𝙜𝙧𝙪𝙥𝙤.
-╰───────────────────╯`;
+│ 𝗕𝗼𝘁 𝗮𝗱𝗮𝗽𝘁𝗮𝗱𝗼 𝗽𝗮𝗿𝗮 𝘁𝘂́ 𝗴𝗿𝘂𝗽𝗼.
+╰─────────────────╯`;
 
     await sock.sendMessage2(
       chatId,
