@@ -76,11 +76,11 @@ const handler = async (msg, { conn, args }) => {
   }
 
   // Si no se escribe el nombre de la canción
-  if (!args || !args.length) {
-    return conn.sendMessage(chatId, {
-      text: `🎧 *Uso correcto del comando .play*\n\n📌 Ejemplo:\n.play Despacito\n\nEste comando busca una canción en YouTube y te la envía en formato MP3.`,
-    }, { quoted: msg });
-  }
+  if (!args || !args.join(" ").trim()) {
+  return conn.sendMessage(chatId, {
+    text: `🎧 *Uso correcto del comando .play*\n\n📌 Ejemplo:\n.play Despacito\n\nEste comando busca una canción en YouTube y te la envía en formato MP3.`,
+  }, { quoted: msg });
+}
 
   const query = args.join(" ").trim();
 
