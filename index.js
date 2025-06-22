@@ -1449,7 +1449,7 @@ try {
             try {
                 const data = JSON.parse(fs.readFileSync(restarterFile, "utf-8"));
                 if (data.chatId) {
-                    await sock.sendMessage(data.chatId, { text: "✅ *El bot está en línea nuevamente tras el reinicio.* 🚀" });
+                    await sock.sendMessage(data.chatId, { text: "[🛠️] 𝘌𝘭 𝘣𝘰𝘵 𝘦𝘴𝘵𝘢 𝘦𝘯 𝘭𝘪́𝘯𝘦𝘢 𝘵𝘳𝘢𝘴 𝘦𝘭 𝘳𝘦𝘪𝘯𝘪𝘤𝘪𝘰🚀*" });
                     console.log(chalk.green("📢 Notificación enviada al chat del reinicio."));
                     fs.unlinkSync(restarterFile); // 🔄 Eliminar el archivo después de enviar el mensaje
                 }
