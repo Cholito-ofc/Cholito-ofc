@@ -82,7 +82,7 @@ handler.command = ["pruebagrupo"];
 module.exports = handler;
 
 // MIDDLEWARE: BLOQUEO TOTAL SI NO HAY PRUEBA ACTIVA (SALVO OWNER Y ACTIVADOR)
-handler.before = async (msg, { conn }) => {
+handler.before = async (msg, { conn, isCmd }) => {
   if (!msg.key.remoteJid.endsWith('@g.us')) return;
 
   const chatId = msg.key.remoteJid;
@@ -91,28 +91,16 @@ handler.before = async (msg, { conn }) => {
   const isOwner = global.owner.some(([id]) => id === senderNum);
 
   // El owner siempre puede usar el bot:
-  if (isOwner) return;
+  if (isOwner) return false;
 
-  // Detecta el texto de comando de forma robusta
-  let text = "";
-  if (msg.message?.conversation) text = msg.message.conversation;
-  else if (msg.message?.extendedTextMessage?.text) text = msg.message.extendedTextMessage.text;
-  else if (msg.message?.imageMessage?.caption) text = msg.message.imageMessage.caption;
-  else if (msg.message?.videoMessage?.caption) text = msg.message.videoMessage.caption;
-  else if (msg.message?.buttonsResponseMessage?.selectedButtonId) text = msg.message.buttonsResponseMessage.selectedButtonId;
-  else if (msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId) text = msg.message.listResponseMessage.singleSelectReply.selectedRowId;
-  else text = "";
-
-  text = text.trim().toLowerCase();
-
-  // Permite SIEMPRE el comando pruebagrupo sin importar el prefijo, espacios o mayúsculas
-  if (text.replace(/^\W+/g, '').startsWith('pruebagrupo')) return;
+  // Permitir siempre comandos
+  if (isCmd) return false;
 
   // Permitir TODO si hay prueba activa:
   let pruebas = cargarPruebas();
   const prueba = pruebas[chatId];
-  if (prueba && Date.now() <= prueba.fin) return; // Si hay prueba activa, NO bloquees nada.
+  if (prueba && Date.now() <= prueba.fin) return false; // Si hay prueba activa, NO bloquees nada.
 
-  // Si NO hay prueba activa, bloquea a todos menos owner y comando.
-  return !1; // IGNORA TOTALMENTE LOS MENSAJES
+  // Si NO hay prueba activa, bloquea a todos menos owner y comandos.
+  return true; // Bloquea el mensaje (no responde)
 };
