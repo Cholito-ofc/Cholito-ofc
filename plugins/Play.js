@@ -15,18 +15,16 @@ const handler = async (msg, { conn, args }) => {
   });
 
   try {
-    // Buscar la canción en YouTube
-    const yt = await fetch(`https://api.akuari.my.id/search/ytsearch?query=${encodeURIComponent(text)}`);
-    const ytJson = await yt.json();
-
-    if (!ytJson.result || !ytJson.result[0]) {
+    // Buscar el video en YouTube
+    const search = await fetch(`https://api.zeks.me/api/searchyoutube?q=${encodeURIComponent(text)}&apikey=sonu8280`);
+    const searchJson = await search.json();
+    if (!searchJson.result || !searchJson.result[0]) {
       return conn.sendMessage(chatId, {
         text: "❌ No se encontró la canción.",
         quoted: msg
       });
     }
-
-    const info = ytJson.result[0];
+    const info = searchJson.result[0];
     const title = info.title;
     const artist = info.channel;
     const duration = info.duration;
@@ -34,11 +32,10 @@ const handler = async (msg, { conn, args }) => {
     const thumb = info.thumbnail;
     const url = info.url;
 
-    // Descargar el audio
-    const dl = await fetch(`https://api.akuari.my.id/downloader/yta?link=${encodeURIComponent(url)}`);
+    // Descargar el audio usando zeks.me
+    const dl = await fetch(`https://api.zeks.me/api/ytmp3?url=${encodeURIComponent(url)}&apikey=sonu8280`);
     const dlJson = await dl.json();
-
-    if (!dlJson || !dlJson.mp3 || !dlJson.mp3.url) {
+    if (!dlJson || !dlJson.result || !dlJson.result.audio_url) {
       return conn.sendMessage(chatId, {
         text: "❌ No se pudo descargar el audio.",
         quoted: msg
@@ -59,7 +56,7 @@ const handler = async (msg, { conn, args }) => {
 
     // Enviar el audio
     await conn.sendMessage(chatId, {
-      audio: { url: dlJson.mp3.url },
+      audio: { url: dlJson.result.audio_url },
       mimetype: 'audio/mpeg'
     }, { quoted: msg });
 
