@@ -4122,6 +4122,7 @@ case 'setinfo': {
 }
         
 case 'daradmin':
+case 'promote':
 case 'daradmins': {
   try {
     const chatId = msg.key.remoteJid;
@@ -4132,7 +4133,7 @@ case 'daradmins': {
     }
     // Enviar reacción inicial
     await sock.sendMessage(chatId, { react: { text: "🔑", key: msg.key } });
-    
+
     // Obtener metadata del grupo y verificar permisos del emisor
     const groupMetadata = await sock.groupMetadata(chatId);
     const senderId = msg.key.participant || msg.key.remoteJid;
@@ -4142,14 +4143,36 @@ case 'daradmins': {
       await sock.sendMessage(chatId, { text: "⚠️ Solo los administradores o el propietario pueden otorgar derechos de admin." }, { quoted: msg });
       return;
     }
-    
+
     // Obtener el usuario objetivo (por reply o mención)
-    let targetId = msg.message?.extendedTextMessage?.contextInfo?.participant || (msg.mentionedJid && msg.mentionedJid[0]);
+    let targetId = null;
+
+    // 1. Si es respuesta a un mensaje
+    if (msg.message?.extendedTextMessage?.contextInfo?.participant) {
+      targetId = msg.message.extendedTextMessage.contextInfo.participant;
+    } 
+    // 2. Si hay menciones
+    else if (
+      msg.message?.extendedTextMessage?.contextInfo?.mentionedJid &&
+      msg.message.extendedTextMessage.contextInfo.mentionedJid.length > 0
+    ) {
+      targetId = msg.message.extendedTextMessage.contextInfo.mentionedJid[0];
+    }
+    // 3. Si hay menciones directas (algunos tipos de mensajes)
+    else if (
+      msg.message?.conversation &&
+      msg.mentionedJid &&
+      msg.mentionedJid.length > 0
+    ) {
+      targetId = msg.mentionedJid[0];
+    }
+
+    // Si no encontró un targetId válido
     if (!targetId) {
       await sock.sendMessage(chatId, { text: "⚠️ Debes responder a un mensaje o mencionar a un usuario para promoverlo." }, { quoted: msg });
       return;
     }
-    
+
     // Promover al usuario a admin
     await sock.groupParticipantsUpdate(chatId, [targetId], "promote");
     await sock.sendMessage(
@@ -4165,7 +4188,7 @@ case 'daradmins': {
   }
   break;
 }
-
+   
 // Comando para quitar derechos de admin (quitaradmin / quitaradmins)
 
 case 'damelink': {
