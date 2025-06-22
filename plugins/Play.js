@@ -105,7 +105,7 @@ const handler = async (msg, { conn, args }) => {
       imageBuffer = Buffer.from(response.data, 'binary');
     } catch {}
 
-    const caption = `╭─⬣「 *Barboza-Ai* 」⬣
+    const caption = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍* 」⬣
 │  🎵 *Título:* ${title}
 │  ⏱ *Duración:* ${duration || 'Desconocida'}
 │  👁 *Vistas:* ${views.toLocaleString()}
@@ -113,9 +113,9 @@ const handler = async (msg, { conn, args }) => {
 │  🔗 *URL:* ${videoUrl}
 ╰─⬣
 
-🎧 Descargando audio...
+*[🛠️] 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈...*
 
-© Barboza™`;
+> ® ⍴᥆ᥕᥱrᥱძ ᑲᥡ kіᥣᥣᥙᥲᑲ᥆𝗍⚡`;
 
     await conn.sendMessage(chatId, {
       image: imageBuffer,
