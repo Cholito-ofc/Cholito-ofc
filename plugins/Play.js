@@ -4,6 +4,9 @@ const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const text = args.join(" ").trim();
 
+  // Reaccionar al comando
+  await conn.sendMessage(chatId, { react: { text: '🎵', key: msg.key } });
+
   if (!text) {
     return conn.sendMessage(chatId, {
       text:
@@ -30,9 +33,9 @@ const handler = async (msg, { conn, args }) => {
     const { title, artist, duration, cover, url } = json.result.metadata;
     const audio = json.result.downloadUrl;
 
-    // Enviar imagen con detalles
+    // Enviar imagen con detalles y la portada ORIGINAL
     await conn.sendMessage(chatId, {
-      image: { url: cover },
+      image: { url: cover }, // ← AQUÍ VA LA PORTADA ORIGINAL
       caption:
         `╭─⬣「 *KILLUA-BOT SPOTIFY* 」⬣\n` +
         `│ ≡◦ 🎵 *Título:* ${title}\n` +
