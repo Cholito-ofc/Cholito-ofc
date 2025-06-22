@@ -81,11 +81,11 @@ const handler = async (msg, { conn, args }) => {
       const imageBuffer = (await axios.get("https://files.catbox.moe/ltq7ph.jpg", { responseType: "arraybuffer" })).data;
       return conn.sendMessage(chatId, {
         image: Buffer.from(imageBuffer),
-        caption: `*¿Cómo usar el comando .play?*\n\n📌 Ejemplo:\n.play Ojitos Lindos\n\n🎵 Descarga música en MP3 desde YouTube.\n\n© Barboza Bot™`
+        caption: `*Uso del comando .play*\n\nEjemplo:\n.play Despacito\n\nEnvía música desde YouTube en formato MP3.`
       }, { quoted: msg });
     } catch {
       return conn.sendMessage(chatId, {
-        text: `❗ Uso correcto: *.play <nombre de la canción>*\n📌 Ejemplo: *.play Ojitos Lindos*`
+        text: `❗ Uso correcto: *.play <nombre de la canción>*\nEjemplo: *.play Despacito*`
       }, { quoted: msg });
     }
   }
@@ -94,7 +94,7 @@ const handler = async (msg, { conn, args }) => {
 
   try {
     const searchResults = await yts(query);
-    if (!searchResults?.videos?.length) throw new Error('No se encontraron resultados en YouTube.');
+    if (!searchResults?.videos?.length) throw new Error('No se encontraron resultados.');
 
     const videoInfo = searchResults.videos[0];
     const { title, timestamp: duration, views, ago, url: videoUrl, image: thumbnail } = videoInfo;
