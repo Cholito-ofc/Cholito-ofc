@@ -402,109 +402,82 @@ const farewellTexts = [
 ];
 
 // BIENVENIDA: solo cuando alguien entra
-const axios = require("axios");
-async function urlToBuffer(url) {
-  const res = await axios.get(url, { responseType: "arraybuffer" });
-  return Buffer.from(res.data, "binary");
+if (update.action === "add" && welcomeActivo) {
+  for (const participant of update.participants) {
+    const mention = `@${participant.split("@")[0]}`;
+    const customMessage = customWelcomes[update.id];
+    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
+    try {
+      profilePicUrl = await sock.profilePictureUrl(participant, "image");
+    } catch (err) {}
+
+    let textoFinal = "";
+    if (customMessage) {
+      // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio, siempre con manito y salto de línea
+      if (/(@user)/gi.test(customMessage)) {
+        textoFinal = `𝑩𝒊𝒆𝒏𝒃𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${customMessage.replace(/@user/gi, mention)}`;
+      } else {
+        textoFinal = `𝑩𝒊𝒆𝒏𝒃𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${customMessage}`;
+      }
+    } else {
+      // Si no hay mensaje personalizado, solo manda la descripción del grupo
+      let groupDesc = "";
+      try {
+        const metadata = await sock.groupMetadata(update.id);
+        groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
+      } catch (err) {
+        groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
+      }
+      textoFinal = `𝑩𝒊𝒆𝒏𝒃𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
+    }
+
+    await sock.sendMessage(update.id, {
+      image: { url: profilePicUrl },
+      caption: textoFinal,
+      mentions: [participant] // SIEMPRE etiqueta al usuario
+    });
+  }
 }
 
-sock.ev.on("group-participants.update", async (update) => {
-  try {
-    if (!update.id.endsWith("@g.us")) return;
-    const fs = require("fs");
-    const activos = fs.existsSync("./activos.json")
-      ? JSON.parse(fs.readFileSync("./activos.json", "utf-8"))
-      : {};
+// DESPEDIDA: solo cuando alguien sale
+if (update.action === "remove" && despedidasActivo) {
+  for (const participant of update.participants) {
+    const mention = `@${participant.split("@")[0]}`;
+    // Carga el mensaje personalizado desde el archivo byemsgs.json
+    let customBye = "";
+    try {
+      const data = fs.existsSync("./byemsgs.json")
+        ? JSON.parse(fs.readFileSync("./byemsgs.json", "utf-8"))
+        : {};
+      customBye = data[update.id];
+    } catch (e) {}
 
-    const welcomeActivo = activos.welcome?.[update.id];
-    const despedidasActivo = activos.despedidas?.[update.id];
-    if (!welcomeActivo && !despedidasActivo) return;
+    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
+    try {
+      profilePicUrl = await sock.profilePictureUrl(participant, "image");
+    } catch (err) {}
 
-    // BIENVENIDA TEXBOT
-    if (update.action === "add" && welcomeActivo) {
-      let customWelcomes = {};
-      try {
-        if (fs.existsSync("./welcome.json")) {
-          customWelcomes = JSON.parse(fs.readFileSync("./welcome.json", "utf-8"));
-        }
-      } catch {}
-      for (const participant of update.participants) {
-        const mention = `@${participant.split("@")[0]}`;
-        let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
-        try {
-          profilePicUrl = await sock.profilePictureUrl(participant, "image");
-        } catch {}
-        let textoFinal = "";
-        // Si hay mensaje personalizado
-        const customMessage = customWelcomes[update.id];
-        if (customMessage) {
-          textoFinal = /@user/gi.test(customMessage)
-            ? customMessage.replace(/@user/gi, mention)
-            : `${mention}\n\n${customMessage}`;
-        } else {
-          // Si no, intenta poner la descripción del grupo
-          let groupDesc = "";
-          try {
-            const metadata = await sock.groupMetadata(update.id);
-            groupDesc = metadata.desc
-              ? `\n\n📜 Descripción: ${metadata.desc}`
-              : "\n\n📜 Este grupo no tiene descripción.";
-          } catch {
-            groupDesc = "\n\n📜 No se pudo obtener la descripción del grupo.";
-          }
-          textoFinal = `${mention}${groupDesc}`;
-        }
-        // TEXBOT: miniatura + texto (no se puede abrir la imagen)
-        const thumbBuf = await urlToBuffer(profilePicUrl);
-        await sock.sendMessage(update.id, {
-          location: {
-            jpegThumbnail: thumbBuf,
-            name: "👋 Bienvenido/a",
-            address: textoFinal.length > 256 ? textoFinal.slice(0, 256) : textoFinal,
-          },
-          mentions: [participant],
-        });
-      }
+    // Mensaje predeterminado con cuadritos
+    const defaultBye = `╔═══════════════════\n║  👋  Hasta pronto, ${mention}!\n║  Esperamos verte de nuevo en el grupo.\n╚═══════════════════`;
+
+    // Usa el personalizado si existe, si no el predeterminado
+    let byeText;
+    if (customBye) {
+      // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio
+      byeText = /@user/gi.test(customBye)
+        ? customBye.replace(/@user/gi, mention)
+        : `${mention} ${customBye}`;
+    } else {
+      byeText = defaultBye;
     }
 
-    // DESPEDIDA TEXBOT
-    if (update.action === "remove" && despedidasActivo) {
-      let customBye = {};
-      try {
-        if (fs.existsSync("./byemsgs.json")) {
-          customBye = JSON.parse(fs.readFileSync("./byemsgs.json", "utf-8"));
-        }
-      } catch {}
-      for (const participant of update.participants) {
-        const mention = `@${participant.split("@")[0]}`;
-        let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
-        try {
-          profilePicUrl = await sock.profilePictureUrl(participant, "image");
-        } catch {}
-        let byeText = "";
-        const byeMsg = customBye[update.id];
-        if (byeMsg) {
-          byeText = /@user/gi.test(byeMsg)
-            ? byeMsg.replace(/@user/gi, mention)
-            : `${mention} ${byeMsg}`;
-        } else {
-          byeText = `👋 Hasta pronto, ${mention}! Esperamos verte de nuevo.`;
-        }
-        const thumbBuf = await urlToBuffer(profilePicUrl);
-        await sock.sendMessage(update.id, {
-          location: {
-            jpegThumbnail: thumbBuf,
-            name: "👋 Adiós",
-            address: byeText.length > 256 ? byeText.slice(0, 256) : byeText,
-          },
-          mentions: [participant],
-        });
-      }
-    }
-  } catch (error) {
-    console.error("Error en el evento group-participants.update (texbot):", error);
+    await sock.sendMessage(update.id, {
+      image: { url: profilePicUrl },
+      caption: byeText,
+      mentions: [participant]
+    });
   }
-});
+}
 // **************** FIN LÓGICA BIENVENIDA/DESPEDIDA ****************
     // **************** FIN LÓGICA BIENVENIDA/DESPEDIDA ****************
 
