@@ -411,8 +411,6 @@ async function urlToBuffer(url) {
 sock.ev.on("group-participants.update", async (update) => {
   try {
     if (!update.id.endsWith("@g.us")) return;
-
-    // Activos
     const fs = require("fs");
     const activos = fs.existsSync("./activos.json")
       ? JSON.parse(fs.readFileSync("./activos.json", "utf-8"))
@@ -435,22 +433,24 @@ sock.ev.on("group-participants.update", async (update) => {
         let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
         try {
           profilePicUrl = await sock.profilePictureUrl(participant, "image");
-        } catch (err) {}
+        } catch {}
         let textoFinal = "";
+        // Si hay mensaje personalizado
         const customMessage = customWelcomes[update.id];
         if (customMessage) {
-          textoFinal = /(@user)/gi.test(customMessage)
+          textoFinal = /@user/gi.test(customMessage)
             ? customMessage.replace(/@user/gi, mention)
             : `${mention}\n\n${customMessage}`;
         } else {
+          // Si no, intenta poner la descripción del grupo
           let groupDesc = "";
           try {
             const metadata = await sock.groupMetadata(update.id);
             groupDesc = metadata.desc
-              ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}`
-              : "\n\n📜 *Este grupo no tiene descripción.*";
+              ? `\n\n📜 Descripción: ${metadata.desc}`
+              : "\n\n📜 Este grupo no tiene descripción.";
           } catch {
-            groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
+            groupDesc = "\n\n📜 No se pudo obtener la descripción del grupo.";
           }
           textoFinal = `${mention}${groupDesc}`;
         }
@@ -480,7 +480,7 @@ sock.ev.on("group-participants.update", async (update) => {
         let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
         try {
           profilePicUrl = await sock.profilePictureUrl(participant, "image");
-        } catch (err) {}
+        } catch {}
         let byeText = "";
         const byeMsg = customBye[update.id];
         if (byeMsg) {
