@@ -1,5 +1,14 @@
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
+  const sender = msg.key.participant || msg.key.remoteJid;
+  const senderNum = sender.replace(/[^0-9]/g, "");
+
+  // Solo permite al Owner
+  if (!global.owner.some(([id]) => id === senderNum)) {
+    return conn.sendMessage(chatId, {
+      text: "❌ Solo el *owner* del bot puede usar este comando."
+    }, { quoted: msg });
+  }
 
   if (!global.gruposAdmin || global.gruposAdmin.length === 0) {
     return conn.sendMessage(chatId, {
@@ -40,9 +49,6 @@ const handler = async (msg, { conn, args }) => {
     // Obtener participantes del grupo destino
     const meta = await conn.groupMetadata(grupo.id);
     const participantes = meta.participants.map(p => p.id);
-
-    // Obtener el remitente con número completo
-    const sender = msg.key.participant || msg.key.remoteJid;
 
     // El formato correcto para mención real
     const senderMention = sender ? `@${sender.split('@')[0]}` : '';
