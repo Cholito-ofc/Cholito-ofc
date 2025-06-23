@@ -4891,7 +4891,6 @@ case 'todos': {
     const isGroup = chatId.endsWith("@g.us");
     const isBotMessage = msg.key.fromMe;
 
-    // Reacción inicial
     await sock.sendMessage(chatId, { react: { text: "🔊", key: msg.key } });
 
     if (!isGroup) {
@@ -4919,8 +4918,14 @@ case 'todos': {
     const args = messageText.trim().split(" ").slice(1);
     const extraMsg = args.join(" ");
 
-    // Función para obtener la bandera a partir del número
+    // Función para obtener bandera por número, incluso si el número viene con "52" falso
     const getFlagFromNumber = (number) => {
+      // Correcciones comunes si número viene mal por @lid
+      if (number.startsWith("52") && number.length > 11) {
+        number = number.slice(2); // Quitar "52" falso
+      }
+
+      // Mapa por código de país
       const codeMap = {
         "502": "GT", "503": "SV", "504": "HN", "505": "NI", "506": "CR", "507": "PA",
         "51": "PE", "52": "MX", "54": "AR", "55": "BR", "56": "CL", "57": "CO",
@@ -4935,17 +4940,22 @@ case 'todos': {
         .replace(/./g, c => String.fromCodePoint(c.charCodeAt(0) + 127397));
     };
 
-    // Lista con bandera primero y luego el número
+    // Lista con bandera antes del número, corregido para grupos con @lid
     const mentionList = participants.map(p => {
-      const num = p.id.split("@")[0];
+      let num = p.id.split("@")[0];
+
+      // Si es un número mal formado por @lid con 52 falso
+      if (p.id.endsWith("@lid") && num.startsWith("52") && num.length > 11) {
+        num = num.slice(2); // Quitar el 52 falso
+      }
+
       const flag = getFlagFromNumber(num);
       return `➤ ${flag} @${num}`;
     }).join("\n");
 
-    // Bandera del invocador
     const senderFlag = getFlagFromNumber(sender);
 
-    let finalMsg = `╭────〔 🔊 *INVOCACIÓN GRUPAL* 〕──\n`;
+    let finalMsg = `╭────〔 🔊 *INVOCACIÓN GRUPAL* 〕────\n`;
     finalMsg += `│\n`;
     finalMsg += `├🤖 *BOT:* 𝗞𝗜𝗟𝗟𝗨𝗔 𝟮.𝟬\n`;
     finalMsg += `├📍 *Invocado por:* ${senderFlag} @${sender}\n`;
@@ -4953,11 +4963,10 @@ case 'todos': {
       finalMsg += `├💬 *Mensaje:* ${extraMsg}\n`;
     }
     finalMsg += `│\n`;
-    finalMsg += `╰────────────────────────────\n\n`;
+    finalMsg += `╰───────────────────────────────\n\n`;
     finalMsg += `📲 *Etiquetando a todos los miembros...*\n\n`;
     finalMsg += mentionList;
 
-    // Enviar imagen con caption y menciones
     await sock.sendMessage(chatId, {
       image: { url: "https://cdn.russellxz.click/c207ff27.jpeg" },
       caption: finalMsg,
@@ -4971,7 +4980,7 @@ case 'todos': {
     }, { quoted: msg });
   }
   break;
-}
+          }
         
 case 'antiarabe': {
   try {
