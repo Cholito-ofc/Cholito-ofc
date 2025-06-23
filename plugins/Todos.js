@@ -3,6 +3,7 @@ const path = require("path");
 
 const emojiPath = path.resolve("./emoji.json");
 
+// Lista de emojis por país según código
 function getFlagFromNumber(number) {
   const flags = {
     "504": "🇭🇳", "502": "🇬🇹", "503": "🇸🇻", "505": "🇳🇮", "506": "🇨🇷",
@@ -19,27 +20,23 @@ const handler = async (msg, { conn, args }) => {
   const senderId = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderId.replace(/[^0-9]/g, "");
   const isGroup = chatId.endsWith("@g.us");
-  const isOwner = senderNum === "50489513153";
-  const isFromMe = msg.key.fromMe;
 
-  if (!isGroup) return conn.sendMessage(chatId, { text: "⚠️ Este comando solo funciona en grupos." }, { quoted: msg });
+  if (!isGroup) {
+    return conn.sendMessage(chatId, { text: "⚠️ Este comando solo funciona en grupos." }, { quoted: msg });
+  }
 
   const metadata = await conn.groupMetadata(chatId);
   const participant = metadata.participants.find(p => p.id === senderId);
   const isAdmin = participant?.admin === "admin" || participant?.admin === "superadmin";
 
-  const permisos = isAdmin || isOwner || isFromMe;
-  if (!permisos) {
-    return conn.sendMessage(chatId, {
-      text: "❌ *Solo administradores u owner pueden usar este comando.*"
-    }, { quoted: msg });
+  if (!isAdmin) {
+    return conn.sendMessage(chatId, { text: "❌ Solo administradores pueden usar este comando." }, { quoted: msg });
   }
 
   const emojiData = fs.existsSync(emojiPath) ? JSON.parse(fs.readFileSync(emojiPath)) : {};
   const usedEmoji = emojiData[chatId] || "➤";
-
   const extraMsg = args.join(" ").trim();
-  const senderFlag = getFlagFromNumber(senderNum);
+
   const mentionList = metadata.participants.map(p => {
     const num = p.id.split("@")[0];
     const flag = getFlagFromNumber(num);
@@ -48,7 +45,7 @@ const handler = async (msg, { conn, args }) => {
 
   const finalMsg = `╔『 🔊 INVOCACIÓN MASIVA 』╗
 ╟🔹 *KILLUA 2.0 BOT PRESENTE*
-╟👤 *Invocado por:* ${senderFlag} @${senderNum}
+╟👤 *Invocado por:* ${getFlagFromNumber(senderNum)} @${senderNum}
 ${extraMsg ? `╟💬 *Mensaje:* ${extraMsg}` : ""}
 ╚═══════════════╝
 
@@ -59,53 +56,77 @@ ${mentionList}`;
   const mentionIds = metadata.participants.map(p => p.id);
 
   await conn.sendMessage(chatId, {
-    image: { url: "https://cdn.russellxz.click/c207ff27.jpeg" },
-    caption: finalMsg,
+    text: finalMsg,
     mentions: mentionIds
   }, { quoted: msg });
 };
 
-// Comando para establecer el emoji
-const handlerEmoji = async (msg, { conn, args }) => {
+// Cambiar emoji por grupo
+const toemoji = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
-  const newEmoji = args[0];
-  if (!newEmoji || newEmoji.length > 2) {
-    return conn.sendMessage(chatId, {
-      text: "⚠️ Especifica un emoji válido. Ejemplo: `.toemoji 🌀`"
-    }, { quoted: msg });
+  const senderId = msg.key.participant || msg.key.remoteJid;
+  const senderNum = senderId.replace(/[^0-9]/g, "");
+  const isGroup = chatId.endsWith("@g.us");
+
+  const metadata = await conn.groupMetadata(chatId);
+  const participant = metadata.participants.find(p => p.id === senderId);
+  const isAdmin = participant?.admin === "admin" || participant?.admin === "superadmin";
+
+  if (!isAdmin) {
+    return conn.sendMessage(chatId, { text: "❌ Solo administradores pueden cambiar el emoji." }, { quoted: msg });
+  }
+
+  const emoji = args[0];
+  if (!emoji || emoji.length > 2) {
+    return conn.sendMessage(chatId, { text: "⚠️ Usa: `.toemoji 🌀` (1 solo emoji)" }, { quoted: msg });
   }
 
   const emojiData = fs.existsSync(emojiPath) ? JSON.parse(fs.readFileSync(emojiPath)) : {};
-  emojiData[chatId] = newEmoji;
+  emojiData[chatId] = emoji;
   fs.writeFileSync(emojiPath, JSON.stringify(emojiData, null, 2));
 
-  await conn.sendMessage(chatId, { text: `✅ Emoji actualizado a: ${newEmoji}` }, { quoted: msg });
+  return conn.sendMessage(chatId, { text: `✅ Emoji cambiado a: ${emoji}` }, { quoted: msg });
 };
 
-// Comando para resetear
-const handlerReset = async (msg, { conn }) => {
+// Resetear emoji al predeterminado ➤
+const resetemoji = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
+  const senderId = msg.key.participant || msg.key.remoteJid;
+  const senderNum = senderId.replace(/[^0-9]/g, "");
+  const isGroup = chatId.endsWith("@g.us");
+
+  const metadata = await conn.groupMetadata(chatId);
+  const participant = metadata.participants.find(p => p.id === senderId);
+  const isAdmin = participant?.admin === "admin" || participant?.admin === "superadmin";
+
+  if (!isAdmin) {
+    return conn.sendMessage(chatId, { text: "❌ Solo administradores pueden restaurar el emoji." }, { quoted: msg });
+  }
+
   const emojiData = fs.existsSync(emojiPath) ? JSON.parse(fs.readFileSync(emojiPath)) : {};
 
   if (emojiData[chatId]) {
     delete emojiData[chatId];
     fs.writeFileSync(emojiPath, JSON.stringify(emojiData, null, 2));
-    await conn.sendMessage(chatId, { text: "✅ Emoji restaurado a ➤" }, { quoted: msg });
+    return conn.sendMessage(chatId, { text: "✅ Emoji restaurado a ➤" }, { quoted: msg });
   } else {
-    await conn.sendMessage(chatId, { text: "ℹ️ Este grupo ya usa el emoji por defecto." }, { quoted: msg });
+    return conn.sendMessage(chatId, { text: "ℹ️ Este grupo ya usa el emoji por defecto." }, { quoted: msg });
   }
 };
 
-handler.command = ["tods", "tagall", "invocar"];
+handler.command = ["todos", "tagall", "invocar"];
 handler.tags = ["group"];
 handler.help = [".todos <mensaje>"];
+handler.disabled = false;
 
-handlerEmoji.command = ["toemoji"];
-handlerEmoji.tags = ["group"];
-handlerEmoji.help = [".toemoji <emoji>"];
+toemoji.command = ["toemoji"];
+toemoji.tags = ["group"];
+toemoji.help = [".toemoji <emoji>"];
+toemoji.disabled = false;
 
-handlerReset.command = ["resetemoji"];
-handlerReset.tags = ["group"];
-handlerReset.help = [".resetemoji"];
+resetemoji.command = ["resetemoji"];
+resetemoji.tags = ["group"];
+resetemoji.help = [".resetemoji"];
+resetemoji.disabled = false;
 
-module.exports = [handler, handlerEmoji, handlerReset];
+module.exports = [handler, toemoji, resetemoji];
