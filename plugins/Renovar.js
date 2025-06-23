@@ -6,17 +6,17 @@ const handler = async (msg, { conn }) => {
   const ownerName = "Cholito";
 
   try {
-    // Mensaje principal con botón arriba (sin enlace, solo texto)
+    // Botón arriba y mensaje debajo
     await conn.sendMessage(chatId, {
-      text: `👑 *RENOVAR ACCESO*`,
+      text: `🔒 *Tu acceso al sistema está por finalizar o ya ha expirado.*\n\nSi deseas continuar utilizando el bot y mantener todas sus funciones activas, contacta con el Owner para renovar tu acceso.\n\n🛠️ Soporte personalizado, activación rápida y atención directa.\n\n👤 *Contacto:* ${ownerName}\n📞 *WhatsApp:* wa.me/${ownerNum}`,
       buttons: [
         { buttonId: ".renovar", buttonText: { displayText: "💼 CONTACTAR OWNER" }, type: 1 }
       ],
-      footer: `Hola, si necesitas renovar tu acceso, aquí tienes el contacto del owner.\n\n📞 WhatsApp: wa.me/50489513153${ownerNum}`,
+      footer: "",
       headerType: 1
     }, { quoted: msg });
 
-    // Contacto real del owner
+    // Enviar contacto real
     await conn.sendMessage(chatId, {
       contacts: {
         displayName: ownerName,
