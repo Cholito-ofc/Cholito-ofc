@@ -4895,7 +4895,9 @@ case 'todos': {
     await sock.sendMessage(chatId, { react: { text: "🔊", key: msg.key } });
 
     if (!isGroup) {
-      await sock.sendMessage(chatId, { text: "⚠️ *Este comando solo se puede usar en grupos.*" }, { quoted: msg });
+      await sock.sendMessage(chatId, {
+        text: "⚠️ *Este comando solo se puede usar en grupos.*"
+      }, { quoted: msg });
       return;
     }
 
@@ -4911,56 +4913,51 @@ case 'todos': {
     }
 
     const participants = metadata.participants;
-    const mentionList = participants.map(p => `➤ @${p.id.split("@")[0]}`).join("\n");
+    const mentionIds = participants.map(p => p.id);
+
     const messageText = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
     const args = messageText.trim().split(" ").slice(1);
     const extraMsg = args.join(" ");
 
-    // Obtener bandera según el código de país
-    const getFlagEmoji = (number) => {
-      const code = number.slice(0, 2) === "55" ? "BR" : // caso especial para Brasil
-        number.startsWith("1") ? "US" :
-        number.startsWith("34") ? "ES" :
-        number.startsWith("52") ? "MX" :
-        number.startsWith("57") ? "CO" :
-        number.startsWith("58") ? "VE" :
-        number.startsWith("591") ? "BO" :
-        number.startsWith("593") ? "EC" :
-        number.startsWith("595") ? "PY" :
-        number.startsWith("54") ? "AR" :
-        number.startsWith("51") ? "PE" :
-        number.startsWith("56") ? "CL" :
-        number.startsWith("502") ? "GT" :
-        number.startsWith("503") ? "SV" :
-        number.startsWith("504") ? "HN" :
-        number.startsWith("505") ? "NI" :
-        number.startsWith("506") ? "CR" :
-        number.startsWith("507") ? "PA" :
-        "🌎";
+    // Función para obtener la bandera a partir del número
+    const getFlagFromNumber = (number) => {
+      const codeMap = {
+        "502": "GT", "503": "SV", "504": "HN", "505": "NI", "506": "CR", "507": "PA",
+        "51": "PE", "52": "MX", "54": "AR", "55": "BR", "56": "CL", "57": "CO",
+        "58": "VE", "591": "BO", "592": "GY", "593": "EC", "595": "PY", "1": "US", "34": "ES"
+      };
 
-      const regionalIndicator = (code) => code.toUpperCase().replace(/./g, char => 
-        String.fromCodePoint(char.charCodeAt(0) + 127397)
-      );
+      const matchCode = Object.keys(codeMap).find(code => number.startsWith(code));
+      const countryCode = matchCode ? codeMap[matchCode] : "🌎";
 
-      return regionalIndicator(code);
+      return countryCode === "🌎" ? "🌎" : countryCode
+        .toUpperCase()
+        .replace(/./g, c => String.fromCodePoint(c.charCodeAt(0) + 127397));
     };
 
-    const flag = getFlagEmoji(sender);
+    // Lista con bandera primero y luego el número
+    const mentionList = participants.map(p => {
+      const num = p.id.split("@")[0];
+      const flag = getFlagFromNumber(num);
+      return `➤ ${flag} @${num}`;
+    }).join("\n");
 
-    let finalMsg = `╭────〔 🔊 *INVOCACIÓN GRUPAL* 〕────\n`;
+    // Bandera del invocador
+    const senderFlag = getFlagFromNumber(sender);
+
+    let finalMsg = `╭────〔 🔊 *INVOCACIÓN GRUPAL* 〕──\n`;
     finalMsg += `│\n`;
-    finalMsg += `├🔰 *BOT:* 𝗞𝗜𝗟𝗟𝗨𝗔 𝟮.𝟬 🤖\n`;
-    finalMsg += `├📍 *Invocado por:* @${sender} ${flag}\n`;
+    finalMsg += `├🤖 *BOT:* 𝗞𝗜𝗟𝗟𝗨𝗔 𝟮.𝟬\n`;
+    finalMsg += `├📍 *Invocado por:* ${senderFlag} @${sender}\n`;
     if (extraMsg.trim().length > 0) {
       finalMsg += `├💬 *Mensaje:* ${extraMsg}\n`;
     }
     finalMsg += `│\n`;
-    finalMsg += `╰──────────────────────────\n\n`;
+    finalMsg += `╰────────────────────────────\n\n`;
     finalMsg += `📲 *Etiquetando a todos los miembros...*\n\n`;
     finalMsg += mentionList;
 
-    const mentionIds = participants.map(p => p.id);
-
+    // Enviar imagen con caption y menciones
     await sock.sendMessage(chatId, {
       image: { url: "https://cdn.russellxz.click/c207ff27.jpeg" },
       caption: finalMsg,
