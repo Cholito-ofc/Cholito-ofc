@@ -2,7 +2,6 @@ const fs = require("fs");
 const path = require("path");
 
 const tiemposPath = path.resolve("./tiempos.json");
-const OWNER_NUMBER = "50489513153"; // Número del owner
 
 function formatearFecha(fecha) {
   const date = new Date(fecha);
@@ -37,9 +36,9 @@ const handler = async (msg, { conn, args }) => {
   const senderId = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderId.replace(/[^0-9]/g, "");
   const isGroup = chatId.endsWith("@g.us");
-
+  const ownerNum = "50489513153";
+  const isOwner = senderNum === ownerNum;
   const isFromMe = msg.key.fromMe;
-  const isOwner = isFromMe || senderNum === OWNER_NUMBER;
 
   const metadata = isGroup ? await conn.groupMetadata(chatId) : null;
   const participant = metadata?.participants.find(p => p.id === senderId);
@@ -48,8 +47,8 @@ const handler = async (msg, { conn, args }) => {
   const command = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
   const tiempos = fs.existsSync(tiemposPath) ? JSON.parse(fs.readFileSync(tiemposPath)) : {};
 
-  // .tiempo — solo owner
-  if (command.startsWith(".tiempo")) {
+  // Permisos para cada comando
+  if (command.startsWith(".tiempos")) {
     if (!isOwner) {
       return conn.sendMessage(chatId, {
         text: "🚫 *Solo el owner puede usar este comando.*"
@@ -58,9 +57,7 @@ const handler = async (msg, { conn, args }) => {
 
     const dias = parseInt(args[0]);
     if (isNaN(dias) || dias <= 0) {
-      return conn.sendMessage(chatId, {
-        text: "⚠️ Especifica un número válido de días. Ejemplo: *.tiempo 30*"
-      }, { quoted: msg });
+      return conn.sendMessage(chatId, { text: "⚠️ Especifica un número válido de días. Ejemplo: *.tiempos 30*" }, { quoted: msg });
     }
 
     const fechaActual = Date.now();
@@ -78,7 +75,6 @@ const handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
-  // .verfecha — admin y owner
   if (command.startsWith(".verfecha")) {
     if (!isOwner && !(isGroup && isAdmin)) {
       return conn.sendMessage(chatId, {
@@ -87,22 +83,19 @@ const handler = async (msg, { conn, args }) => {
     }
 
     if (!tiempos[chatId]) {
-      return conn.sendMessage(chatId, {
-        text: "❌ No se ha establecido ningún tiempo para este grupo."
-      }, { quoted: msg });
+      return conn.sendMessage(chatId, { text: "❌ No se ha establecido ningún tiempo para este grupo." }, { quoted: msg });
     }
 
     const { fin } = tiempos[chatId];
     const diasRestantes = calcularDiasRestantes(fin);
     const fechaTexto = formatearDiaCompleto(fin);
-    const horaTexto = formatearFecha(fin).split(", ")[1];
+    const horaTexto = formatearFecha(fin).split(", ")[1]; // Solo hora
 
     return conn.sendMessage(chatId, {
       text: `📅 \`SHOWDATE\` 🔔\n\n\`\`\`Próximo ${fechaTexto}\`\`\`\n\`\`\`Hora exacta: ${horaTexto} (hora CDMX)\`\`\`\n\`\`\`Quedan, ${diasRestantes} días.\`\`\`\n\n> 𝖴𝗌𝖾 .𝗋𝖾𝗇𝗈𝗏𝖺𝗋`
     }, { quoted: msg });
   }
 
-  // .renovar — admin y owner
   if (command.startsWith(".renovar")) {
     if (!isOwner && !(isGroup && isAdmin)) {
       return conn.sendMessage(chatId, {
@@ -111,34 +104,19 @@ const handler = async (msg, { conn, args }) => {
     }
 
     const ownerName = "Cholito";
+    const ownerNum = "50489513153";
 
-    // Botón primero
-    await conn.sendMessage(chatId, {
-      text: "💼 *CONTACTAR OWNER*",
-      buttons: [
-        { buttonId: ".renovar", buttonText: { displayText: "📲 RENOVAR ACCESO" }, type: 1 }
-      ],
-      footer: "",
-      headerType: 1
-    }, { quoted: msg });
-
-    // Mensaje informativo
-    await conn.sendMessage(chatId, {
-      text: `🔒 *Tu acceso al sistema está por finalizar o ya ha expirado.*\n\nSi deseas continuar utilizando el bot y mantener todas sus funciones activas, contacta con el Owner para renovar tu acceso.\n\n🛠️ Soporte personalizado, activación rápida y atención directa.\n\n👤 *Contacto:* ${ownerName}\n📞 *WhatsApp:* wa.me/${OWNER_NUMBER}`
-    }, { quoted: msg });
-
-    // Contacto
     return conn.sendMessage(chatId, {
       contacts: [{
         displayName: ownerName,
-        vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:${ownerName}\nTEL;type=CELL;type=VOICE;waid=${OWNER_NUMBER}:${OWNER_NUMBER}\nEND:VCARD`
+        vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:${ownerName}\nTEL;type=CELL;type=VOICE;waid=${ownerNum}:${ownerNum}\nEND:VCARD`
       }]
     }, { quoted: msg });
   }
 };
 
-handler.command = ["tiempo", "verfecha", "renovar"];
+handler.command = ["tiempos", "verfecha", "renovar"];
 handler.tags = ["tools"];
-handler.help = [".tiempo <días>", ".verfecha", ".renovar"];
+handler.help = [".tiempos <días>", ".verfecha", ".renovar"];
 
 module.exports = handler;
