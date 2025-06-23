@@ -108,19 +108,29 @@ ${horaMsg}
     const esTitular = data.jugadores.includes(sender)
     const esSuplente = data.suplentes.includes(sender)
 
+    // Suplente
     if (emojisSuplente.includes(emoji)) {
       if (esTitular) {
         if (data.suplentes.length < 2) {
           data.jugadores = data.jugadores.filter(j => j !== sender)
-          data.suplentes.push(sender)
           jugadoresGlobal.delete(sender)
+          data.suplentes.push(sender)
+        } else {
+          return // Suplentes llenos
         }
-      } else if (!esSuplente && data.suplentes.length < 2) {
-        data.suplentes.push(sender)
+      } else if (!esSuplente) {
+        if (data.suplentes.length < 2) {
+          data.suplentes.push(sender)
+        } else {
+          return // Suplentes llenos
+        }
       } else {
-        return
+        return // Ya es suplente
       }
-    } else if (emojisParticipar.includes(emoji)) {
+    }
+
+    // Titular
+    else if (emojisParticipar.includes(emoji)) {
       if (esTitular) return
       if (esSuplente) {
         if (data.jugadores.length < 4) {
@@ -128,16 +138,16 @@ ${horaMsg}
           data.jugadores.push(sender)
           jugadoresGlobal.add(sender)
         } else {
-          return
+          return // Titulares llenos
         }
       } else if (data.jugadores.length < 4) {
         data.jugadores.push(sender)
         jugadoresGlobal.add(sender)
       } else {
-        return
+        return // Titulares llenos
       }
     } else {
-      return
+      return // Emoji no válido
     }
 
     let jugadores = data.jugadores.map(u => `@${u.split('@')[0]}`)
