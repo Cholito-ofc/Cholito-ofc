@@ -96,7 +96,7 @@ const handlerReset = async (msg, { conn }) => {
   }
 };
 
-handler.command = ["todos", "tagall", "invocar"];
+handler.command = ["tods", "tagall", "invocar"];
 handler.tags = ["group"];
 handler.help = [".todos <mensaje>"];
 
