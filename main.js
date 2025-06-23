@@ -4895,9 +4895,7 @@ case 'todos': {
     await sock.sendMessage(chatId, { react: { text: "🔊", key: msg.key } });
 
     if (!isGroup) {
-      await sock.sendMessage(chatId, {
-        text: "⚠️ *Este comando solo se puede usar en grupos.*"
-      }, { quoted: msg });
+      await sock.sendMessage(chatId, { text: "⚠️ *Este comando solo se puede usar en grupos.*" }, { quoted: msg });
       return;
     }
 
@@ -4913,63 +4911,23 @@ case 'todos': {
     }
 
     const participants = metadata.participants;
-    const mentionIds = participants.map(p => p.id);
-
+    const mentionList = participants.map(p => `│➜ @${p.id.split("@")[0]}`).join("\n");
     const messageText = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
     const args = messageText.trim().split(" ").slice(1);
     const extraMsg = args.join(" ");
 
-    // Función para detectar bandera según el número
-    const getFlagFromNumber = (number) => {
-      // Corregir números mal identificados (por ejemplo en grupos con @lid)
-      if (number.startsWith("52") && number.length > 11) {
-        number = number.slice(2);
-      }
-
-      const codeMap = {
-        "502": "GT", "503": "SV", "504": "HN", "505": "NI", "506": "CR", "507": "PA",
-        "51": "PE", "52": "MX", "54": "AR", "55": "BR", "56": "CL", "57": "CO",
-        "58": "VE", "591": "BO", "592": "GY", "593": "EC", "595": "PY", "1": "US", "34": "ES"
-      };
-
-      const matchCode = Object.keys(codeMap).find(code => number.startsWith(code));
-      const countryCode = matchCode ? codeMap[matchCode] : "🌎";
-
-      return countryCode === "🌎" ? "🌎" : countryCode
-        .toUpperCase()
-        .replace(/./g, c => String.fromCodePoint(c.charCodeAt(0) + 127397));
-    };
-
-    // Generar lista de menciones con bandera antes del número
-    const mentionList = participants.map(p => {
-      let num = p.id.split("@")[0];
-
-      // Si es @lid con número falso
-      if (p.id.endsWith("@lid") && num.startsWith("52") && num.length > 11) {
-        num = num.slice(2);
-      }
-
-      const flag = getFlagFromNumber(num);
-      return `│➜ ${flag} @${num}`;
-    }).join("\n");
-
-    // Bandera del que invoca
-    const senderFlag = getFlagFromNumber(sender);
-
-    // 🎨 Diseño elegante
-    let finalMsg = `╭━[〔 𝗜𝗡𝗩𝗢𝗖𝗔𝗖𝗜Ó𝗡 𝗠𝗔𝗦𝗜𝗩𝗔 🔊 〕]━⬣\n`;
-    finalMsg += `│\n`;
-    finalMsg += `├ 🤖 *KILLUA 𝟮.𝟬* en acción\n`;
-    finalMsg += `├ 🧩 *Invocado por:* ${senderFlag} @${sender}\n`;
+    let finalMsg = `*╭━[* *INVOCACIÓN MASIVA* *]━⬣*\n`;
+    finalMsg += `┃🔹 *KILLUA-BOT ⚡*\n`;
+    finalMsg += `┃👤 *Invocado por:* @${sender}\n`;
     if (extraMsg.trim().length > 0) {
-      finalMsg += `├ 💬 *Mensaje:* ${extraMsg}\n`;
+      finalMsg += `┃💬 *Mensaje:* ${extraMsg}\n`;
     }
-    finalMsg += `│\n`;
     finalMsg += `*╰━━━━━━━⋆★⋆━━━━━━━⬣*\n\n`;
-    finalMsg += `📣 *Mencionando a todos los miembros...*\n\n`;
+    finalMsg += `📲 *Etiquetando a todos los miembros...*\n\n`;
     finalMsg += mentionList;
 
-    // Enviar imagen con caption
+    const mentionIds = participants.map(p => p.id);
+
     await sock.sendMessage(chatId, {
       image: { url: "https://cdn.russellxz.click/c207ff27.jpeg" },
       caption: finalMsg,
