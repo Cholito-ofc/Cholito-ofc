@@ -117,6 +117,6 @@ const handler = async (msg, { conn, args }) => {
 
 handler.command = ["tiempo", "verfecha", "renovar"];
 handler.tags = ["tools"];
-handler.help = [".tiempos <días>", ".verfecha", ".renovar"];
+handler.help = [".tiempo <días>", ".verfecha", ".renovar"];
 
 module.exports = handler;
