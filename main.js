@@ -4916,13 +4916,46 @@ case 'todos': {
     const args = messageText.trim().split(" ").slice(1);
     const extraMsg = args.join(" ");
 
-    let finalMsg = `╔『 🔊 INVOCACIÓN MASIVA 』╗\n`;
-    finalMsg += `╟🔹 *KILLUA 2.0 BOT PRESENTE*\n`;
-    finalMsg += `╟👤 *Invocado por:* @${sender}\n`;
+    // Obtener bandera según el código de país
+    const getFlagEmoji = (number) => {
+      const code = number.slice(0, 2) === "55" ? "BR" : // caso especial para Brasil
+        number.startsWith("1") ? "US" :
+        number.startsWith("34") ? "ES" :
+        number.startsWith("52") ? "MX" :
+        number.startsWith("57") ? "CO" :
+        number.startsWith("58") ? "VE" :
+        number.startsWith("591") ? "BO" :
+        number.startsWith("593") ? "EC" :
+        number.startsWith("595") ? "PY" :
+        number.startsWith("54") ? "AR" :
+        number.startsWith("51") ? "PE" :
+        number.startsWith("56") ? "CL" :
+        number.startsWith("502") ? "GT" :
+        number.startsWith("503") ? "SV" :
+        number.startsWith("504") ? "HN" :
+        number.startsWith("505") ? "NI" :
+        number.startsWith("506") ? "CR" :
+        number.startsWith("507") ? "PA" :
+        "🌎";
+
+      const regionalIndicator = (code) => code.toUpperCase().replace(/./g, char => 
+        String.fromCodePoint(char.charCodeAt(0) + 127397)
+      );
+
+      return regionalIndicator(code);
+    };
+
+    const flag = getFlagEmoji(sender);
+
+    let finalMsg = `╭────〔 🔊 *INVOCACIÓN GRUPAL* 〕────\n`;
+    finalMsg += `│\n`;
+    finalMsg += `├🔰 *BOT:* 𝗞𝗜𝗟𝗟𝗨𝗔 𝟮.𝟬 🤖\n`;
+    finalMsg += `├📍 *Invocado por:* @${sender} ${flag}\n`;
     if (extraMsg.trim().length > 0) {
-      finalMsg += `╟💬 *Mensaje:* ${extraMsg}\n`;
+      finalMsg += `├💬 *Mensaje:* ${extraMsg}\n`;
     }
-    finalMsg += `╚═══════════════╝\n\n`;
+    finalMsg += `│\n`;
+    finalMsg += `╰──────────────────────────\n\n`;
     finalMsg += `📲 *Etiquetando a todos los miembros...*\n\n`;
     finalMsg += mentionList;
 
