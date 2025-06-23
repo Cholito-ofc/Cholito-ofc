@@ -2,9 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const tiemposPath = path.resolve("./tiempos.json");
-
-// Tu número exacto con código de país
-const OWNER_NUMBER = "50489513153";
+const OWNER_NUMBER = "50489513153"; // Tu número real
 
 function formatearFecha(fecha) {
   const date = new Date(fecha);
@@ -37,13 +35,13 @@ function calcularDiasRestantes(fechaFutura) {
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const senderId = msg.key.participant || msg.key.remoteJid;
-  const senderNum = senderId.replace(/[^0-9]/g, ""); // Limpia el número
+  const senderNum = senderId.replace(/[^0-9]/g, "");
   const isGroup = chatId.endsWith("@g.us");
 
-  // Muestra el número que detecta el bot
-  console.log("📞 Número detectado:", senderNum);
+  // CORREGIDO: detectar si eres el Owner por número real o porque es tu sesión
+  const isFromMe = msg.key.fromMe;
+  const isOwner = isFromMe || senderNum.includes(OWNER_NUMBER);
 
-  const isOwner = senderNum.includes(OWNER_NUMBER); // Detección segura
   const metadata = isGroup ? await conn.groupMetadata(chatId) : null;
   const participant = metadata?.participants.find(p => p.id === senderId);
   const isAdmin = participant?.admin === "admin" || participant?.admin === "superadmin";
