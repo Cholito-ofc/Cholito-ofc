@@ -48,7 +48,7 @@ const handler = async (msg, { conn, args }) => {
   const tiempos = fs.existsSync(tiemposPath) ? JSON.parse(fs.readFileSync(tiemposPath)) : {};
 
   // Permisos para cada comando
-  if (command.startsWith(".tiempos")) {
+  if (command.startsWith(".tiempo")) {
     if (!isOwner) {
       return conn.sendMessage(chatId, {
         text: "🚫 *Solo el owner puede usar este comando.*"
