@@ -87,7 +87,7 @@ const handler = async (msg, { conn, args }) => {
   }
 
   if (command.startsWith(".renovar")) {
-    const [ownerNum, ownerName = "Owner"] = global.owner[0];
+    const [ownerNum, ownerName = "Owner"] = global.owner[50489513153];
     return conn.sendMessage(chatId, {
       contacts: [{
         displayName: ownerName,
