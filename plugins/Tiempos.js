@@ -26,8 +26,7 @@ function formatearDiaCompleto(fecha) {
 
 function calcularDiasRestantes(fechaFutura) {
   const hoy = new Date();
-  const dias = Math.ceil((fechaFutura - hoy) / (1000 * 60 * 60 * 24));
-  return dias;
+  return Math.ceil((fechaFutura - hoy) / (1000 * 60 * 60 * 24));
 }
 
 const handler = async (msg, { conn, args }) => {
@@ -51,7 +50,6 @@ const handler = async (msg, { conn, args }) => {
   }
 
   const command = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
-
   const tiempos = fs.existsSync(tiemposPath) ? JSON.parse(fs.readFileSync(tiemposPath)) : {};
 
   if (command.startsWith(".tiempos")) {
@@ -90,22 +88,40 @@ const handler = async (msg, { conn, args }) => {
   }
 
   if (command.startsWith(".renovar")) {
-    const owner = global.owner[0]; // primer owner en global.owner
+    const [ownerNum, ownerName = "Owner"] = global.owner[0]; // Soporta nombre si lo defines como ["num", "Nombre"]
+
     return conn.sendMessage(chatId, {
       contacts: [{
-        displayName: "Owner",
-        vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Owner\nTEL;type=CELL;type=VOICE;waid=${owner[0]}:${owner[0]}\nEND:VCARD`
+        displayName: ownerName,
+        contacts: [{
+          vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:${ownerName}\nTEL;type=CELL;type=VOICE;waid=${ownerNum}:${ownerNum}\nEND:VCARD`
+        }]
       }]
     }, { quoted: msg });
   }
 };
 
+// ✅ Esta función debe llamarse automáticamente con setInterval u otro sistema
+handler.checkExpiraciones = async (conn) => {
+  if (!fs.existsSync(tiemposPath)) return;
+  const tiempos = JSON.parse(fs.readFileSync(tiemposPath));
+
+  for (const [chatId, datos] of Object.entries(tiempos)) {
+    const diasRestantes = calcularDiasRestantes(datos.fin);
+    if (diasRestantes === 3) {
+      try {
+        await conn.sendMessage(chatId, {
+          text: `⏳ *¡Atención!* Quedan *3 días* para la expiración del acceso al grupo.\n\n> Usa *.renovar* para contactar con el owner.`
+        });
+      } catch (e) {
+        console.error(`Error notificando a ${chatId}:`, e);
+      }
+    }
+  }
+};
+
 handler.command = ["tiempos", "verfecha", "renovar"];
 handler.tags = ["tools"];
-handler.help = [
-  ".tiempos <días>",
-  ".verfecha",
-  ".renovar"
-];
+handler.help = [".tiempos <días>", ".verfecha", ".renovar"];
 
 module.exports = handler;
