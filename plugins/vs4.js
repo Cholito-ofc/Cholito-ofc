@@ -105,27 +105,40 @@ ${horaMsg}
     const emojisParticipar = ['❤️', '❤', '♥', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '❤️‍🔥']
     const emojisSuplente = ['👍', '👍🏻', '👍🏼', '👍🏽', '👍🏾', '👍🏿']
 
-    if (jugadoresGlobal.has(sender)) return
+    const esTitular = data.jugadores.includes(sender)
+    const esSuplente = data.suplentes.includes(sender)
 
-    if (data.jugadores.includes(sender)) return
-
-    if (emojisParticipar.includes(emoji)) {
-      if (data.jugadores.length < 4) {
-        let index = data.suplentes.indexOf(sender)
-        if (index !== -1) {
-          data.suplentes.splice(index, 1)
+    if (emojisSuplente.includes(emoji)) {
+      if (esTitular) {
+        if (data.suplentes.length < 2) {
+          data.jugadores = data.jugadores.filter(j => j !== sender)
+          data.suplentes.push(sender)
+          jugadoresGlobal.delete(sender)
+        }
+      } else if (!esSuplente && data.suplentes.length < 2) {
+        data.suplentes.push(sender)
+      } else {
+        return
+      }
+    } else if (emojisParticipar.includes(emoji)) {
+      if (esTitular) return
+      if (esSuplente) {
+        if (data.jugadores.length < 4) {
+          data.suplentes = data.suplentes.filter(s => s !== sender)
           data.jugadores.push(sender)
           jugadoresGlobal.add(sender)
         } else {
-          data.jugadores.push(sender)
-          jugadoresGlobal.add(sender)
+          return
         }
+      } else if (data.jugadores.length < 4) {
+        data.jugadores.push(sender)
+        jugadoresGlobal.add(sender)
+      } else {
+        return
       }
-    } else if (emojisSuplente.includes(emoji)) {
-      if (data.suplentes.length < 2 && !data.suplentes.includes(sender)) {
-        data.suplentes.push(sender)
-      }
-    } else return
+    } else {
+      return
+    }
 
     let jugadores = data.jugadores.map(u => `@${u.split('@')[0]}`)
     let suplentes = data.suplentes.map(u => `@${u.split('@')[0]}`)
