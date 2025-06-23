@@ -1,11 +1,11 @@
-// plugins/owner.js
+// plugins/renovar.js
 const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
 
   const ownerNum = "50489513153";
   const ownerName = "Cholito";
 
-  // Enviar contacto
+  // Enviar contacto del owner
   await conn.sendMessage(chatId, {
     contacts: [{
       displayName: ownerName,
@@ -13,14 +13,14 @@ const handler = async (msg, { conn }) => {
     }]
   }, { quoted: msg });
 
-  // Enviar mensaje personalizado
+  // Enviar mensaje de confirmación
   await conn.sendMessage(chatId, {
-    text: `👑 *Aquí tienes el contacto del owner: ${ownerName}*\n\n📞 *WhatsApp:* wa.me/${ownerNum}\n💬 *Puedes escribirle si necesitas ayuda, soporte o renovar servicios.*`,
+    text: `📞 *Para renovar tu acceso, contacta con:*\n\n👑 *${ownerName}*\n🔗 wa.me/${ownerNum}`,
   }, { quoted: msg });
 };
 
 handler.command = ["renovar"];
 handler.tags = ["info"];
-handler.help = [".owner"];
+handler.help = [".renovar"];
 
 module.exports = handler;
