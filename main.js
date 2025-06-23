@@ -3998,7 +3998,7 @@ case 'menugrupo': {
 ┗━━━━━━✦━━━━━━━☪︎
 
 ┏━ [ 𝗖𝗢𝗡𝗙𝗜𝗚𝗨𝗥𝗔𝗖𝗜𝗢𝗡 🛠️ ]━☪︎
-┃➣ ${global.prefix}𝘵𝘪𝘦𝘮𝘱𝘰
+┃➣ ${global.prefix}𝘵𝘪𝘦𝘮𝘱𝘰𝘴
 ┃➣ ${global.prefix}𝘷𝘦𝘳𝘧𝘦𝘤𝘩𝘢
 ┃➣ ${global.prefix}𝘴𝘦𝘵𝘪𝘯𝘧𝘰
 ┃➣ ${global.prefix}𝘪𝘯𝘧𝘰𝘨𝘳𝘶𝘱𝘰  
