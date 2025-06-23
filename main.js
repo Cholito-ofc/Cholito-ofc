@@ -4885,18 +4885,20 @@ case 'personalidad': {
 case 'tagall':
 case 'invocar':
 case 'todos': {
+case 'tagall':
+case 'invocar':
+case 'todos': {
   try {
     const chatId = msg.key.remoteJid;
     const sender = (msg.key.participant || msg.key.remoteJid).replace(/[^0-9]/g, "");
     const isGroup = chatId.endsWith("@g.us");
     const isBotMessage = msg.key.fromMe;
 
+    // Reacción inicial
     await sock.sendMessage(chatId, { react: { text: "🔊", key: msg.key } });
 
     if (!isGroup) {
-      await sock.sendMessage(chatId, {
-        text: "⚠️ *Este comando solo se puede usar en grupos.*"
-      }, { quoted: msg });
+      await sock.sendMessage(chatId, { text: "⚠️ *Este comando solo se puede usar en grupos.*" }, { quoted: msg });
       return;
     }
 
@@ -4912,60 +4914,22 @@ case 'todos': {
     }
 
     const participants = metadata.participants;
-    const mentionIds = participants.map(p => p.id);
-
+    const mentionList = participants.map(p => `│➜ @${p.id.split("@")[0]}`).join("\n");
     const messageText = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
     const args = messageText.trim().split(" ").slice(1);
     const extraMsg = args.join(" ");
 
-    // Función para obtener bandera por número, incluso si el número viene con "52" falso
-    const getFlagFromNumber = (number) => {
-      // Correcciones comunes si número viene mal por @lid
-      if (number.startsWith("52") && number.length > 11) {
-        number = number.slice(2); // Quitar "52" falso
-      }
-
-      // Mapa por código de país
-      const codeMap = {
-        "502": "GT", "503": "SV", "504": "HN", "505": "NI", "506": "CR", "507": "PA",
-        "51": "PE", "52": "MX", "54": "AR", "55": "BR", "56": "CL", "57": "CO",
-        "58": "VE", "591": "BO", "592": "GY", "593": "EC", "595": "PY", "1": "US", "34": "ES"
-      };
-
-      const matchCode = Object.keys(codeMap).find(code => number.startsWith(code));
-      const countryCode = matchCode ? codeMap[matchCode] : "🌎";
-
-      return countryCode === "🌎" ? "🌎" : countryCode
-        .toUpperCase()
-        .replace(/./g, c => String.fromCodePoint(c.charCodeAt(0) + 127397));
-    };
-
-    // Lista con bandera antes del número, corregido para grupos con @lid
-    const mentionList = participants.map(p => {
-      let num = p.id.split("@")[0];
-
-      // Si es un número mal formado por @lid con 52 falso
-      if (p.id.endsWith("@lid") && num.startsWith("52") && num.length > 11) {
-        num = num.slice(2); // Quitar el 52 falso
-      }
-
-      const flag = getFlagFromNumber(num);
-      return `➤ ${flag} @${num}`;
-    }).join("\n");
-
-    const senderFlag = getFlagFromNumber(sender);
-
-    let finalMsg = `╭────〔 🔊 *INVOCACIÓN GRUPAL* 〕────\n`;
-    finalMsg += `│\n`;
-    finalMsg += `├🤖 *BOT:* 𝗞𝗜𝗟𝗟𝗨𝗔 𝟮.𝟬\n`;
-    finalMsg += `├📍 *Invocado por:* ${senderFlag} @${sender}\n`;
+    let finalMsg = `╭━━[ *INVOCACIÓN MASIVA* ]━⬣\n`;
+    finalMsg += `┃🔹 *KILLUA BOT ⚡*\n`;
+    finalMsg += `┃👤 *Invocado por:* @${sender}\n`;
     if (extraMsg.trim().length > 0) {
-      finalMsg += `├💬 *Mensaje:* ${extraMsg}\n`;
+      finalMsg += `╟💬 *Mensaje:* ${extraMsg}\n`;
     }
-    finalMsg += `│\n`;
-    finalMsg += `╰───────────────────────────────\n\n`;
+    finalMsg += `*╰━━━━━━⋆★⋆━━━━━━⬣*\n\n`;
     finalMsg += `📲 *Etiquetando a todos los miembros...*\n\n`;
     finalMsg += mentionList;
+
+    const mentionIds = participants.map(p => p.id);
 
     await sock.sendMessage(chatId, {
       image: { url: "https://cdn.russellxz.click/c207ff27.jpeg" },
@@ -4980,7 +4944,7 @@ case 'todos': {
     }, { quoted: msg });
   }
   break;
-          }
+}
         
 case 'antiarabe': {
   try {
