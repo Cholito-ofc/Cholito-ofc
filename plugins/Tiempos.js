@@ -82,11 +82,11 @@ const handler = async (msg, { conn, args }) => {
       }, { quoted: msg });
     }
 
-    if (!tiempos[chatId]) {
+    if (!tiempo[chatId]) {
       return conn.sendMessage(chatId, { text: "❌ No se ha establecido ningún tiempo para este grupo." }, { quoted: msg });
     }
 
-    const { fin } = tiempos[chatId];
+    const { fin } = tiempo[chatId];
     const diasRestantes = calcularDiasRestantes(fin);
     const fechaTexto = formatearDiaCompleto(fin);
     const horaTexto = formatearFecha(fin).split(", ")[1]; // Solo hora
@@ -115,8 +115,8 @@ const handler = async (msg, { conn, args }) => {
   }
 };
 
-handler.command = ["tiempos", "verfecha", "renovar"];
+handler.command = ["tiempo", "verfecha", "renovar"];
 handler.tags = ["tools"];
-handler.help = [".tiempos <días>", ".verfecha", ".renovar"];
+handler.help = [".tiempo <días>", ".verfecha", ".renovar"];
 
 module.exports = handler;
