@@ -61,7 +61,7 @@ if (msg.body?.startsWith(".resetemoji")) {
 switch (command) {
   case 'tagall':
   case 'invocar':
-  case 'todos': {
+  case 'tod': {
     try {
       const chatId = msg.key.remoteJid;
       const sender = (msg.key.participant || msg.key.remoteJid).replace(/[^0-9]/g, "");
