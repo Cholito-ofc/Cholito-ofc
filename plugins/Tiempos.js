@@ -48,7 +48,7 @@ const handler = async (msg, { conn, args }) => {
   const tiempos = fs.existsSync(tiemposPath) ? JSON.parse(fs.readFileSync(tiemposPath)) : {};
 
   // Permisos para cada comando
-  if (command.startsWith(".tiempo")) {
+  if (command.startsWith(".tiempos")) {
     if (!isOwner) {
       return conn.sendMessage(chatId, {
         text: "🚫 *Solo el owner puede usar este comando.*"
@@ -82,11 +82,11 @@ const handler = async (msg, { conn, args }) => {
       }, { quoted: msg });
     }
 
-    if (!tiempo[chatId]) {
+    if (!tiempos[chatId]) {
       return conn.sendMessage(chatId, { text: "❌ No se ha establecido ningún tiempo para este grupo." }, { quoted: msg });
     }
 
-    const { fin } = tiempo[chatId];
+    const { fin } = tiempos[chatId];
     const diasRestantes = calcularDiasRestantes(fin);
     const fechaTexto = formatearDiaCompleto(fin);
     const horaTexto = formatearFecha(fin).split(", ")[1]; // Solo hora
@@ -115,8 +115,8 @@ const handler = async (msg, { conn, args }) => {
   }
 };
 
-handler.command = ["tiempo", "verfecha", "renovar"];
+handler.command = ["tiempos", "verfecha", "renovar"];
 handler.tags = ["tools"];
-handler.help = [".tiempo <días>", ".verfecha", ".renovar"];
+handler.help = [".tiempos <días>", ".verfecha", ".renovar"];
 
 module.exports = handler;
