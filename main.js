@@ -4892,7 +4892,7 @@ case 'todos': {
     const isBotMessage = msg.key.fromMe;
 
     // Reacción inicial
-    await sock.sendMessage(chatId, { react: { text: "🔊", key: msg.key } });
+    await sock.sendMessage(chatId, { react: { text: "🗣️", key: msg.key } });
 
     if (!isGroup) {
       await sock.sendMessage(chatId, { text: "⚠️ *Este comando solo se puede usar en grupos.*" }, { quoted: msg });
@@ -4916,13 +4916,13 @@ case 'todos': {
     const args = messageText.trim().split(" ").slice(1);
     const extraMsg = args.join(" ");
 
-    let finalMsg = `╭━━[ *INVOCACIÓN MASIVA* ]━⬣\n`;
+    let finalMsg = `╭━[ *INVOCACIÓN MASIVA* ]━⬣\n`;
     finalMsg += `┃🔹 *KILLUA BOT ⚡*\n`;
     finalMsg += `┃👤 *Invocado por:* @${sender}\n`;
     if (extraMsg.trim().length > 0) {
       finalMsg += `╟💬 *Mensaje:* ${extraMsg}\n`;
     }
-    finalMsg += `*╰━━━━━━⋆★⋆━━━━━━⬣*\n\n`;
+    finalMsg += `*╰━━━━━━━⋆★⋆━━━━━━━⬣*\n\n`;
     finalMsg += `📲 *Etiquetando a todos los miembros...*\n\n`;
     finalMsg += mentionList;
 
