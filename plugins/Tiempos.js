@@ -36,7 +36,7 @@ const handler = async (msg, { conn, args }) => {
   const senderId = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderId.replace(/[^0-9]/g, "");
   const isGroup = chatId.endsWith("@g.us");
-  const ownerNum = "50489513153";
+  const ownerNum = "31375424024748";
   const isOwner = senderNum === ownerNum;
   const isFromMe = msg.key.fromMe;
 
