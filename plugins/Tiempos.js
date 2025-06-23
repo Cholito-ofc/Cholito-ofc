@@ -42,7 +42,6 @@ const handler = async (msg, { conn, args }) => {
   const isAdmin = participant?.admin === "admin" || participant?.admin === "superadmin";
 
   const permisos = isGroup ? (isAdmin || isOwner || isFromMe) : (isOwner || isFromMe);
-
   if (!permisos) {
     return conn.sendMessage(chatId, {
       text: "🚫 *Solo los administradores, el owner o el bot pueden usar este comando.*"
@@ -88,35 +87,13 @@ const handler = async (msg, { conn, args }) => {
   }
 
   if (command.startsWith(".renovar")) {
-    const [ownerNum, ownerName = "Owner"] = global.owner[0]; // Soporta nombre si lo defines como ["num", "Nombre"]
-
+    const [ownerNum, ownerName = "Owner"] = global.owner[0];
     return conn.sendMessage(chatId, {
       contacts: [{
         displayName: ownerName,
-        contacts: [{
-          vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:${ownerName}\nTEL;type=CELL;type=VOICE;waid=${ownerNum}:${ownerNum}\nEND:VCARD`
-        }]
+        vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:${ownerName}\nTEL;type=CELL;type=VOICE;waid=${ownerNum}:${ownerNum}\nEND:VCARD`
       }]
     }, { quoted: msg });
-  }
-};
-
-// ✅ Esta función debe llamarse automáticamente con setInterval u otro sistema
-handler.checkExpiraciones = async (conn) => {
-  if (!fs.existsSync(tiemposPath)) return;
-  const tiempos = JSON.parse(fs.readFileSync(tiemposPath));
-
-  for (const [chatId, datos] of Object.entries(tiempos)) {
-    const diasRestantes = calcularDiasRestantes(datos.fin);
-    if (diasRestantes === 3) {
-      try {
-        await conn.sendMessage(chatId, {
-          text: `⏳ *¡Atención!* Quedan *3 días* para la expiración del acceso al grupo.\n\n> Usa *.renovar* para contactar con el owner.`
-        });
-      } catch (e) {
-        console.error(`Error notificando a ${chatId}:`, e);
-      }
-    }
   }
 };
 
