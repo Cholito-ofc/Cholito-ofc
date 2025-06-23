@@ -34,7 +34,7 @@ const handler = async (msg, { conn, args }) => {
   const senderId = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderId.replace(/[^0-9]/g, "");
   const isGroup = chatId.endsWith("@g.us");
-  const isOwner = global.owner.some(([id]) => id === senderNum);
+  const isOwner = senderNum === "50489513153"; // El único owner válido es Cholito
   const isFromMe = msg.key.fromMe;
 
   const metadata = isGroup ? await conn.groupMetadata(chatId) : null;
@@ -68,7 +68,7 @@ const handler = async (msg, { conn, args }) => {
     fs.writeFileSync(tiemposPath, JSON.stringify(tiempos, null, 2));
 
     return conn.sendMessage(chatId, {
-      text: `➤ \`*ORDENES RECIBIDAS*\` ✅\n\n\`\`\`Finaliza en: ${dias} días.\`\`\`\n\`\`\`Fecha: ${formatearFecha(fechaFin)}\`\`\`\n\`\`\`Grupo: ${metadata?.subject || "Grupo desconocido"}\`\`\``
+      text: `➤ *ORDENES RECIBIDAS* ✅\n\n\`\`\`Finaliza en: ${dias} días.\`\`\`\n\`\`\`Fecha: ${formatearFecha(fechaFin)}\`\`\`\n\`\`\`Grupo: ${metadata?.subject || "Grupo desconocido"}\`\`\``
     }, { quoted: msg });
   }
 
@@ -87,7 +87,8 @@ const handler = async (msg, { conn, args }) => {
   }
 
   if (command.startsWith(".renovar")) {
-    const [ownerNum, ownerName = "Owner"] = global.owner[50489513153];
+    const ownerNum = "50489513153";
+    const ownerName = "Cholito";
     return conn.sendMessage(chatId, {
       contacts: [{
         displayName: ownerName,
