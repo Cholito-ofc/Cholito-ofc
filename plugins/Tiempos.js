@@ -3,8 +3,8 @@ const path = require("path");
 
 const tiemposPath = path.resolve("./tiempos.json");
 
-// Lista de dueños autorizados
-const OWNERS = ["50489513153"];
+// Número único del owner (completo con código de país, sin espacios ni guiones)
+const OWNER_NUMBER = "50489513153";
 
 function formatearFecha(fecha) {
   const date = new Date(fecha);
@@ -37,9 +37,9 @@ function calcularDiasRestantes(fechaFutura) {
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const senderId = msg.key.participant || msg.key.remoteJid;
-  const senderNum = senderId.replace(/[^0-9]/g, "");
+  const senderNum = senderId.replace(/[^0-9]/g, ""); // Número limpio
   const isGroup = chatId.endsWith("@g.us");
-  const isOwner = OWNERS.includes(senderNum);
+  const isOwner = senderNum.endsWith(OWNER_NUMBER); // Detección por terminación exacta
 
   const metadata = isGroup ? await conn.groupMetadata(chatId) : null;
   const participant = metadata?.participants.find(p => p.id === senderId);
@@ -102,7 +102,7 @@ const handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
-  // 📲 .renovar — admin y owner
+  // 🔁 .renovar — admin y owner
   if (command.startsWith(".renovar")) {
     if (!isOwner && !(isGroup && isAdmin)) {
       return conn.sendMessage(chatId, {
@@ -111,7 +111,6 @@ const handler = async (msg, { conn, args }) => {
     }
 
     const ownerName = "Cholito";
-    const ownerNum = "50489513153";
 
     // Botón primero
     await conn.sendMessage(chatId, {
@@ -123,16 +122,16 @@ const handler = async (msg, { conn, args }) => {
       headerType: 1
     }, { quoted: msg });
 
-    // Texto explicativo
+    // Texto informativo
     await conn.sendMessage(chatId, {
-      text: `🔒 *Tu acceso al sistema está por finalizar o ya ha expirado.*\n\nSi deseas continuar utilizando el bot y mantener todas sus funciones activas, contacta con el Owner para renovar tu acceso.\n\n🛠️ Soporte personalizado, activación rápida y atención directa.\n\n👤 *Contacto:* ${ownerName}\n📞 *WhatsApp:* wa.me/${ownerNum}`
+      text: `🔒 *Tu acceso al sistema está por finalizar o ya ha expirado.*\n\nSi deseas continuar utilizando el bot y mantener todas sus funciones activas, contacta con el Owner para renovar tu acceso.\n\n🛠️ Soporte personalizado, activación rápida y atención directa.\n\n👤 *Contacto:* ${ownerName}\n📞 *WhatsApp:* wa.me/${OWNER_NUMBER}`
     }, { quoted: msg });
 
-    // Contacto del owner
+    // Contacto del Owner
     return conn.sendMessage(chatId, {
       contacts: [{
         displayName: ownerName,
-        vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:${ownerName}\nTEL;type=CELL;type=VOICE;waid=${ownerNum}:${ownerNum}\nEND:VCARD`
+        vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:${ownerName}\nTEL;type=CELL;type=VOICE;waid=${OWNER_NUMBER}:${OWNER_NUMBER}\nEND:VCARD`
       }]
     }, { quoted: msg });
   }
