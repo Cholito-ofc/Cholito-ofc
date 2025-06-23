@@ -68,7 +68,7 @@ const handler = async (msg, { conn, args }) => {
     fs.writeFileSync(tiemposPath, JSON.stringify(tiempos, null, 2));
 
     return conn.sendMessage(chatId, {
-      text: `➤ *ORDENES RECIBIDAS* ✅\n\n\`\`\`Finaliza en: ${dias} días.\`\`\`\n\`\`\`Fecha: ${formatearFecha(fechaFin)}\`\`\`\n\`\`\`Grupo: ${metadata?.subject || "Grupo desconocido"}\`\`\``
+      text: `➤ \`ORDENES RECIBIDAS\` ✅\n\n\`\`\`Finaliza en: ${dias} días.\`\`\`\n\`\`\`Fecha: ${formatearFecha(fechaFin)}\`\`\`\n\`\`\`Grupo: ${metadata?.subject || "Grupo desconocido"}\`\`\``
     }, { quoted: msg });
   }
 
@@ -82,7 +82,7 @@ const handler = async (msg, { conn, args }) => {
     const fechaTexto = formatearDiaCompleto(fin);
 
     return conn.sendMessage(chatId, {
-      text: `📅 *SHOWDATE* 🔔\n\n\`\`\`Próximo ${fechaTexto}\`\`\`\n\`\`\`Quedan, ${diasRestantes} días.\`\`\`\n\n> 𝖴𝗌𝖾 .𝗋𝖾𝗇𝗈𝗏𝖺𝗋`
+      text: `📅 \`SHOWDATE\` 🔔\n\n\`\`\`Próximo ${fechaTexto}\`\`\`\n\`\`\`Quedan, ${diasRestantes} días.\`\`\`\n\n> 𝖴𝗌𝖾 .𝗋𝖾𝗇𝗈𝗏𝖺𝗋`
     }, { quoted: msg });
   }
 
