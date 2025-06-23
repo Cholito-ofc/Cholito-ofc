@@ -4885,9 +4885,6 @@ case 'personalidad': {
 case 'tagall':
 case 'invocar':
 case 'todos': {
-case 'tagall':
-case 'invocar':
-case 'todos': {
   try {
     const chatId = msg.key.remoteJid;
     const sender = (msg.key.participant || msg.key.remoteJid).replace(/[^0-9]/g, "");
