@@ -28,12 +28,9 @@ const handler = async (msg, { conn, args }) => {
 
   let target = null;
 
-  // Opción 1: Si se responde a un mensaje
   if (context?.participant) {
     target = context.participant;
-  }
-  // Opción 2: Si se usa una mención @usuario
-  else if (mentionedJid.length > 0) {
+  } else if (mentionedJid.length > 0) {
     target = mentionedJid[0];
   }
 
@@ -53,12 +50,24 @@ const handler = async (msg, { conn, args }) => {
     fs.writeFileSync(banPath, JSON.stringify(banData, null, 2));
 
     await conn.sendMessage(chatId, {
-      text: `✅ *Usuario* @${target.split("@")[0]} *ha sido desbaneado exitosamente.*`,
+      text:
+`✅ *El usuario ha sido desbaneado.*
+
+╭─⬣「 *Usuario Desbaneado* 」⬣
+│ 👤 Usuario: @${target.split("@")[0]}
+│ ✅ Estado: Desbaneado
+╰─⬣`,
       mentions: [target],
     }, { quoted: msg });
   } else {
     await conn.sendMessage(chatId, {
-      text: `⚠️ *El usuario* @${target.split("@")[0]} *no está baneado actualmente.*`,
+      text:
+`⚠️ *Este usuario no está baneado.*
+
+╭─⬣「 *Sin Restricción* 」⬣
+│ 👤 Usuario: @${target.split("@")[0]}
+│ ⚠️ Estado: No baneado
+╰─⬣`,
       mentions: [target],
     }, { quoted: msg });
   }
