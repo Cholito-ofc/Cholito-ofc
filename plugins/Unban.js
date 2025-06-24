@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const handler = async (msg, { conn, args }) => {
+const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
   const senderId = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderId.replace(/[^0-9]/g, "");
@@ -10,7 +10,7 @@ const handler = async (msg, { conn, args }) => {
 
   if (!isGroup) {
     return conn.sendMessage(chatId, {
-      text: "🚫 Este comando solo puede usarse en *grupos*."
+      text: "🌐 *Este comando solo puede utilizarse en grupos.*",
     }, { quoted: msg });
   }
 
@@ -19,27 +19,16 @@ const handler = async (msg, { conn, args }) => {
 
   if (!isAdmin && !isOwner) {
     return conn.sendMessage(chatId, {
-      text: "⛔ Solo *administradores* o el *dueño* del bot pueden usar este comando."
+      text: "🚫 *Acceso denegado.*\nSolo los *administradores* o el *propietario del bot* pueden ejecutar este comando.",
     }, { quoted: msg });
   }
 
   const context = msg.message?.extendedTextMessage?.contextInfo;
-  let target = context?.participant;
-
-  // Si no respondió, buscar en las menciones
-  if (!target && args.length > 0) {
-    const mention = args[0].replace(/[@+]/g, "").replace(/[^0-9]/g, "");
-    target = metadata.participants.find(p => p.id.startsWith(mention))?.id + "@s.whatsapp.net";
-  }
+  const target = context?.participant;
 
   if (!target) {
     return conn.sendMessage(chatId, {
-      text: `⚠️ *Uso incorrecto del comando*
-
-╭─⬣「 *Desbanear Usuario* 」⬣
-│ ✅ Responde al mensaje del usuario o 
-│ ✅ Usa: *.unban @usuario*
-╰─⬣`
+      text: "📌 *Debes responder al mensaje del usuario que deseas desbanear.*",
     }, { quoted: msg });
   }
 
@@ -52,24 +41,13 @@ const handler = async (msg, { conn, args }) => {
     fs.writeFileSync(banPath, JSON.stringify(banData, null, 2));
 
     await conn.sendMessage(chatId, {
-      text: `✅ *Usuario desbaneado correctamente.*
-
-╭─⬣「 *Desbaneo Exitoso* 」⬣
-│ 👤 Usuario: @${target.split("@")[0]}
-│ 🔓 Acción: *DESBANEADO*
-╰─⬣
-
-> 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 ⚡`,
+      text: `✅ *El usuario* @${target.split("@")[0]} *ha sido desbaneado exitosamente.*`,
       mentions: [target]
     }, { quoted: msg });
+
   } else {
     await conn.sendMessage(chatId, {
-      text: `⚠️ *Este usuario no estaba baneado.*
-
-╭─⬣「 *Usuario No Baneado* 」⬣
-│ 👤 Usuario: @${target.split("@")[0]}
-│ ℹ️ Estado: No estaba baneado
-╰─⬣`,
+      text: `⚠️ *El usuario* @${target.split("@")[0]} *no se encuentra baneado.*`,
       mentions: [target]
     }, { quoted: msg });
   }
