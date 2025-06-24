@@ -13,7 +13,7 @@ if (!fs.existsSync(configFilePath)) {
 const config = JSON.parse(fs.readFileSync(configFilePath, "utf-8"));
 
 // 🔥 Prefijo global desde archivo de configuración
-global.prefix = config.prefix || ".";
+global.prefix = config.prefix || ".", "#", "!";
 
 // Lista de Owners
 global.owner = [
