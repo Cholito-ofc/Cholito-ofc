@@ -76,7 +76,7 @@ const handler = async (msg, { conn, args }) => {
       text: `⚠️ *Este usuario ya está muteado.*
 
 ╭─⬣「 *Usuario Muteado* 」⬣
-│ 🔇 Usuario: @${target.split("@")[0]}
+│ 🔇 Usuario: Usuario @${target.split("@")[0]}
 │ ℹ️ Estado: Ya estaba muteado
 ╰─⬣`,
       mentions: [target]
