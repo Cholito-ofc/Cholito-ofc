@@ -8,6 +8,9 @@ const MAX_RETRIES = 2;
 const TIMEOUT_MS = 10000;
 const RETRY_DELAY_MS = 12000;
 
+// Agrega tu clave si usas lolhuman
+const LOLHUMAN_KEY = 'Tu_API_Key_Aquí';
+
 function isUserBlocked(userId) {
   try {
     const blockedUsers = JSON.parse(fs.readFileSync('./bloqueados.json', 'utf8'));
@@ -18,21 +21,42 @@ function isUserBlocked(userId) {
 }
 
 async function getDownloadUrl(videoUrl) {
-  const apis = [{ url: 'https://api.vreden.my.id/api/ytmp3?url=', type: 'vreden' }];
+  const apis = [
+    {
+      name: 'vreden',
+      url: `https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(videoUrl)}`,
+      extract: res => res?.data?.result?.download?.url && res?.data?.result?.download?.status
+        ? {
+            url: res.data.result.download.url.trim(),
+            title: res.data.result.metadata.title
+          } : null
+    },
+    {
+      name: 'bx',
+      url: `https://bx-hunter.herokuapp.com/api/yta?url=${encodeURIComponent(videoUrl)}`,
+      extract: res => res?.data?.dl_link
+        ? {
+            url: res.data.dl_link,
+            title: res.data.title
+          } : null
+    },
+    {
+      name: 'lolhuman',
+      url: `https://api.lolhuman.xyz/api/ytaudio?apikey=${LOLHUMAN_KEY}&url=${encodeURIComponent(videoUrl)}`,
+      extract: res => res?.data?.link
+        ? {
+            url: res.data.link,
+            title: res.data.title
+          } : null
+    }
+  ];
+
   for (const api of apis) {
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       try {
-        const response = await axios.get(`${api.url}${encodeURIComponent(videoUrl)}`, { timeout: TIMEOUT_MS });
-        if (
-          response.data?.status === 200 &&
-          response.data?.result?.download?.url &&
-          response.data?.result?.download?.status === true
-        ) {
-          return {
-            url: response.data.result.download.url.trim(),
-            title: response.data.result.metadata.title
-          };
-        }
+        const response = await axios.get(api.url, { timeout: TIMEOUT_MS });
+        const downloadData = api.extract(response);
+        if (downloadData) return downloadData;
       } catch {
         if (attempt < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
       }
@@ -124,8 +148,8 @@ const handler = async (msg, { conn, args }) => {
     return conn.sendMessage(chatId, {
       text: `➤ \`UPS, ERROR\` ❌
 
-𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗋𝗈𝗅𝗂𝗍𝖺* *.𝗉𝗅𝖺𝗒1* 𝗈 *.𝗉𝗅𝖺𝗒2*
-".𝗋𝖾𝗉𝗈𝗋𝗍 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
+𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗌𝗉𝗈𝗍𝗂𝖿𝗒* *.𝗋𝗈𝗅𝗂𝗍𝖺* 𝗈 *.𝗉𝗅𝖺𝗒𝗒*
+".𝗋𝖾𝗉𝗈𝗋𝗍𝖾 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
 > 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗍𝖺𝗇 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
     }, { quoted: msg });
   }
