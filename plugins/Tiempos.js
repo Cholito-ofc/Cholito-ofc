@@ -36,8 +36,10 @@ const handler = async (msg, { conn, args }) => {
   const senderId = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderId.replace(/[^0-9]/g, "");
   const isGroup = chatId.endsWith("@g.us");
-  const ownerNum = "31375424024748";
-  const isOwner = senderNum === ownerNum;
+
+  // Lista de propietarios
+  const OWNERS = ["31375424024748", "50489513153"];
+  const isOwner = OWNERS.includes(senderNum);
   const isFromMe = msg.key.fromMe;
 
   const metadata = isGroup ? await conn.groupMetadata(chatId) : null;
@@ -103,15 +105,17 @@ const handler = async (msg, { conn, args }) => {
       }, { quoted: msg });
     }
 
-    const ownerName = "Cholito";
-    const ownerNum = "50489513153";
+    const ownersInfo = [
+      { name: "Cholito", number: "50489513153" },
+      { name: "Support", number: "31375424024748" }
+    ];
 
-    return conn.sendMessage(chatId, {
-      contacts: [{
-        displayName: ownerName,
-        vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:${ownerName}\nTEL;type=CELL;type=VOICE;waid=${ownerNum}:${ownerNum}\nEND:VCARD`
-      }]
-    }, { quoted: msg });
+    const contacts = ownersInfo.map(o => ({
+      displayName: o.name,
+      vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:${o.name}\nTEL;type=CELL;type=VOICE;waid=${o.number}:${o.number}\nEND:VCARD`
+    }));
+
+    return conn.sendMessage(chatId, { contacts }, { quoted: msg });
   }
 };
 
