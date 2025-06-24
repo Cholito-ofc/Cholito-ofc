@@ -26,10 +26,10 @@ const handler = async (msg, { conn, args }) => {
   const context = msg.message?.extendedTextMessage?.contextInfo;
   let target = context?.participant;
 
-  // Si no respondió, buscar en las menciones
   if (!target && args.length > 0) {
     const mention = args[0].replace(/[@+]/g, "").replace(/[^0-9]/g, "");
-    target = metadata.participants.find(p => p.id.startsWith(mention))?.id + "@s.whatsapp.net";
+    const found = metadata.participants.find(p => p.id.startsWith(mention));
+    if (found) target = found.id;
   }
 
   if (!target) {
@@ -44,9 +44,7 @@ const handler = async (msg, { conn, args }) => {
   }
 
   const targetNum = target.replace(/[^0-9]/g, "");
-  const isTargetOwner = global.owner.some(([id]) => id === targetNum);
-
-  if (isTargetOwner) {
+  if (global.owner.some(([id]) => id === targetNum)) {
     return conn.sendMessage(chatId, {
       text: "❌ No puedes mutear al *dueño del bot*."
     }, { quoted: msg });
@@ -59,12 +57,11 @@ const handler = async (msg, { conn, args }) => {
   if (!muteData[chatId].includes(target)) {
     muteData[chatId].push(target);
     fs.writeFileSync(mutePath, JSON.stringify(muteData, null, 2));
-
     await conn.sendMessage(chatId, {
       text: `✅ *Usuario muteado correctamente.*
 
 ╭─⬣「 *Mute Exitoso* 」⬣
-│ 🔇 Usuario: @${target.split("@")[0]}
+│ 🔇 Usuario: ${target.split("@")[0]}
 │ 🚫 Acción: *MUTEADO*
 ╰─⬣
 
@@ -73,12 +70,7 @@ const handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   } else {
     await conn.sendMessage(chatId, {
-      text: `⚠️ *Este usuario ya está muteado.*
-
-╭─⬣「 *Usuario Muteado* 」⬣
-│ 🔇 Usuario: Usuario @${target.split("@")[0]}
-│ ℹ️ Estado: Ya estaba muteado
-╰─⬣`,
+      text: "⚠️ Este usuario ya está muteado.",
       mentions: [target]
     }, { quoted: msg });
   }
