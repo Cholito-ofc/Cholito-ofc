@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const handler = async (msg, { conn }) => {
+const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const senderId = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderId.replace(/[^0-9]/g, "");
@@ -10,24 +10,36 @@ const handler = async (msg, { conn }) => {
 
   if (!isGroup) {
     return conn.sendMessage(chatId, {
-      text: "❌ Este comando solo puede usarse en grupos."
+      text: "🚫 Este comando solo puede usarse en *grupos*."
     }, { quoted: msg });
   }
 
   const metadata = await conn.groupMetadata(chatId);
   const isAdmin = metadata.participants.find(p => p.id === senderId)?.admin;
+
   if (!isAdmin && !isOwner) {
     return conn.sendMessage(chatId, {
-      text: "❌ Solo *admins* o *dueños* del bot pueden usar este comando."
+      text: "⛔ Solo *administradores* o el *dueño* del bot pueden usar este comando."
     }, { quoted: msg });
   }
 
   const context = msg.message?.extendedTextMessage?.contextInfo;
-  const target = context?.participant;
+  let target = context?.participant;
+
+  // Si no respondió, buscar en las menciones
+  if (!target && args.length > 0) {
+    const mention = args[0].replace(/[@+]/g, "").replace(/[^0-9]/g, "");
+    target = metadata.participants.find(p => p.id.startsWith(mention))?.id + "@s.whatsapp.net";
+  }
 
   if (!target) {
     return conn.sendMessage(chatId, {
-      text: "⚠️ Responde al mensaje del usuario que quieres mutear."
+      text: `⚠️ *Uso incorrecto del comando*
+
+╭─⬣「 *Mutear Usuario* 」⬣
+│ 🔇 Responde al mensaje del usuario o 
+│ 🔇 Usa: *.mute @usuario*
+╰─⬣`
     }, { quoted: msg });
   }
 
@@ -47,13 +59,26 @@ const handler = async (msg, { conn }) => {
   if (!muteData[chatId].includes(target)) {
     muteData[chatId].push(target);
     fs.writeFileSync(mutePath, JSON.stringify(muteData, null, 2));
+
     await conn.sendMessage(chatId, {
-      text: `🔇 Usuario @${target.split("@")[0]} ha sido muteado.`,
+      text: `✅ *Usuario muteado correctamente.*
+
+╭─⬣「 *Mute Exitoso* 」⬣
+│ 🔇 Usuario: @${target.split("@")[0]}
+│ 🚫 Acción: *MUTEADO*
+╰─⬣
+
+> 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 ⚡`,
       mentions: [target]
     }, { quoted: msg });
   } else {
     await conn.sendMessage(chatId, {
-      text: "⚠️ Este usuario ya está muteado.",
+      text: `⚠️ *Este usuario ya está muteado.*
+
+╭─⬣「 *Usuario Muteado* 」⬣
+│ 🔇 Usuario: @${target.split("@")[0]}
+│ ℹ️ Estado: Ya estaba muteado
+╰─⬣`,
       mentions: [target]
     }, { quoted: msg });
   }
