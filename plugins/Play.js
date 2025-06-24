@@ -65,26 +65,23 @@ const handler = async (msg, { conn, args }) => {
   const sender = msg.key.participant || msg.key.remoteJid;
   const senderNum = sender.replace(/[^0-9]/g, "");
 
-  // Reacción inicial al comando
   await conn.sendMessage(chatId, { react: { text: '🎶', key: msg.key } });
 
-  // Verifica si el usuario está bloqueado
   if (isUserBlocked(senderNum)) {
     return conn.sendMessage(chatId, {
       text: "🚫 Lo siento, estás en la lista de usuarios bloqueados."
     }, { quoted: msg });
   }
 
-  // Si no se escribe el nombre de la canción
   if (!args || !args.join(" ").trim()) {
-  return conn.sendMessage(chatId, {
-    text: `╭─⬣「 *KilluaBot* 」⬣
+    return conn.sendMessage(chatId, {
+      text: `╭─⬣「 *KilluaBot* 」⬣
 │ ≡◦ 🎧 *Uso correcto del comando:*
 │ ≡◦ .play Anuel perfecto
 ╰─⬣
 > © ⍴᥆ᥕᥱrᥱძ ᑲᥡ һᥒ ᥴһ᥆ᥣі𝗍᥆`,
-  }, { quoted: msg });
-}
+    }, { quoted: msg });
+  }
 
   const query = args.join(" ").trim();
 
@@ -125,7 +122,11 @@ const handler = async (msg, { conn, args }) => {
 
   } catch (error) {
     return conn.sendMessage(chatId, {
-      text: `🚨 *Error:* ${error.message || 'Error desconocido'}`
+      text: `➤ \`UPS, ERROR\` ❌
+
+𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗌𝗉𝗈𝗍𝗂𝖿𝗒* *.𝗋𝗈𝗅𝗂𝗍1* 𝗈 *.𝗉𝗅𝖺𝗒2*
+".𝗋𝖾𝗉𝗈𝗋𝗍 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
+> 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗍𝖺𝗇 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
     }, { quoted: msg });
   }
 };
