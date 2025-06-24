@@ -33,33 +33,41 @@ function calcularDiasRestantes(fechaFutura) {
 
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
-  const isGroup = msg.key.remoteJid.endsWith("@g.us");
-let senderId;
-
-if (isGroup) {
-  // En grupos, usar participant si existe, sino remoteJid
-  senderId = msg.key.participant || msg.participant || msg.key.remoteJid;
-} else {
-  // En chats privados, usar remoteJid
-  senderId = msg.key.remoteJid;
-}
-
-const senderNum = senderId.replace(/[^0-9]/g, "");
   const isGroup = chatId.endsWith("@g.us");
 
-  // Lista de propietarios
+  // Obtener número real del remitente
+  let senderId;
+  if (isGroup) {
+    senderId = msg.key.participant || msg.participant || msg.key.remoteJid;
+  } else {
+    senderId = msg.key.remoteJid;
+  }
+
+  const senderNum = senderId.replace(/[^0-9]/g, "");
+
+  // Definir lista de Owners
   const OWNERS = ["31375424024748", "50489513153"];
   const isOwner = OWNERS.includes(senderNum);
-  const isFromMe = msg.key.fromMe;
 
-  const metadata = isGroup ? await conn.groupMetadata(chatId) : null;
-  const participant = metadata?.participants.find(p => p.id === senderId);
-  const isAdmin = participant?.admin === "admin" || participant?.admin === "superadmin";
+  // Metadata para saber si es admin
+  let metadata = null;
+  let participant = null;
+  let isAdmin = false;
+
+  if (isGroup) {
+    try {
+      metadata = await conn.groupMetadata(chatId);
+      participant = metadata.participants.find(p => p.id === senderId);
+      isAdmin = participant?.admin === "admin" || participant?.admin === "superadmin";
+    } catch (e) {
+      console.error("Error al obtener metadata del grupo:", e.message);
+    }
+  }
 
   const command = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
   const tiempos = fs.existsSync(tiemposPath) ? JSON.parse(fs.readFileSync(tiemposPath)) : {};
 
-  // Permisos para cada comando
+  // .tiempos <días>
   if (command.startsWith(".tiempos")) {
     if (!isOwner) {
       return conn.sendMessage(chatId, {
@@ -69,7 +77,9 @@ const senderNum = senderId.replace(/[^0-9]/g, "");
 
     const dias = parseInt(args[0]);
     if (isNaN(dias) || dias <= 0) {
-      return conn.sendMessage(chatId, { text: "⚠️ Especifica un número válido de días. Ejemplo: *.tiempos 30*" }, { quoted: msg });
+      return conn.sendMessage(chatId, {
+        text: "⚠️ Especifica un número válido de días. Ejemplo: *.tiempos 30*"
+      }, { quoted: msg });
     }
 
     const fechaActual = Date.now();
@@ -87,29 +97,33 @@ const senderNum = senderId.replace(/[^0-9]/g, "");
     }, { quoted: msg });
   }
 
+  // .verfecha
   if (command.startsWith(".verfecha")) {
-    if (!isOwner && !(isGroup && isAdmin)) {
+    if (!isOwner && !isAdmin) {
       return conn.sendMessage(chatId, {
         text: "🚫 *Solo los administradores y el owner pueden usar este comando.*"
       }, { quoted: msg });
     }
 
     if (!tiempos[chatId]) {
-      return conn.sendMessage(chatId, { text: "❌ No se ha establecido ningún tiempo para este grupo." }, { quoted: msg });
+      return conn.sendMessage(chatId, {
+        text: "❌ No se ha establecido ningún tiempo para este grupo."
+      }, { quoted: msg });
     }
 
     const { fin } = tiempos[chatId];
     const diasRestantes = calcularDiasRestantes(fin);
     const fechaTexto = formatearDiaCompleto(fin);
-    const horaTexto = formatearFecha(fin).split(", ")[1]; // Solo hora
+    const horaTexto = formatearFecha(fin).split(", ")[1];
 
     return conn.sendMessage(chatId, {
       text: `📅 \`SHOWDATE\` 🔔\n\n\`\`\`Próximo ${fechaTexto}\`\`\`\n\`\`\`Hora exacta: ${horaTexto} (hora CDMX)\`\`\`\n\`\`\`Quedan, ${diasRestantes} días.\`\`\`\n\n> 𝖴𝗌𝖾 .𝗋𝖾𝗇𝗈𝗏𝖺𝗋`
     }, { quoted: msg });
   }
 
+  // .renovar
   if (command.startsWith(".renovar")) {
-    if (!isOwner && !(isGroup && isAdmin)) {
+    if (!isOwner && !isAdmin) {
       return conn.sendMessage(chatId, {
         text: "🚫 *Solo los administradores y el owner pueden usar este comando.*"
       }, { quoted: msg });
