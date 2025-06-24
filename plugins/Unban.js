@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const handler = async (msg, { conn }) => {
+const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const senderId = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderId.replace(/[^0-9]/g, "");
@@ -16,6 +16,7 @@ const handler = async (msg, { conn }) => {
 
   const metadata = await conn.groupMetadata(chatId);
   const isAdmin = metadata.participants.find(p => p.id === senderId)?.admin;
+
   if (!isAdmin && !isOwner) {
     return conn.sendMessage(chatId, {
       text: "🚫 *Permiso denegado*\nSolo los *admins* o el *dueño del bot* pueden usar este comando.",
@@ -23,29 +24,19 @@ const handler = async (msg, { conn }) => {
   }
 
   const context = msg.message?.extendedTextMessage?.contextInfo;
-  const mentionedJid = context?.mentionedJid || [];
+  const mentionedJid = msg.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
 
   let target = null;
 
-  // Opción 1: Responder mensaje
   if (context?.participant) {
     target = context.participant;
-  }
-  // Opción 2: Mención @usuario
-  else if (mentionedJid.length > 0) {
+  } else if (mentionedJid.length > 0) {
     target = mentionedJid[0];
   }
 
   if (!target) {
     return conn.sendMessage(chatId, {
-      text: "📍 *Debes responder al mensaje o mencionar con @ al usuario que deseas banear.*",
-    }, { quoted: msg });
-  }
-
-  const targetNum = target.replace(/[^0-9]/g, "");
-  if (global.owner.some(([id]) => id === targetNum)) {
-    return conn.sendMessage(chatId, {
-      text: "❌ *No puedes banear al dueño del bot.*",
+      text: "📍 *Debes responder al mensaje o mencionar con @ al usuario que quieres desbanear.*",
     }, { quoted: msg });
   }
 
@@ -53,34 +44,34 @@ const handler = async (msg, { conn }) => {
   const banData = fs.existsSync(banPath) ? JSON.parse(fs.readFileSync(banPath)) : {};
   if (!banData[chatId]) banData[chatId] = [];
 
-  if (!banData[chatId].includes(target)) {
-    banData[chatId].push(target);
+  if (banData[chatId].includes(target)) {
+    // Desbanear
+    banData[chatId] = banData[chatId].filter(u => u !== target);
     fs.writeFileSync(banPath, JSON.stringify(banData, null, 2));
 
     await conn.sendMessage(chatId, {
       text:
-`🚫 *El usuario ha sido baneado del grupo.*
+`✅ *El usuario ha sido desbaneado.*
 
-╭─⬣「 *Usuario Baneado* 」⬣
+╭─⬣「 *Usuario Desbaneado* 」⬣
 │ 👤 Usuario: @${target.split("@")[0]}
-│ 🔒 Estado: Baneado
+│ ✅ Estado: Desbaneado
 ╰─⬣`,
       mentions: [target],
     }, { quoted: msg });
-
   } else {
     await conn.sendMessage(chatId, {
       text:
-`⚠️ *Este usuario ya está baneado.*
+`⚠️ *Este usuario no está baneado.*
 
-╭─⬣「 *Ya Baneado* 」⬣
+╭─⬣「 *Sin Restricción* 」⬣
 │ 👤 Usuario: @${target.split("@")[0]}
-│ 🔒 Estado: Baneado
+│ ⚠️ Estado: No baneado
 ╰─⬣`,
       mentions: [target],
     }, { quoted: msg });
   }
 };
 
-handler.command = ["ban"];
+handler.command = ["unban"];
 module.exports = handler;
