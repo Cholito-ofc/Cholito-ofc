@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const handler = async (msg, { conn, args }) => {
+const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
   const senderId = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderId.replace(/[^0-9]/g, "");
@@ -10,43 +10,44 @@ const handler = async (msg, { conn, args }) => {
 
   if (!isGroup) {
     return conn.sendMessage(chatId, {
-      text: "🚫 Este comando solo puede usarse en *grupos*."
+      text: "📛 *Este comando solo puede usarse en grupos.*"
     }, { quoted: msg });
   }
 
   const metadata = await conn.groupMetadata(chatId);
   const isAdmin = metadata.participants.find(p => p.id === senderId)?.admin;
-
   if (!isAdmin && !isOwner) {
     return conn.sendMessage(chatId, {
-      text: "⛔ Solo *administradores* o el *dueño* del bot pueden usar este comando."
+      text: "🚫 *Acceso denegado*\nSolo los *admins* o *dueños* del bot pueden usar este comando."
     }, { quoted: msg });
   }
 
   const context = msg.message?.extendedTextMessage?.contextInfo;
-  let target = context?.participant;
+  const mentionedJid = context?.mentionedJid || [];
 
-  if (!target && args.length > 0) {
-    const mention = args[0].replace(/[@+]/g, "").replace(/[^0-9]/g, "");
-    const found = metadata.participants.find(p => p.id.startsWith(mention));
-    if (found) target = found.id;
+  let target = null;
+
+  // Opción 1: responder a mensaje
+  if (context?.participant) {
+    target = context.participant;
+  }
+  // Opción 2: mencionar con @
+  else if (mentionedJid.length > 0) {
+    target = mentionedJid[0];
   }
 
   if (!target) {
     return conn.sendMessage(chatId, {
-      text: `⚠️ *Uso incorrecto del comando*
-
-╭─⬣「 *Mutear Usuario* 」⬣
-│ 🔇 Responde al mensaje del usuario o 
-│ 🔇 Usa: *.mute @usuario*
-╰─⬣`
+      text: "📍 *Debes responder al mensaje o mencionar con @ al usuario que deseas mutear.*"
     }, { quoted: msg });
   }
 
   const targetNum = target.replace(/[^0-9]/g, "");
-  if (global.owner.some(([id]) => id === targetNum)) {
+  const isTargetOwner = global.owner.some(([id]) => id === targetNum);
+
+  if (isTargetOwner) {
     return conn.sendMessage(chatId, {
-      text: "❌ No puedes mutear al *dueño del bot*."
+      text: "❌ *No puedes mutear al dueño del bot.*"
     }, { quoted: msg });
   }
 
@@ -57,20 +58,27 @@ const handler = async (msg, { conn, args }) => {
   if (!muteData[chatId].includes(target)) {
     muteData[chatId].push(target);
     fs.writeFileSync(mutePath, JSON.stringify(muteData, null, 2));
+
     await conn.sendMessage(chatId, {
-      text: `✅ *Usuario muteado correctamente.*
+      text:
+`🔇 *El usuario ha sido silenciado en el grupo.*
 
-╭─⬣「 *Mute Exitoso* 」⬣
-│ 🔇 Usuario: ${target.split("@")[0]}
-│ 🚫 Acción: *MUTEADO*
-╰─⬣
-
-> 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 ⚡`,
+╭─⬣「 *Usuario Silenciado* 」⬣
+│ 👤 Usuario: @${target.split("@")[0]}
+│ 🚫 Estado: Muteado
+╰─⬣`,
       mentions: [target]
     }, { quoted: msg });
+
   } else {
     await conn.sendMessage(chatId, {
-      text: "⚠️ Este usuario ya está muteado.",
+      text:
+`⚠️ *Este usuario ya está silenciado.*
+
+╭─⬣「 *Ya Silenciado* 」⬣
+│ 👤 Usuario: @${target.split("@")[0]}
+│ 🔇 Estado: Muteado
+╰─⬣`,
       mentions: [target]
     }, { quoted: msg });
   }
