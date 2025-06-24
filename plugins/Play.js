@@ -8,8 +8,8 @@ const MAX_RETRIES = 2;
 const TIMEOUT_MS = 10000;
 const RETRY_DELAY_MS = 12000;
 
-// Coloca tu API key de lolhuman si la tienes
-const LOLHUMAN_KEY = 'Tu_API_Key_Lolhuman';
+// Tu clave API de Sylphy
+const SYLPHY_API_KEY = 'Tu_API_Key_Aquí';
 
 function isUserBlocked(userId) {
   try {
@@ -20,64 +20,19 @@ function isUserBlocked(userId) {
   }
 }
 
-async function getDownloadUrl(query, videoUrl) {
-  const apis = [
-    {
-      name: 'vreden',
-      url: `https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(videoUrl)}`,
-      extract: res => res?.data?.result?.download?.url && res?.data?.result?.download?.status
-        ? {
-            url: res.data.result.download.url.trim(),
-            title: res.data.result.metadata.title
-          } : null
-    },
-    {
-      name: 'bx',
-      url: `https://bx-hunter.herokuapp.com/api/yta?url=${encodeURIComponent(videoUrl)}`,
-      extract: res => res?.data?.dl_link
-        ? {
-            url: res.data.dl_link,
-            title: res.data.title
-          } : null
-    },
-    {
-      name: 'lolhuman',
-      url: `https://api.lolhuman.xyz/api/ytaudio?apikey=${LOLHUMAN_KEY}&url=${encodeURIComponent(videoUrl)}`,
-      extract: res => res?.data?.link
-        ? {
-            url: res.data.link,
-            title: res.data.title
-          } : null
-    },
-    {
-      name: 'zenkey',
-      url: `https://api.zenkey.my.id/api/download/ytmp4?apikey=zenkey&url=${encodeURIComponent(videoUrl)}`,
-      extract: res => res?.data?.result?.mp3_audio
-        ? {
-            url: res.data.result.mp3_audio,
-            title: res.data.result.title
-          } : null
-    },
-    {
-      name: 'nekorinn',
-      url: `https://api.nekorinn.my.id/downloader/spotifyplay?q=${encodeURIComponent(query)}`,
-      extract: res => res?.data?.result?.url
-        ? {
-            url: res.data.result.url,
-            title: res.data.result.title || query
-          } : null
-    }
-  ];
-
-  for (const api of apis) {
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      try {
-        const response = await axios.get(api.url, { timeout: TIMEOUT_MS });
-        const downloadData = api.extract(response);
-        if (downloadData) return downloadData;
-      } catch {
-        if (attempt < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
+async function getDownloadUrl(videoUrl) {
+  const apiUrl = `https://api.sylphy.xyz/download/ytmp3?url=${encodeURIComponent(videoUrl)}&apikey=${SYLPHY_API_KEY}`;
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      const res = await axios.get(apiUrl, { timeout: TIMEOUT_MS });
+      if (res?.data?.result?.url) {
+        return {
+          url: res.data.result.url,
+          title: res.data.result.title || 'Audio'
+        };
       }
+    } catch {
+      if (attempt < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
     }
   }
   return null;
@@ -155,7 +110,7 @@ const handler = async (msg, { conn, args }) => {
       caption: caption
     }, { quoted: msg });
 
-    const downloadData = await getDownloadUrl(query, videoUrl);
+    const downloadData = await getDownloadUrl(videoUrl);
     if (!downloadData || !downloadData.url) {
       throw new Error('No se pudo descargar la música.');
     }
@@ -166,7 +121,7 @@ const handler = async (msg, { conn, args }) => {
     return conn.sendMessage(chatId, {
       text: `➤ \`UPS, ERROR\` ❌
 
-𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗋𝗈𝗅𝗂𝗍𝖺* *.𝗉𝗅𝖺𝗒𝟣* 𝗈 *.𝗉𝗅𝖺𝗒𝟤*
+𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗌𝗉𝗈𝗍𝗂𝖿𝗒* *.𝗋𝗈𝗅𝗂𝗍𝖺* 𝗈 *.𝗉𝗅𝖺𝗒𝗒*
 ".𝗋𝖾𝗉𝗈𝗋𝗍𝖾 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
 > 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗍𝖺𝗇 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
     }, { quoted: msg });
