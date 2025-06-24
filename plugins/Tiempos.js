@@ -33,8 +33,18 @@ function calcularDiasRestantes(fechaFutura) {
 
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
-  const senderId = msg.key.participant || msg.key.remoteJid;
-  const senderNum = senderId.replace(/[^0-9]/g, "");
+  const isGroup = msg.key.remoteJid.endsWith("@g.us");
+let senderId;
+
+if (isGroup) {
+  // En grupos, usar participant si existe, sino remoteJid
+  senderId = msg.key.participant || msg.participant || msg.key.remoteJid;
+} else {
+  // En chats privados, usar remoteJid
+  senderId = msg.key.remoteJid;
+}
+
+const senderNum = senderId.replace(/[^0-9]/g, "");
   const isGroup = chatId.endsWith("@g.us");
 
   // Lista de propietarios
