@@ -4911,6 +4911,7 @@ case 'todos': {
     }
 
     const participants = metadata.participants;
+    const totalParticipants = participants.length;
     const mentionList = participants.map(p => `│➜ @${p.id.split("@")[0]}`).join("\n");
     const messageText = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
     const args = messageText.trim().split(" ").slice(1);
@@ -4919,12 +4920,14 @@ case 'todos': {
     let finalMsg = `*╭━[* *INVOCACIÓN MASIVA* *]━⬣*\n`;
     finalMsg += `┃🔹 *KILLUA-BOT ⚡*\n`;
     finalMsg += `┃👤 *Invocado por:* @${sender}\n`;
+    finalMsg += `┃👥 *Miembros del grupo:* ${totalParticipants}\n`;
     if (extraMsg.trim().length > 0) {
       finalMsg += `┃💬 *Mensaje:* ${extraMsg}\n`;
     }
     finalMsg += `*╰━━━━━━━⋆★⋆━━━━━━━⬣*\n\n`;
     finalMsg += `📲 *Etiquetando a todos los miembros...*\n\n`;
     finalMsg += mentionList;
+    finalMsg += `\n\n╰─[ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖶𝗁𝖺𝗍𝗌𝖠𝗉𝗉 ⚡]─`;
 
     const mentionIds = participants.map(p => p.id);
 
@@ -4941,7 +4944,7 @@ case 'todos': {
     }, { quoted: msg });
   }
   break;
-}
+      }
         
 case 'antiarabe': {
   try {
