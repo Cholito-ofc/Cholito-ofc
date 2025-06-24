@@ -4927,7 +4927,7 @@ case 'todos': {
     finalMsg += `*╰━━━━━━━⋆★⋆━━━━━━━⬣*\n\n`;
     finalMsg += `📲 *Etiquetando a todos los miembros...*\n\n`;
     finalMsg += mentionList;
-    finalMsg += `\n\n╰─[ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖶𝗁𝖺𝗍𝗌𝖠𝗉𝗉 ⚡]─`;
+    finalMsg += `\n╰─[ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖶𝗁𝖺𝗍𝗌𝖠𝗉𝗉 ⚡]─`;
 
     const mentionIds = participants.map(p => p.id);
 
