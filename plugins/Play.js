@@ -8,8 +8,8 @@ const MAX_RETRIES = 2;
 const TIMEOUT_MS = 10000;
 const RETRY_DELAY_MS = 12000;
 
-// Agrega tu clave si usas lolhuman
-const LOLHUMAN_KEY = 'Tu_API_Key_Aquí';
+// Coloca tu API key de lolhuman si la tienes
+const LOLHUMAN_KEY = 'Tu_API_Key_Lolhuman';
 
 function isUserBlocked(userId) {
   try {
@@ -20,7 +20,7 @@ function isUserBlocked(userId) {
   }
 }
 
-async function getDownloadUrl(videoUrl) {
+async function getDownloadUrl(query, videoUrl) {
   const apis = [
     {
       name: 'vreden',
@@ -47,6 +47,24 @@ async function getDownloadUrl(videoUrl) {
         ? {
             url: res.data.link,
             title: res.data.title
+          } : null
+    },
+    {
+      name: 'zenkey',
+      url: `https://api.zenkey.my.id/api/download/ytmp4?apikey=zenkey&url=${encodeURIComponent(videoUrl)}`,
+      extract: res => res?.data?.result?.mp3_audio
+        ? {
+            url: res.data.result.mp3_audio,
+            title: res.data.result.title
+          } : null
+    },
+    {
+      name: 'nekorinn',
+      url: `https://api.nekorinn.my.id/downloader/spotifyplay?q=${encodeURIComponent(query)}`,
+      extract: res => res?.data?.result?.url
+        ? {
+            url: res.data.result.url,
+            title: res.data.result.title || query
           } : null
     }
   ];
@@ -114,7 +132,7 @@ const handler = async (msg, { conn, args }) => {
     if (!searchResults?.videos?.length) throw new Error('No se encontraron resultados.');
 
     const videoInfo = searchResults.videos[0];
-    const { title, timestamp: duration, views, ago, url: videoUrl, image: thumbnail } = videoInfo;
+    const { title, timestamp: duration, url: videoUrl, image: thumbnail } = videoInfo;
 
     let imageBuffer = null;
     try {
@@ -137,7 +155,7 @@ const handler = async (msg, { conn, args }) => {
       caption: caption
     }, { quoted: msg });
 
-    const downloadData = await getDownloadUrl(videoUrl);
+    const downloadData = await getDownloadUrl(query, videoUrl);
     if (!downloadData || !downloadData.url) {
       throw new Error('No se pudo descargar la música.');
     }
@@ -148,7 +166,7 @@ const handler = async (msg, { conn, args }) => {
     return conn.sendMessage(chatId, {
       text: `➤ \`UPS, ERROR\` ❌
 
-𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗋𝗈𝗅𝗂𝗍𝖺* *.𝗉𝗅𝖺𝗒𝟣* 𝗈 *.𝗉𝗅𝖺𝗒𝟤*
+𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗌𝗉𝗈𝗍𝗂𝖿𝗒* *.𝗋𝗈𝗅𝗂𝗍𝖺* 𝗈 *.𝗉𝗅𝖺𝗒𝗒*
 ".𝗋𝖾𝗉𝗈𝗋𝗍𝖾 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
 > 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗍𝖺𝗇 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
     }, { quoted: msg });
