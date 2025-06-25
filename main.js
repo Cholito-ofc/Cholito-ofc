@@ -4206,36 +4206,59 @@ COMO ADMIN DE : ${groupName.toUpperCase()}
 case 'link': {
   try {
     const chatId = msg.key.remoteJid;
+
     // Verificar que se use en un grupo
     if (!chatId.endsWith("@g.us")) {
       await sock.sendMessage(chatId, { text: "⚠️ *Este comando solo se puede usar en grupos.*" }, { quoted: msg });
       return;
     }
-    
-    // Enviar reacción inicial
+
+    // Reacción inicial
     await sock.sendMessage(chatId, { react: { text: "🔗", key: msg.key } });
-    
-    // Esperar un poco para simular "carga"
+
+    // Esperar 2 segundos
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Obtener el código de invitación del grupo
+
+    // Obtener código del grupo
     let code = await sock.groupInviteCode(chatId);
-    if (!code) {
-      throw new Error("No se pudo obtener el código de invitación.");
-    }
+    if (!code) throw new Error("No se pudo obtener el código de invitación.");
+
     let link = "https://chat.whatsapp.com/" + code;
-    
-    // Enviar el mensaje con el enlace
+
+    // Obtener info del grupo
+    let metadata = await sock.groupMetadata(chatId);
+    let profilePicUrl;
+    try {
+      profilePicUrl = await sock.profilePictureUrl(chatId, 'image');
+    } catch {
+      profilePicUrl = 'https://i.imgur.com/5Qn9vRC.png'; // Imagen por defecto si no tiene
+    }
+
+    // Enviar mensaje con vista previa enriquecida
     await sock.sendMessage(
       chatId,
-      { text: `🔗 *Aquí tienes el enlace del grupo:*\n${link}` },
+      {
+        text: `🔗 *Aquí tienes el enlace del grupo:*\n${link}`,
+        contextInfo: {
+          externalAdReply: {
+            title: metadata.subject,
+            body: "", // sin descripción
+            thumbnailUrl: profilePicUrl,
+            mediaType: 1,
+            renderLargerThumbnail: true,
+            previewType: "PHOTO",
+            sourceUrl: link
+          }
+        }
+      },
       { quoted: msg }
     );
-    
-    // Enviar reacción final
+
+    // Reacción final
     await sock.sendMessage(chatId, { react: { text: "✅", key: msg.key } });
+
   } catch (error) {
-    console.error("❌ Error en el comando damelink:", error);
+    console.error("❌ Error en el comando link:", error);
     await sock.sendMessage(
       msg.key.remoteJid,
       { text: "❌ *Ocurrió un error al generar el enlace del grupo.*" },
