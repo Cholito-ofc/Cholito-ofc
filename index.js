@@ -1800,3 +1800,4 @@ module.exports = { cargarSubbots };*/
     }
 
     startBot();
+})();
