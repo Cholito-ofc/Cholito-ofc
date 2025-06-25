@@ -3845,8 +3845,8 @@ case 'menu': {
       year: 'numeric'
     });
 
-    const captionText = `Hola @${senderNumber}
-${fechaActual}
+    const captionText = `*¡Hola! @${senderNumber}*
+```${fechaActual}```
 
 *╭━━━━━━⋆★⋆━━━━━━⬣*
 *┃* *🍃𝙺𝙸𝙻𝙻𝚄𝙰-𝙱𝙾𝚃 𝙿𝚁𝙾* 
