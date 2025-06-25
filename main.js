@@ -3832,7 +3832,18 @@ case 'menu': {
     });
 
     const chatId = msg.key.remoteJid;
-    const captionText = `*╭━━━━━━⋆★⋆━━━━━━⬣*
+    const senderId = msg.participant || msg.key.participant || msg.key.remoteJid;
+    const senderClean = senderId.replace(/[@:\s]/g, '');
+
+    const fechaActual = new Date().toLocaleDateString('es-ES', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    const captionText = `Hola @${senderClean}
+
+📅 Fecha: ${fechaActual}
+
+*╭━━━━━━⋆★⋆━━━━━━⬣*
 *┃* *🍃𝙺𝙸𝙻𝙻𝚄𝙰-𝙱𝙾𝚃 𝙿𝚁𝙾* 
 *┃* *🧑🏻‍💻𝙲𝚁𝙴𝙰𝙳𝙾𝚁 ⬇️* 
 *┃* *🗣https://wa.link/mhya0o*
@@ -3846,10 +3857,11 @@ case 'menu': {
 📌 Usa el prefijo antes de cada comando.
 
 ╭━━[ 𝗜𝗡𝗙𝗢𝗥𝗠𝗔𝗖𝗜𝗢́𝗡 💻 ]━⬣
+┃➜ ${global.prefix}𝗀𝗎𝗂𝖺
 ┃➜ ${global.prefix}𝗋𝖾𝗉𝗈𝗋𝗍
 ┃➜ ${global.prefix}𝗌𝗉𝖾𝖾𝖽𝗍𝖾𝗌𝗍
 ┃➜ ${global.prefix}𝗉𝗂𝗇𝗀
-┃➜ ${global.prefix}𝖼𝗋𝖾𝖺𝖽𝗈𝗋
+┃➜ ${global.prefix}𝖼𝖗𝖾𝖺𝖽𝗈𝗋
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 ╭━━[ 𝗠𝗘𝗡𝗨́𝗦 𝗗𝗜𝗦𝗣𝗢𝗡𝗜𝗕𝗟𝗘𝗦 🗂️ ]━⬣
@@ -3969,7 +3981,8 @@ case 'menu': {
       chatId,
       {
         image: { url: "https://cdn.russellxz.click/c0c419e3.jpeg" },
-        caption: captionText
+        caption: captionText,
+        mentions: [senderId]
       },
       msg
     );
