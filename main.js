@@ -364,8 +364,9 @@ case 'playy': {
     }, { quoted: msg });
   }
 
-  break;
-        
+    break;
+    }
+  
 case 'play4': {
   const chatId = msg.key.remoteJid;
   const yts = require('yt-search');
