@@ -3495,7 +3495,7 @@ case 'bc': {
   }
   
   // Obtén la fecha actual en un formato bonito
-  const fecha = new Date().toLocaleString("es-ES", { timeZone: "America/Argentina/Buenos_Aires" });
+  const fecha = new Date().toLocaleString("es-ES", { timeZone: "America/Mexico_City" });
   const header = `📢 *COMUNICADO OFICIAL DEL DUEÑO* 📢\n──────────────\nFecha: ${fecha}\n──────────────\n\n`;
   
   // Prepara el mensaje a enviar dependiendo del tipo de contenido citado
@@ -3640,9 +3640,9 @@ case 'allmenu': {
     // Menú visual estilizado
     let commandList = `📚 𓆩 𝐌𝐄𝐍𝐔́ 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐎 - 𝐊𝐈𝐋𝐋𝐔𝐀 𝟐.𝟎 𝐁𝐎𝐓 𓆪
 
-🔹 *Total de comandos:* ${totalComandos}
-🔹 *Prefijo actual:* 『${global.prefix}』
-🔹 Usa el prefijo antes de cada comando.
+🚩 *Total de comandos:* ${totalComandos}
+🚩 *Prefijo actual:* 『${global.prefix}』
+🚩 Usa el prefijo antes de cada comando.
 
 ━━━━━━━━━━━━━━━━━━━`;
 
@@ -3861,6 +3861,7 @@ case 'menu': {
 ╭━━[ 𝗜𝗡𝗙𝗢𝗥𝗠𝗔𝗖𝗜𝗢́𝗡 💻 ]━⬣
 ┃➜ ${global.prefix}𝗀𝗎𝗂𝖺
 ┃➜ ${global.prefix}𝗋𝖾𝗉𝗈𝗋𝗍
+┃➜ ${global.prefix}𝗂𝗇𝖿𝗈
 ┃➜ ${global.prefix}𝗌𝗉𝖾𝖾𝖽𝗍𝖾𝗌𝗍
 ┃➜ ${global.prefix}𝗉𝗂𝗇𝗀
 ┃➜ ${global.prefix}𝖼𝖗𝖾𝖺𝖽𝗈𝗋
@@ -4066,7 +4067,7 @@ case 'menugrupo': {
 
 ╭─❍ 𝐊𝐈𝐋𝐋𝐔𝐀-𝐁𝐎𝐓 𝟐.𝟎 ❍─╮  
 │ 𝗕𝗼𝘁 𝗮𝗱𝗮𝗽𝘁𝗮𝗱𝗼 𝗽𝗮𝗿𝗮 𝘁𝘂́ 𝗴𝗿𝘂𝗽𝗼.
-╰────────────────╯`;
+╰──────────────────╯`;
 
     await sock.sendMessage2(
       chatId,
@@ -10860,12 +10861,12 @@ case 'pixai': {
             );
         }
 
-        for (const imageUrl of images.slice(0, 4)) {
+        for (const imageUrl of images.slice(0, 1)) {
             await sock.sendMessage(
                 msg.key.remoteJid,
                 {
                     image: { url: imageUrl },
-                    caption: `🎨 *Imagen generada para:* ${userMention}\n📌 *Descripción:* ${prompt}\n\n🍧 API utilizada: https://api.dorratz.com\n© Cortana 2.0 Bot`,
+                    caption: `🎨 *Imagen generada para:* ${userMention}\n📌 *Descripción:* ${prompt}\n\n🍧 API utilizada: https://api.dorratz.com\n© *KilluaBot*`,
                     mentions: [participant] // Menciona al usuario (o bot si es el emisor)
                 },
                 { quoted: msg }
@@ -10905,7 +10906,7 @@ case 'verdad': {
 
         await sock.sendMessage(msg.key.remoteJid, {
             image: { url: 'https://cdn.russellxz.click/cb9701a5.jpeg' },
-            caption: `𝘏𝘢𝘴 𝘦𝘴𝘤𝘰𝘨𝘪𝘥𝘰 *𝘝𝘌𝘙𝘋𝘈𝘋*\n\n╱╲❀╱╲╱╲❀╱╲╱╲❀╱╲\n◆ ${verdad}\n╲╱❀╲╱╲╱❀╲╱╲╱❀╲╱\n\n© cortana 2.0 Bot`
+            caption: `𝘏𝘢𝘴 𝘦𝘴𝘤𝘰𝘨𝘪𝘥𝘰 *𝘝𝘌𝘙𝘋𝘈𝘋*\n\n╱╲❀╱╲╱╲❀╱╲╱╲❀╱╲\n◆ ${verdad}\n╲╱❀╲╱╲╱❀╲╱╲╱❀╲╱\n\n© *KilluaBot*`
         }, { quoted: msg });
 
         // ✅ Reacción de éxito
@@ -10937,7 +10938,7 @@ case 'reto': {
 
         await sock.sendMessage(msg.key.remoteJid, {
             image: { url: 'https://cdn.russellxz.click/1e58dd69.jpeg' },
-            caption: `𝘏𝘢𝘴 𝘦𝘴𝘤𝘰𝘨𝘪𝘥𝘰 *𝘙𝘌𝘛𝘖*\n\n╱╲❀╱╲╱╲❀╱╲╱╲❀╱╲\n◆ ${reto}\n╲╱❀╲╱╲╱❀╲╱╲╱❀╲╱\n\n© cortana 2.0 Bot`
+            caption: `𝘏𝘢𝘴 𝘦𝘴𝘤𝘰𝘨𝘪𝘥𝘰 *𝘙𝘌𝘛𝘖*\n\n╱╲❀╱╲╱╲❀╱╲╱╲❀╱╲\n◆ ${reto}\n╲╱❀╲╱╲╱❀╲╱╲╱❀╲╱\n\n© *KilluaBot*`
         }, { quoted: msg });
 
     } catch (e) {
