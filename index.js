@@ -81,7 +81,8 @@
     return data.response;
   }
 
-  // Dependencias
+  (async () => {
+  // Importaciones
   const axios = require("axios");
   const fetch = require("node-fetch");
   const { cargarSubbots } = require("./indexsubbots");
@@ -91,15 +92,17 @@
   const { tmpdir } = require('os');
   const { join } = require('path');
   const figlet = require("figlet");
-  const fs = require("fs"); // ✅ Se mantiene esta línea
-  // ❌ Eliminada esta: const { readdirSync, statSync, unlinkSync } = require('fs')
+  const fs = require("fs");
   const readline = require("readline");
   const pino = require("pino");
   const { isOwner, getPrefix, allowedPrefixes } = require("./config");
   const { handleCommand } = require("./main");
 
-  // Aquí continúa el resto de tu código...
-})(); 
+  // ✅ Esta línea ya está dentro del async function
+  const { state, saveCreds } = await useMultiFileAuthState("./sessions");
+
+  // Aquí continúas tu código...
+})();
     // Carga de credenciales y estado de autenticación
     const { state, saveCreds } = await useMultiFileAuthState("./sessions");
   const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
