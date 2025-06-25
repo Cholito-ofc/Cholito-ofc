@@ -1807,4 +1807,3 @@ module.exports = { cargarSubbots };*/
     }
 
     startBot();
-})();
