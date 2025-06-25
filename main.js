@@ -3845,7 +3845,7 @@ case 'menu': {
       year: 'numeric'
     });
 
-    const captionText = `*¡Hola! @${senderNumber}*
+    const captionText = ` *¡Hola! @${senderNumber}*
 \`\`\`${fechaActual}\`\`\`
 
 *╭━━━━━━⋆★⋆━━━━━━⬣*
