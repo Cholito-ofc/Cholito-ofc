@@ -3855,8 +3855,8 @@ case 'menu': {
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 ╭━━[ 𝗠𝗘𝗡𝗨́ 𝗣𝗥𝗜𝗡𝗖𝗜𝗣𝗔𝗟 📋]━⬣
-┃➜ ✦ Prefijo Actual:『${global.prefix}』
-┃➜ ✦ Usa el prefijo antes de cada comando.
+┃➜ 🚩 Prefijo Actual:『${global.prefix}』
+┃➜ 🚩 Usa el prefijo antes de cada comando.
 
 ╭━━[ 𝗜𝗡𝗙𝗢𝗥𝗠𝗔𝗖𝗜𝗢́𝗡 💻 ]━⬣
 ┃➜ ${global.prefix}𝗀𝗎𝗂𝖺
@@ -4917,7 +4917,7 @@ case 'todos': {
     const isBotMessage = msg.key.fromMe;
 
     // Reacción inicial
-    await sock.sendMessage(chatId, { react: { text: "🔊", key: msg.key } });
+    await sock.sendMessage(chatId, { react: { text: "🗣️", key: msg.key } });
 
     if (!isGroup) {
       await sock.sendMessage(chatId, { text: "⚠️ *Este comando solo se puede usar en grupos.*" }, { quoted: msg });
@@ -13913,7 +13913,7 @@ case "setprefix":
 
         // Confirmación del cambio
         await sock.sendMessage(msg.key.remoteJid, { 
-            text: `✅ *Prefijo cambiado a:* *${newPrefix}*` 
+            text: `✅ *Prefijo cambiado extexitosamente a: *${newPrefix}*` 
         }, { quoted: msg });
 
         console.log(`🔄 Prefijo cambiado a: ${newPrefix}`);
@@ -13937,17 +13937,17 @@ case 'info':
 
     const infoMessage = `╭─ *🤖 𝗞𝗜𝗟𝗟𝗨𝗔 𝗕𝗢𝗧 𝟮.𝟬* ─╮
 │ 🔹 *Prefijo actual:* ${global.prefix}
-│ 👑 *Dueño:* 𝗖𝗵𝗼𝗹𝗶𝘁𝗼 𝘅𝘆𝘇
+│ 👑 *Dueño:* Cholito hn
 │ 🛠️ *Bot desarrollado desde cero* con la ayuda de Chatgpt.
-│ 🚀 *Creado por:* 𝗖𝗵𝗼𝗹𝗶𝘁𝗼
+│ 🚀 *Creado por:* Cholito
 │  
 ├─〔 📥 *Descargas Redes* 〕─
 │ 📌 *IG, TikTok y FB*  
-│    - 👤 *Colaboró:* 𝗗𝗜𝗘𝗚𝗢-𝗢𝗙𝗖 
+│    - 👤 *Colaboró:* DIEGO-OFC
 │  
 │ 📌 *Descargas youtube*
 │     (.play, .play2, .ytmp3, .ytmp4)  
-│    - 👤 *Colaboró:* 𝗘𝗹𝗶𝗮𝘀𝗮𝗿𝟱𝟰  
+│    - 👤 *Colaboró:* Eliasar54 
 │  
 ├─〔 📜 *Menús y Comandos* 〕─
 │ 📌 Usa *${global.prefix}menu* para ver los comandos principales.  
@@ -14326,9 +14326,10 @@ case "perfil": {
     break;
 }
 
-case 'creador': {
+case 'owner':
+case 'creador':{
     const ownerNumber = "50489513153@s.whatsapp.net"; // Número del dueño en formato WhatsApp
-    const ownerName = "𝘾𝙝𝙤𝙡𝙞𝙩𝙤 𝙭𝙮𝙯🤖"; // Nombre del dueño
+    const ownerName = "𝘾𝙝𝙤𝙡𝙞𝙩𝙤 𝙭𝙮𝙯"; // Nombre del dueño
     const messageText = "📞  *Contacto del Creador:*\n\nSi tienes dudas, preguntas o sugerencias sobre el bot, puedes contactar a mi creador.\n\n📌 *Nombre:* 𝗖𝗵𝗼𝗹𝗼\n📌 *Número:* +504 8951-3153\n💬 *Mensaje directo:* Pulsa sobre el contacto y chatea con él.";
 
     // Enviar mensaje con el contacto del dueño
@@ -14652,6 +14653,8 @@ break;
                         
 
         case "cerrargrupo":
+        case "cerrar grupo":
+        case "grupo cerrar":
             try {
                 if (!msg.key.remoteJid.includes("@g.us")) {
                     return sock.sendMessage(msg.key.remoteJid, { text: "❌ *Este comando solo funciona en grupos.*" }, { quoted: msg });
@@ -14686,6 +14689,8 @@ break;
             break;
 
         case "abrirgrupo":
+        case "abrir grupo":
+        case "grupo abrir":
             try {
                 if (!msg.key.remoteJid.includes("@g.us")) {
                     return sock.sendMessage(msg.key.remoteJid, { text: "❌ *Este comando solo funciona en grupos.*" }, { quoted: msg });
@@ -15036,7 +15041,7 @@ case "fb":
         }
 
         // 📜 Mensaje final sin resoluciones ni 720
-        const message = `🎥 𝗩𝗶𝗱𝗲𝗼 𝗱𝗲 𝗙𝗮𝗰𝗲𝗯𝗼𝗼𝗸 𝗹𝗶𝘀𝘁𝗼 🎯\n\n> ⚙️ DESCARGADO con api.dorratz.com\n───────\n🤖 *Cortana 2.0 Bot*`;
+        const message = `🎥 𝗩𝗶𝗱𝗲𝗼 𝗱𝗲 𝗙𝗮𝗰𝗲𝗯𝗼𝗼𝗸 𝗹𝗶𝘀𝘁𝗼 🎯\n\n> ⚙️ DESCARGADO con api.dorratz.com\n───────\n🤖 *KilluaBot*`;
 
         await sock.sendMessage(msg.key.remoteJid, {
             video: fs.readFileSync(filePath),
