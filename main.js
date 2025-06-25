@@ -365,7 +365,6 @@ case 'playy': {
   }
 
   break;
-}
         
 case 'play4': {
   const chatId = msg.key.remoteJid;
