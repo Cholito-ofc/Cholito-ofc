@@ -370,13 +370,68 @@ case 'playy': {
 case 'play4': {
   const chatId = msg.key.remoteJid;
   const yts = require('yt-search');
-  const axios = require('axios');
+  const ytdl = require('ytdl-core');
 
   if (!text) {
     await sock.sendMessage(chatId, {
-      text: `✳️ Usa el comando correctamente:\n\n📌 Ejemplo: *${global.prefix}play2* Bad Bunny - Yonaguni`
+      text: `✳️ Usa el comando correctamente:\n\n📌 Ejemplo: *${global.prefix}play4* Bad Bunny - Yonaguni`
     }, { quoted: msg });
     break;
+  }
+
+  await sock.sendMessage(chatId, {
+    react: { text: '⏳', key: msg.key }
+  });
+
+  try {
+    const results = await yts(text);
+    if (!results?.videos?.length) {
+      await sock.sendMessage(chatId, {
+        text: `❌ No encontré resultados para "${text}"`
+      }, { quoted: msg });
+      break;
+    }
+
+    const video = results.videos[0];
+    const title = video.title;
+    const duration = video.timestamp;
+    const url = video.url;
+
+    // 1️⃣ Enviar la portada
+    const design = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
+│  🎵 *Título:* ${title}
+│  ⏱ *Duración:* ${duration}
+│  🔗 *URL:* ${url}
+╰─⬣
+
+*[🛠️] 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈, 𝖾𝗌𝗉𝖾𝗋𝖾...*
+
+> ® ⍴᥆ᥕᥱrᥱძ 𝑏𝑦 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍⚡`;
+
+    await sock.sendMessage(chatId, {
+      image: { url: video.image },
+      caption: design
+    }, { quoted: msg });
+
+    // 2️⃣ Descargar y enviar el audio
+    const stream = ytdl(video.url, {
+      filter: 'audioonly',
+      quality: 'highestaudio'
+    });
+    await sock.sendMessage(chatId, {
+      audio: { stream },
+      mimetype: 'audio/mp4',
+      ptt: false
+    }, { quoted: msg });
+
+  } catch (error) {
+    console.error(error);
+    await sock.sendMessage(chatId, {
+      text: '❌ Ocurrió un error al procesar la solicitud.'
+    }, { quoted: msg });
+  }
+
+  break;
   }
 
   await sock.sendMessage(chatId, {
