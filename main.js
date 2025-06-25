@@ -5093,26 +5093,41 @@ case 'welcome': {
   try {
     const fs = require("fs");
     const path = "./activos.json";
-    const chatId = msg.key.remoteJid; // ID del grupo
+    const chatId = msg.key.remoteJid;
     const param = args[0] ? args[0].toLowerCase() : "";
 
-    // Verificar que se use en un grupo
     if (!chatId.endsWith("@g.us")) {
-      await sock.sendMessage(chatId, { text: "⚠️ *Este comando solo se puede usar en grupos.*" }, { quoted: msg });
-      return;
-    }
-
-    // Verificar que se haya especificado "on" o "off"
-    if (!param || (param !== "on" && param !== "off")) {
-      await sock.sendMessage(chatId, { 
-        text: `⚠️ *Uso incorrecto.*\nEjemplo: \`${global.prefix}welcome on\` o \`${global.prefix}welcome off\``
+      await sock.sendMessage(chatId, {
+        text: `
+╭┈〔 ⚠️ *COMANDO SOLO PARA GRUPOS* 〕┈╮
+┊ Este comando solo funciona dentro de grupos.
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
+        `.trim()
       }, { quoted: msg });
       return;
     }
 
-    // Verificar permisos: solo administradores o el propietario pueden usar este comando
+    if (!param || (param !== "on" && param !== "off")) {
+      await sock.sendMessage(chatId, {
+        text: `
+╭┈〔 ⚠️ *USO INCORRECTO* 〕┈╮
+┊ Usa el comando de esta forma:
+┊
+┊ 📥 *Ejemplo:*
+┊ ${global.prefix}welcome on
+┊ ${global.prefix}welcome off
+┊
+┊📝 Este comando solo controla las *bienvenidas*.
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
+        `.trim()
+      }, { quoted: msg });
+      return;
+    }
+
+    // Verificar permisos del remitente
     const senderIdFull = msg.key.participant || msg.key.remoteJid;
     let isSenderAdmin = false;
+
     try {
       const groupMetadata = await sock.groupMetadata(chatId);
       const senderParticipant = groupMetadata.participants.find(p => p.id === senderIdFull);
@@ -5122,38 +5137,63 @@ case 'welcome': {
     } catch (err) {
       console.error("Error obteniendo metadata del grupo:", err);
     }
+
     if (!isSenderAdmin && !isOwner(senderIdFull)) {
-      await sock.sendMessage(chatId, { 
-        text: "⚠️ *Solo los administradores o el propietario pueden usar este comando.*"
+      await sock.sendMessage(chatId, {
+        text: `
+╭┈〔 ⛔ *ACCESO DENEGADO* 〕┈╮
+┊ Solo los *administradores* o el *propietario* del bot
+┊ pueden activar o desactivar las bienvenidas.
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
+        `.trim()
       }, { quoted: msg });
       return;
     }
 
-    // Cargar o crear el archivo activos.json
+    // Cargar configuración
     let activos = {};
     if (fs.existsSync(path)) {
       activos = JSON.parse(fs.readFileSync(path, "utf-8"));
     }
-    // Asegurarse de tener la propiedad "welcome" (para bienvenida y despedida)
+
     if (!activos.hasOwnProperty("welcome")) {
       activos.welcome = {};
     }
 
+    let respuesta = "";
+
     if (param === "on") {
       activos.welcome[chatId] = true;
-      await sock.sendMessage(chatId, { text: "✅ *Bienvenidas y despedidas activadas en este grupo.*" }, { quoted: msg });
+      respuesta = `
+╭┈〔 ✅ *BIENVENIDAS ACTIVADAS* 〕┈╮
+┊ Ahora se enviarán *mensajes de bienvenida*
+┊ cada vez que un usuario entre al grupo.
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
+      `.trim();
     } else {
       delete activos.welcome[chatId];
-      await sock.sendMessage(chatId, { text: "✅ *Bienvenidas y despedidas desactivadas en este grupo.*" }, { quoted: msg });
+      respuesta = `
+╭┈〔 🚫 *BIENVENIDAS DESACTIVADAS* 〕┈╮
+┊ Los *mensajes de bienvenida* fueron
+┊ desactivados en este grupo.
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
+      `.trim();
     }
 
     fs.writeFileSync(path, JSON.stringify(activos, null, 2));
+
+    await sock.sendMessage(chatId, {
+      text: respuesta
+    }, { quoted: msg });
+
   } catch (error) {
     console.error("❌ Error en el comando welcome:", error);
-    await sock.sendMessage(msg.key.remoteJid, { text: "❌ *Ocurrió un error al ejecutar el comando welcome.*" }, { quoted: msg });
+    await sock.sendMessage(msg.key.remoteJid, {
+      text: "❌ *Ocurrió un error al ejecutar el comando welcome.*"
+    }, { quoted: msg });
   }
   break;
-}
+  }  
                 
 case 'cofre': {
     try {
