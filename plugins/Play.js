@@ -2,8 +2,7 @@ const yts = require('yt-search');
 const fs = require('fs');
 const axios = require('axios');
 
-const apiKey = 'TU_API_KEY_AQUI'; // Coloca aquí tu API key válida de lolhuman
-https://api.lolhuman.xyz
+const apiKey = `https://api.lolhuman.xyz'; // Coloca aquí tu API key válida de lolhuman
 
 function isUserBlocked(userId) {
   try {
