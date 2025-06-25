@@ -4203,55 +4203,39 @@ COMO ADMIN DE : ${groupName.toUpperCase()}
      
 // Comando para quitar derechos de admin (quitaradmin / quitaradmins)
 
-case 'link': { 
+case 'link': {
   try {
     const chatId = msg.key.remoteJid;
 
-    // Verificar que se use en un grupo
     if (!chatId.endsWith("@g.us")) {
       await sock.sendMessage(chatId, { text: "⚠️ *Este comando solo se puede usar en grupos.*" }, { quoted: msg });
       return;
     }
 
-    // Reacción inicial
     await sock.sendMessage(chatId, { react: { text: "🔗", key: msg.key } });
-
-    // Esperar 2 segundos
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Obtener código del grupo
-    let code = await sock.groupInviteCode(chatId);
-    if (!code) throw new Error("No se pudo obtener el código de invitación.");
+    const code = await sock.groupInviteCode(chatId);
+    if (!code) throw new Error("No se pudo obtener el código.");
 
-    let link = "https://chat.whatsapp.com/" + code;
+    const link = "https://chat.whatsapp.com/" + code;
+    const metadata = await sock.groupMetadata(chatId);
 
-    // Obtener info del grupo
-    let metadata = await sock.groupMetadata(chatId);
     let profilePicUrl;
     try {
       profilePicUrl = await sock.profilePictureUrl(chatId, 'image');
     } catch {
-      profilePicUrl = 'https://i.imgur.com/5Qn9vRC.png'; // Imagen por defecto si no tiene
+      profilePicUrl = 'https://i.imgur.com/5Qn9vRC.png';
     }
 
-    // Enviar mensaje con botón y vista previa enriquecida
     await sock.sendMessage(
       chatId,
       {
-        text: `✨ *¡Hola! Aquí tienes el enlace para unirte a este grupo:*\n\n🌐 *Nombre del grupo:* ${metadata.subject}\n\n🔗 *Enlace directo:* ${link}`,
-        footer: "¡Presiona el botón o la imagen para unirte!",
-        buttons: [
-          {
-            buttonId: `#null`,
-            buttonText: { displayText: "🚪 Unirse al grupo" },
-            type: 1
-          }
-        ],
-        headerType: 4,
+        text: `🎉 *Enlace de invitación al grupo:*\n\n👥 *Nombre:* ${metadata.subject}\n\n🔗 *Únete aquí:* ${link}`,
         contextInfo: {
           externalAdReply: {
             title: metadata.subject,
-            body: "", // sin descripción
+            body: "Presiona aquí para unirte",
             thumbnailUrl: profilePicUrl,
             mediaType: 1,
             renderLargerThumbnail: true,
@@ -4263,16 +4247,11 @@ case 'link': {
       { quoted: msg }
     );
 
-    // Reacción final
     await sock.sendMessage(chatId, { react: { text: "✅", key: msg.key } });
 
   } catch (error) {
     console.error("❌ Error en el comando link:", error);
-    await sock.sendMessage(
-      msg.key.remoteJid,
-      { text: "❌ *Ocurrió un error al generar el enlace del grupo.*" },
-      { quoted: msg }
-    );
+    await sock.sendMessage(chatId, { text: "❌ *Ocurrió un error al generar el enlace del grupo.*" }, { quoted: msg });
   }
   break;
 }
