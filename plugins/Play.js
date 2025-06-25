@@ -45,7 +45,7 @@ const handler = async (msg, { conn, args }) => {
 
     const { title, timestamp: duration, url, thumbnail } = video;
 
-    const caption = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
+    const caption = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣`
 │  🎵 *Título:* ${title}
 │  ⏱ *Duración:* ${duration || 'Desconocida'}
 │  🔗 *URL:* ${url}
