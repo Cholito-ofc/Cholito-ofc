@@ -1,7 +1,7 @@
 const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
 
-  // URL fija del video que quieres enviar
+  // URL fija del video que quieres enviar como GIF animado
   const mediaUrl = 'https://cdn.russellxz.click/b66b17c2.mp4';
 
   let message = `
@@ -17,9 +17,10 @@ const handler = async (msg, { conn }) => {
 ╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
 `.trim();
 
-  // Enviamos el video con la descripción
+  // Enviamos el video como GIF animado (se reproduce automáticamente)
   await conn.sendMessage(chatId, {
     video: { url: mediaUrl },
+    gifPlayback: true, // Esto es lo importante para que se reproduzca como GIF automático
     caption: message
   }, { quoted: msg });
 
