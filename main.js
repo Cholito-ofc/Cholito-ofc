@@ -3833,15 +3833,20 @@ case 'menu': {
 
     const chatId = msg.key.remoteJid;
     const senderId = msg.participant || msg.key.participant || msg.key.remoteJid;
-    const senderClean = senderId.replace(/[@:\s]/g, '');
 
+    // Extraer solo el número, sin el @s.whatsapp.net
+    const senderNumber = senderId.split('@')[0];
+
+    // Formato de fecha al estilo WhatsApp: martes, 25 de junio de 2025
     const fechaActual = new Date().toLocaleDateString('es-ES', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
     });
 
-    const captionText = `Hola @${senderClean}
-
-📅 Fecha: ${fechaActual}
+    const captionText = `Hola @${senderNumber}
+${fechaActual}
 
 *╭━━━━━━⋆★⋆━━━━━━⬣*
 *┃* *🍃𝙺𝙸𝙻𝙻𝚄𝙰-𝙱𝙾𝚃 𝙿𝚁𝙾* 
