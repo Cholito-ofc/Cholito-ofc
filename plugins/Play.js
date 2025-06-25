@@ -2,11 +2,7 @@ const yts = require('yt-search');
 const fs = require('fs');
 const axios = require('axios');
 
-const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const MAX_RETRIES = 2;
-const TIMEOUT_MS = 10000;
-const RETRY_DELAY_MS = 12000;
+const apiKey = 'TU_API_KEY_AQUI'; // <-- Coloca tu API Key aquí
 
 function isUserBlocked(userId) {
   try {
@@ -15,49 +11,6 @@ function isUserBlocked(userId) {
   } catch {
     return false;
   }
-}
-
-async function getDownloadUrl(videoUrl) {
-  const apis = [{ url: 'https://api.vreden.my.id/api/ytmp3?url=', type: 'vreden' }];
-  for (const api of apis) {
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      try {
-        const response = await axios.get(`${api.url}${encodeURIComponent(videoUrl)}`, { timeout: TIMEOUT_MS });
-        if (
-          response.data?.status === 200 &&
-          response.data?.result?.download?.url &&
-          response.data?.result?.download?.status === true
-        ) {
-          return {
-            url: response.data.result.download.url.trim(),
-            title: response.data.result.metadata.title
-          };
-        }
-      } catch {
-        if (attempt < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
-      }
-    }
-  }
-  return null;
-}
-
-async function sendAudioNormal(conn, chatId, audioUrl, quotedMsg) {
-  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    try {
-      await conn.sendMessage(
-        chatId,
-        {
-          audio: { url: audioUrl },
-          mimetype: 'audio/mpeg'
-        },
-        { quoted: quotedMsg }
-      );
-      return true;
-    } catch {
-      if (attempt < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
-    }
-  }
-  return false;
 }
 
 const handler = async (msg, { conn, args }) => {
@@ -113,14 +66,25 @@ const handler = async (msg, { conn, args }) => {
       caption: caption
     }, { quoted: msg });
 
-    const downloadData = await getDownloadUrl(videoUrl);
-    if (!downloadData || !downloadData.url) {
-      throw new Error('No se pudo descargar la música.');
-    }
+    // 📥 Usar API de lolhuman
+    const apiUrl = `https://api.lolhuman.xyz/api/ytmp3?apikey=${apiKey}&url=${encodeURIComponent(videoUrl)}`;
+    const res = await axios.get(apiUrl);
+    const audioUrl = res.data.result.link;
 
-    await sendAudioNormal(conn, chatId, downloadData.url, msg);
+    // 🎧 Enviar audio
+    await conn.sendMessage(
+      chatId,
+      {
+        audio: { url: audioUrl },
+        mimetype: 'audio/mp4',
+        fileName: `${title}.mp3`,
+        ptt: false
+      },
+      { quoted: msg }
+    );
 
   } catch (error) {
+    console.error(error);
     return conn.sendMessage(chatId, {
       text: `➤ \`UPS, ERROR\` ❌
 
