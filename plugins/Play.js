@@ -3,6 +3,7 @@ const fs = require('fs');
 const axios = require('axios');
 
 const apiKey = 'TU_API_KEY_AQUI'; // Coloca aquí tu API key válida de lolhuman
+https://api.lolhuman.xyz
 
 function isUserBlocked(userId) {
   try {
