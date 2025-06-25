@@ -42,7 +42,7 @@ const handler = async (msg, { conn }) => {
   }, { quoted: msg });
 };
 
-handler.command = /^guia$/i;
+handler.command = /^guia$/i
 handler.tags = ["info"];
 handler.help = [".guia"];
 module.exports = handler;
