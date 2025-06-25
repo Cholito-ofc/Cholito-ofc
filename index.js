@@ -409,7 +409,7 @@ const farewellTexts = [
 ];
 
 // BIENVENIDA: solo cuando alguien entra
-const fs = require("fs");
+//const fs = require("fs");
 const { generarImagen } = require("./imagenes");
 const { create, Client } = require("@open-wa/wa-automate"); // o tu sock equivalente
 
