@@ -2,7 +2,8 @@ const yts = require('yt-search');
 const fs = require('fs');
 const axios = require('axios');
 
-const apiKey = `https://api.lolhuman.xyz'; // Coloca aquí tu API key válida de lolhuman
+// Usa solo tu API key, no la URL
+const apiKey = 'TU_API_KEY_AQUI'; // ← Reemplaza esto con tu API key real
 
 function isUserBlocked(userId) {
   try {
@@ -32,7 +33,7 @@ const handler = async (msg, { conn, args }) => {
 │ ≡◦ 🎧 *Uso correcto del comando:*
 │ ≡◦ .play Anuel perfecto
 ╰─⬣
-> © ⍴᥆ᥕᥱrᥱძ ᑲᥡ һᥒ ᥴһ᥆ᥣі𝗍᥆`,
+> © ⍴᥆ᥕᥱrᥱძ ᑲᥡ һᥒ ᥴһ᥆ᥣі𝗍᥆`
     }, { quoted: msg });
   }
 
@@ -45,7 +46,7 @@ const handler = async (msg, { conn, args }) => {
 
     const { title, timestamp: duration, url, thumbnail } = video;
 
-    const caption = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣`
+    const caption = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
 │  🎵 *Título:* ${title}
 │  ⏱ *Duración:* ${duration || 'Desconocida'}
 │  🔗 *URL:* ${url}
@@ -60,7 +61,6 @@ const handler = async (msg, { conn, args }) => {
       caption: caption
     }, { quoted: msg });
 
-    // 📥 API de lolhuman
     const apiUrl = `https://api.lolhuman.xyz/api/ytmp3?apikey=${apiKey}&url=${encodeURIComponent(url)}`;
     const res = await axios.get(apiUrl);
     const audioUrl = res.data.result.link;
