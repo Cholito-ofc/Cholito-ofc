@@ -2,7 +2,7 @@ const yts = require('yt-search');
 const fs = require('fs');
 const axios = require('axios');
 
-const apiKey = 'TU_API_KEY_AQUI'; // <-- Coloca tu API Key aquí
+const apiKey = https://api.lolhuman.xyz'; // Coloca aquí tu API key válida de lolhuman
 
 function isUserBlocked(userId) {
   try {
@@ -39,22 +39,16 @@ const handler = async (msg, { conn, args }) => {
   const query = args.join(" ").trim();
 
   try {
-    const searchResults = await yts(query);
-    if (!searchResults?.videos?.length) throw new Error('No se encontraron resultados.');
+    const search = await yts(query);
+    const video = search.videos[0];
+    if (!video) throw '❌ No se encontraron resultados.';
 
-    const videoInfo = searchResults.videos[0];
-    const { title, timestamp: duration, views, ago, url: videoUrl, image: thumbnail } = videoInfo;
-
-    let imageBuffer = null;
-    try {
-      const response = await axios.get(thumbnail, { responseType: 'arraybuffer' });
-      imageBuffer = Buffer.from(response.data, 'binary');
-    } catch {}
+    const { title, timestamp: duration, url, thumbnail } = video;
 
     const caption = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
 │  🎵 *Título:* ${title}
 │  ⏱ *Duración:* ${duration || 'Desconocida'}
-│  🔗 *URL:* ${videoUrl}
+│  🔗 *URL:* ${url}
 ╰─⬣
 
 *[🛠️] 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈 𝖾𝗌𝗉𝖾𝗋𝖾...*
@@ -62,16 +56,15 @@ const handler = async (msg, { conn, args }) => {
 > ® ⍴᥆ᥕᥱrᥱძ ᑲᥡ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍⚡`;
 
     await conn.sendMessage(chatId, {
-      image: imageBuffer,
+      image: { url: thumbnail },
       caption: caption
     }, { quoted: msg });
 
-    // 📥 Usar API de lolhuman
-    const apiUrl = `https://api.lolhuman.xyz/api/ytmp3?apikey=${apiKey}&url=${encodeURIComponent(videoUrl)}`;
+    // 📥 API de lolhuman
+    const apiUrl = `https://api.lolhuman.xyz/api/ytmp3?apikey=${apiKey}&url=${encodeURIComponent(url)}`;
     const res = await axios.get(apiUrl);
     const audioUrl = res.data.result.link;
 
-    // 🎧 Enviar audio
     await conn.sendMessage(
       chatId,
       {
@@ -88,9 +81,9 @@ const handler = async (msg, { conn, args }) => {
     return conn.sendMessage(chatId, {
       text: `➤ \`UPS, ERROR\` ❌
 
-𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗋𝗈𝗅𝗂𝗍𝖺* *.𝗉𝗅𝖺𝗒𝟣* 𝗈 *.𝗉𝗅𝖺𝗒2*
-".𝗋𝖾𝗉𝗈𝗋𝗍𝖾 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
-> 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗍𝖺𝗇 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
+Pruebe usar *.rolita* *.play1* o *.play2*
+".reporte no funciona .play"
+> El equipo lo revisará tan pronto. 🚔`
     }, { quoted: msg });
   }
 };
