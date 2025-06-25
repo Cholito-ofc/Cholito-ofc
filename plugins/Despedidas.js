@@ -9,7 +9,11 @@ const handler = async (msg, { conn, args }) => {
 
   if (!isGroup) {
     await conn.sendMessage(chatId, {
-      text: "❌ Este comando solo puede usarse en grupos."
+      text: `
+╭┈〔 ⚠️ *SOLO PARA GRUPOS* 〕┈╮
+┊ Este comando solo puede usarse dentro de *grupos*.
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
+      `.trim()
     }, { quoted: msg });
     return;
   }
@@ -22,14 +26,26 @@ const handler = async (msg, { conn, args }) => {
 
   if (!isAdmin && !isOwner && !isFromMe) {
     await conn.sendMessage(chatId, {
-      text: "🚫 Solo los administradores del grupo, el owner o el bot pueden usar este comando."
+      text: `
+╭┈〔 ⛔ *ACCESO DENEGADO* 〕┈╮
+┊ Solo los *administradores*, el *owner*
+┊ o el *bot* pueden ejecutar este comando.
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
+      `.trim()
     }, { quoted: msg });
     return;
   }
 
   if (!args[0] || !["on", "off"].includes(args[0].toLowerCase())) {
     await conn.sendMessage(chatId, {
-      text: "⚙️ Usa: *despedidas on/off* para activar o desactivar las despedidas en este grupo."
+      text: `
+╭┈〔 ⚙️ *USO INCORRECTO* 〕┈╮
+┊ Activa o desactiva las *despedidas*:
+┊
+┊ 🟢 ${global.prefix}despedidas on
+┊ 🔴 ${global.prefix}despedidas off
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
+      `.trim()
     }, { quoted: msg });
     return;
   }
@@ -42,21 +58,33 @@ const handler = async (msg, { conn, args }) => {
 
   if (!activos.despedidas) activos.despedidas = {};
 
+  let mensaje = "";
+
   if (args[0].toLowerCase() === "on") {
     activos.despedidas[chatId] = true;
-    await conn.sendMessage(chatId, {
-      text: "✅ *Despedidas activadas* en este grupo."
-    }, { quoted: msg });
+    mensaje = `
+╭┈〔 ✅ *DESPEDIDAS ACTIVADAS* 〕┈╮
+┊ Ahora se enviarán *mensajes de despedida*
+┊ cuando un usuario abandone el grupo.
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
+    `.trim();
   } else {
     delete activos.despedidas[chatId];
-    await conn.sendMessage(chatId, {
-      text: "🛑 *Despedidas desactivadas* en este grupo."
-    }, { quoted: msg });
+    mensaje = `
+╭┈〔 🛑 *DESPEDIDAS DESACTIVADAS* 〕┈╮
+┊ Los mensajes de *despedida* fueron
+┊ desactivados en este grupo.
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
+    `.trim();
   }
 
   fs.writeFileSync(activosPath, JSON.stringify(activos, null, 2));
 
-  // Reacción al comando
+  await conn.sendMessage(chatId, {
+    text: mensaje
+  }, { quoted: msg });
+
+  // Reacción ✅
   await conn.sendMessage(chatId, {
     react: { text: "✅", key: msg.key }
   });
