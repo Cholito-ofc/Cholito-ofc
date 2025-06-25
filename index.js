@@ -402,51 +402,82 @@ const farewellTexts = [
 ];
 
 // BIENVENIDA: solo cuando alguien entra
-//const fs = require("fs");
-const { generarImagen } = require("./imagenes");
-const { create, Client } = require("@open-wa/wa-automate"); // o tu sock equivalente
+if (update.action === "add" && welcomeActivo) {
+  for (const participant of update.participants) {
+    const mention = `@${participant.split("@")[0]}`;
+    const customMessage = customWelcomes[update.id];
+    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
+    try {
+      profilePicUrl = await sock.profilePictureUrl(participant, "image");
+    } catch (err) {}
 
-create().then(async sock => {
-  sock.onParticipantsChanged(async (group, change) => {
-    const { action, participants, id: chatId } = change;
-
-    for (const participant of participants) {
-      const mention = `@${participant.split("@")[0]}`;
-
-      let profilePic = "https://cdn.russellxz.click/d9d547b6.jpeg";
+    let textoFinal = "";
+    if (customMessage) {
+      // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio, siempre con manito y salto de línea
+      if (/(@user)/gi.test(customMessage)) {
+        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${customMessage.replace(/@user/gi, mention)}`;
+      } else {
+        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${customMessage}`;
+      }
+    } else {
+      // Si no hay mensaje personalizado, solo manda la descripción del grupo
+      let groupDesc = "";
       try {
-        profilePic = await sock.getProfilePicFromServer(participant) || profilePic;
-      } catch (e) {}
-
-      const metadata = await sock.getGroupInfo(chatId);
-      const totalMiembros = metadata.participants.length;
-
-      if (action === "add") {
-        const buffer = await generarImagen({
-          tipo: "welcome",
-          nombreUsuario: mention,
-          fotoPerfilURL: profilePic,
-          totalMiembros,
-          includeLogo: true
-        });
-
-        await sock.sendImage(chatId, buffer, "welcome.jpg", `👋🏻 ${mention} ha sido agregado/a`, null, [participant]);
+        const metadata = await sock.groupMetadata(update.id);
+        groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
+      } catch (err) {
+        groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
       }
-
-      if (action === "remove") {
-        const buffer = await generarImagen({
-          tipo: "bye",
-          nombreUsuario: mention,
-          fotoPerfilURL: profilePic,
-          totalMiembros,
-          includeLogo: true
-        });
-
-        await sock.sendImage(chatId, buffer, "bye.jpg", `👋🏻 ${mention} ha salido`, null, [participant]);
-      }
+      textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
     }
-  });
-});
+
+    await sock.sendMessage(update.id, {
+      image: { url: profilePicUrl },
+      caption: textoFinal,
+      mentions: [participant] // SIEMPRE etiqueta al usuario
+    });
+  }
+}
+
+// DESPEDIDA: solo cuando alguien sale
+if (update.action === "remove" && despedidasActivo) {
+  for (const participant of update.participants) {
+    const mention = `@${participant.split("@")[0]}`;
+    // Carga el mensaje personalizado desde el archivo byemsgs.json
+    let customBye = "";
+    try {
+      const data = fs.existsSync("./byemsgs.json")
+        ? JSON.parse(fs.readFileSync("./byemsgs.json", "utf-8"))
+        : {};
+      customBye = data[update.id];
+    } catch (e) {}
+
+    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
+    try {
+      profilePicUrl = await sock.profilePictureUrl(participant, "image");
+    } catch (err) {}
+
+    // Mensaje predeterminado con cuadritos
+    const defaultBye = `╔═══════════════════\n║  👋  Hasta pronto, ${mention}!\n║  Esperamos verte de nuevo en el grupo.\n╚═══════════════════`;
+
+    // Usa el personalizado si existe, si no el predeterminado
+    let byeText;
+    if (customBye) {
+      // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio
+      byeText = /@user/gi.test(customBye)
+        ? customBye.replace(/@user/gi, mention)
+        : `${mention} ${customBye}`;
+    } else {
+      byeText = defaultBye;
+    }
+
+    await sock.sendMessage(update.id, {
+      image: { url: profilePicUrl },
+      caption: byeText,
+      mentions: [participant]
+    });
+  }
+}
 // **************** FIN LÓGICA BIENVENIDA/DESPEDIDA ****************
     // **************** FIN LÓGICA BIENVENIDA/DESPEDIDA ****************
 
