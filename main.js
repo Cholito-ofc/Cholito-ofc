@@ -4203,7 +4203,7 @@ COMO ADMIN DE : ${groupName.toUpperCase()}
      
 // Comando para quitar derechos de admin (quitaradmin / quitaradmins)
 
-case 'link': {
+case 'link': { 
   try {
     const chatId = msg.key.remoteJid;
 
@@ -4234,11 +4234,20 @@ case 'link': {
       profilePicUrl = 'https://i.imgur.com/5Qn9vRC.png'; // Imagen por defecto si no tiene
     }
 
-    // Enviar mensaje con vista previa enriquecida
+    // Enviar mensaje con botón y vista previa enriquecida
     await sock.sendMessage(
       chatId,
       {
-        text: `🔗 *Aquí tienes el enlace del grupo:*\n${link}`,
+        text: `✨ *¡Hola! Aquí tienes el enlace para unirte a este grupo:*\n\n🌐 *Nombre del grupo:* ${metadata.subject}\n\n🔗 *Enlace directo:* ${link}`,
+        footer: "¡Presiona el botón o la imagen para unirte!",
+        buttons: [
+          {
+            buttonId: `#null`,
+            buttonText: { displayText: "🚪 Unirse al grupo" },
+            type: 1
+          }
+        ],
+        headerType: 4,
         contextInfo: {
           externalAdReply: {
             title: metadata.subject,
