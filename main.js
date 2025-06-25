@@ -7025,78 +7025,73 @@ case 'gomascota': {
         
 case 'addlista': {
   try {
-    const fromMe = msg.key.fromMe; // Definir desde el mensaje
+    const fromMe = msg.key.fromMe;
     const text = args.join(" ");
-    // Permitir el comando si el remitente es owner o si el mensaje es enviado por el bot (fromMe)
+    const chatId = msg.key.remoteJid;
+
     if (!isOwner(sender) && !fromMe) {
-      await sock.sendMessage(
-        msg.key.remoteJid,
-        { text: "⛔ Solo el propietario del bot o el bot mismo pueden usar este comando." },
-        { quoted: msg }
-      );
+      await sock.sendMessage(chatId, {
+        text: "⛔ *Solo el propietario del bot o el bot mismo pueden usar este comando.*"
+      }, { quoted: msg });
       return;
     }
 
-    // Intentamos extraer el número del usuario objetivo:
-    // Si se cita el mensaje, se toma el número del participante citado.
     let target;
     if (msg.message?.extendedTextMessage?.contextInfo?.quotedMessage) {
-      target =
-        msg.message.extendedTextMessage.contextInfo.participant ||
-        msg.key.participant ||
-        msg.key.remoteJid;
+      target = msg.message.extendedTextMessage.contextInfo.participant ||
+               msg.key.participant ||
+               msg.key.remoteJid;
     } else if (text && text.trim() !== "") {
       target = text;
     }
 
     if (!target) {
-      await sock.sendMessage(
-        msg.key.remoteJid,
-        { text: "⚠️ Uso incorrecto. Cita el mensaje del usuario o proporciona el número." },
-        { quoted: msg }
-      );
+      await sock.sendMessage(chatId, {
+        text: "⚠️ *Uso incorrecto.*\n\n📌 *Cita un mensaje o escribe el número del usuario.*"
+      }, { quoted: msg });
       return;
     }
 
-    // Normalizamos para guardar solo dígitos
     target = target.replace(/\D/g, "");
 
-    // Ruta del archivo lista.json
     const listaFile = "./lista.json";
     let lista = [];
     if (fs.existsSync(listaFile)) {
       lista = JSON.parse(fs.readFileSync(listaFile, "utf-8"));
-      if (!Array.isArray(lista)) {
-        lista = [];
-      }
+      if (!Array.isArray(lista)) lista = [];
     }
 
-    // Verificar si el usuario ya está en la lista
     if (lista.includes(target)) {
-      await sock.sendMessage(
-        msg.key.remoteJid,
-        { text: "ℹ️ El usuario ya está en la lista." },
-        { quoted: msg }
-      );
+      await sock.sendMessage(chatId, {
+        text: "ℹ️ *El usuario ya está en la lista.*"
+      }, { quoted: msg });
       return;
     }
 
-    // Agregar el usuario a la lista y guardar el archivo
     lista.push(target);
     fs.writeFileSync(listaFile, JSON.stringify(lista, null, 2));
 
-    await sock.sendMessage(
-      msg.key.remoteJid,
-      { text: `✅ Usuario ${target} agregado a la lista.` },
-      { quoted: msg }
-    );
+    const mentionJid = [`${target}@s.whatsapp.net`];
+    const mensaje = `
+╭┈ \`𝖴𝖲𝖴𝖠𝖱𝖨𝖮 𝖠𝖦𝖱𝖤𝖦𝖠𝖣𝖮\` ┈≫
+┊
+┊👤 𝖴𝖲𝖴𝖠𝖱𝖨𝖮:
+┊ @${target}  
+┊
+┊𝖥𝗎𝖾 𝖺𝗀𝗋𝖾𝗀𝖺𝖽𝗈 𝖾𝗑𝗂𝗍𝗈𝗌𝖺𝗆𝖾𝗇𝗍𝖾 𝖺 𝗅𝖺 𝗅𝗂𝗌𝗍𝖺
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
+    `.trim();
+
+    await sock.sendMessage(chatId, {
+      text: mensaje,
+      mentions: mentionJid
+    }, { quoted: msg });
+
   } catch (error) {
     console.error("❌ Error en el comando .addlista:", error);
-    await sock.sendMessage(
-      msg.key.remoteJid,
-      { text: "❌ Ocurrió un error al agregar el usuario a la lista." },
-      { quoted: msg }
-    );
+    await sock.sendMessage(msg.key.remoteJid, {
+      text: "❌ *Ocurrió un error al agregar el usuario a la lista.*"
+    }, { quoted: msg });
   }
   break;
 }
@@ -7104,76 +7099,73 @@ case 'addlista': {
 // Comando para eliminar un usuario de la lista (deletelista)
 case 'deletelista': {
   try {
-    const fromMe = msg.key.fromMe; // Definir desde el mensaje
+    const fromMe = msg.key.fromMe;
     const text = args.join(" ");
-    // Permitir el comando si el remitente es owner o si el mensaje es enviado por el bot (fromMe)
+    const chatId = msg.key.remoteJid;
+
     if (!isOwner(sender) && !fromMe) {
-      await sock.sendMessage(
-        msg.key.remoteJid,
-        { text: "⛔ Solo el propietario del bot o el bot mismo pueden usar este comando." },
-        { quoted: msg }
-      );
+      await sock.sendMessage(chatId, {
+        text: "⛔ *Solo el propietario del bot o el bot mismo pueden usar este comando.*"
+      }, { quoted: msg });
       return;
     }
 
-    // Intentamos extraer el número del usuario objetivo
     let target;
     if (msg.message?.extendedTextMessage?.contextInfo?.quotedMessage) {
-      target =
-        msg.message.extendedTextMessage.contextInfo.participant ||
-        msg.key.participant ||
-        msg.key.remoteJid;
+      target = msg.message.extendedTextMessage.contextInfo.participant ||
+               msg.key.participant ||
+               msg.key.remoteJid;
     } else if (text && text.trim() !== "") {
       target = text;
     }
 
     if (!target) {
-      await sock.sendMessage(
-        msg.key.remoteJid,
-        { text: "⚠️ Uso incorrecto. Cita el mensaje del usuario o proporciona el número." },
-        { quoted: msg }
-      );
+      await sock.sendMessage(chatId, {
+        text: "⚠️ *Uso incorrecto.*\n\n📌 *Cita un mensaje o escribe el número del usuario.*"
+      }, { quoted: msg });
       return;
     }
 
-    // Normalizamos para guardar solo dígitos
     target = target.replace(/\D/g, "");
 
     const listaFile = "./lista.json";
     let lista = [];
     if (fs.existsSync(listaFile)) {
       lista = JSON.parse(fs.readFileSync(listaFile, "utf-8"));
-      if (!Array.isArray(lista)) {
-        lista = [];
-      }
+      if (!Array.isArray(lista)) lista = [];
     }
 
-    // Verificar si el usuario se encuentra en la lista
     if (!lista.includes(target)) {
-      await sock.sendMessage(
-        msg.key.remoteJid,
-        { text: "ℹ️ El usuario no se encuentra en la lista." },
-        { quoted: msg }
-      );
+      await sock.sendMessage(chatId, {
+        text: "ℹ️ *El usuario no se encuentra en la lista.*"
+      }, { quoted: msg });
       return;
     }
 
-    // Eliminar el usuario de la lista y guardar el archivo
     lista = lista.filter((u) => u !== target);
     fs.writeFileSync(listaFile, JSON.stringify(lista, null, 2));
 
-    await sock.sendMessage(
-      msg.key.remoteJid,
-      { text: `✅ Usuario ${target} eliminado de la lista.` },
-      { quoted: msg }
-    );
+    const mentionJid = [`${target}@s.whatsapp.net`];
+    const mensaje = `
+╭┈ \`𝖴𝖲𝖴𝖠𝖱𝖨𝖮 𝖤𝖫𝖨𝖬𝖨𝖭𝖠𝖣𝖮\` ┈≫
+┊
+┊👤 𝖴𝖲𝖴𝖠𝖱𝖨𝖮:
+┊ @${target}  
+┊
+┊𝖥𝗎𝖾 𝖾𝗅𝗂𝗆𝗂𝗇𝖺𝖽𝗈 𝖾𝗑𝗂𝗍𝗈𝗌𝖺𝗆𝖾𝗇𝗍𝖾 𝖽𝖾 𝗅𝖺 𝗅𝗂𝗌𝗍𝖺
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
+    `.trim();
+
+    await sock.sendMessage(chatId, {
+      text: mensaje,
+      mentions: mentionJid
+    }, { quoted: msg });
+
   } catch (error) {
     console.error("❌ Error en el comando .deletelista:", error);
-    await sock.sendMessage(
-      msg.key.remoteJid,
-      { text: "❌ Ocurrió un error al eliminar el usuario de la lista." },
-      { quoted: msg }
-    );
+    await sock.sendMessage(msg.key.remoteJid, {
+      text: "❌ *Ocurrió un error al eliminar el usuario de la lista.*"
+    }, { quoted: msg });
   }
   break;
 }
