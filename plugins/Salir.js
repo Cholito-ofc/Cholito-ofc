@@ -1,9 +1,9 @@
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
-  const sender = msg.key.participant || msg.key.remoteJid;
-  const senderNum = sender.replace(/[^0-9]/g, "");
+  const senderJid = msg.participant || msg.key.participant || msg.key.remoteJid;
+  const senderNum = senderJid.replace(/[^0-9]/g, "");
   const senderMention = `@${senderNum}`;
-  const mentionJid = sender.endsWith('@s.whatsapp.net') ? sender : sender + '@s.whatsapp.net';
+  const mentionJid = senderNum + "@s.whatsapp.net";
 
   if (!global.owner.some(([id]) => id === senderNum)) {
     return conn.sendMessage(chatId, {
@@ -41,7 +41,7 @@ const handler = async (msg, { conn, args }) => {
 
     await conn.sendMessage(grupo.id, {
       text: salidaTexto,
-      mentions: [mentionJid]
+      mentions: [mentionJid] // <- ¡esto enlaza correctamente el texto con JID!
     });
 
     await conn.groupLeave(grupo.id);
@@ -59,5 +59,5 @@ const handler = async (msg, { conn, args }) => {
   }
 };
 
-handler.command = ['salir'];
+handler.command = ['salirgrupo'];
 module.exports = handler;
