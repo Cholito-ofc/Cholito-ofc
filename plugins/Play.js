@@ -155,8 +155,6 @@ const handler = async (msg, { conn, args }) => {
 │  🔗 *URL:* ${videoUrl}
 ╰─⬣
 
-pedido de: ${senderMention}
-
 *[🛠️] 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈 𝖾𝗌𝗉𝖾𝗋𝖾...*
 
 > ® ⍴᥆ᥕᥱrᥱძ ᑲᥡ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍⚡`;
