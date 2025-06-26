@@ -29,7 +29,7 @@ let handler = async (msg, { conn, args }) => {
     )
   }
 
-  // ────── helpers horario ──────
+  /*──────── helpers de hora ────────*/
   const to24Hour = (str) => {
     let [time, modifier] = str.toLowerCase().split(/(am|pm)/)
     let [h, m] = time.split(":").map(n => parseInt(n))
@@ -38,9 +38,9 @@ let handler = async (msg, { conn, args }) => {
     return { h, m: m || 0 }
   }
   const to12Hour = (h, m) => {
-    const suffix = h >= 12 ? 'pm' : 'am'
+    const suf = h >= 12 ? 'pm' : 'am'
     h = h % 12 || 12
-    return `${h}:${m.toString().padStart(2, '0')}${suffix}`
+    return `${h}:${m.toString().padStart(2, '0')}${suf}`
   }
 
   const base = to24Hour(horaTexto)
@@ -50,23 +50,24 @@ let handler = async (msg, { conn, args }) => {
     { pais: "🇨🇴 COLOMBIA", offset: 1 }
   ]
 
+  // 👇 ahora genera "10:00pm 🇲🇽 MÉXICO"
   const horaMsg = zonas.map(z => {
     let newH = base.h + z.offset
     let newM = base.m
     if (newH >= 24) newH -= 24
-    return `${z.pais} : ${to12Hour(newH, newM)}`
+    return `${to12Hour(newH, newM)} ${z.pais}`
   }).join("\n")
 
   const idPartida = new Date().getTime().toString()
 
-  /*────────── mensaje inicial ──────────*/
+  /*──────── mensaje inicial ────────*/
   let plantilla = `
 ㅤ ㅤ4 \`𝗩𝗘𝗥𝗦𝗨𝗦\` 4
 ╭─────────────╮
 ┊ \`𝗠𝗢𝗗𝗢:\` \`\`\`${modalidad}\`\`\`
 ┊
 ┊ ⏱️ \`𝗛𝗢𝗥𝗔𝗥𝗜𝗢\`
-┊ ${horaMsg.split('\\n').map(l => '• ' +  l).join('\\n┊ ')}
+┊ ${horaMsg.split('\\n').map(l => '• ' + l).join('\\n┊ ')}
 ┊
 ┊ » \`𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔\`
 ┊
@@ -95,7 +96,7 @@ let handler = async (msg, { conn, args }) => {
     idPartida
   }
 
-  /*────────── listener de reacciones ──────────*/
+  /*──────── listener de reacciones ────────*/
   conn.ev.on('messages.upsert', async ({ messages }) => {
     let m = messages[0]
     if (!m?.message?.reactionMessage) return
@@ -114,8 +115,7 @@ let handler = async (msg, { conn, args }) => {
     const esTitular  = data.jugadores.includes(sender)
     const esSuplente = data.suplentes.includes(sender)
 
-    // ─── Suplentes ───
-    if (emojisSuplente.includes(emoji)) {
+    if (emojisSuplente.includes(emoji)) {                    // suplentes
       if (esTitular) {
         if (data.suplentes.length < 2) {
           data.jugadores = data.jugadores.filter(j => j !== sender)
@@ -126,10 +126,7 @@ let handler = async (msg, { conn, args }) => {
         if (data.suplentes.length < 2) data.suplentes.push(sender)
         else return
       } else return
-    }
-
-    // ─── Titulares ───
-    else if (emojisParticipar.includes(emoji)) {
+    } else if (emojisParticipar.includes(emoji)) {           // titulares
       if (esTitular) return
       if (esSuplente) {
         if (data.jugadores.length < 4) {
@@ -143,9 +140,9 @@ let handler = async (msg, { conn, args }) => {
       } else return
     } else return
 
-    /*────────── plantilla actualizada ──────────*/
-    let jugadores  = data.jugadores.map(u => `@${u.split('@')[0]}`)
-    let suplentes  = data.suplentes.map(u => `@${u.split('@')[0]}`)
+    /*──────── plantilla actualizada ────────*/
+    let jugadores = data.jugadores.map(u => `@${u.split('@')[0]}`)
+    let suplentes = data.suplentes.map(u => `@${u.split('@')[0]}`)
 
     let plantilla = `
 ㅤ ㅤ4 \`𝗩𝗘𝗥𝗦𝗨𝗦\` 4
@@ -153,7 +150,7 @@ let handler = async (msg, { conn, args }) => {
 ┊ \`𝗠𝗢𝗗𝗢:\` \`\`\`${data.modalidad}\`\`\`
 ┊
 ┊ ⏱️ \`𝗛𝗢𝗥𝗔𝗥𝗜𝗢\`
-┊ ${data.horaMsg.split('\\n').map(l => '• ' +  l).join('\\n┊ ')}
+┊ ${data.horaMsg.split('\\n').map(l => '• ' + l).join('\\n┊ ')}
 ┊
 ┊ » \`𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔\`
 ┊
@@ -172,11 +169,10 @@ let handler = async (msg, { conn, args }) => {
 • Lista Activa Por 5 Minutos
 `.trim()
 
-    // borrar y reenviar
     await conn.sendMessage(data.chat, { delete: data.originalMsgKey })
     let newMsg = await conn.sendMessage(data.chat, { text: plantilla, mentions: [...data.jugadores, ...data.suplentes] })
 
-    partidasVS4[newMsg.key.id]              = data
+    partidasVS4[newMsg.key.id]               = data
     partidasVS4[newMsg.key.id].originalMsgKey = newMsg.key
     delete partidasVS4[key.id]
   })
