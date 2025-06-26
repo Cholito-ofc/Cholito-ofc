@@ -13,8 +13,9 @@ let handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
+  const text = msg?.message?.conversation || msg?.message?.extendedTextMessage?.text || ''
   const type = (args[0] || '').toLowerCase();
-  const enable = msg.text.startsWith('.on');
+  const enable = text.startsWith('.on');
 
   if (!['welcome'].includes(type)) {
     return conn.sendMessage(chatId, {
