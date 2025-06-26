@@ -5,14 +5,22 @@ const handler = async (msg, { conn }) => {
   const senderId = msg.participant || msg.key.participant || msg.key.remoteJid;
   const senderClean = senderId.replace(/[^0-9]/g, '');
 
+  // Obtener la fecha actual (formato dd/mm/yyyy)
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const year = now.getFullYear();
+  const formattedDate = `${day}/${month}/${year}`;
+
   // URL fija del video (GIF animado)
   const mediaUrl = 'https://cdn.russellxz.click/b66b17c2.mp4';
 
-  // Guía adaptada con mención
+  // Guía adaptada con mención y fecha
   let message = `
 *Hola @${senderClean} 👋*
+\`\`\`${formattedDate}\`\`\`
 
-𝙈𝙐𝘾𝙃𝙊 𝙂𝙐𝙎𝙏𝙊 𝙎𝙊𝙔 *𝙆𝙄𝙇𝙇𝙐𝘼-𝘽𝙊𝙏* 𝙔 𝙀𝙎𝙏𝙊𝙔 𝘼𝙌𝙐𝙄́ 𝙋𝘼𝙍𝘼 𝘼𝙔𝙐𝘿𝘼𝙍𝙏𝙀, 𝘾𝙊𝙈𝙀𝙉𝘾𝙀𝙈𝙊𝙎...
+𝙈𝙐𝘾𝙃𝙊 𝙂𝙐𝙎𝙏𝙊 𝙎𝙊𝙔 *𝙆𝙄𝙇𝙇𝙐𝘼-𝘽𝙊𝙏* 𝙔 𝙀𝙎𝙏𝙊𝙔 𝘼𝙌𝙐Í 𝙋𝘼𝙍𝘼 𝘼𝙔𝙐𝘿𝘼𝙍𝙏𝙀, 𝘾𝙊𝙈𝙀𝙉𝘾𝙀𝙈𝙊𝙎...
 
 ⚙️${global.prefix}𝙒𝙚𝙡𝙘𝙤𝙢𝙚 𝙤𝙣/𝙤𝙛𝙛
 🔗 Con esta función KilluaBot enviará un mensaje de bienvenida al usuario que entre el grupo.
