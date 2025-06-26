@@ -17,27 +17,29 @@ function isUserBlocked(userId) {
   }
 }
 
+// ✅ NUEVA FUNCIÓN para usar la API de Anomaki
 async function getDownloadUrl(videoUrl) {
-  const apis = [{ url: 'https://www.apis-anomaki.zone.id/downloader/yta?url=joji=', type: 'vreden' }];
-  for (const api of apis) {
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      try {
-        const response = await axios.get(`${api.url}${encodeURIComponent(videoUrl)}`, { timeout: TIMEOUT_MS });
-        if (
-          response.data?.status === 200 &&
-          response.data?.result?.download?.url &&
-          response.data?.result?.download?.status === true
-        ) {
-          return {
-            url: response.data.result.download.url.trim(),
-            title: response.data.result.metadata.title
-          };
-        }
-      } catch {
-        if (attempt < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
+  const apiUrl = 'https://www.apis-anomaki.zone.id/downloader/yta?url=';
+
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      const res = await axios.get(`${apiUrl}${encodeURIComponent(videoUrl)}`, {
+        timeout: TIMEOUT_MS
+      });
+
+      const data = res.data;
+      if (data?.result?.url) {
+        return {
+          url: data.result.url.trim(),
+          title: data.result.title || 'Audio'
+        };
       }
+
+    } catch {
+      if (attempt < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
     }
   }
+
   return null;
 }
 
@@ -124,8 +126,8 @@ const handler = async (msg, { conn, args }) => {
     return conn.sendMessage(chatId, {
       text: `➤ \`UPS, ERROR\` ❌
 
-𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗋𝗈𝗅𝗂𝗍𝖺* *.𝗉𝗅𝖺𝗒𝟣* 𝗈 *.𝗉𝗅𝖺𝗒2*
-".𝗋𝖾𝗉𝗈𝗋𝗍𝖾 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
+𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗋𝗈𝗅𝗂𝗍𝖺* *.𝗉𝗅𝖺𝗒1* 𝗈 *.𝗉𝗅𝖺𝗒2*
+".𝗋𝖾𝗉𝗈𝗋𝗍 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
 > 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗍𝖺𝗇 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
     }, { quoted: msg });
   }
