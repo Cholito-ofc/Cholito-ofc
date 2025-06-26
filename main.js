@@ -292,7 +292,7 @@ case 'play': {
 ╭───────────✦
 ➤ sᴇʟᴇᴄᴄɪᴏɴᴀ ᴜɴᴀ ᴏᴘᴄɪᴏ́ɴ
 ➤ 𝟏 ᴏ *ᴀᴜᴅɪᴏ* – 𝖬𝗎́𝗌𝗂𝖼𝖺  
-➤ 𝟐 ᴏ *ᴠɪᴅᴇᴏ* – 𝖵𝗂́𝖽𝖾𝗈    
+➤ 𝟐 ᴏ *ᴠɪᴅᴇ𝗈* – 𝖵𝗂́𝖽𝖾𝗈    
 ╰───────────✦
 
 > ⍴᥆ᥕᥱrᥱძ ᑲᥡ kіᥣᥣᥙᥲᑲ᥆𝗍 🎧
@@ -383,6 +383,53 @@ case 'play2': {
       text: `❌ Error al procesar el video.`
     }, { quoted: msg });
   }
+
+  break;
+}
+
+case 'revsall': {
+  const chatId = msg.key.remoteJid;
+  const sender = msg.key.participant || msg.key.remoteJid;
+  const senderNum = sender.replace(/[^0-9]/g, '');
+
+  const fs = require('fs');
+  const path = require('path');
+
+  if (!global.owner.some(([id]) => id === senderNum)) {
+    await sock.sendMessage(chatId, {
+      text: '❌ Solo el *dueño del bot* puede usar este comando.'
+    }, { quoted: msg });
+    break;
+  }
+
+  const baseDir = path.join(__dirname, 'commands'); // Ajusta esta ruta si tu estructura es distinta
+  const folders = fs.readdirSync(baseDir).filter(f => fs.lstatSync(path.join(baseDir, f)).isDirectory());
+
+  let report = `🔍 *REVISIÓN DE MÓDULOS (${folders.length})*\n\n`;
+
+  for (const folder of folders) {
+    const files = fs.readdirSync(path.join(baseDir, folder)).filter(file => file.endsWith('.js'));
+
+    for (const file of files) {
+      const fullPath = path.join(baseDir, folder, file);
+
+      try {
+        const mod = require(fullPath);
+
+        if (typeof mod !== 'function' && typeof mod?.handler !== 'function' && typeof mod?.default !== 'function') {
+          report += `⚠️ ${folder}/${file} - Falta handler\n`;
+        } else {
+          report += `✅ ${folder}/${file}\n`;
+        }
+      } catch (err) {
+        report += `❌ ${folder}/${file}\n    ↪️ ${err.message.split('\n')[0]}\n`;
+      }
+    }
+  }
+
+  await sock.sendMessage(chatId, {
+    text: report.length < 4000 ? report : report.slice(0, 4000) + "\n\n⚠️ Mensaje truncado...",
+  }, { quoted: msg });
 
   break;
 }        
