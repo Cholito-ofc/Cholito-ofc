@@ -9,65 +9,58 @@ const handler = async (msg, { conn, args }) => {
     try {
       const metadata = await conn.groupMetadata(chatId);
       groupName = metadata.subject || "Sin nombre";
-    } catch (e) {
-      groupName = "Grupo (no se pudo obtener el nombre)";
+    } catch {
+      groupName = "Grupo (no disponible)";
     }
   }
 
-  // Número del dueño principal (ajusta si tu owner es distinto)
+  // Número del dueño principal
   const ownerNumber = global.owner[0]?.[0] || "";
 
-  // Si no hay texto, mostrar ejemplo de uso bonito
+  // 🟡 Si no hay mensaje, mostrar ejemplo
   if (!text) {
     return conn.sendMessage(chatId, {
-      text:
-`╭━[ 📝  *EJEMPLO DE REPORTE*  ]━╮
-
-Por favor, describe el error o sugerencia.
-
-*Ejemplo:*
-.report El bot no responde a .menu
-
-¡Entre más detalles brindes, mejor podremos ayudarte!
-
-╰━━━━━━━━━━━━━━━━━━━━━━╯`
+      text: 
+`╭┈┈┈┈┈┈┈┈┈┈┈┈┈≫
+┊  📩 *EJEMPLO DE REPORTE*
+┊ 
+┊  Por favor, describe el error o sugerencia.
+┊ 
+┊  *Ejemplo:*
+┊  .report El comando .menu no responde
+┊ 
+┊  Entre más detalles des, mejor te ayudaremos.
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈≫`,
     }, { quoted: msg });
   }
 
-  // Mensaje bonito al owner, solo mención, nombre e ID del grupo
+  // Mensaje al owner
   const ownerMsg = 
-`╭━[ 🚨  *NUEVO REPORTE*  🚨 ]━╮
+`╭┈┈┈┈┈┈┈┈┈┈┈┈┈≫
+┊ 🚨 *NUEVO REPORTE* 🚨
+┊ 
+┊ 👤 *Usuario:* @${jid}
+┊ 📝 *Mensaje:* ${text}
+┊ 🏷️ *Grupo:* ${groupName}
+┊ 🆔 *ID:* ${chatId}
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈≫`;
 
-👤 *Usuario:*
-   @${jid}
-
-📝 *Mensaje:*
-   ${text}
-
-🏷️ *Grupo:*
-   ${groupName}
-
-🆔 *ID del grupo:*
-   ${chatId}
-
-╰━━━━━━━━━━━━━━━━━━━━━╯`;
-
-  await conn.sendMessage(ownerNumber + "@s.whatsapp.net", { 
+  await conn.sendMessage(`${ownerNumber}@s.whatsapp.net`, {
     text: ownerMsg,
     mentions: [jid]
   });
 
-  // Confirmación al usuario con diseño bonito
+  // Mensaje de confirmación al usuario
   await conn.sendMessage(chatId, {
-    text:
-`╭━[ ✅ *REPORTE ENVIADO* ]━╮
-
-¡Gracias por tu reporte!
-Tu mensaje ha sido enviado con éxito al dueño del bot.
-
-🔎 Tu ayuda es importante para mejorar el servicio.
-
-╰━━━━━━━━━━━━━━━━━━━━━╯`
+    text: 
+`╭┈┈┈┈┈┈┈┈┈┈┈┈┈≫
+┊ ✅ *REPORTE ENVIADO*
+┊ 
+┊ ¡Gracias por tu reporte!
+┊ Tu mensaje ha sido enviado al dueño del bot.
+┊ 
+┊ 🔍 Tu ayuda mejora el servicio 💖
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈≫`
   }, { quoted: msg });
 };
 
