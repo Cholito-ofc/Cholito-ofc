@@ -26,4 +26,4 @@ handler.group = true;              // Solo se puede usar en grupos
 handler.admin = false;            // No requiere que el usuario sea admin
 handler.botAdmin = true;          // El bot debe ser admin para poder salirse
 
-export default handler;
+module.exports handler;
