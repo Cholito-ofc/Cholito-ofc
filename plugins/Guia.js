@@ -14,59 +14,59 @@ const handler = async (msg, { conn }) => {
 
 𝙈𝙐𝘾𝙃𝙊 𝙂𝙐𝙎𝙏𝙊 𝙎𝙊𝙔 *𝙆𝙄𝙇𝙇𝙐𝘼-𝘽𝙊𝙏* 𝙔 𝙀𝙎𝙏𝙊𝙔 𝘼𝙌𝙐𝙄́ 𝙋𝘼𝙍𝘼 𝘼𝙔𝙐𝘿𝘼𝙍𝙏𝙀, 𝘾𝙊𝙈𝙀𝙉𝘾𝙀𝙈𝙊𝙎...
 
-⚙️ ${global.prefix}𝙒𝙚𝙡𝙘𝙤𝙢𝙚 𝙤𝙣/𝙤𝙛𝙛
+⚙️${global.prefix}𝙒𝙚𝙡𝙘𝙤𝙢𝙚 𝙤𝙣/𝙤𝙛𝙛
 🔗 Con esta función KilluaBot enviará un mensaje de bienvenida al usuario que entre el grupo.
 ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 
-⚙️.𝘿𝙚𝙨𝙥𝙚𝙙𝙞𝙙𝙖𝙨 𝙤𝙣/𝙤𝙛𝙛
+⚙️${global.prefix}𝘿𝙚𝙨𝙥𝙚𝙙𝙞𝙙𝙖𝙨 𝙤𝙣/𝙤𝙛𝙛
 🔗 Con esta función KilluaBot mandará un mensaje despidiendo al usuario que salió del grupo.
 ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 
-⚙️.𝙎𝙚𝙩𝙬𝙚𝙡𝙘𝙤𝙢𝙚
+⚙️${global.prefix}𝙎𝙚𝙩𝙬𝙚𝙡𝙘𝙤𝙢𝙚
 🔗 𝘊𝘰𝘯 𝘦𝘴𝘵𝘢 𝘧𝘶𝘯𝘤𝘪𝘰́𝘯 𝘱𝘰𝘥𝘳𝘢́𝘴 𝘱𝘦𝘳𝘴𝘰𝘯𝘢𝘭𝘪𝘻𝘢𝘳 𝘭𝘢 𝘣𝘪𝘦𝘯𝘷𝘦𝘯𝘪𝘥𝘢 𝘥𝘦𝘭 𝘶𝘴𝘶𝘢𝘳𝘪𝘰 𝘢𝘭 𝘨𝘳𝘶𝘱𝘰. 
 ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 
-⚙️.𝘿𝙚𝙡𝙬𝙚𝙡𝙘𝙤𝙢𝙚
+⚙️${global.prefix}𝘿𝙚𝙡𝙬𝙚𝙡𝙘𝙤𝙢𝙚
 🔗 𝘊𝘰𝘯 𝘦𝘴𝘵𝘢 𝘧𝘶𝘯𝘤𝘪𝘰́𝘯 𝘱𝘰𝘥𝘳𝘢́𝘴 𝘦𝘭𝘪𝘮𝘪𝘯𝘢𝘳 𝘦𝘭 𝘮𝘦𝘯𝘴𝘢𝘫𝘦 𝘱𝘦𝘳𝘴𝘰𝘯𝘢𝘭𝘪𝘻𝘢𝘥𝘰 𝘥𝘦 𝘭𝘢 𝘣𝘪𝘦𝘯𝘷𝘦𝘯𝘪𝘥𝘢. 
 ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 
-🔗.𝙎𝙚𝙩𝙗𝙮𝙚
+🔗${global.prefix}𝙎𝙚𝙩𝙗𝙮𝙚
 𝘊𝘰𝘯 𝘦𝘴𝘵𝘢 𝘧𝘶𝘯𝘤𝘪𝘰́𝘯 𝘱𝘰𝘥𝘳𝘢́𝘴 𝘱𝘦𝘳𝘴𝘰𝘯𝘢𝘭𝘪𝘻𝘢𝘳 𝘦𝘭 𝘮𝘦𝘯𝘴𝘢𝘫𝘦 𝘥𝘦 𝘥𝘦𝘴𝘱𝘦𝘥𝘪𝘥𝘢 𝘦𝘯 𝘦𝘭 𝘨𝘳𝘶𝘱𝘰.
 ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 
-⚙️.𝘿𝙚𝙡𝙗𝙮𝙚
+⚙️${global.prefix}𝘿𝙚𝙡𝙗𝙮𝙚
 🔗 𝘊𝘰𝘯 𝘦𝘴𝘵𝘢 𝘧𝘶𝘯𝘤𝘪𝘰́𝘯 𝘱𝘰𝘥𝘳𝘢́𝘴 𝘦𝘭𝘪𝘮𝘪𝘯𝘢𝘳 𝘵𝘶́ 𝘮𝘦𝘯𝘴𝘢𝘫𝘦 𝘱𝘦𝘳𝘴𝘰𝘯𝘢𝘭𝘪𝘻𝘢𝘥𝘰 𝘱𝘢𝘳𝘢 𝘭𝘢𝘴 𝘥𝘦𝘴𝘱𝘦𝘥𝘪𝘥𝘢𝘴 𝘤𝘶𝘢𝘯𝘥𝘰 𝘦𝘭 𝘶𝘴𝘶𝘢𝘳𝘪𝘰 𝘴𝘢𝘭𝘦 𝘥𝘦𝘭 𝘎𝘳𝘶𝘱𝘰. 
 ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 
-⚙️.𝙍𝙚𝙥𝙤𝙧𝙩
+⚙️${global.prefix}𝙍𝙚𝙥𝙤𝙧𝙩
 🔗 Con esta función podrás enviar algún reporte técnico a mi creador.
 ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 
-⚙️.𝙋𝙧𝙤𝙜𝙧𝙖𝙢𝙖𝙧𝙜𝙧𝙪𝙥𝙤
+⚙️${global.prefix}𝙋𝙧𝙤𝙜𝙧𝙖𝙢𝙖𝙧𝙜𝙧𝙪𝙥𝙤
 🔗 Con esta función podrás abrir / cerrar el grupo automáticamente.
 ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 
-⚙️.𝙏𝙤𝙙𝙤𝙨
+⚙️${global.prefix}𝙏𝙤𝙙𝙤𝙨
 🔗 Con esta función KilluaBot mencionará a todos automáticamente.
 ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 
-⚙️.𝙋𝙡𝙖𝙮
+⚙️${global.prefix}𝙋𝙡𝙖𝙮
 🔗 Con esta función KilluaBot te mandará la música que desees.
 ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 
-⚙️.𝙎𝙩𝙞𝙘𝙠𝙚𝙧
+⚙️${global.prefix}𝙎𝙩𝙞𝙘𝙠𝙚𝙧
 🔗 Con esta función KilluaBot te hará un sticker.
 ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 
-⚙️.𝘼𝙗𝙧𝙞𝙧𝙜𝙧𝙪𝙥𝙤
+⚙️${global.prefix}𝘼𝙗𝙧𝙞𝙧𝙜𝙧𝙪𝙥𝙤
 🔗 Con esta función KilluaBot abrirá el grupo por ti.
 ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 
-⚙️.𝘾𝙚𝙧𝙧𝙖𝙧𝙜𝙧𝙪𝙥𝙤
+⚙️${global.prefix}𝘾𝙚𝙧𝙧𝙖𝙧𝙜𝙧𝙪𝙥𝙤
 🔗 Con esta función KilluaBot cerrará el grupo por ti.
 ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 
-⚙️.𝘾𝙧𝙚𝙖𝙙𝙤𝙧
+⚙️${global.prefix}𝘾𝙧𝙚𝙖𝙙𝙤𝙧
 🔗 Con esta función encontrarás el contacto de mi creador.
 ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 `.trim();
