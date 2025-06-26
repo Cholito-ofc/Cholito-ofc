@@ -1,9 +1,9 @@
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
-  const senderNum = sender.replace(/[^0-9]/g, "");
+  const senderNum = sender.replace(/[^0-9]/g, ""); // Ej: 50212345678
+  const mentionJid = sender.endsWith('@s.whatsapp.net') ? sender : sender + '@s.whatsapp.net';
 
-  // Validar que sea el owner principal
   if (!global.owner.some(([id]) => id === senderNum)) {
     return conn.sendMessage(chatId, {
       text: "❌ Solo el *owner* del bot puede usar este comando."
@@ -26,7 +26,6 @@ const handler = async (msg, { conn, args }) => {
   }
 
   try {
-    const mentionJid = sender.endsWith('@s.whatsapp.net') ? sender : sender + '@s.whatsapp.net';
     const botName = conn.user.name || 'KilluaBot';
 
     const salidaTexto = `
@@ -59,5 +58,5 @@ const handler = async (msg, { conn, args }) => {
   }
 };
 
-handler.command = ['salir'];
+handler.command = ['salirgrupo'];
 module.exports = handler;
