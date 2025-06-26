@@ -22,7 +22,7 @@ const handler = async (msg, { conn }) => {
 
   // Mensaje del menú guía
   let message = `
-*Hola @${senderClean}handle
+*👋🏻Hola! @${senderClean}
 \`\`\`${fechaCapitalizada}\`\`\`
 
 𝙈𝙐𝘾𝙃𝙊 𝙂𝙐𝙎𝙏𝙊 𝙎𝙊𝙔 *𝙆𝙄𝙇𝙇𝙐𝘼-𝘽𝙊𝙏* 𝙔 𝙀𝙎𝙏𝙊𝙔 𝘼𝙌𝙐Í 𝙋𝘼𝙍𝘼 𝘼𝙔𝙐𝘿𝘼𝙍𝙏𝙀, 𝘾𝙊𝙈𝙀𝙉𝘾𝙀𝙈𝙊𝙎...
