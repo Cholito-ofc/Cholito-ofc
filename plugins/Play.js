@@ -18,7 +18,7 @@ function isUserBlocked(userId) {
 }
 
 async function getDownloadUrl(videoUrl) {
-  const apis = [{ url: 'https://api.vreden.my.id/api/ytmp3?url=', type: 'vreden' }];
+  const apis = [{ url: 'https://www.apis-anomaki.zone.id/downloader/yta?url=joji=', type: 'vreden' }];
   for (const api of apis) {
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       try {
