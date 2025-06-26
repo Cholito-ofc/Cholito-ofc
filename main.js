@@ -3682,51 +3682,55 @@ case 'menuowner': {
     });
 
     const chatId = msg.key.remoteJid;
-    const captionText = `👑 KILLUA 2.0 — PANEL DEL CREADOR
+    const captionText = `𝙆𝙞𝙡𝙡𝙪𝙖𝘽𝙤𝙩 𝙥𝙖𝙣𝙚𝙡 𝙥𝙖𝙧𝙖 𝙘𝙧𝙚𝙖𝙙𝙤𝙧 👑
 
-🧠 𝗖𝗼𝗺𝗮𝗻𝗱𝗼𝘀 𝗲𝘅𝗰𝗹𝘂𝘀𝗶𝘃𝗼𝘀 𝗽𝗮𝗿𝗮 𝗲𝗹 𝗽𝗿𝗼𝗽𝗶𝗲𝘁𝗮𝗿𝗶𝗼:
+𝘊𝘰𝘮𝘢𝘯𝘥𝘰𝘴 𝘦𝘹𝘤𝘭𝘶𝘴𝘪𝘷𝘰𝘴 𝘱𝘢𝘳𝘢 𝘦𝘭 𝘱𝘳𝘰𝘱𝘪𝘦𝘵𝘢𝘳𝘪𝘰 🐍:
+╭━─━──────────────━─━╮
+╰╮ » 𝗣𝗔𝗡𝗘𝗟 𝗗𝗘𝗟 𝗦𝗜𝗦𝗧𝗘𝗠𝗔 🛠️
+╭━─━──────────────━─━╯
+┊» ${global.prefix}bc
+┊» ${global.prefix}rest
+┊» ${global.prefix}carga
+┊» ${global.prefix}fix
+┊» ${global.prefix}deltmp
+┊» ${global.prefix}modoprivado on/off
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
 
-┃➜ ${global.prefix}bc
-┃➜ ${global.prefix}rest
-┃➜ ${global.prefix}carga
-┃➜ ${global.prefix}cargabots
-┃➜ ${global.prefix}delsesion
-┃➜ ${global.prefix}delsubbots
-┃➜ ${global.prefix}deltmp
-┃➜ ${global.prefix}modoprivado on/off
+╭━─━──────────────━─━╮
+╰╮ » 𝗣𝗘𝗥𝗦𝗢𝗡𝗔𝗟𝗜𝗭𝗔𝗖𝗜𝗢́𝗡 🕵🏼‍♂️
+╭━─━──────────────━─━╯
+┊» ${global.prefix}botname
+┊» ${global.prefix}botfoto
+┊» ${global.prefix}setprefix
+┊» ${global.prefix}git
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
 
-╭───────•◈•───────╮
- 𝗣𝗘𝗥𝗦𝗢𝗡𝗔𝗟𝗜𝗭𝗔 𝗧𝗨́ 𝗕𝗢𝗧 🤝
-╰───────•◈•───────╯
+╭━─━──────────────━─━╮
+╰╮ » 𝗖𝗢𝗡𝗦𝗢𝗟𝗔 𝗧𝗘́𝗖𝗡𝗜𝗖𝗔 🧑🏻‍💻
+╭━─━──────────────━─━╯
+┊» ${global.prefix}listgrupo
+┊» ${global.prefix}aviso
+┊» ${global.prefix}cmd
+┊» ${global.prefix}salir
+┊» ${global.prefix}re
+┊» ${global.prefix}unre
+┊» ${global.prefix}antideletepri on/off
+┊» ${global.prefix}apagar
+┊» ${global.prefix}prender
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
 
-┃➜ ${global.prefix}botname
-┃➜ ${global.prefix}botfoto
-┃➜ ${global.prefix}setprefix
-┃➜ ${global.prefix}git
+╭━─━──────────────━─━╮
+╰╮ » 𝗖𝗢𝗡𝗧𝗘𝗡𝗜𝗗𝗢 𝗘𝗗𝗜𝗧𝗔𝗕𝗟𝗘 ✍🏼
+╭━─━──────────────━─━╯
+┊» ${global.prefix}addper
+┊» ${global.prefix}addmascota
+┊» ${global.prefix}dar
+┊» ${global.prefix}dame
+┊» ${global.prefix}addlista
+┊» ${global.prefix}deletelista
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
 
-╭───────•◈•───────╮
-   𝗖𝗢𝗡𝗦𝗢𝗟𝗔 𝗧𝗘́𝗖𝗡𝗜𝗖𝗔 👨🏻‍💻
-╰───────•◈•───────╯
-┃➜ ${global.prefix}listgrupo
-┃➜ ${global.prefix}aviso
-┃➜ ${global.prefix}re
-┃➜ ${global.prefix}unre
-┃➜ ${global.prefix}antideletepri on/off
-┃➜ ${global.prefix}apagar
-┃➜ ${global.prefix}prender
-
-╭───────•◈•───────╮
- 𝗖𝗢𝗡𝗧𝗘𝗡𝗜𝗗𝗢 𝗘𝗗𝗜𝗧𝗔𝗕𝗟𝗘 ✍🏼
-╰───────•◈•───────╯
-
-┃➜ ${global.prefix}addper
-┃➜ ${global.prefix}addmascota
-┃➜ ${global.prefix}dar
-┃➜ ${global.prefix}dame
-┃➜ ${global.prefix}addlista
-┃➜ ${global.prefix}deletelista
-
-🔐 Solo para administradores autorizados.
+🔐 Solo administradores autorizados.
 👨‍💻 Dueño: 𝐂𝐡𝐨𝐥𝐨 𝐡𝐧`;
 
     await sock.sendMessage2(
@@ -3824,7 +3828,8 @@ case 'menurpg': {
   }
   break;
 }
-
+        
+case 'menú': 
 case 'menu': {
   try {
     await sock.sendMessage(msg.key.remoteJid, {
