@@ -13917,7 +13917,7 @@ case "setprefix":
 
         // Confirmación del cambio
         await sock.sendMessage(msg.key.remoteJid, { 
-            text: `✅ *Prefijo cambiado extexitosamente a: *${newPrefix}*` 
+            text: `✅ *Prefijo cambiado extexitosamente a: [${newPrefix}]` 
         }, { quoted: msg });
 
         console.log(`🔄 Prefijo cambiado a: ${newPrefix}`);
@@ -14734,11 +14734,12 @@ case "kick": {
     const sender = (msg.key.participant || msg.participant || msg.key.remoteJid).replace(/[^0-9]/g, "");
     const isGroup = chatId.endsWith("@g.us");
 
-    // Reacción inicial
     await sock.sendMessage(chatId, { react: { text: "🛑", key: msg.key } });
 
     if (!isGroup) {
-      return await sock.sendMessage(chatId, { text: "❌ *Este comando solo funciona en grupos.*" }, { quoted: msg });
+      return await sock.sendMessage(chatId, {
+        text: "❌ *Este comando solo funciona en grupos.*"
+      }, { quoted: msg });
     }
 
     const metadata = await sock.groupMetadata(chatId);
@@ -14767,14 +14768,9 @@ case "kick": {
       }, { quoted: msg });
     }
 
-    const isTargetAdmin = groupAdmins.some(p => p.id === userToKick);
     const botId = sock.user.id;
-
-    if (isTargetAdmin) {
-      return await sock.sendMessage(chatId, {
-        text: "❌ *No se puede expulsar a otro administrador.*"
-      }, { quoted: msg });
-    }
+    const isTargetAdmin = groupAdmins.some(p => p.id === userToKick);
+    const isTargetOwner = isOwner(userToKick.replace(/[^0-9]/g, ''));
 
     if (userToKick === botId) {
       return await sock.sendMessage(chatId, {
@@ -14782,16 +14778,23 @@ case "kick": {
       }, { quoted: msg });
     }
 
+    if (isTargetOwner) {
+      return await sock.sendMessage(chatId, {
+        text: "🚫 *No se puede expulsar al owner del bot.*"
+      }, { quoted: msg });
+    }
+
+    // Expulsar sin importar si es admin
     await sock.groupParticipantsUpdate(chatId, [userToKick], "remove");
 
     await sock.sendMessage(chatId, {
-      text: `🚷 *El usuario @${userToKick.split("@")[0]} ha sido expulsado del grupo.*`,
+      text: `🚷 *El usuario @${userToKick.split("@")[0]} ha sido expulsado${isTargetAdmin ? ' (era administrador)' : ''} del grupo.*`,
       mentions: [userToKick]
     }, { quoted: msg });
 
   } catch (error) {
     console.error("❌ Error en el comando kick:", error);
-    await sock.sendMessage(msg.key.remoteJid, {
+    await sock.sendMessage(chatId, {
       text: "❌ *Ocurrió un error al intentar expulsar al usuario.*"
     }, { quoted: msg });
   }
