@@ -402,65 +402,42 @@ const farewellTexts = [
 ];
 
 // BIENVENIDA: solo cuando alguien entra
-const axios = require('axios');
-const sharp = require('sharp');
-
-// Opcional: puedes hacer que esto venga de una base de datos más adelante
-let welcomeActivo = true;
-const customWelcomes = {}; // Aquí podrías almacenar los mensajes personalizados por grupo
-
-module.exports = async (update, sock) => {
-  if (update.action !== "add") return;
-
+if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
     let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
-
     try {
       profilePicUrl = await sock.profilePictureUrl(participant, "image");
-    } catch {}
+    } catch (err) {}
 
     let textoFinal = "";
     if (customMessage) {
-      textoFinal = /@user/gi.test(customMessage)
-        ? `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${customMessage.replace(/@user/gi, mention)}`
-        : `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${customMessage}`;
+      // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio, siempre con manito y salto de línea
+      if (/(@user)/gi.test(customMessage)) {
+        textoFinal = `𝑩𝒊𝒆𝒏𝒃𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${customMessage.replace(/@user/gi, mention)}`;
+      } else {
+        textoFinal = `𝑩𝒊𝒆𝒏𝒃𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${customMessage}`;
+      }
     } else {
+      // Si no hay mensaje personalizado, solo manda la descripción del grupo
+      let groupDesc = "";
       try {
         const metadata = await sock.groupMetadata(update.id);
-        const desc = metadata.desc || "Este grupo no tiene descripción.";
-        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n📜 *Descripción del grupo:*\n${desc}`;
-      } catch {
-        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n📜 *No se pudo obtener la descripción.*`;
+        groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
+      } catch (err) {
+        groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
       }
-    }
-
-    let imageBuffer;
-    try {
-      const response = await axios.get(profilePicUrl, { responseType: 'arraybuffer' });
-      imageBuffer = await sharp(response.data).resize({ width: 600 }).jpeg({ quality: 70 }).toBuffer();
-    } catch {
-      continue;
+      textoFinal = `𝑩𝒊𝒆𝒏𝒃𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
     }
 
     await sock.sendMessage(update.id, {
-      text: textoFinal,
-      contextInfo: {
-        externalAdReply: {
-          title: '⚡ KILLUA-BOT ⚡',
-          body: '👋🏻 Bienvenido/a al grupo',
-          mediaType: 1,
-          renderLargerThumbnail: true,
-          thumbnail: imageBuffer,
-          mediaUrl: 'https://chat.whatsapp.com/XXX', // Cambia por tu link real
-          sourceUrl: 'https://chat.whatsapp.com/XXX'
-        },
-        mentionedJid: [participant]
-      }
+      image: { url: profilePicUrl },
+      caption: textoFinal,
+      mentions: [participant] // SIEMPRE etiqueta al usuario
     });
   }
-};
+}
 
 // DESPEDIDA: solo cuando alguien sale
 if (update.action === "remove" && despedidasActivo) {
