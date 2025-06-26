@@ -23,7 +23,6 @@ const handler = async (msg, { conn, text, usedPrefix }) => {
 ┊ 
 ┊ Puedes usar etiquetas como:
 ┊ @user – para mencionar
-┊ @group – nombre del grupo
 ╰┈┈┈┈┈┈┈┈┈┈┈┈┈≫`,
     }, { quoted: msg });
   }
