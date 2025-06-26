@@ -405,54 +405,45 @@ const farewellTexts = [
 const axios = require('axios');
 const sharp = require('sharp');
 
-if (update.action === "add" && welcomeActivo) {
+// Opcional: puedes hacer que esto venga de una base de datos más adelante
+let welcomeActivo = true;
+const customWelcomes = {}; // Aquí podrías almacenar los mensajes personalizados por grupo
+
+module.exports = async (update, sock) => {
+  if (update.action !== "add") return;
+
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
     let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
 
-    // Obtener la foto de perfil
     try {
       profilePicUrl = await sock.profilePictureUrl(participant, "image");
-    } catch (err) {
-      console.log("No se pudo obtener la foto de perfil. Usando imagen por defecto.");
-    }
+    } catch {}
 
-    // Generar el texto final
     let textoFinal = "";
     if (customMessage) {
-      if (/(@user)/gi.test(customMessage)) {
-        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${customMessage.replace(/@user/gi, mention)}`;
-      } else {
-        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${customMessage}`;
-      }
+      textoFinal = /@user/gi.test(customMessage)
+        ? `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${customMessage.replace(/@user/gi, mention)}`
+        : `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${customMessage}`;
     } else {
-      let groupDesc = "";
       try {
         const metadata = await sock.groupMetadata(update.id);
-        groupDesc = metadata.desc
-          ? `📜 *Descripción del grupo:*\n${metadata.desc}`
-          : `📜 *Este grupo no tiene descripción.*`;
-      } catch (err) {
-        groupDesc = `📜 *No se pudo obtener la descripción del grupo.*`;
+        const desc = metadata.desc || "Este grupo no tiene descripción.";
+        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n📜 *Descripción del grupo:*\n${desc}`;
+      } catch {
+        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n📜 *No se pudo obtener la descripción.*`;
       }
-      textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${groupDesc}`;
     }
 
-    // Descargar y redimensionar imagen
     let imageBuffer;
     try {
       const response = await axios.get(profilePicUrl, { responseType: 'arraybuffer' });
-      imageBuffer = await sharp(response.data)
-        .resize({ width: 600 }) // ajusta tamaño si deseas
-        .jpeg({ quality: 70 })
-        .toBuffer();
-    } catch (err) {
-      console.log("❌ Error procesando imagen de perfil:", err);
+      imageBuffer = await sharp(response.data).resize({ width: 600 }).jpeg({ quality: 70 }).toBuffer();
+    } catch {
       continue;
     }
 
-    // Enviar mensaje estilo tarjeta KilluaBot
     await sock.sendMessage(update.id, {
       text: textoFinal,
       contextInfo: {
@@ -462,14 +453,14 @@ if (update.action === "add" && welcomeActivo) {
           mediaType: 1,
           renderLargerThumbnail: true,
           thumbnail: imageBuffer,
-          mediaUrl: 'https://chat.whatsapp.com/XXXXXXX', // <-- cambia por el link real
-          sourceUrl: 'https://chat.whatsapp.com/XXXXXXX'
+          mediaUrl: 'https://chat.whatsapp.com/XXX', // Cambia por tu link real
+          sourceUrl: 'https://chat.whatsapp.com/XXX'
         },
         mentionedJid: [participant]
       }
     });
   }
-}
+};
 
 // DESPEDIDA: solo cuando alguien sale
 if (update.action === "remove" && despedidasActivo) {
