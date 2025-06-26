@@ -6,34 +6,53 @@ const handler = async (msg, { conn, text, usedPrefix }) => {
 
   if (!chatId.endsWith('@g.us')) {
     return conn.sendMessage(chatId, {
-      text: '❌ Este comando solo puede usarse en grupos.'
+      text: 
+`╭┈┈┈[ 🚫 *COMANDO INVÁLIDO* ]┈┈┈≫
+┊ Este comando solo puede usarse en *grupos*.
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈≫`,
     }, { quoted: msg });
   }
 
   if (!text) {
     return conn.sendMessage(chatId, {
-      text: `✳️ Usa el comando correctamente:\n\n📌 Ejemplo: *${usedPrefix}setwelcome* Hola, bienvenido al grupo Azura Ultra.`
+      text: 
+`╭┈┈┈[ ✨ *EJEMPLO DE USO* ]┈┈┈≫
+┊ Usa el comando así:
+┊ 
+┊ 📌 *${usedPrefix}setwelcome* Bienvenido al grupo!
+┊ 
+┊ Puedes usar etiquetas como:
+┊ @user – para mencionar
+┊ @group – nombre del grupo
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈≫`,
     }, { quoted: msg });
   }
 
-  // Obtener metadata y verificar si es admin o owner
+  // Obtener metadata y verificar permisos
   try {
     const metadata = await conn.groupMetadata(chatId);
     const senderId = msg.key.participant || msg.key.remoteJid;
     const senderClean = senderId.replace(/[^0-9]/g, '');
     const participant = metadata.participants.find(p => p.id.includes(senderClean));
     const isAdmin = participant?.admin === 'admin' || participant?.admin === 'superadmin';
-    const isOwner = global.owner.includes(senderClean);
+    const isOwner = global.owner.some(([num]) => num === senderClean);
 
     if (!isAdmin && !isOwner) {
       return conn.sendMessage(chatId, {
-        text: '❌ Solo los administradores del grupo o el owner del bot pueden usar este comando.'
+        text: 
+`╭┈┈┈[ ⚠️ *PERMISO DENEGADO* ]┈┈┈≫
+┊ Solo los *admins del grupo* o el *owner del bot*
+┊ pueden usar este comando.
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈≫`,
       }, { quoted: msg });
     }
   } catch (e) {
-    console.error('❌ Error obteniendo metadata del grupo:', e);
+    console.error('Error al obtener metadata:', e);
     return conn.sendMessage(chatId, {
-      text: '❌ No se pudo verificar si eres administrador.'
+      text: 
+`╭┈┈┈[ ❌ *ERROR DE GRUPO* ]┈┈┈≫
+┊ No se pudo verificar si eres administrador.
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈≫`,
     }, { quoted: msg });
   }
 
@@ -41,6 +60,7 @@ const handler = async (msg, { conn, text, usedPrefix }) => {
     react: { text: '⏳', key: msg.key }
   });
 
+  // Guardar mensaje personalizado
   try {
     const filePath = path.resolve('./welcome.json');
 
@@ -53,7 +73,12 @@ const handler = async (msg, { conn, text, usedPrefix }) => {
     fs.writeFileSync(filePath, JSON.stringify(welcomeData, null, 2));
 
     await conn.sendMessage(chatId, {
-      text: `✅ Mensaje de bienvenida personalizado guardado:\n\n📝 *${text}*`
+      text: 
+`╭┈┈┈[ ✅ *BIENVENIDA GUARDADA* ]┈┈┈≫
+┊ El mensaje de bienvenida se guardó exitosamente:
+┊ 
+┊ 📝 *${text}*
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈≫`,
     }, { quoted: msg });
 
     await conn.sendMessage(chatId, {
@@ -61,10 +86,14 @@ const handler = async (msg, { conn, text, usedPrefix }) => {
     });
 
   } catch (err) {
-    console.error('❌ Error guardando welcome.json:', err);
+    console.error('Error al guardar welcome.json:', err);
 
     await conn.sendMessage(chatId, {
-      text: '❌ Hubo un error al guardar el mensaje.'
+      text: 
+`╭┈┈┈[ ❌ *ERROR AL GUARDAR* ]┈┈┈≫
+┊ Hubo un problema al guardar el mensaje.
+┊ Intenta nuevamente más tarde.
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈≫`,
     }, { quoted: msg });
 
     await conn.sendMessage(chatId, {
