@@ -38,4 +38,4 @@ handler.tags = ['owner'];
 handler.command = /^salirgrupo$/i;
 handler.owner = true;
 
-export default handler;
+module.exports = handler;
