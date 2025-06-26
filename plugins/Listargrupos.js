@@ -51,7 +51,7 @@ const handler = async (msg, { conn }) => {
     texto += `
 ┣ 📌 *${g.code}. ${g.name}*
 ┃ 🆔 ${g.id}
-┃ ✦ Usa: *.salirgrupo ${g.code}*
+┃ ✦ Usa: *.salir ${g.code}*
 ╰━━━━━━━━━━━━━━━━━━━━⬣\n`;
   });
 
