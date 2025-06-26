@@ -14448,7 +14448,19 @@ case 'creador':{
             
             
 case 'kill': {
-    const searchKey = args.join(' ').trim().toLowerCase(); // Convertir clave a minúsculas
+    const sender = msg.key.participant || msg.key.remoteJid;
+    const senderNum = sender.replace(/[^0-9]/g, ""); // Obtener solo el número
+
+    // Verificar si es el owner
+    if (!global.owner.some(([id]) => id === senderNum)) {
+        return sock.sendMessage(
+            msg.key.remoteJid,
+            { text: "🚫 *Acceso denegado:* Solo el dueño del bot puede eliminar contenido guardado." },
+            { quoted: msg }
+        );
+    }
+
+    const searchKey = args.join(' ').trim().toLowerCase();
     if (!searchKey) {
         return sock.sendMessage(
             msg.key.remoteJid,
@@ -14457,7 +14469,6 @@ case 'kill': {
         );
     }
 
-    // Verificar si el archivo guar.json existe
     if (!fs.existsSync("./guar.json")) {
         return sock.sendMessage(
             msg.key.remoteJid,
@@ -14466,10 +14477,8 @@ case 'kill': {
         );
     }
 
-    // Leer archivo guar.json
     let guarData = JSON.parse(fs.readFileSync("./guar.json", "utf-8"));
 
-    // Verificar si la palabra clave existe
     if (!guarData[searchKey]) {
         return sock.sendMessage(
             msg.key.remoteJid,
@@ -14478,44 +14487,8 @@ case 'kill': {
         );
     }
 
-    const storedMedia = guarData[searchKey];
-    const savedBy = storedMedia.savedBy;
-    const senderId = msg.key.participant || msg.key.remoteJid;
+    delete guarData[searchKey];
 
-    // Verificar si el usuario es Owner
-    const isUserOwner = global.owner.some(owner => owner[0] === senderId.replace("@s.whatsapp.net", ""));
-    const isSavedByOwner = global.owner.some(owner => owner[0] === savedBy.replace("@s.whatsapp.net", ""));
-
-    // Verificar si el usuario es admin
-    const isAdminUser = await isAdmin(sock, msg.key.remoteJid, senderId);
-
-    // Reglas de eliminación:
-    if (isUserOwner) {
-        // El owner puede eliminar cualquier multimedia
-        delete guarData[searchKey];
-    } else if (isAdminUser) {
-        // Los admins pueden eliminar cualquier multimedia excepto los del owner
-        if (isSavedByOwner) {
-            return sock.sendMessage(
-                msg.key.remoteJid,
-                { text: "🚫 *Acceso denegado:* No puedes eliminar multimedia guardado por el Owner." },
-                { quoted: msg }
-            );
-        }
-        delete guarData[searchKey];
-    } else {
-        // Un usuario solo puede eliminar su propio multimedia
-        if (savedBy !== senderId) {
-            return sock.sendMessage(
-                msg.key.remoteJid,
-                { text: "⛔ *Acceso denegado:* Solo puedes eliminar los multimedia que tú guardaste." },
-                { quoted: msg }
-            );
-        }
-        delete guarData[searchKey];
-    }
-
-    // Guardar los cambios en guar.json
     fs.writeFileSync("./guar.json", JSON.stringify(guarData, null, 2));
 
     return sock.sendMessage(
@@ -14653,6 +14626,18 @@ case 'g': {
 }
         
 case 'guar': {
+    const sender = msg.key.participant || msg.key.remoteJid;
+    const senderNum = sender.replace(/[^0-9]/g, ""); // Solo número
+
+    // Verifica si es owner
+    if (!global.owner.some(([id]) => id === senderNum)) {
+        return sock.sendMessage(
+            msg.key.remoteJid,
+            { text: "🚫 *Acceso denegado:* Solo el dueño del bot puede usar este comando." },
+            { quoted: msg }
+        );
+    }
+
     if (!msg.message.extendedTextMessage || 
         !msg.message.extendedTextMessage.contextInfo || 
         !msg.message.extendedTextMessage.contextInfo.quotedMessage) {
@@ -14663,25 +14648,20 @@ case 'guar': {
         );
     }
 
-    const saveKey = args.join(' ').trim().toLowerCase(); // Clave en minúsculas
-    // Verifica que haya al menos una letra o número en la palabra clave
-if (!/[a-zA-Z0-9]/.test(saveKey)) {
-  return sock.sendMessage(
-    msg.key.remoteJid,
-    { text: "❌ *Error:* La palabra clave debe incluir al menos una letra o número, no solo emojis o símbolos." },
-    { quoted: msg }
-  );
-}
+    const saveKey = args.join(' ').trim().toLowerCase();
+    if (!/[a-zA-Z0-9]/.test(saveKey)) {
+        return sock.sendMessage(
+            msg.key.remoteJid,
+            { text: "❌ *Error:* La palabra clave debe incluir al menos una letra o número, no solo emojis o símbolos." },
+            { quoted: msg }
+        );
+    }
 
-    // Verificar si el archivo guar.json existe, si no, crearlo
     if (!fs.existsSync("./guar.json")) {
         fs.writeFileSync("./guar.json", JSON.stringify({}, null, 2));
     }
 
-    // Leer archivo guar.json
     let guarData = JSON.parse(fs.readFileSync("./guar.json", "utf-8"));
-
-    // Verificar si la palabra clave ya existe
     if (guarData[saveKey]) {
         return sock.sendMessage(
             msg.key.remoteJid,
@@ -14708,11 +14688,11 @@ if (!/[a-zA-Z0-9]/.test(saveKey)) {
     } else if (quotedMsg.stickerMessage) {
         mediaType = "sticker";
         mediaMessage = quotedMsg.stickerMessage;
-        fileExtension = "webp"; // Stickers son .webp
+        fileExtension = "webp";
     } else if (quotedMsg.documentMessage) {
         mediaType = "document";
         mediaMessage = quotedMsg.documentMessage;
-        fileExtension = mediaMessage.mimetype.split("/")[1] || "bin"; // Obtener la extensión real
+        fileExtension = mediaMessage.mimetype.split("/")[1] || "bin";
     } else {
         return sock.sendMessage(
             msg.key.remoteJid,
@@ -14721,22 +14701,19 @@ if (!/[a-zA-Z0-9]/.test(saveKey)) {
         );
     }
 
-    // Descargar el multimedia
     const mediaStream = await downloadContentFromMessage(mediaMessage, mediaType);
     let mediaBuffer = Buffer.alloc(0);
     for await (const chunk of mediaStream) {
         mediaBuffer = Buffer.concat([mediaBuffer, chunk]);
     }
 
-    // Guardar multimedia con la palabra clave y la información del usuario que lo guardó
     guarData[saveKey] = {
-        buffer: mediaBuffer.toString("base64"), // Convertir a base64
+        buffer: mediaBuffer.toString("base64"),
         mimetype: mediaMessage.mimetype,
         extension: fileExtension,
-        savedBy: msg.key.participant || msg.key.remoteJid, // Número del usuario que guardó el archivo
+        savedBy: sender,
     };
 
-    // Escribir en guar.json
     fs.writeFileSync("./guar.json", JSON.stringify(guarData, null, 2));
 
     return sock.sendMessage(
