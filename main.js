@@ -3838,7 +3838,7 @@ case 'menu': {
     const senderNumber = senderId.split('@')[0];
 
     // Formato de fecha al estilo WhatsApp: martes, 25 de junio de 2025
-    const fechaActual = new Intl.DateTimeFormat('es-ES', {
+    const fechaBase = new Intl.DateTimeFormat('es-ES', {
   timeZone: 'America/Mexico_City',
   weekday: 'long',
   day: 'numeric',
@@ -3846,6 +3846,8 @@ case 'menu': {
   year: 'numeric'
 }).format(new Date());
 
+// Capitalizar la primera letra (ej: "martes..." → "Martes...")
+const fechaActual = fechaBase.charAt(0).toUpperCase() + fechaBase.slice(1);
     const captionText = `*👋🏻¡Hola!* *@${senderNumber}*
 \`\`\`${fechaActual}\`\`\`
 
