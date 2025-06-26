@@ -402,8 +402,8 @@ const farewellTexts = [
 ];
 
 // BIENVENIDA: solo cuando alguien entra
-import axios from 'axios';
-import sharp from 'sharp';
+const axios = require('axios');
+const sharp = require('sharp');
 
 if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
@@ -411,10 +411,14 @@ if (update.action === "add" && welcomeActivo) {
     const customMessage = customWelcomes[update.id];
     let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
 
+    // Obtener la foto de perfil
     try {
       profilePicUrl = await sock.profilePictureUrl(participant, "image");
-    } catch (err) {}
+    } catch (err) {
+      console.log("No se pudo obtener la foto de perfil. Usando imagen por defecto.");
+    }
 
+    // Generar el texto final
     let textoFinal = "";
     if (customMessage) {
       if (/(@user)/gi.test(customMessage)) {
@@ -426,22 +430,29 @@ if (update.action === "add" && welcomeActivo) {
       let groupDesc = "";
       try {
         const metadata = await sock.groupMetadata(update.id);
-        groupDesc = metadata.desc ? `📜 *Descripción del grupo:*\n${metadata.desc}` : `📜 *Este grupo no tiene descripción.*`;
+        groupDesc = metadata.desc
+          ? `📜 *Descripción del grupo:*\n${metadata.desc}`
+          : `📜 *Este grupo no tiene descripción.*`;
       } catch (err) {
         groupDesc = `📜 *No se pudo obtener la descripción del grupo.*`;
       }
       textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${groupDesc}`;
     }
 
+    // Descargar y redimensionar imagen
     let imageBuffer;
     try {
       const response = await axios.get(profilePicUrl, { responseType: 'arraybuffer' });
-      imageBuffer = await sharp(response.data).resize({ width: 600 }).jpeg({ quality: 70 }).toBuffer();
+      imageBuffer = await sharp(response.data)
+        .resize({ width: 600 }) // ajusta tamaño si deseas
+        .jpeg({ quality: 70 })
+        .toBuffer();
     } catch (err) {
-      console.log("❌ Error al procesar imagen de perfil:", err);
+      console.log("❌ Error procesando imagen de perfil:", err);
       continue;
     }
 
+    // Enviar mensaje estilo tarjeta KilluaBot
     await sock.sendMessage(update.id, {
       text: textoFinal,
       contextInfo: {
@@ -451,8 +462,8 @@ if (update.action === "add" && welcomeActivo) {
           mediaType: 1,
           renderLargerThumbnail: true,
           thumbnail: imageBuffer,
-          mediaUrl: 'https://chat.whatsapp.com/XXX', // <-- Pon aquí el link real
-          sourceUrl: 'https://chat.whatsapp.com/XXX'
+          mediaUrl: 'https://chat.whatsapp.com/XXXXXXX', // <-- cambia por el link real
+          sourceUrl: 'https://chat.whatsapp.com/XXXXXXX'
         },
         mentionedJid: [participant]
       }
