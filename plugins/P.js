@@ -1,5 +1,12 @@
 const os = require("os");
 
+function formatUptime(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  return `${h.toString().padStart(2, '0')}h ${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
+}
+
 const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
   const start = performance.now();
@@ -8,20 +15,25 @@ const handler = async (msg, { conn }) => {
     react: { text: '📡', key: msg.key }
   });
 
-  const temp = await conn.sendMessage(chatId, { text: '🏓 Calculando ping...' }, { quoted: msg });
+  const temp = await conn.sendMessage(chatId, { text: '⏳ Consultando estado del bot...' }, { quoted: msg });
 
-  const latency = (performance.now() - start).toFixed(2); // en milisegundos con decimales
+  const latency = (performance.now() - start).toFixed(2);
   const memoryUsage = process.memoryUsage();
   const totalMemGB = (os.totalmem() / 1024 / 1024 / 1024).toFixed(2);
   const usedMemMB = (memoryUsage.rss / 1024 / 1024).toFixed(0);
-  const uptimeSec = process.uptime().toFixed(2); // segundos con milisegundos
+  const uptime = formatUptime(process.uptime());
+  const cpuModel = os.cpus()[0].model;
 
-  const info = `*📍 LATENCIA DEL BOT*\n\n` +
-    `🏓 *Velocidad:* ${latency} ms\n` +
-    `📦 *RAM usada:* ${usedMemMB} MB / ${totalMemGB} GB\n` +
-    `📡 *Estado del bot:* En línea ✅\n` +
-    `🧠 *CPU:* ${os.cpus()[0].model}\n\n` +
-    `⏱️ *Uptime:* ${uptimeSec} segundos`;
+  const info = `
+╭━━━[ 🤖 *ESTADO DEL BOT* ]━━⬣
+┃
+┃ 🏓 *Velocidad:* ${latency} ms
+┃ 📦 *RAM usada:* ${usedMemMB} MB / ${totalMemGB} GB
+┃ ⏱️ *Uptime:* ${uptime}
+┃ 🧠 *CPU:* ${cpuModel.split('@')[0].trim()}
+┃
+╰━━━━━━━━━━━━━━━━━━━━⬣
+`;
 
   await conn.sendMessage(chatId, {
     edit: temp.key,
@@ -29,5 +41,5 @@ const handler = async (msg, { conn }) => {
   });
 };
 
-handler.command = ['p'];
+handler.command = ['p', 'uptime'];
 module.exports = handler;
