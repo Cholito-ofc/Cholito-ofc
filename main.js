@@ -3838,12 +3838,13 @@ case 'menu': {
     const senderNumber = senderId.split('@')[0];
 
     // Formato de fecha al estilo WhatsApp: martes, 25 de junio de 2025
-    const fechaActual = new Date().toLocaleDateString('es-ES', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
+    const fechaActual = new Intl.DateTimeFormat('es-ES', {
+  timeZone: 'America/Mexico_City',
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric'
+}).format(new Date());
 
     const captionText = `*👋🏻¡Hola!* *@${senderNumber}*
 \`\`\`${fechaActual}\`\`\`
