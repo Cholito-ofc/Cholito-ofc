@@ -251,7 +251,7 @@ async function handleCommand(sock, msg, command, args, sender) {
 
     switch (lowerCommand) {
 
-case 'play': {
+case 'playy': {
   const chatId = msg.key.remoteJid;
   const yts = require('yt-search');
   const axios = require('axios');
@@ -402,7 +402,7 @@ case 'revsall': {
     break;
   }
 
-  const baseDir = path.join(__dirname, 'commands'); // Ajusta esta ruta si tu estructura es distinta
+  const baseDir = path.join(__dirname, 'comandos'); // Ajusta esta ruta si tu estructura es distinta
   const folders = fs.readdirSync(baseDir).filter(f => fs.lstatSync(path.join(baseDir, f)).isDirectory());
 
   let report = `🔍 *REVISIÓN DE MÓDULOS (${folders.length})*\n\n`;
