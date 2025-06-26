@@ -19,10 +19,8 @@ const handler = async (msg, { conn, text, usedPrefix }) => {
 `╭┈┈┈[ ✨ *EJEMPLO DE USO* ]┈┈┈≫
 ┊ Usa el comando así:
 ┊ 
-┊ 📌 *${usedPrefix}setwelcome* Bienvenido al grupo!
+┊ 📌 *${usedPrefix}setwelcome* Bienvenido al  grupo!
 ┊ 
-┊ Puedes usar etiquetas como:
-┊ @user – para mencionar
 ╰┈┈┈┈┈┈┈┈┈┈┈┈┈≫`,
     }, { quoted: msg });
   }
