@@ -44,13 +44,19 @@ const handler = async (msg, { conn }) => {
 
   global.gruposAdmin = grupos;
 
-  let texto = '🚪 *Grupos en los que estoy (para salir):*\n\n';
+  let texto = `
+╭━━━〔 *🌐 GRUPOS ACTIVOS DEL BOT* 〕━━⬣\n`;
+
   grupos.forEach((g) => {
-    texto += `🔢 *${g.code}. ${g.name}*\n`;
-    texto += `• JID: ${g.id}\n`;
-    texto += `━━━━━━━━━━━━━━━━━━━━━\n`;
+    texto += `
+┣ 📌 *${g.code}. ${g.name}*
+┃ 🆔 ${g.id}
+┃ ✦ Usa: *.salirgrupo ${g.code}*
+╰━━━━━━━━━━━━━━━━━━━━⬣\n`;
   });
-  texto += `\nUsa: *.salirgrupo <número>* para que el bot se retire.`;
+
+  texto += `\n🎯 *Total:* ${grupos.length} grupo(s)
+📤 Usa *.salirgrupo <número>* para salir de uno.`;
 
   return conn.sendMessage(chatId, { text: texto.trim() }, { quoted: msg });
 };
