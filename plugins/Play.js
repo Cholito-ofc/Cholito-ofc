@@ -1,104 +1,135 @@
 const yts = require('yt-search');
+const fs = require('fs');
 const axios = require('axios');
 
-const wait = (ms) => new Promise(res => setTimeout(res, ms));
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// ⚙️ Nuevo Scraper: yt-download.org backend
-async function getDownloadUrl(videoUrl) {
+const MAX_RETRIES = 2;
+const TIMEOUT_MS = 10000;
+const RETRY_DELAY_MS = 12000;
+
+function isUserBlocked(userId) {
   try {
-    const { data } = await axios.get(`https://yt-download.org/api/button/mp3/${extractVideoId(videoUrl)}`, {
-      timeout: 15000
-    });
-
-    const match = data.match(/href="(https:\/\/[^"]+\.mp3[^"]*)"/);
-    if (!match || !match[1]) return null;
-
-    return {
-      url: match[1],
-      title: 'audio'
-    };
-  } catch (e) {
-    console.error('[SCRAPER ERROR]', e);
-    return null;
-  }
-}
-
-// 🎯 Extrae el ID de un video de YouTube
-function extractVideoId(url) {
-  const match = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})(?:\?|\&|$)/);
-  return match ? match[1] : null;
-}
-
-async function sendAudio(conn, chatId, audioUrl, quotedMsg, fileName) {
-  try {
-    await conn.sendMessage(
-      chatId,
-      {
-        audio: { url: audioUrl },
-        mimetype: 'audio/mpeg',
-        fileName
-      },
-      { quoted: quotedMsg }
-    );
-    return true;
+    const blockedUsers = JSON.parse(fs.readFileSync('./bloqueados.json', 'utf8'));
+    return blockedUsers.includes(userId);
   } catch {
     return false;
   }
 }
 
+async function getDownloadUrl(videoUrl) {
+  const apis = [{ url: 'https://api.vreden.my.id/api/ytmp3?url=', type: 'vreden' }];
+  for (const api of apis) {
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        const response = await axios.get(`${api.url}${encodeURIComponent(videoUrl)}`, { timeout: TIMEOUT_MS });
+        if (
+          response.data?.status === 200 &&
+          response.data?.result?.download?.url &&
+          response.data?.result?.download?.status === true
+        ) {
+          return {
+            url: response.data.result.download.url.trim(),
+            title: response.data.result.metadata.title
+          };
+        }
+      } catch {
+        if (attempt < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
+      }
+    }
+  }
+  return null;
+}
+
+async function sendAudioNormal(conn, chatId, audioUrl, quotedMsg) {
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      await conn.sendMessage(
+        chatId,
+        {
+          audio: { url: audioUrl },
+          mimetype: 'audio/mpeg'
+        },
+        { quoted: quotedMsg }
+      );
+      return true;
+    } catch {
+      if (attempt < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
+    }
+  }
+  return false;
+}
+
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
-  const senderMention = '@' + sender.split('@')[0];
+  const senderNum = sender.replace(/[^0-9]/g, "");
 
-  if (!args.length) {
+  await conn.sendMessage(chatId, { react: { text: '🎶', key: msg.key } });
+
+  if (isUserBlocked(senderNum)) {
     return conn.sendMessage(chatId, {
-      text: `╭─⬣「 *KilluaBot* 」⬣
-│ ≡◦ 🎧 *Uso:* .play Karol G - Amargura
-╰─⬣`
+      text: "🚫 Lo siento, estás en la lista de usuarios bloqueados."
     }, { quoted: msg });
   }
 
-  const query = args.join(" ");
-  await conn.sendMessage(chatId, { react: { text: '🎵', key: msg.key } });
+  if (!args || !args.join(" ").trim()) {
+    return conn.sendMessage(chatId, {
+      text: `╭─⬣「 *KilluaBot* 」⬣
+│ ≡◦ 🎧 *Uso correcto del comando:*
+│ ≡◦ .play Anuel perfecto
+╰─⬣
+> © ⍴᥆ᥕᥱrᥱძ ᑲᥡ һᥒ ᥴһ᥆ᥣі𝗍᥆`,
+    }, { quoted: msg });
+  }
+
+  const query = args.join(" ").trim();
 
   try {
-    const search = await yts(query);
-    const video = search.videos[0];
-    if (!video) throw new Error('❌ No se encontró ningún video.');
+    const searchResults = await yts(query);
+    if (!searchResults?.videos?.length) throw new Error('No se encontraron resultados.');
 
-    const { title, timestamp, url: videoUrl, author, image } = video;
+    const videoInfo = searchResults.videos[0];
+    const { title, timestamp: duration, views, ago, url: videoUrl, image: thumbnail } = videoInfo;
 
-    const download = await getDownloadUrl(videoUrl);
-    if (!download?.url) throw new Error('❌ No se pudo obtener el enlace de descarga.');
+    let imageBuffer = null;
+    try {
+      const response = await axios.get(thumbnail, { responseType: 'arraybuffer' });
+      imageBuffer = Buffer.from(response.data, 'binary');
+    } catch {}
 
-    const caption = `🎶 *PLAY AUDIO*
+    const caption = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
+│  🎵 *Título:* ${title}
+│  ⏱ *Duración:* ${duration || 'Desconocida'}
+│  🔗 *URL:* ${videoUrl}
+╰─⬣
 
-🎧 *Título:* ${title}
-🎤 *Artista:* ${author.name}
-⏱️ *Duración:* ${timestamp}
-🔗 *URL:* ${videoUrl}
+*[🛠️] 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈 𝖾𝗌𝗉𝖾𝗋𝖾...*
 
-👤 *Pedido por:* ${senderMention}
-⏳ *Enviando audio...*`;
+> ® ⍴᥆ᥕᥱrᥱძ ᑲᥡ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍⚡`;
 
     await conn.sendMessage(chatId, {
-      image: { url: image },
-      caption,
-      mentions: [sender]
+      image: imageBuffer,
+      caption: caption
     }, { quoted: msg });
 
-    await sendAudio(conn, chatId, download.url, msg, `${title}.mp3`);
-    await conn.sendMessage(chatId, { react: { text: '✅', key: msg.key } });
+    const downloadData = await getDownloadUrl(videoUrl);
+    if (!downloadData || !downloadData.url) {
+      throw new Error('No se pudo descargar la música.');
+    }
 
-  } catch (e) {
-    console.error('[.play error]', e);
-    await conn.sendMessage(chatId, {
-      text: `❌ *Error al procesar la canción*\n\n${e.message || e}`
+    await sendAudioNormal(conn, chatId, downloadData.url, msg);
+
+  } catch (error) {
+    return conn.sendMessage(chatId, {
+      text: `➤ \`UPS, ERROR\` ❌
+
+𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗋𝗈𝗅𝗂𝗍𝖺* *.𝗉𝗅𝖺𝗒1* 𝗈 *.𝗉𝗅𝖺𝗒2*
+".𝗋𝖾𝗉𝗈𝗋𝗍 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
+> 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗍𝖺𝗇 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
     }, { quoted: msg });
-    await conn.sendMessage(chatId, { react: { text: '❌', key: msg.key } });
   }
 };
 
-handler.command = ['play', 'musica', 'song'];
+handler.command = ["play"];
 module.exports = handler;
