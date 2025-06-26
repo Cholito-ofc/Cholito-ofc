@@ -47,9 +47,6 @@ Por favor, describe el error o sugerencia.
 🏷️ *Grupo:*
    ${groupName}
 
-🆔 *ID del grupo:*
-   ${chatId}
-
 ╰━━━━━━━━━━━━━━━━━━━━━╯`;
 
   await conn.sendMessage(ownerNumber + "@s.whatsapp.net", { 
