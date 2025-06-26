@@ -1,54 +1,29 @@
-const handler = async (msg, { conn, args }) => {
-  const chatId = msg.key.remoteJid;
-  const sender = msg.key.participant || msg.key.remoteJid;
-  const text = args.join(" ").trim();
+const handler = async (m, { conn }) => {
+  // Obtener la lista de owners válidos
+  const list = Array.isArray(global.owner)
+    ? global.owner.map(v => (typeof v === "object" ? v[0] : v))
+    : [];
 
-  // Limpiar formato para comparar el número
-  const raw = sender.replace(/(@s\.whatsapp\.net|@lid)/g, '');
-  const ownersPermitidos = ['31375424024748', '50489513153'];
-
-  if (!ownersPermitidos.includes(raw)) {
-    return conn.sendMessage(chatId, {
-      text: "🚫 Este comando solo puede ser usado por el *owner principal autorizado*.",
-    }, { quoted: msg });
+  // Validar si quien ejecuta el comando es owner principal
+  if (!list.includes(m.sender)) {
+    return m.reply("🚫 Este comando solo puede ser usado por el owner principal.");
   }
 
-  const grupos = Object.entries(conn.chats)
-    .filter(([jid, chat]) => jid.endsWith('@g.us') && chat.subject)
-    .map(([jid, chat]) => ({ id: jid, name: chat.subject }));
+  // Confirmación opcional antes de salir del grupo
+  await m.reply("👋 El bot está saliendo del grupo...");
 
-  if (!text) {
-    if (grupos.length === 0) {
-      return conn.sendMessage(chatId, {
-        text: "⚠️ El bot no está en ningún grupo actualmente.",
-      }, { quoted: msg });
-    }
-
-    const lista = grupos.map((g, i) => `*${i + 1}.* ${g.name}`).join("\n");
-    return conn.sendMessage(chatId, {
-      text: `📋 *Lista de grupos donde está el bot:*\n\n${lista}`,
-    }, { quoted: msg });
+  // Salir del grupo
+  try {
+    await conn.groupLeave(m.chat);
+  } catch (e) {
+    console.error("Error al salir del grupo:", e);
+    m.reply("❌ No se pudo salir del grupo. Verifica si el bot es admin.");
   }
-
-  const numero = parseInt(text);
-  if (isNaN(numero) || numero < 1 || numero > grupos.length) {
-    return conn.sendMessage(chatId, {
-      text: `❌ Número inválido. Usa un número entre 1 y ${grupos.length}.`,
-    }, { quoted: msg });
-  }
-
-  const grupo = grupos[numero - 1];
-
-  await conn.sendMessage(grupo.id, {
-    text: '👋 El bot ha sido removido por el owner principal.',
-  });
-
-  await conn.groupLeave(grupo.id);
-
-  await conn.sendMessage(chatId, {
-    text: `✅ El bot ha salido correctamente del grupo *${grupo.name}*.`,
-  }, { quoted: msg });
 };
 
-handler.command = ['salirgrupo'];
-module.exports = handler;
+handler.command = ['salirgrupo'];  // Comando que activa este handler
+handler.group = true;              // Solo se puede usar en grupos
+handler.admin = false;            // No requiere que el usuario sea admin
+handler.botAdmin = true;          // El bot debe ser admin para poder salirse
+
+export default handler;
