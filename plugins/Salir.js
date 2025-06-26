@@ -1,9 +1,9 @@
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
-  const senderJid = msg.participant || msg.key.participant || msg.key.remoteJid;
-  const senderNum = senderJid.replace(/[^0-9]/g, "");
+  const jid = msg.participant || msg.key.participant || msg.key.remoteJid;
+  const senderNum = jid.split('@')[0]; // ← Solo el número
   const senderMention = `@${senderNum}`;
-  const mentionJid = senderNum + "@s.whatsapp.net";
+  const mentionJid = jid; // ← El JID real
 
   if (!global.owner.some(([id]) => id === senderNum)) {
     return conn.sendMessage(chatId, {
@@ -34,14 +34,14 @@ const handler = async (msg, { conn, args }) => {
 ┃
 ┃ ⚠️ *Motivo:* El owner principal solicitó la salida
 ┃ 🏷️ *Grupo:* ${grupo.name}
-┃ 👤 *Solicitado por:*  @${jid}}
+┃ 👤 *Solicitado por:* ${senderMention}
 ┃
 ┃ 🛑 ${botName} ha abandonado este grupo.
 ╰━━━━━━━━━━━━━━━━━━━━⬣`.trim();
 
     await conn.sendMessage(grupo.id, {
       text: salidaTexto,
-      mentions: [mentionJid] // <- ¡esto enlaza correctamente el texto con JID!
+      mentions: [mentionJid] // Enlaza el @502... con el JID real
     });
 
     await conn.groupLeave(grupo.id);
