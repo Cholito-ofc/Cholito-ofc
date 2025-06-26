@@ -34,7 +34,7 @@ const handler = async (msg, { conn, args }) => {
 ┃
 ┃ ⚠️ *Motivo:* El owner principal solicitó la salida
 ┃ 🏷️ *Grupo:* ${grupo.name}
-┃ 👤 *Solicitado por:* ${senderMention}
+┃ 👤 *Solicitado por:*  @${jid}}
 ┃
 ┃ 🛑 ${botName} ha abandonado este grupo.
 ╰━━━━━━━━━━━━━━━━━━━━⬣`.trim();
