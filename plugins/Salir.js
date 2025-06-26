@@ -59,5 +59,5 @@ const handler = async (msg, { conn, args }) => {
   }
 };
 
-handler.command = ['salirgrupo'];
+handler.command = ['salir'];
 module.exports = handler;
