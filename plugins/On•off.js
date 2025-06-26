@@ -1,52 +1,52 @@
 const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
   const isGroup = chatId.endsWith('@g.us');
+  const senderId = msg.participant || msg.key.participant || msg.key.remoteJid;
+
   if (!isGroup) {
-    return conn.sendMessage(chatId, { text: '❌ Este comando solo funciona en grupos.' }, { quoted: msg });
+    return conn.sendMessage(chatId, {
+      text: '❌ Este comando solo se puede usar en grupos.'
+    }, { quoted: msg });
   }
 
-  // Obtener configuraciones del grupo
   const chat = global.db.data.chats[chatId] || {};
 
-  // Lista de funciones y su estado
-  const opciones = [
-    { nombre: 'Bienvenida', key: 'welcome' },
-    { nombre: 'Despedidas', key: 'despedida' },
-    { nombre: 'Anti Enlaces', key: 'antiLink' },
-    { nombre: 'Modo Público', key: 'modohorny' },
-    { nombre: 'Restricciones', key: 'restrict' },
-    { nombre: 'Antifake', key: 'antifake' },
-    { nombre: 'Detectar Cambios', key: 'detect' },
-    { nombre: 'Audios Automáticos', key: 'audios' },
-    { nombre: 'Modo Chatbot', key: 'chatbot' },
-    { nombre: 'Autosticker', key: 'autosticker' },
+  // Lista de funciones a mostrar
+  const funciones = [
+    { key: 'welcome', nombre: 'Bienvenida' },
+    { key: 'despedida', nombre: 'Despedidas' },
+    { key: 'antilink', nombre: 'Anti Enlaces' },
+    { key: 'restrict', nombre: 'Restricciones' },
+    { key: 'detect', nombre: 'Detectar Cambios' },
+    { key: 'audios', nombre: 'Audios Automáticos' },
+    { key: 'chatbot', nombre: 'Modo Chatbot' },
+    { key: 'autosticker', nombre: 'Autosticker' },
+    { key: 'antifake', nombre: 'Antifake' },
+    { key: 'modohorny', nombre: 'Modo Público' }
   ];
 
-  let activadas = '';
-  let desactivadas = '';
+  let activadas = '', desactivadas = '';
 
-  for (const opcion of opciones) {
-    const estado = chat[opcion.key];
-    if (estado) {
-      activadas += `✅ *${opcion.nombre}*\n`;
+  funciones.forEach(({ key, nombre }) => {
+    if (chat[key]) {
+      activadas += `✅ *${nombre}*\n`;
     } else {
-      desactivadas += `❌ *${opcion.nombre}*\n`;
+      desactivadas += `❌ *${nombre}*\n`;
     }
-  }
+  });
 
-  const mensaje = `
+  const texto = `
 📍 *Estado de funciones del grupo*
 
 ${activadas || '✅ Ninguna activada'}
 ${desactivadas || '❌ Ninguna desactivada'}
 
-Usa los comandos para activar/desactivar, ejemplo:
-• .welcome on
-• .antilink off
+📌 Usa *.on <función>* o *.off <función>* para activar o desactivar.
+📌 Ejemplo: *.on welcome* o *.off antilink*
 `.trim();
 
-  await conn.sendMessage(chatId, { text: mensaje }, { quoted: msg });
+  await conn.sendMessage(chatId, { text: texto }, { quoted: msg });
 };
 
-handler.command = ['onoff', 'estado', 'statusgrupo'];
+handler.command = ['onoff', 'estado', 'config'];
 module.exports = handler;
