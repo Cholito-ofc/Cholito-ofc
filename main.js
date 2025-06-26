@@ -248,118 +248,89 @@ async function handleCommand(sock, msg, command, args, sender) {
             usedPrefix: global.prefix
         });
     }
-  
-    // …código previo…
 
-switch (command) {
+    switch (lowerCommand) {
 
-  /* ────────  PLAY10  ──────── */
-  case 'play10': {
-    try {
-      const sent = await sock.sendMessage(chatId, {
-        image: { url: thumbnail },
-        caption: info
-      }, { quoted: msg });
+case 'play': {
+  const chatId = msg.key.remoteJid;
+  const yts = require('yt-search');
+  const axios = require('axios');
 
-      global.cachePlay10[sent.key.id] = {
-        videoUrl,
-        title,
-        tipo: 'youtube'
-      };
-    } catch (e) {
-      console.error('❌ Error en play10:', e);
-      await sock.sendMessage(
-        chatId,
-        { text: '❌ Error al procesar el video.' },
-        { quoted: msg }
-      );
-    }
-    break;                 // ← sigue dentro del case
-  }
-
-  /* ────────  PLAY4  ──────── */
-  case 'play4': {
-    const yts  = require('yt-search');
-    const ytdl = require('ytdl-core');
-
-    if (!text) {
-      await sock.sendMessage(
-        chatId,
-        { text: `✳️ Usa el comando correctamente:\n\n📌 Ejemplo: *${global.prefix}play4* Bad Bunny - Yonaguni` },
-        { quoted: msg }
-      );
-      break;
-    }
-
-    // ⏳ Reacción de espera
-    await sock.sendMessage(chatId, { react: { text: '⏳', key: msg.key } });
-
-    try {
-      // ① Buscar video
-      const results = await yts(text);
-      if (!results?.videos?.length) {
-        await sock.sendMessage(
-          chatId,
-          { text: `❌ No encontré resultados para "${text}"` },
-          { quoted: msg }
-        );
-        break;
-      }
-
-      const video    = results.videos[0];
-      const title    = video.title;
-      const duration = video.timestamp;
-      const url      = video.url;
-
-      // ② Portada / ficha
-      const design = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
-│  🎵 *Título:* ${title}
-│  ⏱ *Duración:* ${duration}
-│  🔗 *URL:* ${url}
-╰─⬣
-
-*[🛠️] Descargando audio, espere…*
-
-> ® Powered by 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍⚡`;
-
-      await sock.sendMessage(
-        chatId,
-        { image: { url: video.image }, caption: design },
-        { quoted: msg }
-      );
-
-      // ③ Audio
-      const stream = ytdl(url, { filter: 'audioonly', quality: 'highestaudio' });
-
-      await sock.sendMessage(
-        chatId,
-        {
-          audio: { stream },
-          mimetype: 'audio/mp4',
-          ptt: false
-        },
-        { quoted: msg }
-      );
-
-    } catch (err) {
-      console.error(err);
-      await sock.sendMessage(
-        chatId,
-        { text: '❌ Ocurrió un error al procesar la solicitud.' },
-        { quoted: msg }
-      );
-    }
+  if (!text) {
+    await sock.sendMessage(chatId, {
+      text: `✳️ Usa el comando correctamente:\n\n📌 Ejemplo: *${global.prefix}play* Bad Bunny - Yonaguni`
+    }, { quoted: msg });
     break;
   }
 
-  /* ────────  otros comandos ──────── */
-  default:
-    // …
-    break;
+  await sock.sendMessage(chatId, {
+    react: { text: '⏳', key: msg.key }
+  });
+
+  try {
+    const search = await yts(text);
+    const video = search.videos[0];
+    if (!video) throw new Error("No se encontraron resultados");
+
+    const videoUrl = video.url;
+    const title = video.title;
+    const duration = video.timestamp;
+    const views = video.views.toLocaleString();
+    const author = video.author.name;
+    const thumbnail = video.thumbnail;
+
+    const info = `
+> 𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 🎧
+
+╭───────────────╮
+├ᴛɪᴛᴜʟᴏ 🎼: ${title}
+├ᴅᴜʀᴀᴄɪᴏɴ ⏱️:${duration}
+│00:03 ━━━━⬤─────── 02:56
+├ ᴀᴜᴛᴏʀ 🗣️: ${author}
+╰───────────────╯
+
+╭───────────✦
+➤ sᴇʟᴇᴄᴄɪᴏɴᴀ ᴜɴᴀ ᴏᴘᴄɪᴏ́ɴ
+➤ 𝟏 ᴏ *ᴀᴜᴅɪᴏ* – 𝖬𝗎́𝗌𝗂𝖼𝖺  
+➤ 𝟐 ᴏ *ᴠɪᴅᴇᴏ* – 𝖵𝗂́𝖽𝖾𝗈    
+╰───────────✦
+
+> ⍴᥆ᥕᥱrᥱძ ᑲᥡ kіᥣᥣᥙᥲᑲ᥆𝗍 🎧
+`;
+
+    const sent = await sock.sendMessage(chatId, {
+      image: { url: thumbnail },
+      caption: info
+    }, { quoted: msg });
+
+    global.cachePlay10[sent.key.id] = {
+      videoUrl: videoUrl,
+      title: title,
+      tipo: 'youtube'
+    };
+
+  } catch (e) {
+    console.error("❌ Error en play10:", e);
+    await sock.sendMessage(chatId, {
+      text: `❌ Error al procesar el video.`
+    }, { quoted: msg });
+  }
+
+  break;
 }
 
-// …código posterior…    
-  
+case 'play2': {
+  const chatId = msg.key.remoteJid;
+  const yts = require('yt-search');
+  const axios = require('axios');
+
+  if (!text) {
+    await sock.sendMessage(chatId, {
+      text: `✳️ Usa el comando correctamente:\n\n📌 Ejemplo: *${global.prefix}play2* Bad Bunny - Yonaguni`
+    }, { quoted: msg });
+    break;
+  }
+
   await sock.sendMessage(chatId, {
     react: { text: '⏳', key: msg.key }
   });
