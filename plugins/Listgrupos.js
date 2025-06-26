@@ -39,7 +39,7 @@ const handler = async (msg, { conn }) => {
     return conn.sendMessage(chatId, { text: '🚫 No estoy en ningún grupo.' }, { quoted: msg });
   }
 
-  // Asignar código numérico
+  // Asignar número
   grupos.forEach((g, idx) => {
     g.code = String(idx + 1);
   });
@@ -48,8 +48,7 @@ const handler = async (msg, { conn }) => {
 
   let texto = '✨ *Grupos donde está el bot (enumerados con números)*\n\n';
   grupos.forEach((g) => {
-    texto += `🔹 *${g.name}*\n`;
-    texto += `• Código: *${g.code}*\n`;
+    texto += `🔹 *${g.code}. ${g.name}*\n`;
     texto += `• JID: ${g.id}\n`;
     texto += `━━━━━━━━━━━━━━━━━━━━━\n`;
   });
