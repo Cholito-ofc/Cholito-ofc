@@ -1,56 +1,70 @@
 const yts = require('yt-search');
 const axios = require('axios');
-const FormData = require('form-data');
 
-const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+// Configuración de reintentos
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const MAX_RETRIES = 2;
+const TIMEOUT_MS = 10000;
+const RETRY_DELAY_MS = 12000;
 
-async function youtubeMp3(url) {
-  try {
-    const ds = new FormData();
-    ds.append("url", url);
+// Función de descarga usando Anomaki
+async function getDownloadUrl(videoUrl) {
+  const apiUrl = 'https://www.apis-anomaki.zone.id/downloader/yta?url=';
 
-    const { data } = await axios.post(
-      "https://www.youtubemp3.ltd/convert",
-      ds,
-      {
-        headers: {
-          ...ds.getHeaders(),
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
-        },
-        timeout: 45000
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      const res = await axios.get(`${apiUrl}${encodeURIComponent(videoUrl)}`, {
+        timeout: TIMEOUT_MS
+      });
+
+      const data = res.data;
+      if (data?.result?.url) {
+        return {
+          url: data.result.url.trim(),
+          title: data.result.title || 'Audio'
+        };
       }
-    );
 
-    if (!data || !data.link) {
-      return { success: false, error: "No se pudo obtener el enlace de descarga" };
+    } catch {
+      if (attempt < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
     }
-
-    return {
-      success: true,
-      data: {
-        title: data.filename || "Título desconocido",
-        downloadUrl: data.link,
-        type: "mp3"
-      }
-    };
-
-  } catch (error) {
-    return {
-      success: false,
-      error: error.response?.data?.message || error.message || "Error al convertir a MP3"
-    };
   }
+
+  return null;
 }
 
+// Envía el audio como mensaje de voz
+async function sendAudio(conn, chatId, audioUrl, quotedMsg, fileName) {
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      await conn.sendMessage(
+        chatId,
+        {
+          audio: { url: audioUrl },
+          mimetype: 'audio/mpeg',
+          fileName
+        },
+        { quoted: quotedMsg }
+      );
+      return true;
+    } catch {
+      if (attempt < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
+    }
+  }
+  return false;
+}
+
+// Handler del comando .play
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
+  const senderMention = '@' + sender.split('@')[0];
 
   if (!args.length) {
     return conn.sendMessage(chatId, {
       text: `╭─⬣「 *KilluaBot* 」⬣
-│ ≡◦ 🎧 *Uso:* .play Joji - Glimpse of Us
-╰─⬣`
+│ ≡◦ 🎧 *Uso:* .play Anuel - Más rica que ayer
+╰─⬣`,
     }, { quoted: msg });
   }
 
@@ -61,51 +75,41 @@ const handler = async (msg, { conn, args }) => {
     const search = await yts(query);
     const video = search.videos[0];
 
-    if (!video) throw 'No se encontró el video.';
+    if (!video) throw new Error('❌ No se encontró el video.');
 
-    const { url: videoUrl, title, duration, author, image } = video;
+    const { title, timestamp, url: videoUrl, author, image } = video;
 
-    const mp3Result = await youtubeMp3(videoUrl);
-    if (!mp3Result.success) throw mp3Result.error;
+    const download = await getDownloadUrl(videoUrl);
+    if (!download || !download.url) throw new Error('❌ Falló la descarga del audio.');
 
-    const caption = `🎶 *PLAY AUDIO*
+    const caption = `🎧 *PLAY AUDIO*
 
-📌 *Título:* ${title}
-🎙️ *Artista:* ${author.name}
-⏱️ *Duración:* ${duration}
+🔖 *Título:* ${title}
+🎤 *Artista:* ${author?.name || 'Desconocido'}
+⏱️ *Duración:* ${timestamp || 'N/A'}
 🔗 *URL:* ${videoUrl}
 
-> Pedido de: @${sender.split('@')[0]}
-> ⏳ *Descargando audio...*
+👤 *Pedido por:* ${senderMention}
+⏳ *Descargando audio...*
+~ KilluaBot 🎶`;
 
-~ KilluaBot Music 🎧`;
-
-    // Enviar imagen + info
     await conn.sendMessage(chatId, {
       image: { url: image },
-      caption: caption,
+      caption,
       mentions: [sender]
     }, { quoted: msg });
 
-    // Enviar audio
-    await wait(2000);
-    await conn.sendMessage(chatId, {
-      audio: { url: mp3Result.data.downloadUrl },
-      mimetype: "audio/mp4",
-      fileName: `${title}.mp3`,
-      mentions: [sender]
-    }, { quoted: msg });
-
+    await sendAudio(conn, chatId, download.url, msg, `${title}.mp3`);
     await conn.sendMessage(chatId, { react: { text: '✅', key: msg.key } });
 
   } catch (e) {
-    console.error(e);
+    console.error('[.play ERROR]', e);
     await conn.sendMessage(chatId, {
-      text: `❌ *Error al procesar la canción*\n\n${e.toString().slice(0, 300)}`
+      text: `❌ *Error al procesar la canción*\n\n${e.message || e.toString()}`
     }, { quoted: msg });
     await conn.sendMessage(chatId, { react: { text: '❌', key: msg.key } });
   }
 };
 
-handler.command = ['play', 'song', 'musica'];
+handler.command = ['play', 'musica', 'song'];
 module.exports = handler;
