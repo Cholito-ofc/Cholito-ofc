@@ -45,17 +45,18 @@ let handler = async (msg, { conn, args }) => {
 
   const base = to24Hour(horaTexto)
 
+  /*── zonas con país y bandera separados ──*/
   const zonas = [
-    { pais: "🇲🇽 MÉXICO",  offset: 0 },
-    { pais: "🇨🇴 COLOMBIA", offset: 1 }
+    { name: "MÉXICO",  flag: "🇲🇽", offset: 0 },
+    { name: "COLOMBIA", flag: "🇨🇴", offset: 1 }
   ]
 
-  // 👇 ahora genera "10:00pm 🇲🇽 MÉXICO"
+  /*── horaMsg: "• 10:00pm MÉXICO 🇲🇽" ──*/
   const horaMsg = zonas.map(z => {
     let newH = base.h + z.offset
     let newM = base.m
     if (newH >= 24) newH -= 24
-    return `${to12Hour(newH, newM)} ${z.pais}`
+    return `• ${to12Hour(newH, newM)} ${z.name} ${z.flag}`
   }).join("\n")
 
   const idPartida = new Date().getTime().toString()
@@ -67,7 +68,7 @@ let handler = async (msg, { conn, args }) => {
 ┊ \`𝗠𝗢𝗗𝗢:\` \`\`\`${modalidad}\`\`\`
 ┊
 ┊ ⏱️ \`𝗛𝗢𝗥𝗔𝗥𝗜𝗢\`
-┊ ${horaMsg.split('\\n').map(l => '• ' + l).join('\\n┊ ')}
+┊ ${horaMsg.split('\\n').join('\\n┊ ')}
 ┊
 ┊ » \`𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔\`
 ┊
@@ -150,7 +151,7 @@ let handler = async (msg, { conn, args }) => {
 ┊ \`𝗠𝗢𝗗𝗢:\` \`\`\`${data.modalidad}\`\`\`
 ┊
 ┊ ⏱️ \`𝗛𝗢𝗥𝗔𝗥𝗜𝗢\`
-┊ ${data.horaMsg.split('\\n').map(l => '• ' + l).join('\\n┊ ')}
+┊ ${data.horaMsg.split('\\n').join('\\n┊ ')}
 ┊
 ┊ » \`𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔\`
 ┊
