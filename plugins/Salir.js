@@ -30,7 +30,7 @@ const handler = async (msg, { conn, args }) => {
     const botName = conn.user.name || 'KilluaBot';
 
     const salidaTexto = `
-╭━━〔 🚪 *${botName} se ha retirado del grupo* 〕━━⬣
+╭━━〔 🚪 *${botName} se despide* 〕━━⬣
 ┃
 ┃ ⚠️ *Motivo:* El owner principal solicitó la salida
 ┃ 🏷️ *Grupo:* ${grupo.name}
