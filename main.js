@@ -262,7 +262,12 @@ case 'play': {
     }, { quoted: msg });
     break;
   }
-  
+
+  // Aquí puedes poner tu código de descarga o respuesta con audio...
+
+  break;
+}
+
 case 'on': {
   const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
@@ -274,8 +279,6 @@ case 'on': {
     break;
   }
 
-  // Simulación de base de datos de funciones por grupo
-  // Puedes cambiar esto por tu propia lógica o base de datos real
   const db = global.db || {};
   db.data = db.data || {};
   db.data.chats = db.data.chats || {};
@@ -310,7 +313,7 @@ case 'on': {
   }, { quoted: msg });
 
   break;
-}
+}  
   
   await sock.sendMessage(chatId, {
     react: { text: '⏳', key: msg.key }
