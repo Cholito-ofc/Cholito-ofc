@@ -263,11 +263,6 @@ case 'play': {
     break;
   }
 
-  // Aquí puedes poner tu código de descarga o respuesta con audio...
-
-  break;
-}
-  
   await sock.sendMessage(chatId, {
     react: { text: '⏳', key: msg.key }
   });
@@ -315,7 +310,7 @@ case 'play': {
     };
 
   } catch (e) {
-    console.error("❌ Error en play10:", e);
+    console.error("❌ Error en play:", e);
     await sock.sendMessage(chatId, {
       text: `❌ Error al procesar el video.`
     }, { quoted: msg });
@@ -369,8 +364,8 @@ case 'on': {
   }, { quoted: msg });
 
   break;
-}    
-  
+}
+
 case 'play2': {
   const chatId = msg.key.remoteJid;
   const yts = require('yt-search');
@@ -404,9 +399,9 @@ case 'play2': {
 
 🎼 𝐷𝑒𝑡𝑎𝑙𝑙𝑒𝑠 𝑑𝑒 𝑡𝑢 𝑏𝑢́𝑠𝑞𝑢𝑒𝑑𝑎:
 ╭───────────────╮
-├ 🎶 𝖳𝗂́𝗍𝗎𝗅𝗈: ${𝗍𝗂𝗍𝗅𝖾}
-├ ⏱️ 𝖣𝗎𝗋𝖺𝖼𝗂𝗈́𝗇: ${𝖽𝗎𝗋𝖺𝗍𝗂𝗈𝗇}
-├ 👤 𝖠𝗎𝗍𝗈𝗋: ${𝖺𝗎𝗍𝗁𝗈𝗋}
+├ 🎶 𝖳𝗂́𝗍𝗎𝗅𝗈: ${title}
+├ ⏱️ 𝖣𝗎𝗋𝖺𝖼𝗂𝗈́𝗇: ${duration}
+├ 👤 𝖠𝗎𝗍𝗈𝗋: ${author}
 ╰───────────────╯
 
 ╭───────────✦
@@ -430,7 +425,7 @@ case 'play2': {
     };
 
   } catch (e) {
-    console.error("❌ Error en play10:", e);
+    console.error("❌ Error en play2:", e);
     await sock.sendMessage(chatId, {
       text: `❌ Error al procesar el video.`
     }, { quoted: msg });
