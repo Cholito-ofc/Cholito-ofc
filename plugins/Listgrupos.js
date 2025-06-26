@@ -39,37 +39,23 @@ const handler = async (msg, { conn }) => {
     return conn.sendMessage(chatId, { text: '🚫 No estoy en ningún grupo.' }, { quoted: msg });
   }
 
-  // Enumerar los grupos
+  // Asignar número
   grupos.forEach((g, idx) => {
     g.code = String(idx + 1);
   });
 
   global.gruposAdmin = grupos;
 
-  // Construir mensaje
-  let texto = '✨ *Grupos donde está el bot (elige uno para enviar aviso)*\n\n';
-  const botones = [];
-
-  grupos.slice(0, 10).forEach((g) => { // Limita a 10 botones (WhatsApp permite máx. 10)
-    texto += `🔹 *${g.code}. ${g.name}*\n`;
+  let texto = '✨ *Grupos donde está el bot (enumerados con números)*\n\n';
+  grupos.forEach((g) => {
+    texto += `⚡ *${g.code}. ${g.name}*\n`;
     texto += `• JID: ${g.id}\n`;
     texto += `━━━━━━━━━━━━━━━━━━━━━\n`;
-
-    botones.push({
-      buttonId: `.aviso ${g.code} Este es un aviso rápido.`,
-      buttonText: { displayText: `Avisar al grupo ${g.code}` },
-      type: 1
-    });
   });
-
   texto += `\n🤖 *Total de grupos:* ${grupos.length}`;
-  texto += `\n\nPuedes presionar un botón para enviar un aviso básico.`;
+  texto += `\n\nUsa: .aviso <código> <mensaje>\nEjemplo: .aviso 1 Este es un aviso importante.`;
 
-  return conn.sendMessage(chatId, {
-    text: texto.trim(),
-    buttons: botones,
-    headerType: 1
-  }, { quoted: msg });
+  return conn.sendMessage(chatId, { text: texto.trim() }, { quoted: msg });
 };
 
 handler.command = ['listgrupos', 'vergrupos', 'gruposbot'];
