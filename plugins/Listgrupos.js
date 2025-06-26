@@ -48,7 +48,7 @@ const handler = async (msg, { conn }) => {
 
   let texto = '✨ *Grupos donde está el bot (enumerados con números)*\n\n';
   grupos.forEach((g) => {
-    texto += `🔹 *${g.code}. ${g.name}*\n`;
+    texto += `⚡ *${g.code}. ${g.name}*\n`;
     texto += `• JID: ${g.id}\n`;
     texto += `━━━━━━━━━━━━━━━━━━━━━\n`;
   });
