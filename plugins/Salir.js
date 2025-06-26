@@ -3,6 +3,7 @@ const handler = async (msg, { conn, args }) => {
   const sender = msg.key.participant || msg.key.remoteJid;
   const senderNum = sender.replace(/[^0-9]/g, "");
 
+  // Validar que sea el owner principal
   if (!global.owner.some(([id]) => id === senderNum)) {
     return conn.sendMessage(chatId, {
       text: "❌ Solo el *owner* del bot puede usar este comando."
@@ -12,7 +13,7 @@ const handler = async (msg, { conn, args }) => {
   const numero = args[0];
   if (!numero || isNaN(numero)) {
     return conn.sendMessage(chatId, {
-      text: '⚠️ Debes escribir el número del grupo.\nEjemplo: *.salirgrupo 2*'
+      text: '⚠️ Debes escribir el número del grupo.\n\nEjemplo: *.salirgrupo 2*'
     }, { quoted: msg });
   }
 
@@ -20,18 +21,36 @@ const handler = async (msg, { conn, args }) => {
 
   if (!grupo) {
     return conn.sendMessage(chatId, {
-      text: '❌ No se encontró el grupo con ese número. Usa *.listarsalir* para ver los disponibles.'
+      text: '❌ No se encontró el grupo con ese número.\nUsa *.listarsalir* para ver los disponibles.'
     }, { quoted: msg });
   }
 
   try {
+    const mentionJid = sender.endsWith('@s.whatsapp.net') ? sender : sender + '@s.whatsapp.net';
+    const botName = conn.user.name || 'KilluaBot';
+
+    const salidaTexto = `
+╭━━〔 🚪 *${botName} se ha retirado del grupo* 〕━━⬣
+┃
+┃ ⚠️ *Motivo:* El owner principal solicitó la salida
+┃ 🏷️ *Grupo:* ${grupo.name}
+┃ 👤 *Solicitado por:* @${senderNum}
+┃
+┃ 🛑 ${botName} ha abandonado este grupo.
+╰━━━━━━━━━━━━━━━━━━━━⬣`.trim();
+
     await conn.sendMessage(grupo.id, {
-      text: '👋 El bot ha sido retirado de este grupo por orden del owner.'
+      text: salidaTexto,
+      mentions: [mentionJid]
     });
+
     await conn.groupLeave(grupo.id);
+
     return conn.sendMessage(chatId, {
-      text: `✅ Salí del grupo *${grupo.name}*.`
+      text: `✅ ${botName} ha salido del grupo *${grupo.name}* por tu orden.`,
+      mentions: [mentionJid]
     }, { quoted: msg });
+
   } catch (e) {
     console.error(e);
     return conn.sendMessage(chatId, {
@@ -40,5 +59,5 @@ const handler = async (msg, { conn, args }) => {
   }
 };
 
-handler.command = ['salirgrupo'];
+handler.command = ['salir'];
 module.exports = handler;
