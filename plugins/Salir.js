@@ -1,7 +1,8 @@
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
-  const senderNum = sender.replace(/[^0-9]/g, ""); // Ej: 50212345678
+  const senderNum = sender.replace(/[^0-9]/g, "");
+  const senderMention = `@${senderNum}`;
   const mentionJid = sender.endsWith('@s.whatsapp.net') ? sender : sender + '@s.whatsapp.net';
 
   if (!global.owner.some(([id]) => id === senderNum)) {
@@ -33,7 +34,7 @@ const handler = async (msg, { conn, args }) => {
 ┃
 ┃ ⚠️ *Motivo:* El owner principal solicitó la salida
 ┃ 🏷️ *Grupo:* ${grupo.name}
-┃ 👤 *Solicitado por:* @${senderNum}
+┃ 👤 *Solicitado por:* ${senderMention}
 ┃
 ┃ 🛑 ${botName} ha abandonado este grupo.
 ╰━━━━━━━━━━━━━━━━━━━━⬣`.trim();
@@ -58,5 +59,5 @@ const handler = async (msg, { conn, args }) => {
   }
 };
 
-handler.command = ['salirgrupo'];
+handler.command = ['salir'];
 module.exports = handler;
