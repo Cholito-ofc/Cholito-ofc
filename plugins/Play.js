@@ -18,26 +18,77 @@ function isUserBlocked(userId) {
 }
 
 async function getDownloadUrl(videoUrl) {
-  const apis = [{ url: 'https://api.vreden.my.id/api/ytmp3?url=', type: 'vreden' }];
+  const apis = [
+    {
+      url: `https://api.vreden.my.id/api/ytmp3?url=`,
+      type: 'vreden'
+    },
+    {
+      url: `https://api.anhdev.eu.org/api/ytmp3?url=`,
+      type: 'anh'
+    },
+    {
+      url: `https://api.lolhuman.xyz/api/ytaudio?apikey=TuAPIKEY&url=`,
+      type: 'lolhuman'
+    },
+    {
+      url: `https://bx-team-api.up.railway.app/api/download/youtube-mp3?url=`,
+      type: 'bx'
+    }
+  ];
+
   for (const api of apis) {
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       try {
         const response = await axios.get(`${api.url}${encodeURIComponent(videoUrl)}`, { timeout: TIMEOUT_MS });
-        if (
-          response.data?.status === 200 &&
-          response.data?.result?.download?.url &&
-          response.data?.result?.download?.status === true
-        ) {
-          return {
-            url: response.data.result.download.url.trim(),
-            title: response.data.result.metadata.title
-          };
+
+        switch (api.type) {
+          case 'vreden':
+            if (
+              response.data?.status === 200 &&
+              response.data?.result?.download?.url &&
+              response.data?.result?.download?.status === true
+            ) {
+              return {
+                url: response.data.result.download.url.trim(),
+                title: response.data.result.metadata.title
+              };
+            }
+            break;
+
+          case 'anh':
+            if (response.data?.status && response.data.result?.url) {
+              return {
+                url: response.data.result.url,
+                title: response.data.result.title || 'Audio'
+              };
+            }
+            break;
+
+          case 'lolhuman':
+            if (response.data?.status === 200 && response.data.result?.link) {
+              return {
+                url: response.data.result.link,
+                title: response.data.result.title
+              };
+            }
+            break;
+
+          case 'bx':
+            if (response.data?.success && response.data?.data?.url) {
+              return {
+                url: response.data.data.url,
+                title: response.data.data.title
+              };
+            }
+            break;
         }
       } catch {
         if (attempt < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
       }
     }
   }
+
   return null;
 }
 
