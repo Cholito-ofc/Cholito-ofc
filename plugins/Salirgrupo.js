@@ -3,20 +3,16 @@ const handler = async (msg, { conn, args }) => {
   const sender = msg.key.participant || msg.key.remoteJid;
   const text = args.join(" ").trim();
 
-  // ✅ Lista de owners permitidos
-  const ownersPermitidos = [
-    '31375424024748@lid',
-    '50489513153@s.whatsapp.net'
-  ];
+  // Limpiar formato para comparar el número
+  const raw = sender.replace(/(@s\.whatsapp\.net|@lid)/g, '');
+  const ownersPermitidos = ['31375424024748', '50489513153'];
 
-  // ❌ Bloqueo si no está en la lista
-  if (!ownersPermitidos.includes(sender)) {
+  if (!ownersPermitidos.includes(raw)) {
     return conn.sendMessage(chatId, {
       text: "🚫 Este comando solo puede ser usado por el *owner principal autorizado*.",
     }, { quoted: msg });
   }
 
-  // ✅ Obtener grupos activos
   const grupos = Object.entries(conn.chats)
     .filter(([jid, chat]) => jid.endsWith('@g.us') && chat.subject)
     .map(([jid, chat]) => ({ id: jid, name: chat.subject }));
