@@ -388,12 +388,12 @@ case 'play2': {
 }
 
 case 'revsall': {
+  const os = require('os');
+  const process = require('process');
+  const axios = require('axios');
   const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
   const senderNum = sender.replace(/[^0-9]/g, '');
-
-  const fs = require('fs');
-  const path = require('path');
 
   if (!global.owner.some(([id]) => id === senderNum)) {
     await sock.sendMessage(chatId, {
@@ -402,38 +402,79 @@ case 'revsall': {
     break;
   }
 
-  const baseDir = path.join(__dirname, 'comandos'); // Ajusta esta ruta si tu estructura es distinta
-  const folders = fs.readdirSync(baseDir).filter(f => fs.lstatSync(path.join(baseDir, f)).isDirectory());
+  try {
+    const memoriaLibre = (os.freemem() / 1024 / 1024).toFixed(2);
+    const memoriaTotal = (os.totalmem() / 1024 / 1024).toFixed(2);
+    const usoCPU = os.loadavg()[0].toFixed(2);
+    const uptime = process.uptime();
+    const horas = Math.floor(uptime / 3600);
+    const minutos = Math.floor((uptime % 3600) / 60);
+    const segundos = Math.floor(uptime % 60);
 
-  let report = `🔍 *REVISIÓN DE MÓDULOS (${folders.length})*\n\n`;
+    let estado = '✅ *Bot funcionando correctamente*';
+    let alerta = '';
 
-  for (const folder of folders) {
-    const files = fs.readdirSync(path.join(baseDir, folder)).filter(file => file.endsWith('.js'));
+    if (usoCPU > 1.5) alerta += '⚠️ *CPU alta*\n';
+    if (memoriaLibre < 100) alerta += '⚠️ *RAM baja*\n';
 
-    for (const file of files) {
-      const fullPath = path.join(baseDir, folder, file);
+    // Verificar APIs externas
+    const apis = [
+      { name: 'Vreden', url: 'https://api.vreden.my.id/api/ytmp3?url=https://youtu.be/kJQP7kiw5Fk' },
+      { name: 'AnhDev', url: 'https://api.anhdev.eu.org/api/ytmp3?url=https://youtu.be/kJQP7kiw5Fk' },
+      { name: 'Lolhuman', url: 'https://api.lolhuman.xyz/api/ytaudio?apikey=TuAPIKEY&url=https://youtu.be/kJQP7kiw5Fk' }
+    ];
 
+    let apistatus = '';
+
+    for (const api of apis) {
       try {
-        const mod = require(fullPath);
-
-        if (typeof mod !== 'function' && typeof mod?.handler !== 'function' && typeof mod?.default !== 'function') {
-          report += `⚠️ ${folder}/${file} - Falta handler\n`;
+        const res = await axios.get(api.url, { timeout: 7000 });
+        if (res.status === 200) {
+          apistatus += `✅ ${api.name} – *OK*\n`;
         } else {
-          report += `✅ ${folder}/${file}\n`;
+          apistatus += `❌ ${api.name} – *HTTP ${res.status}*\n`;
         }
-      } catch (err) {
-        report += `❌ ${folder}/${file}\n    ↪️ ${err.message.split('\n')[0]}\n`;
+      } catch {
+        apistatus += `❌ ${api.name} – *No responde*\n`;
       }
     }
+
+    const respuesta = `${estado}
+
+📊 *Estado del Sistema KilluaBot*
+
+🧠 *RAM libre:* ${memoriaLibre} MB
+💾 *RAM total:* ${memoriaTotal} MB
+📈 *CPU:* ${usoCPU} %
+⏱️ *Uptime:* ${horas}h ${minutos}m ${segundos}s
+${alerta ? '\n' + alerta : ''}
+
+🌐 *Estado de APIs externas:*
+${apistatus.trim()}
+
+> ⍴᥆ᥕᥱrᥱძ ᑲᥡ 𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 🚀`;
+
+    await sock.sendMessage(chatId, {
+      text: respuesta
+    }, { quoted: msg });
+
+  } catch (err) {
+    const errorText = `❌ *El bot detectó un error crítico*
+
+📛 *Tipo de error:* ${err.name}
+📄 *Mensaje:* ${err.message}
+
+🔧 Revisa tu código o las APIs utilizadas.
+
+> 𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 💥 – Sistema en fallo`;
+    await sock.sendMessage(chatId, {
+      text: errorText
+    }, { quoted: msg });
   }
 
-  await sock.sendMessage(chatId, {
-    text: report.length < 4000 ? report : report.slice(0, 4000) + "\n\n⚠️ Mensaje truncado...",
-  }, { quoted: msg });
-
   break;
-}        
-        
+  }
+  
 case "menuaudio": {
   try {
     await sock.sendMessage(msg.key.remoteJid, {
