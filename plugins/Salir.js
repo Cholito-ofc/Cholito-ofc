@@ -14,7 +14,7 @@ const handler = async (msg, { conn, args }) => {
   const numero = args[0];
   if (!numero || isNaN(numero)) {
     return conn.sendMessage(chatId, {
-      text: '⚠️ Debes escribir el número del grupo.\n\nEjemplo: *.salirgrupo 2*'
+      text: '⚠️ Debes escribir el número del grupo.\n\nEjemplo: *.salir 2*'
     }, { quoted: msg });
   }
 
