@@ -153,7 +153,7 @@ let handler = async (msg, { conn, args }) => {
 ┊ \`𝗠𝗢𝗗𝗢:\` \`\`\`${data.modalidad}\`\`\`
 ┊
 ┊ ⏱️ \`𝗛𝗢𝗥𝗔𝗥𝗜𝗢\`
-┊ ${data.horaMsg.split('\\n').map(l => '• ' +   l).join('\\n┊ ')}
+┊ ${data.horaMsg.split('\\n').map(l => '• ' +  l).join('\\n┊ ')}
 ┊
 ┊ » \`𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔\`
 ┊
