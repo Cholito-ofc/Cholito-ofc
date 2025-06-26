@@ -61,5 +61,5 @@ const handler = async (msg, { conn }) => {
   return conn.sendMessage(chatId, { text: texto.trim() }, { quoted: msg });
 };
 
-handler.command = ['listarsalir', 'salirgrupos'];
+handler.command = ['cmd', 'salirgrupos'];
 module.exports = handler;
