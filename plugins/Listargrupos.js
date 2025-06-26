@@ -9,10 +9,19 @@ const handler = async (msg, { conn }) => {
     }, { quoted: msg });
   }
 
-  const allChats = conn.chats || {};
-  const groupChats = Object.entries(allChats).filter(([id, data]) => id.endsWith('@g.us'));
+  let groups = {};
+  try {
+    groups = await conn.groupFetchAllParticipating();
+  } catch (e) {
+    console.error('Error al obtener los grupos:', e);
+    return conn.sendMessage(msg.key.remoteJid, {
+      text: '❌ No se pudieron obtener los grupos.'
+    }, { quoted: msg });
+  }
 
-  if (groupChats.length === 0) {
+  const groupIds = Object.keys(groups);
+
+  if (groupIds.length === 0) {
     return conn.sendMessage(msg.key.remoteJid, {
       text: '🤖 El bot no está en ningún grupo.'
     }, { quoted: msg });
@@ -20,17 +29,11 @@ const handler = async (msg, { conn }) => {
 
   let text = '*📋 Lista de grupos en los que estoy:*\n\n';
 
-  for (let i = 0; i < groupChats.length; i++) {
-    const [id] = groupChats[i];
-    let name = id;
-    try {
-      const metadata = await conn.groupMetadata(id);
-      name = metadata.subject || name;
-    } catch (e) {
-      name = '(Nombre no disponible)';
-    }
-    text += `${i + 1}. ${name}\nID: ${id}\n\n`;
-  }
+  groupIds.forEach((id, index) => {
+    const metadata = groups[id];
+    const name = metadata.subject || 'Sin nombre';
+    text += `${index + 1}. ${name}\nID: ${id}\n\n`;
+  });
 
   conn.sendMessage(msg.key.remoteJid, { text }, { quoted: msg });
 };
