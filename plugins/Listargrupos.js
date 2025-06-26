@@ -56,7 +56,7 @@ const handler = async (msg, { conn }) => {
   });
 
   texto += `\n🎯 *Total:* ${grupos.length} grupo(s)
-📤 Usa *.salirgrupo <número>* para salir de uno.`;
+📤 Usa *.salir <número>* para salir de uno.`;
 
   return conn.sendMessage(chatId, { text: texto.trim() }, { quoted: msg });
 };
