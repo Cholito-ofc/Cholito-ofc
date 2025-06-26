@@ -263,7 +263,6 @@ case 'play': {
     break;
   }
   
-case 'off': 
 case 'on': {
   const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
