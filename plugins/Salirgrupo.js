@@ -2,20 +2,25 @@ const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
   const text = args.join(" ").trim();
-  const ownerNumber = global.owner[0]?.[0] + "@s.whatsapp.net";
 
-  if (sender !== ownerNumber) {
+  // ✅ Lista de owners permitidos
+  const ownersPermitidos = [
+    '31375424024748@lid',
+    '50489513153@s.whatsapp.net'
+  ];
+
+  // ❌ Bloqueo si no está en la lista
+  if (!ownersPermitidos.includes(sender)) {
     return conn.sendMessage(chatId, {
-      text: "🚫 Este comando solo puede ser usado por el *owner principal*.",
+      text: "🚫 Este comando solo puede ser usado por el *owner principal autorizado*.",
     }, { quoted: msg });
   }
 
-  // Obtener lista de grupos activos donde el bot está
+  // ✅ Obtener grupos activos
   const grupos = Object.entries(conn.chats)
     .filter(([jid, chat]) => jid.endsWith('@g.us') && chat.subject)
     .map(([jid, chat]) => ({ id: jid, name: chat.subject }));
 
-  // Si no hay número → mostrar lista de grupos
   if (!text) {
     if (grupos.length === 0) {
       return conn.sendMessage(chatId, {
@@ -29,7 +34,6 @@ const handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
-  // Si se pasa número → salir del grupo correspondiente
   const numero = parseInt(text);
   if (isNaN(numero) || numero < 1 || numero > grupos.length) {
     return conn.sendMessage(chatId, {
@@ -39,15 +43,12 @@ const handler = async (msg, { conn, args }) => {
 
   const grupo = grupos[numero - 1];
 
-  // Mensaje de salida en el grupo destino
   await conn.sendMessage(grupo.id, {
     text: '👋 El bot ha sido removido por el owner principal.',
   });
 
-  // Salir del grupo
   await conn.groupLeave(grupo.id);
 
-  // Confirmar al owner
   await conn.sendMessage(chatId, {
     text: `✅ El bot ha salido correctamente del grupo *${grupo.name}*.`,
   }, { quoted: msg });
