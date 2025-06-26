@@ -402,39 +402,60 @@ const farewellTexts = [
 ];
 
 // BIENVENIDA: solo cuando alguien entra
+import axios from 'axios';
+import sharp from 'sharp';
+
 if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
     let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
+
     try {
       profilePicUrl = await sock.profilePictureUrl(participant, "image");
     } catch (err) {}
 
     let textoFinal = "";
     if (customMessage) {
-      // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio, siempre con manito y salto de línea
       if (/(@user)/gi.test(customMessage)) {
         textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${customMessage.replace(/@user/gi, mention)}`;
       } else {
         textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${customMessage}`;
       }
     } else {
-      // Si no hay mensaje personalizado, solo manda la descripción del grupo
       let groupDesc = "";
       try {
         const metadata = await sock.groupMetadata(update.id);
-        groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
+        groupDesc = metadata.desc ? `📜 *Descripción del grupo:*\n${metadata.desc}` : `📜 *Este grupo no tiene descripción.*`;
       } catch (err) {
-        groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
+        groupDesc = `📜 *No se pudo obtener la descripción del grupo.*`;
       }
-      textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
+      textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${groupDesc}`;
+    }
+
+    let imageBuffer;
+    try {
+      const response = await axios.get(profilePicUrl, { responseType: 'arraybuffer' });
+      imageBuffer = await sharp(response.data).resize({ width: 600 }).jpeg({ quality: 70 }).toBuffer();
+    } catch (err) {
+      console.log("❌ Error al procesar imagen de perfil:", err);
+      continue;
     }
 
     await sock.sendMessage(update.id, {
-      image: { url: profilePicUrl },
-      caption: textoFinal,
-      mentions: [participant] // SIEMPRE etiqueta al usuario
+      text: textoFinal,
+      contextInfo: {
+        externalAdReply: {
+          title: '⚡ KILLUA-BOT ⚡',
+          body: '👋🏻 Bienvenido/a al grupo',
+          mediaType: 1,
+          renderLargerThumbnail: true,
+          thumbnail: imageBuffer,
+          mediaUrl: 'https://chat.whatsapp.com/XXX', // <-- Pon aquí el link real
+          sourceUrl: 'https://chat.whatsapp.com/XXX'
+        },
+        mentionedJid: [participant]
+      }
     });
   }
 }
