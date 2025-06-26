@@ -267,53 +267,6 @@ case 'play': {
 
   break;
 }
-
-case 'on': {
-  const chatId = msg.key.remoteJid;
-  const sender = msg.key.participant || msg.key.remoteJid;
-
-  if (!msg.key.remoteJid.endsWith('@g.us')) {
-    await sock.sendMessage(chatId, {
-      text: `❌ Este comando solo puede usarse en *grupos*.`
-    }, { quoted: msg });
-    break;
-  }
-
-  const db = global.db || {};
-  db.data = db.data || {};
-  db.data.chats = db.data.chats || {};
-  db.data.chats[chatId] = db.data.chats[chatId] || {
-    welcome: true,
-    detect: false,
-    antilink: true,
-    antifake: false,
-    modohorny: false,
-    modeadmin: true,
-  };
-
-  const groupConf = db.data.chats[chatId];
-
-  const funciones = [
-    ['👋 Bienvenida', groupConf.welcome],
-    ['📛 Detectar cambios de nombre', groupConf.detect],
-    ['🔗 Antilink', groupConf.antilink],
-    ['🚫 Antifake', groupConf.antifake],
-    ['🔞 Modo horny', groupConf.modohorny],
-    ['🛡️ Solo admins', groupConf.modeadmin],
-  ];
-
-  let status = `📢 *Funciones activas en este grupo:*\n\n`;
-
-  for (const [nombre, estado] of funciones) {
-    status += `▪️ ${estado ? '✅' : '❌'} ${nombre}\n`;
-  }
-
-  await sock.sendMessage(chatId, {
-    text: status.trim()
-  }, { quoted: msg });
-
-  break;
-}  
   
   await sock.sendMessage(chatId, {
     react: { text: '⏳', key: msg.key }
@@ -371,6 +324,53 @@ case 'on': {
   break;
 }
 
+case 'on': {
+  const chatId = msg.key.remoteJid;
+  const sender = msg.key.participant || msg.key.remoteJid;
+
+  if (!msg.key.remoteJid.endsWith('@g.us')) {
+    await sock.sendMessage(chatId, {
+      text: `❌ Este comando solo puede usarse en *grupos*.`
+    }, { quoted: msg });
+    break;
+  }
+
+  const db = global.db || {};
+  db.data = db.data || {};
+  db.data.chats = db.data.chats || {};
+  db.data.chats[chatId] = db.data.chats[chatId] || {
+    welcome: true,
+    detect: false,
+    antilink: true,
+    antifake: false,
+    modohorny: false,
+    modeadmin: true,
+  };
+
+  const groupConf = db.data.chats[chatId];
+
+  const funciones = [
+    ['👋 Bienvenida', groupConf.welcome],
+    ['📛 Detectar cambios de nombre', groupConf.detect],
+    ['🔗 Antilink', groupConf.antilink],
+    ['🚫 Antifake', groupConf.antifake],
+    ['🔞 Modo horny', groupConf.modohorny],
+    ['🛡️ Solo admins', groupConf.modeadmin],
+  ];
+
+  let status = `📢 *Funciones activas en este grupo:*\n\n`;
+
+  for (const [nombre, estado] of funciones) {
+    status += `▪️ ${estado ? '✅' : '❌'} ${nombre}\n`;
+  }
+
+  await sock.sendMessage(chatId, {
+    text: status.trim()
+  }, { quoted: msg });
+
+  break;
+}    
+  
 case 'play2': {
   const chatId = msg.key.remoteJid;
   const yts = require('yt-search');
