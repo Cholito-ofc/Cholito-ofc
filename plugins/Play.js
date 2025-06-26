@@ -19,22 +19,10 @@ function isUserBlocked(userId) {
 
 async function getDownloadUrl(videoUrl) {
   const apis = [
-    {
-      url: `https://api.vreden.my.id/api/ytmp3?url=`,
-      type: 'vreden'
-    },
-    {
-      url: `https://api.anhdev.eu.org/api/ytmp3?url=`,
-      type: 'anh'
-    },
-    {
-      url: `https://api.lolhuman.xyz/api/ytaudio?apikey=TuAPIKEY&url=`,
-      type: 'lolhuman'
-    },
-    {
-      url: `https://bx-team-api.up.railway.app/api/download/youtube-mp3?url=`,
-      type: 'bx'
-    }
+    { url: `https://api.vreden.my.id/api/ytmp3?url=`, type: 'vreden' },
+    { url: `https://api.anhdev.eu.org/api/ytmp3?url=`, type: 'anh' },
+    { url: `https://api.lolhuman.xyz/api/ytaudio?apikey=TuAPIKEY&url=`, type: 'lolhuman' },
+    { url: `https://bx-team-api.up.railway.app/api/download/youtube-mp3?url=`, type: 'bx' }
   ];
 
   for (const api of apis) {
@@ -55,7 +43,6 @@ async function getDownloadUrl(videoUrl) {
               };
             }
             break;
-
           case 'anh':
             if (response.data?.status && response.data.result?.url) {
               return {
@@ -64,7 +51,6 @@ async function getDownloadUrl(videoUrl) {
               };
             }
             break;
-
           case 'lolhuman':
             if (response.data?.status === 200 && response.data.result?.link) {
               return {
@@ -73,7 +59,6 @@ async function getDownloadUrl(videoUrl) {
               };
             }
             break;
-
           case 'bx':
             if (response.data?.success && response.data?.data?.url) {
               return {
@@ -141,7 +126,7 @@ const handler = async (msg, { conn, args }) => {
     if (!searchResults?.videos?.length) throw new Error('No se encontraron resultados.');
 
     const videoInfo = searchResults.videos[0];
-    const { title, timestamp: duration, views, ago, url: videoUrl, image: thumbnail } = videoInfo;
+    const { title, timestamp: duration, url: videoUrl, image: thumbnail } = videoInfo;
 
     let imageBuffer = null;
     try {
@@ -149,19 +134,24 @@ const handler = async (msg, { conn, args }) => {
       imageBuffer = Buffer.from(response.data, 'binary');
     } catch {}
 
-    const caption = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
-│  🎵 *Título:* ${title}
-│  ⏱ *Duración:* ${duration || 'Desconocida'}
-│  🔗 *URL:* ${videoUrl}
-╰─⬣
+    const mention = [`${senderNum}@s.whatsapp.net`];
 
-*[🛠️] 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈 𝖾𝗌𝗉𝖾𝗋𝖾...*
+    const caption = `🎶 *PLAY AUDIO*
 
-> ® ⍴᥆ᥕᥱrᥱძ ᑲᥡ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍⚡`;
+📌 *Título:* ${title}
+🎤 *Artista:* No disponible
+⏱ *Duración:* ${duration || 'Desconocida'}
+🔗 *URL:* ${videoUrl}
+
+📥 Pedido de: @${senderNum}
+⌛ Descargando audio...
+
+~ KilluaBot Music 🎧`;
 
     await conn.sendMessage(chatId, {
       image: imageBuffer,
-      caption: caption
+      caption: caption,
+      mentions: mention
     }, { quoted: msg });
 
     const downloadData = await getDownloadUrl(videoUrl);
