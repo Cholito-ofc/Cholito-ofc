@@ -13,13 +13,19 @@ let handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
-  const rawText = msg?.message?.conversation || msg?.message?.extendedTextMessage?.text || ''
-  const type = (args[0] || '').toLowerCase();
-  const enable = rawText.startsWith('.on');
+  // ✅ capturamos el texto completo del mensaje
+  const textRaw =
+    msg?.message?.conversation ||
+    msg?.message?.extendedTextMessage?.text ||
+    "";
 
+  const type = (args[0] || '').toLowerCase();
+  const enable = textRaw.toLowerCase().startsWith('.on');
+
+  // ✅ validamos tipo permitido
   if (!['welcome'].includes(type)) {
     return conn.sendMessage(chatId, {
-      text: `📌 Usa uno de estos comandos válidos:\n\n✅ *.on welcome*\n❌ *.off welcome*`
+      text: `📌 *Uso correcto:*\n\n✅ *.on welcome*\n❌ *.off welcome*`,
     }, { quoted: msg });
   }
 
@@ -27,7 +33,7 @@ let handler = async (msg, { conn, args }) => {
   global.db.data.chats[chatId][type] = enable;
 
   return conn.sendMessage(chatId, {
-    text: `🌟 Función *${type}* ${enable ? 'ACTIVADA ✅' : 'DESACTIVADA ❌'} correctamente.`
+    text: `✅ Función *${type}* ${enable ? "activada" : "desactivada"} correctamente.`,
   }, { quoted: msg });
 };
 
