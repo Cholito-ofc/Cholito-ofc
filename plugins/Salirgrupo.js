@@ -1,38 +1,28 @@
 const handler = async (msg, { conn }) => {
-  const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
   const senderNum = sender.replace(/[^0-9]/g, "");
   const isOwner = global.owner.some(([id]) => id === senderNum);
 
-  if (!chatId.endsWith("@g.us")) {
-    return conn.sendMessage(chatId, {
-      text: "❌ Este comando solo puede usarse en grupos."
+  if (!isOwner) {
+    return conn.sendMessage(msg.key.remoteJid, {
+      text: '🚫 Solo el *owner* puede usar este comando.'
     }, { quoted: msg });
   }
 
-  const meta = await conn.groupMetadata(chatId);
-  const isAdmin = meta.participants.find(p => p.id === sender)?.admin;
-  const isFromMe = msg.key.fromMe;
+  const chats = Object.values(conn.chats).filter(v => v.id.endsWith("@g.us"));
+  let text = "*📋 Lista de grupos:*\n\n";
 
-  if (!isAdmin && !isOwner && !isFromMe) {
-    return conn.sendMessage(chatId, {
-      text: "❌ Solo *admins* o *el dueño del bot* pueden usar este comando."
-    }, { quoted: msg });
-  }
+  const groupNames = await Promise.all(
+    chats.map(async (v, i) => {
+      const metadata = await conn.groupMetadata(v.id).catch(() => ({}));
+      return `${i + 1}. ${metadata.subject || "Grupo sin nombre"}\nID: ${v.id}`;
+    })
+  );
 
-  await conn.sendMessage(chatId, {
-    text: "👋 El bot se retirará del grupo..."
-  }, { quoted: msg });
+  text += groupNames.join('\n\n');
 
-  try {
-    await conn.groupLeave(chatId);
-  } catch (e) {
-    console.error("Error al salir del grupo:", e);
-    await conn.sendMessage(chatId, {
-      text: "❌ No se pudo salir del grupo. ¿El bot es admin?"
-    }, { quoted: msg });
-  }
+  conn.sendMessage(msg.key.remoteJid, { text }, { quoted: msg });
 };
 
-handler.command = ['salirgrupo'];
+handler.command = ['listargrupos'];
 module.exports = handler;
