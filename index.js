@@ -402,8 +402,7 @@ const farewellTexts = [
 ];
 
 // BIENVENIDA: solo cuando alguien entra
-const axios = require('axios'); // Asegúrate de tener axios instalado
-const require('fs'); // ✅ Declaración única para evitar errores
+const axios = require('axios');
 
 if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
@@ -414,7 +413,7 @@ if (update.action === "add" && welcomeActivo) {
     try {
       profilePicUrl = await sock.profilePictureUrl(participant, "image");
     } catch (err) {
-      console.log("⚠️ No se pudo obtener foto de perfil, usando imagen por defecto");
+      console.log("⚠️ No se pudo obtener foto de perfil");
     }
 
     let textoFinal = "";
@@ -437,12 +436,14 @@ if (update.action === "add" && welcomeActivo) {
       textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
     }
 
+    // Imagen cuadrada 720x720 con API externa
     let thumb = null;
     try {
-      const res = await axios.get(profilePicUrl, { responseType: 'arraybuffer' });
+      const cuadradaAPI = `https://api.memegeneration.xyz/square?url=${encodeURIComponent(profilePicUrl)}&size=720`;
+      const res = await axios.get(cuadradaAPI, { responseType: 'arraybuffer' });
       thumb = res.data;
     } catch (e) {
-      console.log("⚠️ Error al descargar imagen:", e.message);
+      console.log("⚠️ Error al generar imagen cuadrada:", e.message);
     }
 
     await sock.sendMessage(update.id, {
@@ -450,8 +451,8 @@ if (update.action === "add" && welcomeActivo) {
       contextInfo: {
         mentionedJid: [participant],
         externalAdReply: {
-          title: `👤 Nuevo integrante!`,
-          body: `⚡ KilluaBot bienvenido ⚡`,
+          title: `🎉 ¡Bienvenido al grupo!`,
+          body: `⚡ KilluaBot Músic ⚡`,
           thumbnail: thumb,
           sourceUrl: `https://wa.me/${participant.split("@")[0]}`,
           mediaType: 1,
