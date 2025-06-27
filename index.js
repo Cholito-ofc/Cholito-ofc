@@ -402,8 +402,10 @@ const farewellTexts = [
 ];
 
 // BIENVENIDA: solo cuando alguien entra
+const fs = require('fs');
 const axios = require('axios');
 
+// ========== BIENVENIDA ==========
 if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
@@ -436,14 +438,13 @@ if (update.action === "add" && welcomeActivo) {
       textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
     }
 
-    // Imagen cuadrada 720x720 con API externa
     let thumb = null;
     try {
-      const cuadradaAPI = `https://api.memegeneration.xyz/square?url=${encodeURIComponent(profilePicUrl)}&size=720`;
-      const res = await axios.get(cuadradaAPI, { responseType: 'arraybuffer' });
+      const apiURL = `https://some-random-api.com/canvas/welcome?avatar=${encodeURIComponent(profilePicUrl)}`;
+      const res = await axios.get(apiURL, { responseType: 'arraybuffer' });
       thumb = res.data;
     } catch (e) {
-      console.log("⚠️ Error al generar imagen cuadrada:", e.message);
+      console.log("⚠️ Error al obtener imagen cuadrada:", e.message);
     }
 
     await sock.sendMessage(update.id, {
@@ -463,6 +464,7 @@ if (update.action === "add" && welcomeActivo) {
   }
 }
 
+// ========== DESPEDIDA ==========
 if (update.action === "remove" && despedidasActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
@@ -492,10 +494,11 @@ if (update.action === "remove" && despedidasActivo) {
 
     let thumb = null;
     try {
-      const res = await axios.get(profilePicUrl, { responseType: 'arraybuffer' });
+      const apiURL = `https://some-random-api.com/canvas/welcome?avatar=${encodeURIComponent(profilePicUrl)}`;
+      const res = await axios.get(apiURL, { responseType: 'arraybuffer' });
       thumb = res.data;
     } catch (e) {
-      console.log("⚠️ Error al descargar imagen:", e.message);
+      console.log("⚠️ Error al obtener imagen cuadrada:", e.message);
     }
 
     await sock.sendMessage(update.id, {
