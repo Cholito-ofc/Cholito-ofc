@@ -118,28 +118,28 @@ const handler = async (msg, { conn, args }) => {
     }
 
     // Texto personalizado
-    const infoText = `╭─⬣「 *KilluaBot Músic* 」⬣
-│ 🎵 *Título:* ${title}
-│ ⏱️ *Duración:* ${duration}
-│ 🔗 *URL:* ${videoUrl}
-╰─⬣
+    const infoText = `╭┈≫「 *KilluaBot Músic* 」⬣
+┊ 🎵 *Título:* ${title}
+┊ ⏱️ *Duración:* ${duration}
+┊ 🔗 *URL:* ${videoUrl}
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
 
 [🔧] Descargando audio espere...`;
 
     // Enviar mensaje con imagen + info
     await conn.sendMessage(chatId, {
-      text: infoText,
-      contextInfo: {
-        externalAdReply: {
-          title: `🎶 ${title}`,
-          body: `🕒 ${duration} | 📅 ${ago}`,
-          thumbnail: thumb,
-          mediaType: 1,
-          renderLargerThumbnail: true,
-          sourceUrl: videoUrl
-        }
-      }
-    }, { quoted: msg });
+  text: infoText,
+  contextInfo: {
+    externalAdReply: {
+      title: `🎶 ${title}`,
+      body: `⚡ KilluaBot Músic ⚡`, // ← TEXTO PERSONALIZADO
+      thumbnail: thumb,
+      mediaType: 1,
+      renderLargerThumbnail: true,
+      sourceUrl: videoUrl
+    }
+  }
+}, { quoted: msg });
 
     const download = await getDownloadUrl(videoUrl);
     if (!download?.url) throw new Error('No se pudo descargar la música');
