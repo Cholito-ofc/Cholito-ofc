@@ -1,122 +1,174 @@
-const axios = require('axios');
 const yts = require('yt-search');
 const fs = require('fs');
-const path = require('path');
-const ffmpeg = require('fluent-ffmpeg');
-const { pipeline } = require('stream');
-const { promisify } = require('util');
-const streamPipeline = promisify(pipeline);
+const axios = require('axios');
+const Jimp = require('jimp'); // npm i jimp
 
-const handler = async (msg, { conn, text }) => {
-  const rawID = conn.user?.id || "";
-  const subbotID = rawID.split(":")[0] + "@s.whatsapp.net";
+const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const MAX_RETRIES = 2;
+const TIMEOUT_MS = 10000;
+const RETRY_DELAY_MS = 12000;
 
-  // Cargar prefijo personalizado
-  const prefixPath = path.resolve("prefixes.json");
-  let prefixes = {};
-  if (fs.existsSync(prefixPath)) {
-    prefixes = JSON.parse(fs.readFileSync(prefixPath, "utf-8"));
+function isUserBlocked(userId) {
+  try {
+    const blockedUsers = JSON.parse(fs.readFileSync('./bloqueados.json', 'utf8'));
+    return blockedUsers.includes(userId);
+  } catch {
+    return false;
   }
+}
 
-  const usedPrefix = prefixes[subbotID] || "."; // Por defecto .
+async function getDownloadUrl(videoUrl) {
+  const apis = [
+    {
+      url: `https://api.vreden.my.id/api/ytmp3?url=`,
+      type: 'vreden'
+    },
+    {
+      url: `https://api.anhdev.eu.org/api/ytmp3?url=`,
+      type: 'anh'
+    },
+    {
+      url: `https://api.lolhuman.xyz/api/ytaudio?apikey=TuAPIKEY&url=`,
+      type: 'lolhuman'
+    },
+    {
+      url: `https://bx-team-api.up.railway.app/api/download/youtube-mp3?url=`,
+      type: 'bx'
+    }
+  ];
 
-  if (!text) {
-    return await conn.sendMessage(msg.key.remoteJid, {
-      text: `✳️ Usa el comando correctamente:\n\n📌 Ejemplo: *${usedPrefix}play* bad bunny diles`
+  for (const api of apis) {
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        const response = await axios.get(`${api.url}${encodeURIComponent(videoUrl)}`, { timeout: TIMEOUT_MS });
+
+        switch (api.type) {
+          case 'vreden':
+            if (response.data?.status === 200 && response.data?.result?.download?.url) {
+              return {
+                url: response.data.result.download.url.trim(),
+                title: response.data.result.metadata.title
+              };
+            }
+            break;
+          case 'anh':
+            if (response.data?.status && response.data.result?.url) {
+              return {
+                url: response.data.result.url,
+                title: response.data.result.title || 'Audio'
+              };
+            }
+            break;
+          case 'lolhuman':
+            if (response.data?.status === 200 && response.data.result?.link) {
+              return {
+                url: response.data.result.link,
+                title: response.data.result.title
+              };
+            }
+            break;
+          case 'bx':
+            if (response.data?.success && response.data?.data?.url) {
+              return {
+                url: response.data.data.url,
+                title: response.data.data.title
+              };
+            }
+            break;
+        }
+      } catch {
+        if (attempt < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
+      }
+    }
+  }
+  return null;
+}
+
+async function sendAudioNormal(conn, chatId, audioUrl, quotedMsg) {
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      await conn.sendMessage(chatId, {
+        audio: { url: audioUrl },
+        mimetype: 'audio/mpeg'
+      }, { quoted: quotedMsg });
+      return true;
+    } catch {
+      if (attempt < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
+    }
+  }
+  return false;
+}
+
+const handler = async (msg, { conn, args }) => {
+  const chatId = msg.key.remoteJid;
+  const sender = msg.key.participant || msg.key.remoteJid;
+  const senderNum = sender.replace(/[^0-9]/g, "");
+
+  await conn.sendMessage(chatId, { react: { text: '🎶', key: msg.key } });
+
+  if (isUserBlocked(senderNum)) {
+    return conn.sendMessage(chatId, {
+      text: "🚫 Lo siento, estás en la lista de usuarios bloqueados."
     }, { quoted: msg });
   }
 
-  await conn.sendMessage(msg.key.remoteJid, {
-    react: { text: '⏳', key: msg.key }
-  });
+  if (!args || !args.join(" ").trim()) {
+    return conn.sendMessage(chatId, {
+      text: `╭─⬣「 *KilluaBot* 」⬣
+│ ≡◦ 🎧 *Uso correcto del comando:*
+│ ≡◦ .play Anuel perfecto
+╰─⬣`
+    }, { quoted: msg });
+  }
+
+  const query = args.join(" ").trim();
 
   try {
-    const search = await yts(text);
-    const video = search.videos[0];
-    if (!video) throw new Error('No se encontraron resultados');
+    const searchResults = await yts(query);
+    if (!searchResults?.videos?.length) throw new Error('No se encontraron resultados.');
 
-    const videoUrl = video.url;
-    const thumbnail = video.thumbnail;
-    const title = video.title;
-    const fduration = video.timestamp;
-    const views = video.views.toLocaleString();
-    const channel = video.author.name || 'Desconocido';
+    const videoInfo = searchResults.videos[0];
+    const { title, timestamp: duration, url: videoUrl, image: thumbnail } = videoInfo;
 
-    const infoMessage = `
+    // Procesar imagen y agregar marca de agua
+    const imagePath = './temp_thumbnail.jpg';
+    const img = await Jimp.read(thumbnail);
+    const font = await Jimp.loadFont(Jimp.FONT_SANS_32_WHITE);
+    img.print(font, 10, img.getHeight() - 50, {
+      text: 'Killua-Bot 🎧',
+      alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
+      alignmentY: Jimp.VERTICAL_ALIGN_BOTTOM
+    }, img.getWidth() - 20, 40);
+    await img.writeAsync(imagePath);
 
-   ✦ 𝗔𝘇𝘂𝗿𝗮 𝗨𝗹𝘁𝗿𝗮 & 𝘾𝙤𝙧𝙩𝙖𝙣𝙖 𝗦𝘂𝗯𝗯𝗼𝘁 ✦
+    const caption = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
+│  🎵 *Título:* ${title}
+│  ⏱ *Duración:* ${duration || 'Desconocida'}
+│  🔗 *URL:* ${videoUrl}
+╰─⬣
 
-📀 *Info del audio:*  
-❀ 🎼 *Título:* ${title}
-❀ ⏱️ *Duración:* ${fduration}
-❀ 👁️ *Vistas:* ${views}
-❀ 👤 *Autor:* ${channel}
-❀ 🔗 *Enlace:* ${videoUrl}
+*[🛠️] 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈 𝖾𝗌𝗉𝖾𝗋𝖾...*`;
 
-📥 *Opciones:*  
-❀ 🎵 _${usedPrefix}play1 ${text}_
-❀ 🎥 _${usedPrefix}play2 ${text}_
-❀ 🎥 _${usedPrefix}play6 ${text}_
-❀ ⚠️ *¿No se reproduce?* Usa _${usedPrefix}ff_
-
-⏳ Procesando audio...
-═══════════════════`;
-
-    await conn.sendMessage(msg.key.remoteJid, {
-      image: { url: thumbnail },
-      caption: infoMessage
+    await conn.sendMessage(chatId, {
+      image: fs.readFileSync(imagePath),
+      caption
     }, { quoted: msg });
 
-    const apiURL = `https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(videoUrl)}&type=audio&quality=128kbps&apikey=russellxz`;
-    const res = await axios.get(apiURL);
-    const json = res.data;
+    const downloadData = await getDownloadUrl(videoUrl);
+    if (!downloadData?.url) throw new Error('No se pudo descargar la música.');
 
-    if (!json.status || !json.data?.url) throw new Error("No se pudo obtener el audio");
+    await sendAudioNormal(conn, chatId, downloadData.url, msg);
 
-    const tmpDir = path.join(__dirname, '../tmp');
-    if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
+  } catch (error) {
+    return conn.sendMessage(chatId, {
+      text: `➤ \`UPS, ERROR\` ❌
 
-    const rawPath = path.join(tmpDir, `${Date.now()}_raw.m4a`);
-    const finalPath = path.join(tmpDir, `${Date.now()}_final.mp3`);
-
-    const audioRes = await axios.get(json.data.url, { responseType: 'stream' });
-    await streamPipeline(audioRes.data, fs.createWriteStream(rawPath));
-
-    await new Promise((resolve, reject) => {
-      ffmpeg(rawPath)
-        .audioCodec('libmp3lame')
-        .audioBitrate('128k')
-        .format('mp3')
-        .save(finalPath)
-        .on('end', resolve)
-        .on('error', reject);
-    });
-
-    await conn.sendMessage(msg.key.remoteJid, {
-      audio: fs.readFileSync(finalPath),
-      mimetype: 'audio/mpeg',
-      fileName: `${title}.mp3`,
-      ptt: false
+𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗋𝗈𝗅𝗂𝗍𝖺* *.𝗉𝗅𝖺𝗒1* 𝗈 *.𝗉𝗅𝖺𝗒2*
+".𝗋𝖾𝗉𝗈𝗋𝗍 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
+> 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺. 🚔`
     }, { quoted: msg });
-
-    fs.unlinkSync(rawPath);
-    fs.unlinkSync(finalPath);
-
-    await conn.sendMessage(msg.key.remoteJid, {
-      react: { text: '✅', key: msg.key }
-    });
-
-  } catch (err) {
-    console.error(err);
-    await conn.sendMessage(msg.key.remoteJid, {
-      text: `❌ *Error:* ${err.message}`
-    }, { quoted: msg });
-
-    await conn.sendMessage(msg.key.remoteJid, {
-      react: { text: '❌', key: msg.key }
-    });
   }
 };
 
-handler.command = ['play'];
+handler.command = ["play"];
 module.exports = handler;
