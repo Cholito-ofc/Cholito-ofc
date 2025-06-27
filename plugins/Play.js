@@ -106,16 +106,22 @@ const handler = async (msg, { conn, args }) => {
     if (!search?.videos?.length) throw new Error('No se encontraron resultados');
 
     const video = search.videos[0];
-    const { title, timestamp: duration, views, ago, url: videoUrl, image: thumbnail } = video;
+    const { title, timestamp: duration, url: videoUrl, image: thumbnail } = video;
 
     const thumb = await axios.get(thumbnail, { responseType: 'arraybuffer' }).then(res => res.data).catch(() => null);
 
-    const fakeAdMessage = {
-      text: `🎧 Descargando audio...`,
+    const adMessage = {
+      text: `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
+│  🎵 *Título:* ${title}
+│  ⏱ *Duración:* ${duration}
+│  🔗 *URL:* ${videoUrl}
+╰─⬣
+
+*[🛠️] 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈 𝖾𝗌𝗉𝖾𝗋𝖾...*`,
       contextInfo: {
         externalAdReply: {
           title: title,
-          body: `KilluaBot 🎶 ${duration || ''}`,
+          body: 'KilluaBot 🎶',
           thumbnail: thumb,
           mediaType: 1,
           renderLargerThumbnail: true,
@@ -124,7 +130,7 @@ const handler = async (msg, { conn, args }) => {
       }
     };
 
-    await conn.sendMessage(chatId, fakeAdMessage, { quoted: msg });
+    await conn.sendMessage(chatId, adMessage, { quoted: msg });
 
     const download = await getDownloadUrl(videoUrl);
     if (!download?.url) throw new Error('No se pudo descargar la música');
