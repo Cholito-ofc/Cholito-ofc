@@ -4,7 +4,6 @@ const axios = require('axios');
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
-  const senderNum = sender.replace(/[^0-9]/g, "");
 
   await conn.sendMessage(chatId, { react: { text: '🎶', key: msg.key } });
 
@@ -27,45 +26,37 @@ const handler = async (msg, { conn, args }) => {
 
     const { title, timestamp: duration, views, ago, url, thumbnail, author } = video;
 
-    const text = `╭─⬣「 *KilluaBot Music* 」⬣
-│ 🎵 *Título:* ${title}
-│ 🎬 *Duración:* ${duration}
-│ 👀 *Vistas:* ${views.toLocaleString()}
-│ 📺 *Canal:* ${author.name}
-│ 📅 *Publicado:* ${ago}
-╰─⬣
-🔗 *Link:* ${url}
-> 𝖲𝖾 𝖾𝗌𝗍𝖺 𝖻𝗎𝗌𝖼𝖺𝗇𝖽𝗈 𝖾𝗅 𝖺𝗎𝖽𝗂𝗈... 🎧`;
-
-    // Descargar thumbnail como buffer
+    // Descargar la imagen en buffer
     let thumbBuffer;
     try {
-      const response = await axios.get(thumbnail, { responseType: "arraybuffer" });
-      thumbBuffer = Buffer.from(response.data, "binary");
-    } catch {
+      const { data } = await axios.get(thumbnail, { responseType: 'arraybuffer' });
+      thumbBuffer = Buffer.from(data);
+    } catch (e) {
       thumbBuffer = null;
     }
 
-    const preview = {
+    // Texto de descripción
+    const description = `🎵 Título: ${title}
+🎬 Duración: ${duration}
+📺 Canal: ${author.name}
+👁️ Vistas: ${views.toLocaleString()}
+📆 Publicado: ${ago}`;
+
+    // Enviar preview como tarjeta enriquecida
+    await conn.sendMessage(chatId, {
+      text: description,
       contextInfo: {
         externalAdReply: {
           title: title,
-          body: '🎧 KilluaBot',
+          body: 'KilluaBot - Descargador YouTube',
           mediaType: 1,
           previewType: 0,
           thumbnail: thumbBuffer,
           sourceUrl: url,
-          renderLargerThumbnail: true
+          renderLargerThumbnail: true,
         }
       }
-    };
-
-    await conn.sendMessage(chatId, {
-      text
-    }, {
-      quoted: msg,
-      ...preview
-    });
+    }, { quoted: msg });
 
   } catch (e) {
     console.error(e);
