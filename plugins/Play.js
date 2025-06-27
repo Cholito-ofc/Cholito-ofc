@@ -1,178 +1,159 @@
-const fetch = require("node-fetch");
-const yts = require("yt-search");
-const axios = require("axios");
+const yts = require('yt-search');
+const fs = require('fs');
+const axios = require('axios');
 
-const formatAudio = ["mp3"];
-const formatVideo = ["360", "480", "720", "1080"];
+const wait = (ms) => new Promise((res) => setTimeout(res, ms));
+const MAX_RETRIES = 2;
+const TIMEOUT_MS = 10000;
+const RETRY_DELAY_MS = 12000;
 
-const ddownr = {
-  download: async (url, format) => {
-    if (!formatAudio.includes(format) && !formatVideo.includes(format)) {
-      throw new Error("⚠️ Ese formato no es compatible.");
-    }
+function isUserBlocked(userId) {
+  try {
+    const blocked = JSON.parse(fs.readFileSync('./bloqueados.json', 'utf8'));
+    return blocked.includes(userId);
+  } catch {
+    return false;
+  }
+}
 
-    const response = await axios.get(`https://p.oceansaver.in/ajax/download.php?format=${format}&url=${encodeURIComponent(url)}&api=dfcb6d76f2f6a9894gjkege8a4ab232222`, {
-      headers: { "User-Agent": "Mozilla/5.0" }
-    });
+async function getDownloadUrl(videoUrl) {
+  const apis = [
+    { url: `https://api.vreden.my.id/api/ytmp3?url=`, type: 'vreden' },
+    { url: `https://api.anhdev.eu.org/api/ytmp3?url=`, type: 'anh' },
+    { url: `https://api.lolhuman.xyz/api/ytaudio?apikey=TuAPIKEY&url=`, type: 'lolhuman' },
+    { url: `https://bx-team-api.up.railway.app/api/download/youtube-mp3?url=`, type: 'bx' }
+  ];
 
-    if (!response.data?.success) {
-      throw new Error("⛔ No se pudo obtener los detalles del video.");
-    }
+  for (const api of apis) {
+    for (let i = 0; i < MAX_RETRIES; i++) {
+      try {
+        const res = await axios.get(`${api.url}${encodeURIComponent(videoUrl)}`, { timeout: TIMEOUT_MS });
 
-    const { id, title, info } = response.data;
-    const downloadUrl = await ddownr.cekProgress(id);
-    return { id, title, image: info.image, downloadUrl };
-  },
-
-  cekProgress: async (id) => {
-    const config = {
-      method: "GET",
-      url: `https://p.oceansaver.in/ajax/progress.php?id=${id}`,
-      headers: { "User-Agent": "Mozilla/5.0" }
-    };
-
-    while (true) {
-      const res = await axios(config);
-      if (res.data?.success && res.data.progress === 1000) {
-        return res.data.download_url;
+        switch (api.type) {
+          case 'vreden':
+            if (res.data?.status === 200 && res.data?.result?.download?.url) {
+              return {
+                url: res.data.result.download.url.trim(),
+                title: res.data.result.metadata.title
+              };
+            }
+            break;
+          case 'anh':
+            if (res.data?.status && res.data.result?.url) {
+              return { url: res.data.result.url, title: res.data.result.title || 'Audio' };
+            }
+            break;
+          case 'lolhuman':
+            if (res.data?.status === 200 && res.data.result?.link) {
+              return { url: res.data.result.link, title: res.data.result.title };
+            }
+            break;
+          case 'bx':
+            if (res.data?.success && res.data?.data?.url) {
+              return { url: res.data.data.url, title: res.data.data.title };
+            }
+            break;
+        }
+      } catch {
+        if (i < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
       }
-      await new Promise(r => setTimeout(r, 5000));
     }
   }
-};
 
-const handler = async (msg, { conn, args, command }) => {
+  return null;
+}
+
+async function sendAudio(conn, chatId, audioUrl, quoted) {
+  for (let i = 0; i < MAX_RETRIES; i++) {
+    try {
+      await conn.sendMessage(chatId, {
+        audio: { url: audioUrl },
+        mimetype: 'audio/mpeg'
+      }, { quoted });
+      return true;
+    } catch {
+      if (i < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
+    }
+  }
+  return false;
+}
+
+const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
-  const text = args.join(" ").trim();
+  const sender = msg.key.participant || msg.key.remoteJid;
+  const senderNum = sender.replace(/[^0-9]/g, '');
 
-  await conn.sendMessage(chatId, { react: { text: "⚡", key: msg.key } });
+  await conn.sendMessage(chatId, { react: { text: '🎶', key: msg.key } });
 
+  if (isUserBlocked(senderNum)) {
+    return conn.sendMessage(chatId, {
+      text: '🚫 Lo siento, estás en la lista de usuarios bloqueados.'
+    }, { quoted: msg });
+  }
+
+  const text = args.join(' ').trim();
   if (!text) {
     return conn.sendMessage(chatId, {
-      text: "*🎵 Usa el comando así:* `.play Bohemian Rhapsody`",
-      quoted: msg
-    });
+      text: `╭─⬣「 *KilluaBot* 」⬣
+│ ≡◦ 🎧 *Uso correcto del comando:*
+│ ≡◦ .play Anuel - Mejor que yo
+╰─⬣\n> ⍴᥆ᥕᥱrᥱძ ᑲᥡ һᥒ ᥴһ᥆ᥣі𝗍᥆`
+    }, { quoted: msg });
   }
 
   try {
     const search = await yts(text);
-    if (!search.all.length) {
-      return conn.sendMessage(chatId, {
-        text: "❌ No se encontraron resultados.",
-        quoted: msg
-      });
-    }
+    if (!search?.videos?.length) throw new Error('No se encontraron resultados');
 
-    const videoInfo = search.all[0];
-    const { title, url, thumbnail, timestamp, views, ago, author } = videoInfo;
+    const video = search.videos[0];
+    const { title, timestamp: duration, views, ago, url: videoUrl, image: thumbnail } = video;
 
-    const textPreview = `🎧 *${title}*
-📺 ${author.name}
-🕒 ${timestamp} | ${views.toLocaleString()} vistas
-🔗 ${url}`;
+    const thumb = await axios.get(thumbnail, { responseType: 'arraybuffer' }).then(res => res.data).catch(() => null);
 
-    const thumbBuffer = await (await conn.getFile(thumbnail)).data;
+    const caption = `╭─⬣「 *KilluaBot Music* 」⬣
+│ 🎵 *Título:* ${title}
+│ ⏱ *Duración:* ${duration || 'Desconocida'}
+│ 👁 *Vistas:* ${views.toLocaleString()}
+│ 📆 *Publicado:* ${ago}
+│ 🔗 *Enlace:* ${videoUrl}
+╰─⬣
 
-    // Mostrar info estilo miniatura + mensaje de preview (NO imagen abierta)
-    await conn.sendMessage(chatId, {
-      text: textPreview,
+*[🛠️] Descargando audio, por favor espere...*
+
+> ⍴᥆ᥕᥱrᥱძ ᑲᥡ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍⚡`;
+
+    const msgAd = {
       contextInfo: {
         externalAdReply: {
-          title: title,
-          body: "🎧 Resultado de búsqueda - Pikachu Bot",
-          thumbnail: thumbBuffer,
-          sourceUrl: url,
-          mediaUrl: url,
+          title: "KilluaBot 🎧",
+          body: title,
           mediaType: 1,
-          showAdAttribution: true,
+          previewType: 0,
+          thumbnail: thumb,
+          sourceUrl: videoUrl,
           renderLargerThumbnail: true
         }
-      },
-      quoted: msg
-    });
-
-    if (["play", "yta", "ytmp3"].includes(command)) {
-      const result = await ddownr.download(url, "mp3");
-
-      await conn.sendMessage(chatId, {
-        audio: { url: result.downloadUrl },
-        fileName: `${title}.mp3`,
-        mimetype: "audio/mpeg",
-        quoted: msg,
-        contextInfo: {
-          externalAdReply: {
-            title: "Pikachu-Bot",
-            body: "🎧 Tu música está lista",
-            thumbnail: thumbBuffer,
-            mediaType: 1,
-            showAdAttribution: true,
-            sourceUrl: url
-          }
-        }
-      });
-    }
-
-    if (["play2", "ytv", "ytmp4"].includes(command)) {
-      const sources = [
-        `https://api.siputzx.my.id/api/d/ytmp4?url=${url}`,
-        `https://api.zenkey.my.id/api/download/ytmp4?apikey=zenkey&url=${url}`,
-        `https://axeel.my.id/api/download/video?url=${encodeURIComponent(url)}`,
-        `https://delirius-apiofc.vercel.app/download/ytmp4?url=${url}`
-      ];
-
-      let found = false;
-
-      for (const source of sources) {
-        try {
-          const res = await fetch(source);
-          const json = await res.json();
-          const downloadUrl = json?.data?.dl || json?.result?.download?.url || json?.downloads?.url || json?.data?.download?.url;
-
-          if (downloadUrl) {
-            found = true;
-
-            await conn.sendMessage(chatId, {
-              video: { url: downloadUrl },
-              fileName: `${title}.mp4`,
-              mimetype: "video/mp4",
-              caption: "🎬 Tu video está listo.",
-              quoted: msg,
-              contextInfo: {
-                externalAdReply: {
-                  title: "Pikachu-Bot",
-                  body: "🎥 Video descargado",
-                  thumbnail: thumbBuffer,
-                  mediaType: 1,
-                  showAdAttribution: true,
-                  sourceUrl: url
-                }
-              }
-            });
-            break;
-          }
-        } catch (e) {
-          console.error(`❌ Error con ${source}:`, e.message);
-        }
       }
+    };
 
-      if (!found) {
-        return conn.sendMessage(chatId, {
-          text: "❌ No se pudo descargar el video.",
-          quoted: msg
-        });
-      }
-    }
+    await conn.sendMessage(chatId, { text: caption }, { quoted: msg, ...msgAd });
 
-  } catch (e) {
-    console.error("⚠️ Error en el comando play:", e);
-    conn.sendMessage(chatId, {
-      text: `⚠️ Ocurrió un error: ${e.message}`,
-      quoted: msg
-    });
+    const download = await getDownloadUrl(videoUrl);
+    if (!download?.url) throw new Error('No se pudo descargar la música');
+
+    await sendAudio(conn, chatId, download.url, msg);
+
+  } catch (err) {
+    console.error('[ERROR .play]', err);
+    return conn.sendMessage(chatId, {
+      text: `➤ \`UPS, ERROR\` ❌
+
+𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗋𝗈𝗅𝗂𝗍𝖺* *.𝗉𝗅𝖺𝗒1* 𝗈 *.𝗉𝗅𝖺𝗒2*
+".𝗋𝖾𝗉𝗈𝗋𝗍 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
+> El equipo lo revisará. 🚔`
+    }, { quoted: msg });
   }
 };
 
-handler.command = ["play", "play2", "yta", "ytv", "ytmp3", "ytmp4"];
-handler.tags = ["downloader"];
-handler.help = ["play <texto>", "play2 <texto>", "yta <texto>", "ytv <texto>"];
+handler.command = ['play'];
 module.exports = handler;
