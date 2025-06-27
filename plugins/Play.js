@@ -108,6 +108,9 @@ const handler = async (msg, { conn, args }) => {
 
 > ® ⍴᥆ᥕᥱrᥱძ ᑲᥡ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍⚡`;
 
+// Opción: usar un thumbnail diferente al del video para evitar duplicación
+const thumbAlternativo = fs.readFileSync('./media/thumb_default.jpg'); // 📸 Asegúrate de tener esta imagen
+
 await conn.sendMessage(chatId, {
   image: imageBuffer,
   caption: caption,
@@ -115,7 +118,7 @@ await conn.sendMessage(chatId, {
     externalAdReply: {
       title: title,
       body: 'KilluaBot 🎶',
-     thumbnail: thumb
+      thumbnail: thumbAlternativo, // ✅ Imagen diferente para que no se repita
       mediaType: 1,
       renderLargerThumbnail: true,
       sourceUrl: videoUrl
