@@ -1,20 +1,11 @@
 const yts = require('yt-search');
-const fs = require('fs');
 const axios = require('axios');
+const fs = require('fs');
 
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const MAX_RETRIES = 2;
 const TIMEOUT_MS = 10000;
 const RETRY_DELAY_MS = 12000;
-
-function isUserBlocked(userId) {
-  try {
-    const blockedUsers = JSON.parse(fs.readFileSync('./bloqueados.json', 'utf8'));
-    return blockedUsers.includes(userId);
-  } catch {
-    return false;
-  }
-}
 
 async function getDownloadUrl(videoUrl) {
   const apis = [
@@ -27,10 +18,6 @@ async function getDownloadUrl(videoUrl) {
       type: 'anh'
     },
     {
-      url: `https://api.lolhuman.xyz/api/ytaudio?apikey=TuAPIKEY&url=`,
-      type: 'lolhuman'
-    },
-    {
       url: `https://bx-team-api.up.railway.app/api/download/youtube-mp3?url=`,
       type: 'bx'
     }
@@ -39,129 +26,87 @@ async function getDownloadUrl(videoUrl) {
   for (const api of apis) {
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       try {
-        const response = await axios.get(`${api.url}${encodeURIComponent(videoUrl)}`, { timeout: TIMEOUT_MS });
+        const res = await axios.get(`${api.url}${encodeURIComponent(videoUrl)}`, { timeout: TIMEOUT_MS });
 
-        switch (api.type) {
-          case 'vreden':
-            if (response.data?.status === 200 && response.data?.result?.download?.url) {
-              return {
-                url: response.data.result.download.url.trim(),
-                title: response.data.result.metadata.title
-              };
-            }
-            break;
-          case 'anh':
-            if (response.data?.status && response.data.result?.url) {
-              return {
-                url: response.data.result.url,
-                title: response.data.result.title || 'Audio'
-              };
-            }
-            break;
-          case 'lolhuman':
-            if (response.data?.status === 200 && response.data.result?.link) {
-              return {
-                url: response.data.result.link,
-                title: response.data.result.title
-              };
-            }
-            break;
-          case 'bx':
-            if (response.data?.success && response.data?.data?.url) {
-              return {
-                url: response.data.data.url,
-                title: response.data.data.title
-              };
-            }
-            break;
+        if (api.type === 'vreden' && res.data?.result?.download?.url) {
+          return { url: res.data.result.download.url, title: res.data.result.metadata.title };
         }
+        if (api.type === 'anh' && res.data?.result?.url) {
+          return { url: res.data.result.url, title: res.data.result.title };
+        }
+        if (api.type === 'bx' && res.data?.data?.url) {
+          return { url: res.data.data.url, title: res.data.data.title };
+        }
+
       } catch {
         if (attempt < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
       }
     }
   }
-  return null;
-}
 
-async function sendAudioNormal(conn, chatId, audioUrl, quotedMsg) {
-  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    try {
-      await conn.sendMessage(chatId, {
-        audio: { url: audioUrl },
-        mimetype: 'audio/mpeg'
-      }, { quoted: quotedMsg });
-      return true;
-    } catch {
-      if (attempt < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
-    }
-  }
-  return false;
+  return null;
 }
 
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
-  const senderNum = sender.replace(/[^0-9]/g, "");
+  const text = args.join(" ").trim();
 
-  await conn.sendMessage(chatId, { react: { text: '🎶', key: msg.key } });
+  await conn.sendMessage(chatId, { react: { text: '🎧', key: msg.key } });
 
-  if (isUserBlocked(senderNum)) {
+  if (!text) {
     return conn.sendMessage(chatId, {
-      text: "🚫 Lo siento, estás en la lista de usuarios bloqueados."
+      text: `⚠️ *Uso correcto del comando:*\n\n*${global.prefix}play* Bad Bunny - Yonaguni`
     }, { quoted: msg });
   }
-
-  if (!args || !args.join(" ").trim()) {
-    return conn.sendMessage(chatId, {
-      text: `╭─⬣「 *KilluaBot* 」⬣
-│ ≡◦ 🎧 *Uso correcto del comando:*
-│ ≡◦ .play Anuel perfecto
-╰─⬣`
-    }, { quoted: msg });
-  }
-
-  const query = args.join(" ").trim();
 
   try {
-    const searchResults = await yts(query);
-    if (!searchResults?.videos?.length) throw new Error('No se encontraron resultados.');
+    const results = await yts(text);
+    const video = results.videos[0];
+    if (!video) throw 'No se encontró ningún resultado.';
 
-    const videoInfo = searchResults.videos[0];
-    const { title, timestamp: duration, url: videoUrl, image: thumbnail, views, author, ago } = videoInfo;
+    const { title, timestamp, url: videoUrl, image: thumbnail, views, ago, author } = video;
 
-    const caption = `╭──── ⬣
-│  ⚡ *KilluaBot Music* ⚡
-│  
-│  🎵 *Título:* ${title}
-│  🕒 *Duración:* ${duration || 'Desconocida'}
-│  📺 *Canal:* ${author.name}
-│  👀 *Vistas:* ${views.toLocaleString()}
-│  📅 *Publicado:* ${ago}
-│  🔗 *Link:* ${videoUrl}
-╰────⬣
-
-🎧 Descargando audio, espera un momento...`;
+    // Vista tipo tarjeta estilo Pikachu
+    const caption = `╭───⬣ 「 *𝑲𝒊𝒍𝒍𝒖𝒂𝑩𝒐𝒕 𝑴𝒖𝒔𝒊𝒄 🎧* 」
+│ 🎵 *Título:* ${title}
+│ ⏱ *Duración:* ${timestamp}
+│ 👀 *Vistas:* ${views.toLocaleString()}
+│ 📺 *Canal:* ${author.name}
+│ 📅 *Publicado:* ${ago}
+╰────────────⬣`;
 
     await conn.sendMessage(chatId, {
-      image: { url: thumbnail },
-      caption
+      text: caption,
+      contextInfo: {
+        externalAdReply: {
+          title: title,
+          body: "🎧 KilluaBot Descargas",
+          thumbnailUrl: thumbnail,
+          sourceUrl: videoUrl,
+          mediaType: 1,
+          renderLargerThumbnail: true,
+          showAdAttribution: true
+        }
+      }
     }, { quoted: msg });
 
-    const downloadData = await getDownloadUrl(videoUrl);
-    if (!downloadData?.url) throw new Error('No se pudo descargar la música.');
+    // Esperar y luego enviar audio
+    const result = await getDownloadUrl(videoUrl);
+    if (!result?.url) throw 'No se pudo descargar el audio.';
 
-    await sendAudioNormal(conn, chatId, downloadData.url, msg);
+    await conn.sendMessage(chatId, {
+      audio: { url: result.url },
+      mimetype: 'audio/mpeg'
+    }, { quoted: msg });
 
-  } catch (error) {
-    return conn.sendMessage(chatId, {
-      text: `➤ \`UPS, ERROR\` ❌
-
-𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗋𝗈𝗅𝗂𝗍𝖺* *.𝗉𝗅𝖺𝗒1* 𝗈 *.𝗉𝗅𝖺𝗒2*
-".𝗋𝖾𝗉𝗈𝗋𝗍 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
-> 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺. 🚔`
+  } catch (e) {
+    console.error(e);
+    await conn.sendMessage(chatId, {
+      text: `❌ *Ocurrió un error al procesar tu solicitud.*\n\n_Usa .play1 o .play2 si este falla._`
     }, { quoted: msg });
   }
 };
 
-handler.command = ["play"];
+handler.command = ['play'];
 module.exports = handler;
