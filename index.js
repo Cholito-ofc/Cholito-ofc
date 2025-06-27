@@ -402,79 +402,54 @@ const farewellTexts = [
 ];
 
 // BIENVENIDA: solo cuando alguien entra
-const axios = require('axios');
-
-// Función que devuelve el buffer de la imagen correcta (foto real o predeterminada)
-async function obtenerFotoBuffer(sock, participant) {
-  const predeterminada = "https://cdn.russellxz.click/d9d547b6.jpeg";
-
-  let url;
-  try {
-    url = await sock.profilePictureUrl(participant, "image");
-  } catch {
-    url = null;
-  }
-
-  // Si no hay URL o es una foto genérica, usamos la predeterminada
-  const esGenerica = !url || url.includes("dyn.web.whatsapp.com") || url.includes("mmg.whatsapp.net/d/f") || url.includes("avatar") || url.includes("default-user");
-
-  try {
-    const finalUrl = esGenerica ? predeterminada : url;
-    const res = await axios.get(finalUrl, { responseType: 'arraybuffer' });
-    return res.data;
-  } catch (e) {
-    console.log("⚠️ No se pudo obtener imagen, se usará la predeterminada.");
-    const res = await axios.get(predeterminada, { responseType: 'arraybuffer' });
-    return res.data;
-  }
-}
-
-// ========== BIENVENIDA ==========
+// BIENVENIDA
 if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
+    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
+
+    try {
+      profilePicUrl = await sock.profilePictureUrl(participant, "image");
+    } catch (err) {}
 
     let textoFinal = "";
     if (customMessage) {
       if (/(@user)/gi.test(customMessage)) {
-        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${customMessage.replace(/@user/gi, mention)}`;
+        textoFinal = `👋🏻 𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 ${customMessage.replace(/@user/gi, mention)}`;
       } else {
-        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${customMessage}`;
+        textoFinal = `👋🏻 𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 ${mention}\n\n${customMessage}`;
       }
     } else {
       let groupDesc = "";
       try {
         const metadata = await sock.groupMetadata(update.id);
-        groupDesc = metadata.desc
-          ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}`
-          : "\n\n📜 *Este grupo no tiene descripción.*";
+        groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
       } catch (err) {
         groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
       }
-      textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
+      textoFinal = `👋🏻 𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 ${mention}${groupDesc}`;
     }
-
-    const thumb = await obtenerFotoBuffer(sock, participant);
 
     await sock.sendMessage(update.id, {
       text: textoFinal,
+      mentions: [participant],
       contextInfo: {
-        mentionedJid: [participant],
         externalAdReply: {
-          title: `👤 ¡Nuevo Miembro!`,
-          body: `⚡ KilluaBot Bienvenido/a ⚡`,
-          thumbnail: thumb,
-          sourceUrl: `https://wa.me/${participant.split("@")[0]}`,
+          showAdAttribution: true,
+          title: "✨ BIENVENIDO/A AL GRUPO ✨",
+          body: "Disfruta tu estadía con nosotros",
           mediaType: 1,
-          renderLargerThumbnail: true
+          thumbnailUrl: profilePicUrl,
+          renderLargerThumbnail: true,
+          sourceUrl: "https://whatsapp.com", // Puedes cambiarlo por tu enlace
         }
       }
     });
   }
 }
 
-// ========== DESPEDIDA ==========
+// DESPEDIDA
 if (update.action === "remove" && despedidasActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
@@ -487,27 +462,34 @@ if (update.action === "remove" && despedidasActivo) {
       customBye = data[update.id];
     } catch (e) {}
 
+    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
+    try {
+      profilePicUrl = await sock.profilePictureUrl(participant, "image");
+    } catch (err) {}
+
     const defaultBye = `╔═══════════════════\n║  👋  Hasta pronto, ${mention}!\n║  Esperamos verte de nuevo en el grupo.\n╚═══════════════════`;
 
-    const byeText = customBye
-      ? /@user/gi.test(customBye)
+    let byeText = "";
+    if (customBye) {
+      byeText = /@user/gi.test(customBye)
         ? customBye.replace(/@user/gi, mention)
-        : `${mention} ${customBye}`
-      : defaultBye;
-
-    const thumb = await obtenerFotoBuffer(sock, participant);
+        : `${mention} ${customBye}`;
+    } else {
+      byeText = defaultBye;
+    }
 
     await sock.sendMessage(update.id, {
       text: byeText,
+      mentions: [participant],
       contextInfo: {
-        mentionedJid: [participant],
         externalAdReply: {
-          title: `👋 Adiós!`,
-          body: `⚡ KilluaBot despedida ⚡`,
-          thumbnail: thumb,
-          sourceUrl: `https://wa.me/${participant.split("@")[0]}`,
+          showAdAttribution: true,
+          title: "👋 DESPEDIDA",
+          body: "Un miembro ha salido del grupo",
           mediaType: 1,
-          renderLargerThumbnail: true
+          thumbnailUrl: profilePicUrl,
+          renderLargerThumbnail: true,
+          sourceUrl: "https://whatsapp.com", // Puedes cambiarlo por tu enlace
         }
       }
     });
