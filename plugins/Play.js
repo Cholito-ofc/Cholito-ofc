@@ -121,13 +121,13 @@ try {
 
 > ® ⍴᥆ᥕᥱrᥱძ ᑲᥡ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍⚡`;
 
-    await conn.sendMessage(chatId, {
-  text: caption,
+ await conn.sendMessage(chatId, {
+  image: imageBuffer,
+  caption: caption,
   contextInfo: {
     externalAdReply: {
       title: title,
       body: 'KilluaBot 🎶',
-      thumbnail: imageBuffer, // ✅ Buffer ahora es único y WhatsApp no lo cachea
       mediaType: 1,
       renderLargerThumbnail: true,
       sourceUrl: videoUrl
