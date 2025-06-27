@@ -403,7 +403,7 @@ const farewellTexts = [
 
 // BIENVENIDA: solo cuando alguien entra
 const axios = require('axios'); // Asegúrate de tener axios instalado
-const fs = require('fs'); // ✅ Declaración única para evitar errores
+const = require('fs'); // ✅ Declaración única para evitar errores
 
 if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
