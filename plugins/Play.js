@@ -109,12 +109,12 @@ const handler = async (msg, { conn, args }) => {
 > ® ⍴᥆ᥕᥱrᥱძ ᑲᥡ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍⚡`;
 
     await conn.sendMessage(chatId, {
-  image: imageBuffer,
-  caption: caption,
+  text: caption, // ✅ solo texto, sin image
   contextInfo: {
     externalAdReply: {
       title: title,
       body: 'KilluaBot 🎶',
+      thumbnail: imageBuffer,
       mediaType: 1,
       renderLargerThumbnail: true,
       sourceUrl: videoUrl
