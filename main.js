@@ -3928,8 +3928,8 @@ case 'menu': {
     const senderId = msg.participant || msg.key.participant || msg.key.remoteJid;
     const senderNumber = senderId.split('@')[0];
 
-    const ownerTag = global.owner[0][0]; // solo el número
-    const ownerMention = `${ownerTag}@s.whatsapp.net`; // mención completa
+    const ownerTag = global.owner[0][0];
+    const ownerMention = `${ownerTag}@s.whatsapp.net`;
 
     const fechaBase = new Intl.DateTimeFormat('es-ES', {
       timeZone: 'America/Mexico_City',
@@ -3945,16 +3945,16 @@ case 'menu': {
 \`\`\`${fechaActual}\`\`\`
 
 *╭━━━━━━⋆★⋆━━━━━━⬣*
-*┃* *🍃𝙺𝙸𝙻𝙻𝚄𝙰-𝙱𝙾𝚃 𝙿𝚁𝙾* 
+*┃* *🍃KILLUA-BOT PRO* 
 *┃* *🧑🏻‍💻CREADOR:* @${ownerTag}
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
-╭━━[ 𝗠𝗘𝗡𝗨́ 𝗣𝗥𝗜𝗡𝗖𝗜𝗣𝗔𝗟 📋]━⬣
+╭━━[ MENÚ PRINCIPAL 📋 ]━⬣
 ┃➜ 🚩 Prefijo Actual:『${global.prefix}』
 ┃➜ 🚩 Usa el prefijo antes de cada comando.
 
-╭━━[ 𝗜𝗡𝗙𝗢𝗥𝗠𝗔𝗖𝗜𝗢́𝗡 💻 ]━⬣
-┃➜ ${global.prefix}guía
+╭━━[ INFORMACIÓN 💻 ]━⬣
+┃➜ ${global.prefix}guia
 ┃➜ ${global.prefix}reporte
 ┃➜ ${global.prefix}info
 ┃➜ ${global.prefix}speedtest
@@ -3962,7 +3962,7 @@ case 'menu': {
 ┃➜ ${global.prefix}creador
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
-╭━━[ 𝗠𝗘𝗡𝗨́𝗦 𝗗𝗜𝗦𝗣𝗢𝗡𝗜𝗕𝗟𝗘𝗦 🗂️ ]━⬣
+╭━━[ MENÚS DISPONIBLES 🗂️ ]━⬣
 ┃➜ ${global.prefix}allmenu
 ┃➜ ${global.prefix}menugrupo
 ┃➜ ${global.prefix}menuaudio
@@ -3972,7 +3972,105 @@ case 'menu': {
 ┃➜ ${global.prefix}menufree
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
-... (tu menú continúa aquí)
+╭━━[ SISTEMA DE VENTAS 🛍️ ]━⬣
+┃➜ ${global.prefix}setstock
+┃➜ ${global.prefix}stock
+┃➜ ${global.prefix}setnetflix
+┃➜ ${global.prefix}netflix
+┃➜ ${global.prefix}setpago
+┃➜ ${global.prefix}pago
+┃➜ ${global.prefix}setcombos
+┃➜ ${global.prefix}combos
+┃➜ ${global.prefix}setreglas
+┃➜ ${global.prefix}reglas
+┃➜ ${global.prefix}sorteo
+*╰━━━━━━⋆★⋆━━━━━━⬣*
+
+╭━━[ IA & CHATBOTS 👨‍💻 ]━⬣
+┃➜ ${global.prefix}gemini
+┃➜ ${global.prefix}chatgpt
+┃➜ ${global.prefix}dalle
+┃➜ ${global.prefix}vision
+┃➜ ${global.prefix}vision2
+┃➜ ${global.prefix}simi
+┃➜ ${global.prefix}chat on/off
+┃➜ ${global.prefix}lumi on/off
+┃➜ ${global.prefix}luminai
+*╰━━━━━━⋆★⋆━━━━━━⬣*
+
+╭━━[ DESCARGAS 📥 ]━⬣
+┃➜ ${global.prefix}play
+┃➜ ${global.prefix}play1
+┃➜ ${global.prefix}play2
+┃➜ ${global.prefix}play3
+┃➜ ${global.prefix}ytmp3
+┃➜ ${global.prefix}ytmp4
+┃➜ ${global.prefix}ytmp3doc
+┃➜ ${global.prefix}ytmp4doc
+┃➜ ${global.prefix}spotify
+┃➜ ${global.prefix}mediafire
+┃➜ ${global.prefix}apk
+┃➜ ${global.prefix}tiktok
+┃➜ ${global.prefix}fb
+┃➜ ${global.prefix}ig
+*╰━━━━━━⋆★⋆━━━━━━⬣*
+
+╭━━[ BUSCADORES 🔍 ]━⬣
+┃➜ ${global.prefix}pixai
+┃➜ ${global.prefix}yts
+┃➜ ${global.prefix}tiktoksearch
+┃➜ ${global.prefix}tiktokstalk
+*╰━━━━━━⋆★⋆━━━━━━⬣*
+
+╭━━[ CONVERTIDORES 🧰 ]━⬣
+┃➜ ${global.prefix}tomp3
+┃➜ ${global.prefix}tovideo
+┃➜ ${global.prefix}toimg
+┃➜ ${global.prefix}tts
+┃➜ ${global.prefix}gifvideo
+┃➜ ${global.prefix}ff
+┃➜ ${global.prefix}ff2
+*╰━━━━━━⋆★⋆━━━━━━⬣*
+
+╭━━[ STICKERS 🧩 ]━⬣
+┃➜ ${global.prefix}s
+┃➜ ${global.prefix}newpack
+┃➜ ${global.prefix}addsticker
+┃➜ ${global.prefix}listapacks
+┃➜ ${global.prefix}sendpack
+┃➜ ${global.prefix}texto
+┃➜ ${global.prefix}qc
+┃➜ ${global.prefix}qc2
+*╰━━━━━━⋆★⋆━━━━━━⬣*
+
+╭━━[ HERRAMIENTAS 🛠️ ]━⬣
+┃➜ ${global.prefix}ver
+┃➜ ${global.prefix}tourl
+┃➜ ${global.prefix}whatmusic
+┃➜ ${global.prefix}perfil
+┃➜ ${global.prefix}carga
+┃➜ ${global.prefix}get
+┃➜ ${global.prefix}addco
+┃➜ ${global.prefix}delco
+*╰━━━━━━⋆★⋆━━━━━━⬣*
+
+╭━━[ MINI JUEGOS 🎮 ]━⬣
+┃➜ ${global.prefix}verdad
+┃➜ ${global.prefix}reto
+┃➜ ${global.prefix}ship
+┃➜ ${global.prefix}parejas
+┃➜ ${global.prefix}personalidad
+┃➜ ${global.prefix}menurpg
+*╰━━━━━━⋆★⋆━━━━━━⬣*
+
+╭━━[ CONTENIDO 🔞 ]━⬣
+┃➜ ${global.prefix}videoxx
+┃➜ ${global.prefix}pornololi
+┃➜ ${global.prefix}nsfwneko
+┃➜ ${global.prefix}waifu
+┃➜ ${global.prefix}neko
+┃➜ ${global.prefix}nsfwwaifu
+*╰━━━━━━⋆★⋆━━━━━━⬣*
 
 > *⍴᥆ᥕᥱrᥱძ ᑲᥡ һᥒ ᥴһ᥆ᥣ᥆*`;
 
