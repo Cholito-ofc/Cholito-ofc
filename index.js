@@ -402,47 +402,64 @@ const farewellTexts = [
 ];
 
 // BIENVENIDA: solo cuando alguien entra
-// BIENVENIDA
 if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
-    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
+    const defaultPic = "https://cdn.russellxz.click/d9d547b6.jpeg";
+    let thumbBuffer = null;
 
+    // Intentar obtener la foto de perfil
+    let profilePicUrl;
     try {
       profilePicUrl = await sock.profilePictureUrl(participant, "image");
-    } catch (err) {}
+    } catch {
+      profilePicUrl = defaultPic; // Si no tiene foto, usar predeterminada
+    }
 
+    // Descargar la imagen para usar como thumbnail
+    try {
+      const res = await axios.get(profilePicUrl || defaultPic, { responseType: 'arraybuffer' });
+      thumbBuffer = res.data;
+    } catch {
+      // En caso de cualquier fallo, usar default
+      const fallback = await axios.get(defaultPic, { responseType: 'arraybuffer' });
+      thumbBuffer = fallback.data;
+    }
+
+    // Construcción del mensaje de bienvenida
     let textoFinal = "";
     if (customMessage) {
       if (/(@user)/gi.test(customMessage)) {
-        textoFinal = `👋🏻 𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 ${customMessage.replace(/@user/gi, mention)}`;
+        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${customMessage.replace(/@user/gi, mention)}`;
       } else {
-        textoFinal = `👋🏻 𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 ${mention}\n\n${customMessage}`;
+        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${customMessage}`;
       }
     } else {
       let groupDesc = "";
       try {
         const metadata = await sock.groupMetadata(update.id);
-        groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
-      } catch (err) {
+        groupDesc = metadata.desc
+          ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}`
+          : "\n\n📜 *Este grupo no tiene descripción.*";
+      } catch {
         groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
       }
-      textoFinal = `👋🏻 𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 ${mention}${groupDesc}`;
+      textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
     }
 
+    // Enviar el mensaje estilo tarjeta
     await sock.sendMessage(update.id, {
       text: textoFinal,
       mentions: [participant],
       contextInfo: {
         externalAdReply: {
-          showAdAttribution: true,
-          title: "✨ BIENVENIDO/A AL GRUPO ✨",
-          body: "Disfruta tu estadía con nosotros",
+          title: '👋🏻 Nuevo miembro',
+          body: 'Bienvenido a la familia KilluaBot',
+          thumbnail: thumbBuffer,
           mediaType: 1,
-          thumbnailUrl: profilePicUrl,
           renderLargerThumbnail: true,
-          sourceUrl: "https://whatsapp.com", // Puedes cambiarlo por tu enlace
+          sourceUrl: 'https://chat.whatsapp.com/' // opcional, o link a tu bot
         }
       }
     });
