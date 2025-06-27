@@ -404,16 +404,28 @@ const farewellTexts = [
 // BIENVENIDA: solo cuando alguien entra
 const axios = require('axios');
 
-// Función auxiliar para obtener foto de perfil o usar predeterminada
-async function obtenerFotoDePerfil(sock, participant) {
+// Función que devuelve el buffer de la imagen correcta (foto real o predeterminada)
+async function obtenerFotoBuffer(sock, participant) {
   const predeterminada = "https://cdn.russellxz.click/d9d547b6.jpeg";
+
+  let url;
   try {
-    const url = await sock.profilePictureUrl(participant, "image");
-    if (!url || url === '') return predeterminada;
-    return url;
-  } catch (err) {
-    console.log("⚠️ No se pudo obtener foto de perfil:", err.message);
-    return predeterminada;
+    url = await sock.profilePictureUrl(participant, "image");
+  } catch {
+    url = null;
+  }
+
+  // Si no hay URL o es una foto genérica, usamos la predeterminada
+  const esGenerica = !url || url.includes("dyn.web.whatsapp.com") || url.includes("mmg.whatsapp.net/d/f") || url.includes("avatar") || url.includes("default-user");
+
+  try {
+    const finalUrl = esGenerica ? predeterminada : url;
+    const res = await axios.get(finalUrl, { responseType: 'arraybuffer' });
+    return res.data;
+  } catch (e) {
+    console.log("⚠️ No se pudo obtener imagen, se usará la predeterminada.");
+    const res = await axios.get(predeterminada, { responseType: 'arraybuffer' });
+    return res.data;
   }
 }
 
@@ -422,8 +434,6 @@ if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
-
-    const profilePicUrl = await obtenerFotoDePerfil(sock, participant);
 
     let textoFinal = "";
     if (customMessage) {
@@ -445,13 +455,7 @@ if (update.action === "add" && welcomeActivo) {
       textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
     }
 
-    let thumb = null;
-    try {
-      const res = await axios.get(profilePicUrl, { responseType: 'arraybuffer' });
-      thumb = res.data;
-    } catch (e) {
-      console.log("⚠️ Error al descargar imagen de perfil:", e.message);
-    }
+    const thumb = await obtenerFotoBuffer(sock, participant);
 
     await sock.sendMessage(update.id, {
       text: textoFinal,
@@ -483,26 +487,15 @@ if (update.action === "remove" && despedidasActivo) {
       customBye = data[update.id];
     } catch (e) {}
 
-    const profilePicUrl = await obtenerFotoDePerfil(sock, participant);
-
     const defaultBye = `╔═══════════════════\n║  👋  Hasta pronto, ${mention}!\n║  Esperamos verte de nuevo en el grupo.\n╚═══════════════════`;
 
-    let byeText;
-    if (customBye) {
-      byeText = /@user/gi.test(customBye)
+    const byeText = customBye
+      ? /@user/gi.test(customBye)
         ? customBye.replace(/@user/gi, mention)
-        : `${mention} ${customBye}`;
-    } else {
-      byeText = defaultBye;
-    }
+        : `${mention} ${customBye}`
+      : defaultBye;
 
-    let thumb = null;
-    try {
-      const res = await axios.get(profilePicUrl, { responseType: 'arraybuffer' });
-      thumb = res.data;
-    } catch (e) {
-      console.log("⚠️ Error al descargar imagen de perfil:", e.message);
-    }
+    const thumb = await obtenerFotoBuffer(sock, participant);
 
     await sock.sendMessage(update.id, {
       text: byeText,
