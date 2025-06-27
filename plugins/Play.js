@@ -108,22 +108,15 @@ const handler = async (msg, { conn, args }) => {
     const video = search.videos[0];
     const { title, timestamp: duration, views, ago, url: videoUrl, image: thumbnail } = video;
 
-    // Enviar mensaje con preview y portada personalizada
-    const fakeAdMessage = {
-      text: `🎵 Descargando tu canción...`,
-      contextInfo: {
-        externalAdReply: {
-          title: `🎶 ${title}`,
-          body: `🕒 Duración: ${duration} | 👁️ ${views} vistas`,
-          thumbnailUrl: thumbnail,
-          mediaType: 1,
-          renderLargerThumbnail: true,
-          sourceUrl: videoUrl
-        }
-      }
-    };
+    const infoText = `╭─⬣「 *KilluaBot Músic* 」⬣
+│ 🎵 *Título:* ${title}
+│ ⏱️ *Duración:* ${duration}
+│ 🔗 *URL:* ${videoUrl}
+╰─⬣
 
-    await conn.sendMessage(chatId, fakeAdMessage, { quoted: msg });
+[🔧] Descargando audio espere...`;
+
+    await conn.sendMessage(chatId, { text: infoText }, { quoted: msg });
 
     const download = await getDownloadUrl(videoUrl);
     if (!download?.url) throw new Error('No se pudo descargar la música');
