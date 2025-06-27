@@ -116,13 +116,12 @@ const handler = async (msg, { conn, args }) => {
 
 [🔧] Descargando audio espere...`;
 
-    // Enviar imagen NO interactiva (no se puede abrir ni tiene link)
+    // Enviar la portada como DOCUMENTO para evitar clics o redirección
     await conn.sendMessage(chatId, {
-      image: { url: thumbnail },
-      caption: infoText,
-      mimetype: 'image/jpeg', // evita preview expandible
-      jpegThumbnail: null,
-      contextInfo: {} // sin externalAdReply
+      document: { url: thumbnail },
+      fileName: 'killua_portada.jpg',
+      mimetype: 'image/jpeg',
+      caption: infoText
     }, { quoted: msg });
 
     const download = await getDownloadUrl(videoUrl);
