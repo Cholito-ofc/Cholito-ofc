@@ -66,19 +66,19 @@ const handler = async (msg, { conn, args, command }) => {
     const videoInfo = search.all[0];
     const { title, url, thumbnail, timestamp, views, ago, author } = videoInfo;
 
-    const info = `*🎧 Título:* ${title}
-*📺 Canal:* ${author.name}
-*📊 Vistas:* ${views.toLocaleString()}
-*⏰ Duración:* ${timestamp}
-*🕒 Publicado:* ${ago}
+    const info = `🎧 *Título:* ${title}
+📺 *Canal:* ${author.name}
+📊 *Vistas:* ${views.toLocaleString()}
+⏰ *Duración:* ${timestamp}
+🕒 *Publicado:* ${ago}
 🔗 ${url}`;
 
+    // Enviar imagen de portada con texto
     await conn.sendMessage(chatId, {
-      text: info,
+      image: { url: thumbnail },
+      caption: info,
       quoted: msg
     });
-
-    const thumb = await conn.getFile(thumbnail);
 
     if (["play", "yta", "ytmp3"].includes(command)) {
       const result = await ddownr.download(url, "mp3");
@@ -92,7 +92,7 @@ const handler = async (msg, { conn, args, command }) => {
           externalAdReply: {
             title: "Pikachu-Bot",
             body: "🎧 ¡Tu música está lista!",
-            thumbnail: thumb?.data,
+            thumbnail: await (await conn.getFile(thumbnail))?.data,
             mediaType: 1,
             showAdAttribution: true,
             sourceUrl: url
@@ -130,7 +130,7 @@ const handler = async (msg, { conn, args, command }) => {
                 externalAdReply: {
                   title: "Pikachu-Bot",
                   body: "🎥 ¡Descarga exitosa!",
-                  thumbnail: thumb?.data,
+                  thumbnail: await (await conn.getFile(thumbnail))?.data,
                   mediaType: 1,
                   showAdAttribution: true,
                   sourceUrl: url
