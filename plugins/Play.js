@@ -92,24 +92,11 @@ const handler = async (msg, { conn, args }) => {
     const videoInfo = searchResults.videos[0];
     const { title, timestamp: duration, views, ago, url: videoUrl, image: thumbnail } = videoInfo;
 
-    const axios = require('axios');
-let imageBuffer = null;
-
-try {
-  const { data } = await axios.get(thumbnail, {
-    responseType: 'arraybuffer',
-    headers: {
-      'Cache-Control': 'no-cache', // 🔁 Evita que axios use caché
-      'Pragma': 'no-cache'
-    }
-  });
-
-  // Agregamos un pequeño cambio invisible al buffer
-  const rand = Buffer.from(`${Math.random()}`); // cambia el hash aunque sea igual
-  imageBuffer = Buffer.concat([data, rand]); // fuerza un thumbnail único
-} catch (e) {
-  console.warn('⚠️ Error al descargar thumbnail:', e);
-}
+    let imageBuffer = null;
+    try {
+      const response = await axios.get(thumbnail, { responseType: 'arraybuffer' });
+      imageBuffer = Buffer.from(response.data, 'binary');
+    } catch {}
 
     const caption = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
 │  🎵 *Título:* ${title}
@@ -121,7 +108,7 @@ try {
 
 > ® ⍴᥆ᥕᥱrᥱძ ᑲᥡ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍⚡`;
 
- await conn.sendMessage(chatId, {
+    await conn.sendMessage(chatId, {
   image: imageBuffer,
   caption: caption,
   contextInfo: {
