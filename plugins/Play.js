@@ -106,10 +106,9 @@ const handler = async (msg, { conn, args }) => {
     if (!search?.videos?.length) throw new Error('No se encontraron resultados');
 
     const video = search.videos[0];
-    const { title, timestamp: duration, views, ago, url: videoUrl, image: thumbnail } = video;
+    const { title, timestamp: duration, url: videoUrl, image: thumbnail } = video;
 
-// Crear texto informativo
-const infoText = `╭┈≫「 *KilluaBot Músic* 」⬣
+    const infoText = `╭┈≫「 *KilluaBot Músic* 」⬣
 ┊ 🎵 *Título:* ${title}
 ┊ ⏱️ *Duración:* ${duration}
 ┊ 🔗 *URL:* ${videoUrl}
@@ -117,20 +116,14 @@ const infoText = `╭┈≫「 *KilluaBot Músic* 」⬣
 
 [🔧] Descargando audio espere...`;
 
-// Enviar mensaje sin imagen adjunta, solo con vista previa de link
-await conn.sendMessage(chatId, {
-  text: infoText,
-  contextInfo: {
-    externalAdReply: {
-      title: `🎶 ${title}`,
-      body: `⚡ KilluaBot Músic ⚡`,
-      mediaType: 1,
-      renderLargerThumbnail: true,
-      thumbnailUrl: thumbnail,
-      sourceUrl: videoUrl
-    }
-  }
-}, { quoted: msg });
+    // Enviar imagen NO interactiva (no se puede abrir ni tiene link)
+    await conn.sendMessage(chatId, {
+      image: { url: thumbnail },
+      caption: infoText,
+      mimetype: 'image/jpeg', // evita preview expandible
+      jpegThumbnail: null,
+      contextInfo: {} // sin externalAdReply
+    }, { quoted: msg });
 
     const download = await getDownloadUrl(videoUrl);
     if (!download?.url) throw new Error('No se pudo descargar la música');
