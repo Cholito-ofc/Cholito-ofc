@@ -404,77 +404,47 @@ const farewellTexts = [
 // BIENVENIDA: solo cuando alguien entra
 if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
-    const mentionId = participant; // Ej: 52123456789@s.whatsapp.net
-    const mentionTag = `@${participant.split("@")[0]}`;
+    const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
-    const defaultPic = "https://cdn.russellxz.click/d9d547b6.jpeg";
-    let thumbBuffer;
-
-    // Verificamos si tiene foto de perfil o no
-    let profilePicUrl = defaultPic;
+    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
     try {
-      const url = await sock.profilePictureUrl(participant, "image");
-      if (url && url !== "") {
-        profilePicUrl = url;
-      }
-    } catch {
-      profilePicUrl = defaultPic;
-    }
+      profilePicUrl = await sock.profilePictureUrl(participant, "image");
+    } catch (err) {}
 
-    // Descargar imagen como buffer para usar en externalAdReply
-    try {
-      const res = await axios.get(profilePicUrl, { responseType: 'arraybuffer' });
-      thumbBuffer = res.data;
-    } catch {
-      const fallback = await axios.get(defaultPic, { responseType: 'arraybuffer' });
-      thumbBuffer = fallback.data;
-    }
-
-    // Construcción del texto de bienvenida
     let textoFinal = "";
     if (customMessage) {
-      if (/@user/gi.test(customMessage)) {
-        textoFinal = `👋🏻 Bienvenido/a ${customMessage.replace(/@user/gi, mentionTag)}`;
+      // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio, siempre con manito y salto de línea
+      if (/(@user)/gi.test(customMessage)) {
+        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${customMessage.replace(/@user/gi, mention)}`;
       } else {
-        textoFinal = `👋🏻 Bienvenido/a ${mentionTag}\n\n${customMessage}`;
+        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${customMessage}`;
       }
     } else {
+      // Si no hay mensaje personalizado, solo manda la descripción del grupo
       let groupDesc = "";
       try {
         const metadata = await sock.groupMetadata(update.id);
-        groupDesc = metadata.desc
-          ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}`
-          : "\n\n📜 *Este grupo no tiene descripción.*";
-      } catch {
+        groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
+      } catch (err) {
         groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
       }
-      textoFinal = `👋🏻 Bienvenido/a ${mentionTag}${groupDesc}`;
+      textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
     }
 
-    // Enviar mensaje con externalAdReply + mención funcional
     await sock.sendMessage(update.id, {
-      text: textoFinal,
-      mentions: [mentionId],
-      contextInfo: {
-        externalAdReply: {
-          title: '✨ ¡Nuevo integrante!',
-          body: 'KilluaBot te da la bienvenida',
-          thumbnail: thumbBuffer,
-          mediaType: 1,
-          renderLargerThumbnail: true,
-          sourceUrl: 'https://chat.whatsapp.com/' // Opcional, o link personalizado
-        }
-      }
+      image: { url: profilePicUrl },
+      caption: textoFinal,
+      mentions: [participant] // SIEMPRE etiqueta al usuario
     });
   }
 }
 
-// DESPEDIDA
+// DESPEDIDA: solo cuando alguien sale
 if (update.action === "remove" && despedidasActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
+    // Carga el mensaje personalizado desde el archivo byemsgs.json
     let customBye = "";
-
     try {
       const data = fs.existsSync("./byemsgs.json")
         ? JSON.parse(fs.readFileSync("./byemsgs.json", "utf-8"))
@@ -487,10 +457,13 @@ if (update.action === "remove" && despedidasActivo) {
       profilePicUrl = await sock.profilePictureUrl(participant, "image");
     } catch (err) {}
 
+    // Mensaje predeterminado con cuadritos
     const defaultBye = `╔═══════════════════\n║  👋  Hasta pronto, ${mention}!\n║  Esperamos verte de nuevo en el grupo.\n╚═══════════════════`;
 
-    let byeText = "";
+    // Usa el personalizado si existe, si no el predeterminado
+    let byeText;
     if (customBye) {
+      // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio
       byeText = /@user/gi.test(customBye)
         ? customBye.replace(/@user/gi, mention)
         : `${mention} ${customBye}`;
@@ -499,19 +472,9 @@ if (update.action === "remove" && despedidasActivo) {
     }
 
     await sock.sendMessage(update.id, {
-      text: byeText,
-      mentions: [participant],
-      contextInfo: {
-        externalAdReply: {
-          showAdAttribution: true,
-          title: "👋 DESPEDIDA",
-          body: "Un miembro ha salido del grupo",
-          mediaType: 1,
-          thumbnailUrl: profilePicUrl,
-          renderLargerThumbnail: true,
-          sourceUrl: "https://whatsapp.com", // Puedes cambiarlo por tu enlace
-        }
-      }
+      image: { url: profilePicUrl },
+      caption: byeText,
+      mentions: [participant]
     });
   }
 }
