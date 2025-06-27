@@ -413,28 +413,47 @@ if (update.action === "add" && welcomeActivo) {
 
     let textoFinal = "";
     if (customMessage) {
-      // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio, siempre con manito y salto de línea
       if (/(@user)/gi.test(customMessage)) {
-        textoFinal = `𝑩𝒊𝒆𝒏𝒃𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${customMessage.replace(/@user/gi, mention)}`;
+        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${customMessage.replace(/@user/gi, mention)}`;
       } else {
-        textoFinal = `𝑩𝒊𝒆𝒏𝒃𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${customMessage}`;
+        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${customMessage}`;
       }
     } else {
-      // Si no hay mensaje personalizado, solo manda la descripción del grupo
       let groupDesc = "";
       try {
         const metadata = await sock.groupMetadata(update.id);
-        groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
+        groupDesc = metadata.desc
+          ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}`
+          : "\n\n📜 *Este grupo no tiene descripción.*";
       } catch (err) {
         groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
       }
-      textoFinal = `𝑩𝒊𝒆𝒏𝒃𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
+      textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
     }
 
+    // Descargar la imagen en buffer
+    let thumb = null;
+    try {
+      const res = await axios.get(profilePicUrl, { responseType: 'arraybuffer' });
+      thumb = res.data;
+    } catch (e) {
+      console.log("⚠️ No se pudo cargar la imagen de perfil");
+    }
+
+    // Enviar con externalAdReply
     await sock.sendMessage(update.id, {
-      image: { url: profilePicUrl },
-      caption: textoFinal,
-      mentions: [participant] // SIEMPRE etiqueta al usuario
+      text: textoFinal,
+      contextInfo: {
+        mentionedJid: [participant],
+        externalAdReply: {
+          title: `🎉 Bienvenido ${mention}`,
+          body: `⚡ KilluaBot Bienvenido/a ⚡`,
+          thumbnail: thumb,
+          sourceUrl: `https://wa.me/${participant.split("@")[0]}`, // enlace a su WhatsApp
+          mediaType: 1,
+          renderLargerThumbnail: true
+        }
+      }
     });
   }
 }
