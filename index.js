@@ -402,18 +402,19 @@ const farewellTexts = [
 ];
 
 // BIENVENIDA: solo cuando alguien entra
-const axios = require('axios');
+const axios = require('axios'); // Asegúrate de tener axios instalado
+const fs = require('fs'); // ✅ Declaración única para evitar errores
 
 if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
-    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
+    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg"; // Imagen por defecto
 
     try {
       profilePicUrl = await sock.profilePictureUrl(participant, "image");
     } catch (err) {
-      console.log("⚠️ No se pudo obtener foto de perfil");
+      console.log("⚠️ No se pudo obtener foto de perfil, usando imagen por defecto");
     }
 
     let textoFinal = "";
@@ -436,14 +437,13 @@ if (update.action === "add" && welcomeActivo) {
       textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
     }
 
-    // Imagen cuadrada 720x720 con API externa
+    // Descargar imagen directamente (sin redimensionar)
     let thumb = null;
     try {
-      const cuadradaAPI = `https://api.memegeneration.xyz/square?url=${encodeURIComponent(profilePicUrl)}&size=720`;
-      const res = await axios.get(cuadradaAPI, { responseType: 'arraybuffer' });
+      const res = await axios.get(profilePicUrl, { responseType: 'arraybuffer' });
       thumb = res.data;
     } catch (e) {
-      console.log("⚠️ Error al generar imagen cuadrada:", e.message);
+      console.log("⚠️ Error al descargar imagen:", e.message);
     }
 
     await sock.sendMessage(update.id, {
@@ -451,8 +451,8 @@ if (update.action === "add" && welcomeActivo) {
       contextInfo: {
         mentionedJid: [participant],
         externalAdReply: {
-          title: `👤 ¡Nuevo integrante!`,
-          body: `⚡ KilluaBot Bienvenido/a ⚡`,
+          title: `👤 Nuevo integrante!`,
+          body: `⚡ KilluaBot bienvenido ⚡`,
           thumbnail: thumb,
           sourceUrl: `https://wa.me/${participant.split("@")[0]}`,
           mediaType: 1,
@@ -464,15 +464,11 @@ if (update.action === "add" && welcomeActivo) {
 }
 
 // DESPEDIDA: solo cuando alguien sale
-const fs = require("fs");
-const axios = require("axios");
-
 if (update.action === "remove" && despedidasActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
+    // Carga el mensaje personalizado desde el archivo byemsgs.json
     let customBye = "";
-
-    // Leer mensaje personalizado
     try {
       const data = fs.existsSync("./byemsgs.json")
         ? JSON.parse(fs.readFileSync("./byemsgs.json", "utf-8"))
@@ -480,15 +476,15 @@ if (update.action === "remove" && despedidasActivo) {
       customBye = data[update.id];
     } catch (e) {}
 
-    // Foto de perfil o imagen predeterminada
     let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
     try {
       profilePicUrl = await sock.profilePictureUrl(participant, "image");
     } catch (err) {}
 
-    // Mensaje predeterminado
+    // Mensaje predeterminado con cuadritos
     const defaultBye = `╔═══════════════════\n║  👋  Hasta pronto, ${mention}!\n║  Esperamos verte de nuevo en el grupo.\n╚═══════════════════`;
 
+    // Usa el personalizado si existe, si no el predeterminado
     let byeText;
     if (customBye) {
       byeText = /@user/gi.test(customBye)
@@ -498,24 +494,22 @@ if (update.action === "remove" && despedidasActivo) {
       byeText = defaultBye;
     }
 
-    // Obtener imagen cuadrada por API
+    // Descargar imagen para miniatura
     let thumb = null;
     try {
-      const cuadradaAPI = `https://api.memegeneration.xyz/square?url=${encodeURIComponent(profilePicUrl)}&size=720`;
-      const res = await axios.get(cuadradaAPI, { responseType: "arraybuffer" });
+      const res = await axios.get(profilePicUrl, { responseType: 'arraybuffer' });
       thumb = res.data;
     } catch (e) {
-      console.log("⚠️ Error al generar imagen cuadrada:", e.message);
+      console.log("⚠️ Error al descargar imagen:", e.message);
     }
 
-    // Enviar mensaje con tarjeta tipo KilluaBot
     await sock.sendMessage(update.id, {
       text: byeText,
       contextInfo: {
         mentionedJid: [participant],
         externalAdReply: {
-          title: `❌ Usuario salió del grupo`,
-          body: `⚡ KilluaBot  ⚡`,
+          title: `👋 Adiós!`,
+          body: `⚡ KilluaBot despedida ⚡`,
           thumbnail: thumb,
           sourceUrl: `https://wa.me/${participant.split("@")[0]}`,
           mediaType: 1,
