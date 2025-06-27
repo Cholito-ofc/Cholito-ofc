@@ -403,13 +403,13 @@ const farewellTexts = [
 
 // BIENVENIDA: solo cuando alguien entra
 const axios = require('axios'); // Asegúrate de tener axios instalado
-const fs = require('fs'); // ✅ Declaración única para evitar errores
+const fs = require('fs'); // ✅ Declaración única
 
 if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
-    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg"; // Imagen por defecto
+    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
 
     try {
       profilePicUrl = await sock.profilePictureUrl(participant, "image");
@@ -437,7 +437,6 @@ if (update.action === "add" && welcomeActivo) {
       textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
     }
 
-    // Descargar imagen directamente (sin redimensionar)
     let thumb = null;
     try {
       const res = await axios.get(profilePicUrl, { responseType: 'arraybuffer' });
@@ -463,11 +462,9 @@ if (update.action === "add" && welcomeActivo) {
   }
 }
 
-// DESPEDIDA: solo cuando alguien sale
 if (update.action === "remove" && despedidasActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
-    // Carga el mensaje personalizado desde el archivo byemsgs.json
     let customBye = "";
     try {
       const data = fs.existsSync("./byemsgs.json")
@@ -481,10 +478,8 @@ if (update.action === "remove" && despedidasActivo) {
       profilePicUrl = await sock.profilePictureUrl(participant, "image");
     } catch (err) {}
 
-    // Mensaje predeterminado con cuadritos
     const defaultBye = `╔═══════════════════\n║  👋  Hasta pronto, ${mention}!\n║  Esperamos verte de nuevo en el grupo.\n╚═══════════════════`;
 
-    // Usa el personalizado si existe, si no el predeterminado
     let byeText;
     if (customBye) {
       byeText = /@user/gi.test(customBye)
@@ -494,7 +489,6 @@ if (update.action === "remove" && despedidasActivo) {
       byeText = defaultBye;
     }
 
-    // Descargar imagen para miniatura
     let thumb = null;
     try {
       const res = await axios.get(profilePicUrl, { responseType: 'arraybuffer' });
