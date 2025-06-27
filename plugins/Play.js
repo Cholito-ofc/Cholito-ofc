@@ -1,7 +1,6 @@
 const yts = require('yt-search');
 const fs = require('fs');
 const axios = require('axios');
-const Jimp = require('jimp'); // npm i jimp
 
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const MAX_RETRIES = 2;
@@ -128,29 +127,23 @@ const handler = async (msg, { conn, args }) => {
     if (!searchResults?.videos?.length) throw new Error('No se encontraron resultados.');
 
     const videoInfo = searchResults.videos[0];
-    const { title, timestamp: duration, url: videoUrl, image: thumbnail } = videoInfo;
+    const { title, timestamp: duration, url: videoUrl, image: thumbnail, views, author, ago } = videoInfo;
 
-    // Procesar imagen y agregar marca de agua
-    const imagePath = './temp_thumbnail.jpg';
-    const img = await Jimp.read(thumbnail);
-    const font = await Jimp.loadFont(Jimp.FONT_SANS_32_WHITE);
-    img.print(font, 10, img.getHeight() - 50, {
-      text: 'Killua-Bot 🎧',
-      alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
-      alignmentY: Jimp.VERTICAL_ALIGN_BOTTOM
-    }, img.getWidth() - 20, 40);
-    await img.writeAsync(imagePath);
-
-    const caption = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
+    const caption = `╭──── ⬣
+│  ⚡ *KilluaBot Music* ⚡
+│  
 │  🎵 *Título:* ${title}
-│  ⏱ *Duración:* ${duration || 'Desconocida'}
-│  🔗 *URL:* ${videoUrl}
-╰─⬣
+│  🕒 *Duración:* ${duration || 'Desconocida'}
+│  📺 *Canal:* ${author.name}
+│  👀 *Vistas:* ${views.toLocaleString()}
+│  📅 *Publicado:* ${ago}
+│  🔗 *Link:* ${videoUrl}
+╰────⬣
 
-*[🛠️] 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈 𝖾𝗌𝗉𝖾𝗋𝖾...*`;
+🎧 Descargando audio, espera un momento...`;
 
     await conn.sendMessage(chatId, {
-      image: fs.readFileSync(imagePath),
+      image: { url: thumbnail },
       caption
     }, { quoted: msg });
 
