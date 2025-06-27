@@ -403,19 +403,28 @@ const farewellTexts = [
 
 // BIENVENIDA: solo cuando alguien entra
 const axios = require('axios');
+const fs = require('fs');
+
+// Función auxiliar para obtener foto de perfil o usar predeterminada
+async function obtenerFotoDePerfil(sock, participant) {
+  const predeterminada = "https://cdn.russellxz.click/d9d547b6.jpeg";
+  try {
+    const url = await sock.profilePictureUrl(participant, "image");
+    if (!url || url === '') return predeterminada;
+    return url;
+  } catch (err) {
+    console.log("⚠️ No se pudo obtener foto de perfil:", err.message);
+    return predeterminada;
+  }
+}
 
 // ========== BIENVENIDA ==========
 if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
-    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
 
-    try {
-      profilePicUrl = await sock.profilePictureUrl(participant, "image");
-    } catch (err) {
-      console.log("⚠️ No se pudo obtener foto de perfil");
-    }
+    const profilePicUrl = await obtenerFotoDePerfil(sock, participant);
 
     let textoFinal = "";
     if (customMessage) {
@@ -475,10 +484,7 @@ if (update.action === "remove" && despedidasActivo) {
       customBye = data[update.id];
     } catch (e) {}
 
-    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
-    try {
-      profilePicUrl = await sock.profilePictureUrl(participant, "image");
-    } catch (err) {}
+    const profilePicUrl = await obtenerFotoDePerfil(sock, participant);
 
     const defaultBye = `╔═══════════════════\n║  👋  Hasta pronto, ${mention}!\n║  Esperamos verte de nuevo en el grupo.\n╚═══════════════════`;
 
