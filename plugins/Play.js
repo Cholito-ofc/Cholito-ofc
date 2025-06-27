@@ -68,7 +68,8 @@ async function sendAudio(conn, chatId, audioUrl, quoted) {
     try {
       await conn.sendMessage(chatId, {
         audio: { url: audioUrl },
-        mimetype: 'audio/mpeg'
+        mimetype: 'audio/mpeg',
+        ptt: false
       }, { quoted });
       return true;
     } catch {
@@ -97,7 +98,7 @@ const handler = async (msg, { conn, args }) => {
       text: `╭─⬣「 *KilluaBot* 」⬣
 │ ≡◦ 🎧 *Uso correcto del comando:*
 │ ≡◦ .play Anuel - Mejor que yo
-╰─⬣\n> ⍴᥆ᥕᥱrᥱძ ᑲᥡ һᥒ ᥴһ᥆ᥣі𝗍᥆`
+╰─⬣`
     }, { quoted: msg });
   }
 
@@ -106,25 +107,31 @@ const handler = async (msg, { conn, args }) => {
     if (!search?.videos?.length) throw new Error('No se encontraron resultados');
 
     const video = search.videos[0];
-    const { title, timestamp: duration, url: videoUrl, image: thumbnail } = video;
+    const { title, timestamp: duration, url: videoUrl, image: thumbnailUrl } = video;
 
-    const thumb = await axios.get(thumbnail, { responseType: 'arraybuffer' }).then(res => res.data).catch(() => null);
+    // ✅ Descargar miniatura como buffer
+    let thumb = null;
+    try {
+      const response = await axios.get(thumbnailUrl, { responseType: 'arraybuffer' });
+      thumb = response.data;
+    } catch {
+      console.warn('⚠️ Error al descargar thumbnail');
+    }
 
+    // 🖼️ Enviar solo UNA vez la portada
     const adMessage = {
-      text: `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
-│  🎵 *Título:* ${title}
-│  ⏱ *Duración:* ${duration}
-│  🔗 *URL:* ${videoUrl}
-╰─⬣
-
-*[🛠️] 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈 𝖾𝗌𝗉𝖾𝗋𝖾...*`,
+      text: `╭─⬣「 *KilluaBot Música* 」⬣
+│ 🎵 *Título:* ${title}
+│ ⏱ *Duración:* ${duration}
+│ 🔗 *URL:* ${videoUrl}
+╰─⬣\n\n*[🛠️] Descargando audio, espere...*`,
       contextInfo: {
         externalAdReply: {
-          title: title,
+          title,
           body: 'KilluaBot 🎶',
-          thumbnail: thumb,
           mediaType: 1,
           renderLargerThumbnail: true,
+          thumbnail: thumb,
           sourceUrl: videoUrl
         }
       }
@@ -135,6 +142,7 @@ const handler = async (msg, { conn, args }) => {
     const download = await getDownloadUrl(videoUrl);
     if (!download?.url) throw new Error('No se pudo descargar la música');
 
+    // 🔊 Enviar solo el audio, sin repetir miniaturas
     await sendAudio(conn, chatId, download.url, msg);
 
   } catch (err) {
@@ -142,9 +150,8 @@ const handler = async (msg, { conn, args }) => {
     return conn.sendMessage(chatId, {
       text: `➤ \`UPS, ERROR\` ❌
 
-𝖯𝗋𝗎𝖾𝗁𝖺 𝗎𝗌𝖺𝗋 *.𝗋𝗈𝗅𝗂𝗍𝖺* *.𝗉𝗅𝖺𝗒1* 𝗈 *.𝗉𝗅𝖺𝗒2*
-".𝗋𝖾𝗉𝗈𝗋𝗍 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
-> El equipo lo revisará. 🚔`
+Prueba usar *.rolita*, *.play1* o *.play2*
+".report no funciona .play" para que el equipo lo revise.`
     }, { quoted: msg });
   }
 };
