@@ -108,15 +108,14 @@ const handler = async (msg, { conn, args }) => {
     const video = search.videos[0];
     const { title, timestamp: duration, views, ago, url: videoUrl, image: thumbnail } = video;
 
-    const thumb = await axios.get(thumbnail, { responseType: 'arraybuffer' }).then(res => res.data).catch(() => null);
-
+    // Enviar mensaje con preview y portada personalizada
     const fakeAdMessage = {
-      text: `🎧 Descargando audio...`,
+      text: `🎵 Descargando tu canción...`,
       contextInfo: {
         externalAdReply: {
-          title: title,
-          body: `KilluaBot 🎶 ${duration || ''}`,
-          thumbnail: thumb,
+          title: `🎶 ${title}`,
+          body: `🕒 Duración: ${duration} | 👁️ ${views} vistas`,
+          thumbnailUrl: thumbnail,
           mediaType: 1,
           renderLargerThumbnail: true,
           sourceUrl: videoUrl
