@@ -66,17 +66,28 @@ const handler = async (msg, { conn, args, command }) => {
     const videoInfo = search.all[0];
     const { title, url, thumbnail, timestamp, views, ago, author } = videoInfo;
 
-    const info = `🎧 *Título:* ${title}
-📺 *Canal:* ${author.name}
-📊 *Vistas:* ${views.toLocaleString()}
-⏰ *Duración:* ${timestamp}
-🕒 *Publicado:* ${ago}
+    const textPreview = `🎧 *${title}*
+📺 ${author.name}
+🕒 ${timestamp} | ${views.toLocaleString()} vistas
 🔗 ${url}`;
 
-    // Enviar imagen de portada con texto
+    const thumbBuffer = await (await conn.getFile(thumbnail)).data;
+
+    // Mostrar info estilo miniatura + mensaje de preview (NO imagen abierta)
     await conn.sendMessage(chatId, {
-      image: { url: thumbnail },
-      caption: info,
+      text: textPreview,
+      contextInfo: {
+        externalAdReply: {
+          title: title,
+          body: "🎧 Resultado de búsqueda - Pikachu Bot",
+          thumbnail: thumbBuffer,
+          sourceUrl: url,
+          mediaUrl: url,
+          mediaType: 1,
+          showAdAttribution: true,
+          renderLargerThumbnail: true
+        }
+      },
       quoted: msg
     });
 
@@ -91,8 +102,8 @@ const handler = async (msg, { conn, args, command }) => {
         contextInfo: {
           externalAdReply: {
             title: "Pikachu-Bot",
-            body: "🎧 ¡Tu música está lista!",
-            thumbnail: await (await conn.getFile(thumbnail))?.data,
+            body: "🎧 Tu música está lista",
+            thumbnail: thumbBuffer,
             mediaType: 1,
             showAdAttribution: true,
             sourceUrl: url
@@ -129,8 +140,8 @@ const handler = async (msg, { conn, args, command }) => {
               contextInfo: {
                 externalAdReply: {
                   title: "Pikachu-Bot",
-                  body: "🎥 ¡Descarga exitosa!",
-                  thumbnail: await (await conn.getFile(thumbnail))?.data,
+                  body: "🎥 Video descargado",
+                  thumbnail: thumbBuffer,
                   mediaType: 1,
                   showAdAttribution: true,
                   sourceUrl: url
