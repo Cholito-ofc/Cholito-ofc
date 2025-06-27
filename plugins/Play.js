@@ -83,16 +83,6 @@ const handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
-      contextInfo: {
-        externalAdReply: {
-          title: title,
-          body: 'KilluaBot 🎶'
-          renderLargerThumbnail: true,
-          sourceUrl: videoUrl
-        }
-      }
-    };
-
   const query = args.join(" ").trim();
 
   try {
@@ -117,6 +107,14 @@ const handler = async (msg, { conn, args }) => {
 *[🛠️] 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈 𝖾𝗌𝗉𝖾𝗋𝖾...*
 
 > ® ⍴᥆ᥕᥱrᥱძ ᑲᥡ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍⚡`;
+
+    contextInfo: {
+        externalAdReply: {
+          title: title,
+          body: 'KilluaBot 🎶'
+        }
+      }
+    };
 
     await conn.sendMessage(chatId, {
       image: imageBuffer,
