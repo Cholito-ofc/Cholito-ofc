@@ -402,19 +402,18 @@ const farewellTexts = [
 ];
 
 // BIENVENIDA: solo cuando alguien entra
-const axios = require('axios');
-const sharp = require('sharp'); // 👈 NUEVO: para ajustar tamaño
+const axios = require('axios'); // Asegúrate de tener axios instalado
 
 if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
-    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg"; // Imagen predeterminada
+    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg"; // Imagen por defecto
 
     try {
       profilePicUrl = await sock.profilePictureUrl(participant, "image");
     } catch (err) {
-      console.log("⚠️ No se pudo obtener foto de perfil");
+      console.log("⚠️ No se pudo obtener foto de perfil, usando imagen por defecto");
     }
 
     let textoFinal = "";
@@ -437,13 +436,13 @@ if (update.action === "add" && welcomeActivo) {
       textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
     }
 
-    // Descargar imagen y ajustar a 720x720
+    // Descargar imagen directamente (sin redimensionar)
     let thumb = null;
     try {
       const res = await axios.get(profilePicUrl, { responseType: 'arraybuffer' });
-      thumb = await sharp(res.data).resize(720, 720).toBuffer();
+      thumb = res.data;
     } catch (e) {
-      console.log("⚠️ Error al procesar imagen:", e.message);
+      console.log("⚠️ Error al descargar imagen:", e.message);
     }
 
     await sock.sendMessage(update.id, {
@@ -451,8 +450,8 @@ if (update.action === "add" && welcomeActivo) {
       contextInfo: {
         mentionedJid: [participant],
         externalAdReply: {
-          title: `🎉 ¡Bienvenido al grupo!`,
-          body: `⚡ KilluaBot Músic ⚡`,
+          title: `👤 Nuevo integrante!`,
+          body: `⚡ KilluaBot bienvenido ⚡`,
           thumbnail: thumb,
           sourceUrl: `https://wa.me/${participant.split("@")[0]}`,
           mediaType: 1,
