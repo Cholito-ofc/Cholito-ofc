@@ -115,6 +115,7 @@ const handler = async (msg, { conn, args }) => {
     externalAdReply: {
       title: title,
       body: 'KilluaBot 🎶',
+     thumbnail: imageBuffer,
       mediaType: 1,
       renderLargerThumbnail: true,
       sourceUrl: videoUrl
