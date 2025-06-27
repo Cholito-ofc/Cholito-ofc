@@ -1,9 +1,9 @@
 const yts = require('yt-search');
 const fs = require('fs');
 const axios = require('axios');
+const Jimp = require('jimp'); // Asegúrate de tener Jimp instalado con: npm i jimp
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
 const MAX_RETRIES = 2;
 const TIMEOUT_MS = 10000;
 const RETRY_DELAY_MS = 12000;
@@ -129,8 +129,7 @@ const handler = async (msg, { conn, args }) => {
       text: `╭─⬣「 *KilluaBot* 」⬣
 │ ≡◦ 🎧 *Uso correcto del comando:*
 │ ≡◦ .play Anuel perfecto
-╰─⬣
-> © ⍴᥆ᥕᥱrᥱძ ᑲᥡ һᥒ ᥴһ᥆ᥣі𝗍᥆`,
+╰─⬣`
     }, { quoted: msg });
   }
 
@@ -143,11 +142,18 @@ const handler = async (msg, { conn, args }) => {
     const videoInfo = searchResults.videos[0];
     const { title, timestamp: duration, views, ago, url: videoUrl, image: thumbnail } = videoInfo;
 
-    let imageBuffer = null;
-    try {
-      const response = await axios.get(thumbnail, { responseType: 'arraybuffer' });
-      imageBuffer = Buffer.from(response.data, 'binary');
-    } catch {}
+    const imagePath = './temp_thumbnail.jpg';
+
+    // Descargar imagen y agregar marca de agua
+    const img = await Jimp.read(thumbnail);
+    const font = await Jimp.loadFont(Jimp.FONT_SANS_32_WHITE);
+    img.print(font, 10, img.getHeight() - 50, {
+      text: 'Killua-Bot 🎧',
+      alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
+      alignmentY: Jimp.VERTICAL_ALIGN_BOTTOM
+    }, img.getWidth() - 20, 40);
+
+    await img.writeAsync(imagePath);
 
     const caption = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
 │  🎵 *Título:* ${title}
@@ -155,13 +161,11 @@ const handler = async (msg, { conn, args }) => {
 │  🔗 *URL:* ${videoUrl}
 ╰─⬣
 
-*[🛠️] 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈 𝖾𝗌𝗉𝖾𝗋𝖾...*
-
-> ® ⍴᥆ᥕᥱrᥱძ ᑲᥡ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍⚡`;
+*[🛠️] 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈 𝖾𝗌𝗉𝖾𝗋𝖾...*`;
 
     await conn.sendMessage(chatId, {
-      image: imageBuffer,
-      caption: caption
+      image: fs.readFileSync(imagePath),
+      caption
     }, { quoted: msg });
 
     const downloadData = await getDownloadUrl(videoUrl);
