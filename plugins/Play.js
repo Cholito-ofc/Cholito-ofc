@@ -99,7 +99,6 @@ try {
 } catch (e) {
   console.warn('⚠️ Error al descargar imagen de miniatura');
 }
-    } catch {}
 
     const caption = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
 │  🎵 *Título:* ${title}
