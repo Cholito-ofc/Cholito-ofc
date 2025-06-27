@@ -109,9 +109,19 @@ const handler = async (msg, { conn, args }) => {
 > ® ⍴᥆ᥕᥱrᥱძ ᑲᥡ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍⚡`;
 
     await conn.sendMessage(chatId, {
-      image: imageBuffer,
-      caption: caption
-    }, { quoted: msg });
+  image: imageBuffer,
+  caption: caption,
+  contextInfo: {
+    externalAdReply: {
+      title: title,                        // Título grande
+      body: 'KilluaBot 🎶',                // Subtexto
+      thumbnail: imageBuffer,              // Imagen de portada
+      mediaType: 1,
+      renderLargerThumbnail: true,
+      sourceUrl: videoUrl                  // Enlace clicable
+    }
+  }
+}, { quoted: msg });
 
     const downloadData = await getDownloadUrl(videoUrl);
     if (!downloadData || !downloadData.url) {
