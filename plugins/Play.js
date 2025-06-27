@@ -92,12 +92,23 @@ const handler = async (msg, { conn, args }) => {
     const videoInfo = searchResults.videos[0];
     const { title, timestamp: duration, views, ago, url: videoUrl, image: thumbnail } = videoInfo;
 
-    let imageBuffer = null;
+    const axios = require('axios');
+let imageBuffer = null;
+
 try {
-  const res = await axios.get(thumbnail, { responseType: 'arraybuffer' });
-  imageBuffer = Buffer.from(res.data);
+  const { data } = await axios.get(thumbnail, {
+    responseType: 'arraybuffer',
+    headers: {
+      'Cache-Control': 'no-cache', // 🔁 Evita que axios use caché
+      'Pragma': 'no-cache'
+    }
+  });
+
+  // Agregamos un pequeño cambio invisible al buffer
+  const rand = Buffer.from(`${Math.random()}`); // cambia el hash aunque sea igual
+  imageBuffer = Buffer.concat([data, rand]); // fuerza un thumbnail único
 } catch (e) {
-  console.warn('⚠️ Error al descargar imagen de miniatura');
+  console.warn('⚠️ Error al descargar thumbnail:', e);
 }
 
     const caption = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
@@ -111,12 +122,12 @@ try {
 > ® ⍴᥆ᥕᥱrᥱძ ᑲᥡ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍⚡`;
 
     await conn.sendMessage(chatId, {
-  text: caption, // 🎵 El texto con info de la canción
+  text: caption,
   contextInfo: {
     externalAdReply: {
       title: title,
       body: 'KilluaBot 🎶',
-      thumbnail: imageBuffer, // ✅ Portada única para cada canción
+      thumbnail: imageBuffer, // ✅ Buffer ahora es único y WhatsApp no lo cachea
       mediaType: 1,
       renderLargerThumbnail: true,
       sourceUrl: videoUrl
