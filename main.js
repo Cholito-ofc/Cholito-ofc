@@ -3926,28 +3926,27 @@ case 'menu': {
 
     const chatId = msg.key.remoteJid;
     const senderId = msg.participant || msg.key.participant || msg.key.remoteJid;
-
-    // Extraer solo el número, sin el @s.whatsapp.net
     const senderNumber = senderId.split('@')[0];
 
-    // Formato de fecha al estilo WhatsApp: martes, 25 de junio de 2025
-    const fechaBase = new Intl.DateTimeFormat('es-ES', {
-  timeZone: 'America/Mexico_City',
-  weekday: 'long',
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric'
-}).format(new Date());
+    const ownerTag = global.owner[0][0]; // solo el número
+    const ownerMention = `${ownerTag}@s.whatsapp.net`; // mención completa
 
-// Capitalizar la primera letra (ej: "martes..." → "Martes...")
-const fechaActual = fechaBase.charAt(0).toUpperCase() + fechaBase.slice(1);
+    const fechaBase = new Intl.DateTimeFormat('es-ES', {
+      timeZone: 'America/Mexico_City',
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    }).format(new Date());
+
+    const fechaActual = fechaBase.charAt(0).toUpperCase() + fechaBase.slice(1);
+
     const captionText = `*👋🏻¡Hola!* *@${senderNumber}*
 \`\`\`${fechaActual}\`\`\`
 
 *╭━━━━━━⋆★⋆━━━━━━⬣*
 *┃* *🍃𝙺𝙸𝙻𝙻𝚄𝙰-𝙱𝙾𝚃 𝙿𝚁𝙾* 
-*┃* *🧑🏻‍💻𝙲𝚁𝙴𝙰𝙳𝙾𝚁 ⬇️* 
-*┃* *🗣https://wa.link/mhya0o*
+*┃* *🧑🏻‍💻CREADOR:* @${ownerTag}
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 ╭━━[ 𝗠𝗘𝗡𝗨́ 𝗣𝗥𝗜𝗡𝗖𝗜𝗣𝗔𝗟 📋]━⬣
@@ -3955,123 +3954,25 @@ const fechaActual = fechaBase.charAt(0).toUpperCase() + fechaBase.slice(1);
 ┃➜ 🚩 Usa el prefijo antes de cada comando.
 
 ╭━━[ 𝗜𝗡𝗙𝗢𝗥𝗠𝗔𝗖𝗜𝗢́𝗡 💻 ]━⬣
-┃➜ ${global.prefix}𝗀𝗎𝗂𝖺
-┃➜ ${global.prefix}𝗋𝖾𝗉𝗈𝗋𝗍
-┃➜ ${global.prefix}𝗂𝗇𝖿𝗈
-┃➜ ${global.prefix}𝗌𝗉𝖾𝖾𝖽𝗍𝖾𝗌𝗍
-┃➜ ${global.prefix}𝗉𝗂𝗇𝗀
-┃➜ ${global.prefix}𝖼𝖗𝖾𝖺𝖽𝗈𝗋
+┃➜ ${global.prefix}guía
+┃➜ ${global.prefix}reporte
+┃➜ ${global.prefix}info
+┃➜ ${global.prefix}speedtest
+┃➜ ${global.prefix}ping
+┃➜ ${global.prefix}creador
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 ╭━━[ 𝗠𝗘𝗡𝗨́𝗦 𝗗𝗜𝗦𝗣𝗢𝗡𝗜𝗕𝗟𝗘𝗦 🗂️ ]━⬣
-┃➜ ${global.prefix}𝖺𝗅𝗅𝗆𝖾𝗇𝗎
-┃➜ ${global.prefix}𝗆𝖾𝗇𝗎𝗀𝗋𝗎𝗉𝗈
-┃➜ ${global.prefix}𝗆𝖾𝗇𝗎𝖺𝗎𝖽𝗂𝗈
-┃➜ ${global.prefix}𝗆𝖾𝗇𝗎𝗋𝗉𝗀
-┃➜ ${global.prefix}𝗂𝗇𝖿𝗈
-┃➜ ${global.prefix}𝗆𝖾𝗇𝗎𝗈𝗐𝗇𝖾𝗋
-┃➜ ${global.prefix}𝗆𝖾𝗇𝗎𝖿𝗋𝖾𝖾
+┃➜ ${global.prefix}allmenu
+┃➜ ${global.prefix}menugrupo
+┃➜ ${global.prefix}menuaudio
+┃➜ ${global.prefix}menurpg
+┃➜ ${global.prefix}info
+┃➜ ${global.prefix}menuowner
+┃➜ ${global.prefix}menufree
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
-╭━━[ 𝗦𝗜𝗦𝗧𝗘𝗠𝗔 𝗗𝗘 𝗩𝗘𝗡𝗧𝗔𝗦🛍️ ]━⬣
-┃➜ ${global.prefix}𝗌𝖾𝗍𝗌𝗍𝗈𝖼𝗄
-┃➜ ${global.prefix}𝗌𝗍𝗈𝖼𝗄
-┃➜ ${global.prefix}𝗌𝖾𝗍𝗇𝖾𝗍𝖿𝗅𝗂𝗑
-┃➜ ${global.prefix}𝗇𝖾𝗍𝖿𝗅𝗂𝗑
-┃➜ ${global.prefix}𝗌𝖾𝖽𝗉𝖺𝗀𝗈
-┃➜ ${global.prefix}𝗉𝖺𝗀𝗈
-┃➜ ${global.prefix}𝗌𝖾𝗍𝖼𝗈𝗆𝖻𝗈𝗌
-┃➜ ${global.prefix}𝖼𝗈𝗆𝖻𝗈𝗌
-┃➜ ${global.prefix}𝗌𝖾𝗍𝗋𝖾𝗀𝗅𝖺𝗌
-┃➜ ${global.prefix}𝗋𝖾𝗀𝗅𝖺𝗌
-┃➜ ${global.prefix}𝗌𝗈𝗋𝗍𝖾𝗈
-*╰━━━━━━⋆★⋆━━━━━━⬣*
-
-╭━━[ 𝗜𝗔 & 𝗖𝗛𝗔𝗧𝗕𝗢𝗧𝗦 👨‍💻 ]━⬣
-┃➜ ${global.prefix}𝗀𝖾𝗆𝗂𝗇𝗂
-┃➜ ${global.prefix}𝖼𝗁𝖺𝗍𝗀𝗉𝗍
-┃➜ ${global.prefix}𝖽𝖺𝗅𝗅𝖾
-┃➜ ${global.prefix}𝗏𝗂𝗌𝗂𝗈𝗇
-┃➜ ${global.prefix}𝗏𝗂𝗌𝗂𝗈𝗇𝟤
-┃➜ ${global.prefix}𝗌𝗂𝗆𝗂
-┃➜ ${global.prefix}𝖼𝗁𝖺𝗍 𝗈𝗇/𝗈𝖿𝖿
-┃➜ ${global.prefix}𝗅𝗎𝗆𝗂 𝗈𝗇/𝗈𝖿𝖿
-┃➜ ${global.prefix}𝗅𝗎𝗆𝗂𝗇𝖺𝗂
-*╰━━━━━━⋆★⋆━━━━━━⬣*
-
-╭━━[ 𝗗𝗘𝗦𝗖𝗔𝗥𝗚𝗔𝗦 📥 ]━⬣
-┃➜ ${global.prefix}𝗉𝗅𝖺𝗒
-┃➜ ${global.prefix}𝗉𝗅𝖺𝗒𝟣
-┃➜ ${global.prefix}𝗉𝗅𝖺𝗒𝟤
-┃➜ ${global.prefix}𝗉𝗅𝖺𝗒𝟥
-┃➜ ${global.prefix}𝗒𝗍𝗆𝗉𝟥
-┃➜ ${global.prefix}𝗒𝗍𝗆𝗉𝟦
-┃➜ ${global.prefix}𝗒𝗍𝗆𝗉𝟥𝖽𝗈𝖼
-┃➜ ${global.prefix}𝗒𝗍𝗆𝗉𝟦𝖽𝗈𝖼
-┃➜ ${global.prefix}𝗌𝗉𝗈𝗍𝗂𝖿𝗒
-┃➜ ${global.prefix}𝗆𝖾𝖽𝗂𝖺𝖿𝗂𝗋𝖾
-┃➜ ${global.prefix}𝖺𝗉𝗄
-┃➜ ${global.prefix}𝗍𝗂𝗄𝗍𝗈𝗄
-┃➜ ${global.prefix}𝖿𝖻
-┃➜ ${global.prefix}𝗂𝗀
-*╰━━━━━━⋆★⋆━━━━━━⬣*
-
-╭━━[ 𝗕𝗨𝗦𝗖𝗔𝗗𝗢𝗥𝗘𝗦 🔍 ]━⬣
-┃➜ ${global.prefix}𝗉𝗂𝗑𝖺𝗂
-┃➜ ${global.prefix}𝗒𝗍𝗌
-┃➜ ${global.prefix}𝗍𝗂𝗄𝗍𝗈𝗄𝗌𝖾𝖺𝗋𝖼𝗁
-┃➜ ${global.prefix}𝗍𝗂𝗄𝗍𝗈𝗄𝗌𝗍𝖺𝗅𝗄
-*╰━━━━━━⋆★⋆━━━━━━⬣*
-
-╭━━[ 𝗖𝗢𝗠𝗕𝗘𝗥𝗧𝗜𝗗𝗢𝗥𝗘𝗦 🧰 ]━⬣
-┃➜ ${global.prefix}𝗍𝗈𝗆𝗉𝟥
-┃➜ ${global.prefix}𝗍𝗈𝗏𝗂𝖽𝖾𝗈
-┃➜ ${global.prefix}𝗍𝗈𝗂𝗆𝗀
-┃➜ ${global.prefix}𝗍𝗍𝗌
-┃➜ ${global.prefix}𝗀𝗂𝖿𝗏𝗂𝖽𝖾𝗈
-┃➜ ${global.prefix}𝖿𝖿
-┃➜ ${global.prefix}𝖿𝖿𝟤
-*╰━━━━━━⋆★⋆━━━━━━⬣*
-
-╭━━[ 𝗦𝗧𝗜𝗖𝗞𝗘𝗥𝗦 🧩 ]━⬣
-┃➜ ${global.prefix}𝗌
-┃➜ ${global.prefix}𝗇𝖾𝗐𝗉𝖺𝖼𝗄
-┃➜ ${global.prefix}𝖺𝖽𝖽𝗌𝗍𝗂𝖼𝗄𝖾𝗋
-┃➜ ${global.prefix}𝗅𝗂𝗌𝗍𝖺𝗉𝖺𝖼𝗄𝗌
-┃➜ ${global.prefix}𝗌𝖾𝗇𝖽𝗉𝖺𝖼𝗄
-┃➜ ${global.prefix}𝗍𝖾𝗑𝗍𝗈
-┃➜ ${global.prefix}𝗊𝖼
-┃➜ ${global.prefix}𝗊𝖼𝟤
-*╰━━━━━━⋆★⋆━━━━━━⬣*
-
-╭━━[ 𝗛𝗘𝗥𝗥𝗔𝗠𝗜𝗘𝗡𝗧𝗔𝗦 🛠️ ]━⬣
-┃➜ ${global.prefix}𝗏𝖾𝗋
-┃➜ ${global.prefix}𝗍𝗈𝗎𝗋𝗅
-┃➜ ${global.prefix}𝗐𝗁𝖺𝗍𝗆𝗎𝗌𝗂𝖼
-┃➜ ${global.prefix}𝗉𝖾𝗋𝖿𝗂𝗅
-┃➜ ${global.prefix}𝖼𝖺𝗋𝗀𝖺
-┃➜ ${global.prefix}𝗀𝖾𝗍
-┃➜ ${global.prefix}𝖺𝖽𝖽𝖼𝗈
-┃➜ ${global.prefix}𝖽𝖾𝗅𝖼𝗈
-*╰━━━━━━⋆★⋆━━━━━━⬣*
-
-╭━━[ 𝗠𝗜𝗡𝗜 𝗝𝗨𝗘𝗚𝗢𝗦 🎮 ]━⬣
-┃➜ ${global.prefix}𝗏𝖾𝗋𝖽𝖺𝖽
-┃➜ ${global.prefix}𝗋𝖾𝗍𝗈
-┃➜ ${global.prefix}𝗌𝗁𝗂𝗉
-┃➜ ${global.prefix}𝗉𝖺𝗋𝖾𝗃𝖺𝗌
-┃➜ ${global.prefix}𝗉𝖾𝗋𝗌𝗈𝗇𝖺𝗅𝗂𝖽𝖺𝖽
-┃➜ ${global.prefix}𝗆𝖾𝗇𝗎𝗋𝗉𝗀
-*╰━━━━━━⋆★⋆━━━━━━⬣*
-
-╭━━[ 𝗖𝗢𝗡𝗧𝗘𝗡𝗜𝗗𝗢 🔞 ]━⬣
-┃➜ ${global.prefix}𝗏𝗂𝖽𝖾𝗈𝗑𝗑�
-┃➜ ${global.prefix}𝗉𝗈𝗋𝗇𝗈𝗅𝗈𝗅𝗂
-┃➜ ${global.prefix}𝗇𝗌𝖿𝗐𝗇𝖾𝗄𝗈
-┃➜ ${global.prefix}𝗐𝖺𝗂𝖿𝗎
-┃➜ ${global.prefix}𝗇𝖾𝗄𝗈
-┃➜ ${global.prefix}𝗇𝗌𝖿𝗐𝗐𝖺𝗂𝖿𝗎
-*╰━━━━━━⋆★⋆━━━━━━⬣*
+... (tu menú continúa aquí)
 
 > *⍴᥆ᥕᥱrᥱძ ᑲᥡ һᥒ ᥴһ᥆ᥣ᥆*`;
 
@@ -4080,16 +3981,16 @@ const fechaActual = fechaBase.charAt(0).toUpperCase() + fechaBase.slice(1);
       {
         image: { url: "https://cdn.russellxz.click/c0c419e3.jpeg" },
         caption: captionText,
-        mentions: [senderId]
+        mentions: [senderId, ownerMention]
       },
       msg
     );
 
   } catch (error) {
-    console.error("Error en comando menu:", error);
+    console.error("❌ Error en comando menu:", error);
     await sock.sendMessage2(
       msg.key.remoteJid,
-      "❌ *Ocurrió un error al mostrar el menú. Inténtalo de nuevo.*",
+      { text: "❌ *Ocurrió un error al mostrar el menú. Inténtalo de nuevo.*" },
       msg
     );
   }
