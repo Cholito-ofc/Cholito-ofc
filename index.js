@@ -450,8 +450,8 @@ if (update.action === "add" && welcomeActivo) {
       contextInfo: {
         mentionedJid: [participant],
         externalAdReply: {
-          title: `🎉 ¡Bienvenido al grupo!`,
-          body: `⚡ KilluaBot Músic ⚡`,
+          title: `👤 ¡Nuevo Miembro!`,
+          body: `⚡ KilluaBot Bienvenido/a ⚡`,
           thumbnail: thumb,
           sourceUrl: `https://wa.me/${participant.split("@")[0]}`,
           mediaType: 1,
