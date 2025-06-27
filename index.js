@@ -439,11 +439,10 @@ if (update.action === "add" && welcomeActivo) {
 
     let thumb = null;
     try {
-      const apiURL = `https://some-random-api.com/canvas/welcome?avatar=${encodeURIComponent(profilePicUrl)}`;
-      const res = await axios.get(apiURL, { responseType: 'arraybuffer' });
+      const res = await axios.get(profilePicUrl, { responseType: 'arraybuffer' });
       thumb = res.data;
     } catch (e) {
-      console.log("⚠️ Error al obtener imagen cuadrada:", e.message);
+      console.log("⚠️ Error al descargar imagen de perfil:", e.message);
     }
 
     await sock.sendMessage(update.id, {
@@ -468,6 +467,7 @@ if (update.action === "remove" && despedidasActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
     let customBye = "";
+
     try {
       const data = fs.existsSync("./byemsgs.json")
         ? JSON.parse(fs.readFileSync("./byemsgs.json", "utf-8"))
@@ -493,11 +493,10 @@ if (update.action === "remove" && despedidasActivo) {
 
     let thumb = null;
     try {
-      const apiURL = `https://some-random-api.com/canvas/welcome?avatar=${encodeURIComponent(profilePicUrl)}`;
-      const res = await axios.get(apiURL, { responseType: 'arraybuffer' });
+      const res = await axios.get(profilePicUrl, { responseType: 'arraybuffer' });
       thumb = res.data;
     } catch (e) {
-      console.log("⚠️ Error al obtener imagen cuadrada:", e.message);
+      console.log("⚠️ Error al descargar imagen de perfil:", e.message);
     }
 
     await sock.sendMessage(update.id, {
