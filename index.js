@@ -402,7 +402,6 @@ const farewellTexts = [
 ];
 
 // BIENVENIDA: solo cuando alguien entra
-const fs = require('fs');
 const axios = require('axios');
 
 // ========== BIENVENIDA ==========
