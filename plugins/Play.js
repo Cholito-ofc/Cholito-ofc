@@ -2,7 +2,7 @@ const yts = require('yt-search');
 const fs = require('fs');
 const axios = require('axios');
 
-const wait = (ms) => new Promise((res) => setTimeout(res, ms));
+const wait = (ms) => new Promise(res => setTimeout(res, ms));
 const MAX_RETRIES = 2;
 const TIMEOUT_MS = 10000;
 const RETRY_DELAY_MS = 12000;
@@ -110,33 +110,21 @@ const handler = async (msg, { conn, args }) => {
 
     const thumb = await axios.get(thumbnail, { responseType: 'arraybuffer' }).then(res => res.data).catch(() => null);
 
-    const caption = `╭─⬣「 *KilluaBot Music* 」⬣
-│ 🎵 *Título:* ${title}
-│ ⏱ *Duración:* ${duration || 'Desconocida'}
-│ 👁 *Vistas:* ${views.toLocaleString()}
-│ 📆 *Publicado:* ${ago}
-│ 🔗 *Enlace:* ${videoUrl}
-╰─⬣
-
-*[🛠️] Descargando audio, por favor espere...*
-
-> ⍴᥆ᥕᥱrᥱძ ᑲᥡ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍⚡`;
-
-    const msgAd = {
+    const fakeAdMessage = {
+      text: `🎧 Descargando audio...`,
       contextInfo: {
         externalAdReply: {
-          title: "KilluaBot 🎧",
-          body: title,
-          mediaType: 1,
-          previewType: 0,
+          title: title,
+          body: `KilluaBot 🎶 ${duration || ''}`,
           thumbnail: thumb,
-          sourceUrl: videoUrl,
-          renderLargerThumbnail: true
+          mediaType: 1,
+          renderLargerThumbnail: true,
+          sourceUrl: videoUrl
         }
       }
     };
 
-    await conn.sendMessage(chatId, { text: caption }, { quoted: msg, ...msgAd });
+    await conn.sendMessage(chatId, fakeAdMessage, { quoted: msg });
 
     const download = await getDownloadUrl(videoUrl);
     if (!download?.url) throw new Error('No se pudo descargar la música');
@@ -148,7 +136,7 @@ const handler = async (msg, { conn, args }) => {
     return conn.sendMessage(chatId, {
       text: `➤ \`UPS, ERROR\` ❌
 
-𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗋𝗈𝗅𝗂𝗍𝖺* *.𝗉𝗅𝖺𝗒1* 𝗈 *.𝗉𝗅𝖺𝗒2*
+𝖯𝗋𝗎𝖾𝗁𝖺 𝗎𝗌𝖺𝗋 *.𝗋𝗈𝗅𝗂𝗍𝖺* *.𝗉𝗅𝖺𝗒1* 𝗈 *.𝗉𝗅𝖺𝗒2*
 ".𝗋𝖾𝗉𝗈𝗋𝗍 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
 > El equipo lo revisará. 🚔`
     }, { quoted: msg });
