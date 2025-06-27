@@ -108,6 +108,16 @@ const handler = async (msg, { conn, args }) => {
     const video = search.videos[0];
     const { title, timestamp: duration, views, ago, url: videoUrl, image: thumbnail } = video;
 
+    // Descargar imagen en buffer para usar como thumbnail
+    let thumb = null;
+    try {
+      const res = await axios.get(thumbnail, { responseType: 'arraybuffer' });
+      thumb = res.data;
+    } catch (e) {
+      console.log('⚠️ No se pudo obtener la miniatura:', e.message);
+    }
+
+    // Texto personalizado
     const infoText = `╭─⬣「 *KilluaBot Músic* 」⬣
 │ 🎵 *Título:* ${title}
 │ ⏱️ *Duración:* ${duration}
@@ -116,7 +126,20 @@ const handler = async (msg, { conn, args }) => {
 
 [🔧] Descargando audio espere...`;
 
-    await conn.sendMessage(chatId, { text: infoText }, { quoted: msg });
+    // Enviar mensaje con imagen + info
+    await conn.sendMessage(chatId, {
+      text: infoText,
+      contextInfo: {
+        externalAdReply: {
+          title: `🎶 ${title}`,
+          body: `🕒 ${duration} | 📅 ${ago}`,
+          thumbnail: thumb,
+          mediaType: 1,
+          renderLargerThumbnail: true,
+          sourceUrl: videoUrl
+        }
+      }
+    }, { quoted: msg });
 
     const download = await getDownloadUrl(videoUrl);
     if (!download?.url) throw new Error('No se pudo descargar la música');
