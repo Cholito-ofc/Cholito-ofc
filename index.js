@@ -404,36 +404,39 @@ const farewellTexts = [
 // BIENVENIDA: solo cuando alguien entra
 if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
-    const mention = `@${participant.split("@")[0]}`;
+    const mentionId = participant; // Ej: 52123456789@s.whatsapp.net
+    const mentionTag = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
     const defaultPic = "https://cdn.russellxz.click/d9d547b6.jpeg";
-    let thumbBuffer = null;
+    let thumbBuffer;
 
-    // Intentar obtener la foto de perfil
-    let profilePicUrl;
+    // Verificamos si tiene foto de perfil o no
+    let profilePicUrl = defaultPic;
     try {
-      profilePicUrl = await sock.profilePictureUrl(participant, "image");
+      const url = await sock.profilePictureUrl(participant, "image");
+      if (url && url !== "") {
+        profilePicUrl = url;
+      }
     } catch {
-      profilePicUrl = defaultPic; // Si no tiene foto, usar predeterminada
+      profilePicUrl = defaultPic;
     }
 
-    // Descargar la imagen para usar como thumbnail
+    // Descargar imagen como buffer para usar en externalAdReply
     try {
-      const res = await axios.get(profilePicUrl || defaultPic, { responseType: 'arraybuffer' });
+      const res = await axios.get(profilePicUrl, { responseType: 'arraybuffer' });
       thumbBuffer = res.data;
     } catch {
-      // En caso de cualquier fallo, usar default
       const fallback = await axios.get(defaultPic, { responseType: 'arraybuffer' });
       thumbBuffer = fallback.data;
     }
 
-    // Construcción del mensaje de bienvenida
+    // Construcción del texto de bienvenida
     let textoFinal = "";
     if (customMessage) {
-      if (/(@user)/gi.test(customMessage)) {
-        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${customMessage.replace(/@user/gi, mention)}`;
+      if (/@user/gi.test(customMessage)) {
+        textoFinal = `👋🏻 Bienvenido/a ${customMessage.replace(/@user/gi, mentionTag)}`;
       } else {
-        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${customMessage}`;
+        textoFinal = `👋🏻 Bienvenido/a ${mentionTag}\n\n${customMessage}`;
       }
     } else {
       let groupDesc = "";
@@ -445,21 +448,21 @@ if (update.action === "add" && welcomeActivo) {
       } catch {
         groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
       }
-      textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
+      textoFinal = `👋🏻 Bienvenido/a ${mentionTag}${groupDesc}`;
     }
 
-    // Enviar el mensaje estilo tarjeta
+    // Enviar mensaje con externalAdReply + mención funcional
     await sock.sendMessage(update.id, {
       text: textoFinal,
-      mentions: [participant],
+      mentions: [mentionId],
       contextInfo: {
         externalAdReply: {
-          title: '👋🏻 Nuevo miembro',
-          body: 'Bienvenido a la familia KilluaBot',
+          title: '✨ ¡Nuevo integrante!',
+          body: 'KilluaBot te da la bienvenida',
           thumbnail: thumbBuffer,
           mediaType: 1,
           renderLargerThumbnail: true,
-          sourceUrl: 'https://chat.whatsapp.com/' // opcional, o link a tu bot
+          sourceUrl: 'https://chat.whatsapp.com/' // Opcional, o link personalizado
         }
       }
     });
