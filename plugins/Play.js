@@ -113,12 +113,11 @@ const handler = async (msg, { conn, args }) => {
   caption: caption,
   contextInfo: {
     externalAdReply: {
-      title: title,                        // Título grande
-      body: 'KilluaBot 🎶',                // Subtexto
-      thumbnail: imageBuffer,              // Imagen de portada
+      title: title,
+      body: 'KilluaBot 🎶',
       mediaType: 1,
       renderLargerThumbnail: true,
-      sourceUrl: videoUrl                  // Enlace clicable
+      sourceUrl: videoUrl
     }
   }
 }, { quoted: msg });
