@@ -1,7 +1,6 @@
 const yts = require('yt-search');
-const fs = require('fs');
 const axios = require('axios');
-const { ytdl } = require('@bochilteam/scraper'); // Opcional si quieres descargar mejor
+const fs = require('fs');
 
 module.exports = {
   name: 'play',
@@ -14,46 +13,45 @@ module.exports = {
 
     try {
       // Buscar video
-      let search = await yts(text);
-      let vid = search.videos[0];
-      if (!vid) return m.reply('❗ No se encontró ningún resultado.');
+      const search = await yts(text);
+      const video = search.videos[0];
+      if (!video) return m.reply('❗ No se encontró ningún resultado.');
 
-      let { title, timestamp, views, url, thumbnail, author } = vid;
+      const { title, url, timestamp, views, thumbnail, author } = video;
 
-      // Descargar audio
-      const { audio } = await ytdl(url);
-      const res = await axios.get(audio.download(), { responseType: 'arraybuffer' });
-
-      // Enviar imagen de preview con externalAdReply (sin URL activa)
+      // Enviar imagen con externalAdReply (sin URL clickeable)
       await conn.sendMessage(m.chat, {
         image: { url: thumbnail },
         caption: `🎵 *Título:* ${title}\n⏱️ *Duración:* ${timestamp}\n👁️ *Vistas:* ${views}\n🎙️ *Autor:* ${author.name}`,
         contextInfo: {
           externalAdReply: {
             title: '🔊 Reproduciendo audio',
-            body: `${title}`,
+            body: title,
             mediaType: 1,
             thumbnailUrl: thumbnail,
             renderLargerThumbnail: true,
             showAdAttribution: false,
-            sourceUrl: '' // ⚠️ Si dejas esto vacío no abre enlace
+            sourceUrl: '' // Así no es clickeable
           }
         }
       }, { quoted: m });
 
-      // Espera para evitar bloqueos
-      await new Promise(res => setTimeout(res, 2000));
+      // Descargar audio usando servicio externo (ejemplo con anoboy API)
+      const api = `https://aemt.me/download/yta?url=${encodeURIComponent(url)}`;
+      const res = await axios.get(api);
+      if (!res.data || !res.data.dl_url) return m.reply('❌ No se pudo descargar el audio.');
 
-      // Enviar audio como documento (puedes cambiar a audio normal si prefieres)
+      const audioData = await axios.get(res.data.dl_url, { responseType: 'arraybuffer' });
+
       await conn.sendMessage(m.chat, {
-        document: Buffer.from(res.data),
+        document: Buffer.from(audioData.data),
         fileName: `${title}.mp3`,
         mimetype: 'audio/mpeg'
       }, { quoted: m });
 
     } catch (e) {
       console.error(e);
-      m.reply('❌ Error al procesar el comando.');
+      m.reply('❌ Ocurrió un error al procesar el comando.');
     }
   }
 };
