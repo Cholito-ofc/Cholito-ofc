@@ -402,14 +402,20 @@ const farewellTexts = [
 ];
 
 // BIENVENIDA: solo cuando alguien entra
+const axios = require('axios');
+const sharp = require('sharp'); // 👈 NUEVO: para ajustar tamaño
+
 if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
-    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
+    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg"; // Imagen predeterminada
+
     try {
       profilePicUrl = await sock.profilePictureUrl(participant, "image");
-    } catch (err) {}
+    } catch (err) {
+      console.log("⚠️ No se pudo obtener foto de perfil");
+    }
 
     let textoFinal = "";
     if (customMessage) {
@@ -431,25 +437,24 @@ if (update.action === "add" && welcomeActivo) {
       textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
     }
 
-    // Descargar la imagen en buffer
+    // Descargar imagen y ajustar a 720x720
     let thumb = null;
     try {
       const res = await axios.get(profilePicUrl, { responseType: 'arraybuffer' });
-      thumb = res.data;
+      thumb = await sharp(res.data).resize(720, 720).toBuffer();
     } catch (e) {
-      console.log("⚠️ No se pudo cargar la imagen de perfil");
+      console.log("⚠️ Error al procesar imagen:", e.message);
     }
 
-    // Enviar con externalAdReply
     await sock.sendMessage(update.id, {
       text: textoFinal,
       contextInfo: {
         mentionedJid: [participant],
         externalAdReply: {
-          title: `🎉 Bienvenido ${mention}`,
-          body: `⚡ KilluaBot Bienvenido/a ⚡`,
+          title: `🎉 ¡Bienvenido al grupo!`,
+          body: `⚡ KilluaBot Músic ⚡`,
           thumbnail: thumb,
-          sourceUrl: `https://wa.me/${participant.split("@")[0]}`, // enlace a su WhatsApp
+          sourceUrl: `https://wa.me/${participant.split("@")[0]}`,
           mediaType: 1,
           renderLargerThumbnail: true
         }
