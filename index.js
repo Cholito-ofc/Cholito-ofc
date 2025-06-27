@@ -403,7 +403,6 @@ const farewellTexts = [
 
 // BIENVENIDA: solo cuando alguien entra
 const axios = require('axios');
-const fs = require('fs');
 
 // Función auxiliar para obtener foto de perfil o usar predeterminada
 async function obtenerFotoDePerfil(sock, participant) {
