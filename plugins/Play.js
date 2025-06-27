@@ -106,25 +106,17 @@ const handler = async (msg, { conn, args }) => {
     if (!search?.videos?.length) throw new Error('No se encontraron resultados');
 
     const video = search.videos[0];
-    const { title, timestamp: duration, url: videoUrl, image: thumbnail } = video;
+    const { title, timestamp: duration, views, ago, url: videoUrl, image: thumbnail } = video;
 
     const thumb = await axios.get(thumbnail, { responseType: 'arraybuffer' }).then(res => res.data).catch(() => null);
 
-    const tabla = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
-│  🎵 *Título:* ${title}
-│  ⏱ *Duración:* ${duration || 'Desconocida'}
-│  🔗 *URL:* ${videoUrl}
-╰─⬣
-
-*[🛠️] 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈 𝖾𝗌𝗉𝖾𝗋𝖾...*`;
-
-    const portada = {
-      text: tabla,
+    const fakeAdMessage = {
+      text: `🎧 Descargando audio...`,
       contextInfo: {
         externalAdReply: {
           title: title,
-          body: `🎵 ${duration || 'Desconocida'} | KilluaBot`,
-          thumbnail,
+          body: `KilluaBot 🎶 ${duration || ''}`,
+          thumbnail: thumb,
           mediaType: 1,
           renderLargerThumbnail: true,
           sourceUrl: videoUrl
@@ -132,7 +124,7 @@ const handler = async (msg, { conn, args }) => {
       }
     };
 
-    await conn.sendMessage(chatId, portada, { quoted: msg });
+    await conn.sendMessage(chatId, fakeAdMessage, { quoted: msg });
 
     const download = await getDownloadUrl(videoUrl);
     if (!download?.url) throw new Error('No se pudo descargar la música');
@@ -144,7 +136,7 @@ const handler = async (msg, { conn, args }) => {
     return conn.sendMessage(chatId, {
       text: `➤ \`UPS, ERROR\` ❌
 
-𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗋𝗈𝗅𝗂𝗍𝖺* *.𝗉𝗅𝖺𝗒1* 𝗈 *.𝗉𝗅𝖺𝗒2*
+𝖯𝗋𝗎𝖾𝗁𝖺 𝗎𝗌𝖺𝗋 *.𝗋𝗈𝗅𝗂𝗍𝖺* *.𝗉𝗅𝖺𝗒1* 𝗈 *.𝗉𝗅𝖺𝗒2*
 ".𝗋𝖾𝗉𝗈𝗋𝗍 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
 > El equipo lo revisará. 🚔`
     }, { quoted: msg });
