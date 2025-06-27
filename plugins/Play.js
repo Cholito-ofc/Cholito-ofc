@@ -93,9 +93,12 @@ const handler = async (msg, { conn, args }) => {
     const { title, timestamp: duration, views, ago, url: videoUrl, image: thumbnail } = videoInfo;
 
     let imageBuffer = null;
-    try {
-      const response = await axios.get(thumbnail, { responseType: 'arraybuffer' });
-      imageBuffer = Buffer.from(response.data, 'binary');
+try {
+  const res = await axios.get(thumbnail, { responseType: 'arraybuffer' });
+  imageBuffer = Buffer.from(res.data);
+} catch (e) {
+  console.warn('⚠️ Error al descargar imagen de miniatura');
+}
     } catch {}
 
     const caption = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
@@ -109,12 +112,12 @@ const handler = async (msg, { conn, args }) => {
 > ® ⍴᥆ᥕᥱrᥱძ ᑲᥡ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍⚡`;
 
     await conn.sendMessage(chatId, {
-  text: caption, // ✅ solo texto, sin image
+  text: caption, // 🎵 El texto con info de la canción
   contextInfo: {
     externalAdReply: {
       title: title,
       body: 'KilluaBot 🎶',
-      thumbnail: imageBuffer,
+      thumbnail: imageBuffer, // ✅ Portada única para cada canción
       mediaType: 1,
       renderLargerThumbnail: true,
       sourceUrl: videoUrl
