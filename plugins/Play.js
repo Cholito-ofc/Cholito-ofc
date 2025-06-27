@@ -98,11 +98,11 @@ const handler = async (msg, { conn, args }) => {
       imageBuffer = Buffer.from(response.data, 'binary');
     } catch {}
 
-    const caption = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
-│  🎵 *Título:* ${title}
-│  ⏱ *Duración:* ${duration || 'Desconocida'}
-│  🔗 *URL:* ${videoUrl}
-╰─⬣
+    const caption = `*╭┈≫*「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
+┊  🎵 *Título:* ${title}
+┊  ⏱ *Duración:* ${duration || 'Desconocida'}
+┊  🔗 *URL:* ${videoUrl}
+*╰┈┈┈┈┈┈┈┈┈┈┈┈┈≫*
 
 *[🛠️] 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈 𝖾𝗌𝗉𝖾𝗋𝖾...*
 
