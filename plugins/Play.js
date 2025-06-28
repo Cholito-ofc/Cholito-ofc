@@ -100,7 +100,7 @@ const handler = async (msg, { conn, text }) => {
     });
 
     } catch (error) {
-    return conn.sendMessage(chatId, {
+    return conn.sendMessage(msg.key.remoteJid, {
       text: `➤ \`UPS, ERROR\` ❌
 
 𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗉𝗅𝖺𝗒𝗉𝗋𝗈* *.𝗌𝗉𝗈𝗍𝗂𝖿𝗒* 𝗈 *.𝗋𝗈𝗅𝗂𝗍𝖺*
@@ -108,7 +108,6 @@ const handler = async (msg, { conn, text }) => {
 > 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
     }, { quoted: msg });
   }
-};
 
 handler.command = ['play'];
 module.exports = handler;
