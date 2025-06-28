@@ -1,3 +1,7 @@
+// Reacciones compatibles
+const HEARTS = ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍", "🤎"];
+const LIKES = ["👍", "👍🏻", "👍🏼", "👍🏽", "👍🏾", "👍🏿"];
+
 const axios = require("axios");
 const yts = require("yt-search");
 const fs = require("fs");
@@ -38,36 +42,31 @@ module.exports = async (msg, { conn, text }) => {
     }, { quoted: msg });
   }
 
-  const videoUrl = video.url;
-  const title = video.title;
-  const duration = video.timestamp;
-  const views = video.views.toLocaleString();
-  const author = video.author.name;
+  const { url: videoUrl, title, timestamp: duration, views, author, thumbnail } = video;
 
   const caption = `
-╔═══════════════╗
-║  *Killua-Bot*
-╚═══════════════╝
-📀 𝙄𝗻𝗳𝗼 𝗱𝗲𝗹 𝘃𝗶𝗱𝗲𝗼:
-╭───────────────╮
-├ 🎼 Título: ${title}
-├ ⏱️ Duración: ${duration}
-├ 👁️ Vistas: ${views}
-├ 👤 Autor: ${author}
-└ 🔗 Link: ${videoUrl}
-╰───────────────╯
-📥 *Opciones de Descarga:*
-┣ 👍 Audio MP3
-┣ ❤️ Video MP4
-┣ 📄 Audio (Documento)
-┗ 📁 Video (Documento)
+╭──── ∘ 𝘼𝙯𝙪𝙧𝙖 𝙐𝙡𝙩𝙧𝙖 2.0 ∘ ────╮
+│🎧 *Título:* ${title}
+│⏱️ *Duración:* ${duration}
+│👁️ *Vistas:* ${views.toLocaleString()}
+│👤 *Autor:* ${author.name}
+│🔗 *Link:* ${videoUrl}
+╰────────────────────────────╯
 
-═════════════════════
-𖥔 Azura Ultra 𖥔
-═════════════════════`.trim();
+📥 *Reacciona para descargar:*
+👍 Audio MP3
+❤️ Video MP4
+📄 Audio como Documento
+📁 Video como Documento
+
+📦 *Otras opciones:*
+🎵 ${global.prefix}play5 ${text}
+🎥 ${global.prefix}play6 ${text}
+⚠️ ${global.prefix}ff
+`.trim();
 
   const preview = await conn.sendMessage(msg.key.remoteJid, {
-    image: { url: video.thumbnail },
+    image: { url: thumbnail },
     caption
   }, { quoted: msg });
 
@@ -98,13 +97,13 @@ module.exports = async (msg, { conn, text }) => {
         if (!job) continue;
 
         try {
-          if (emoji === "👍" && !job.done.audio) {
+          if (LIKES.includes(emoji) && !job.done.audio) {
             job.done.audio = true;
             await conn.sendMessage(job.chatId, {
               text: "⏳ Descargando audio…", quoted: job.userMsg
             });
             await sendAudio(conn, job, false);
-          } else if (emoji === "❤️" && !job.done.video) {
+          } else if (HEARTS.includes(emoji) && !job.done.video) {
             job.done.video = true;
             await conn.sendMessage(job.chatId, {
               text: "⏳ Descargando vídeo…", quoted: job.userMsg
