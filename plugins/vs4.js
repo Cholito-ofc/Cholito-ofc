@@ -1,5 +1,4 @@
 let partidasVS4 = {};
-let jugadoresGlobal = new Set();
 
 let handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
@@ -61,63 +60,10 @@ let handler = async (msg, { conn, args }) => {
     chat: chatId,
     jugadores: [],
     suplentes: [],
-    originalMsgKey: tempMsg.key,
     modalidad,
-    horaMsg
+    horaMsg,
+    mensajeId: tempMsg.key.id
   };
-
-  conn.ev.on("messages.upsert", async ({ messages }) => {
-    const m = messages[0];
-    if (!m?.message?.reactionMessage) return;
-
-    const { key, text: emoji } = m.message.reactionMessage;
-    const sender = m.key.participant || m.key.remoteJid;
-    const data = partidasVS4[key.id];
-    if (!data) return;
-
-    const corazones = ['❤️', '❤', '♥', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '❤️‍🔥'];
-    const likes = ['👍', '👍🏻', '👍🏼', '👍🏽', '👍🏾', '👍🏿'];
-
-    const esTitular = data.jugadores.includes(sender);
-    const esSuplente = data.suplentes.includes(sender);
-
-    let cambio = false;
-
-    if (corazones.includes(emoji)) {
-      if (esTitular) return;
-      if (esSuplente && data.jugadores.length < 4) {
-        data.suplentes = data.suplentes.filter(s => s !== sender);
-        data.jugadores.push(sender);
-        cambio = true;
-      } else if (!esTitular && !esSuplente && data.jugadores.length < 4) {
-        data.jugadores.push(sender);
-        cambio = true;
-      }
-    }
-
-    else if (likes.includes(emoji)) {
-      if (esSuplente) return;
-      if (esTitular && data.suplentes.length < 2) {
-        data.jugadores = data.jugadores.filter(j => j !== sender);
-        data.suplentes.push(sender);
-        cambio = true;
-      } else if (!esTitular && !esSuplente && data.suplentes.length < 2) {
-        data.suplentes.push(sender);
-        cambio = true;
-      }
-    }
-
-    if (!cambio) return;
-
-    const jugadores = data.jugadores.map(u => `@${u.split('@')[0]}`);
-    const suplentes = data.suplentes.map(u => `@${u.split('@')[0]}`);
-    const nuevoTexto = generarPlantilla(jugadores, suplentes, data.modalidad, data.horaMsg);
-
-    await conn.sendMessage(data.chat, {
-      text: nuevoTexto,
-      mentions: [...data.jugadores, ...data.suplentes]
-    });
-  });
 };
 
 function generarPlantilla(jugadores, suplentes, modalidad, horaMsg) {
@@ -147,3 +93,78 @@ ${horaMsg}
 
 handler.command = ['vs4'];
 module.exports = handler;
+
+// Escucha reacciones globalmente
+const { ev } = require('../lib/baileys');
+ev.on('messages.upsert', async ({ messages }) => {
+  const m = messages[0];
+  if (!m?.message?.reactionMessage) return;
+
+  const { key, text: emoji } = m.message.reactionMessage;
+  const sender = m.key.participant || m.key.remoteJid;
+  const data = partidasVS4[key.id];
+  if (!data) return;
+
+  const corazones = ['❤️', '❤', '♥', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '❤️‍🔥'];
+  const likes = ['👍', '👍🏻', '👍🏼', '👍🏽', '👍🏾', '👍🏿'];
+
+  const esTitular = data.jugadores.includes(sender);
+  const esSuplente = data.suplentes.includes(sender);
+
+  let cambio = false;
+
+  if (corazones.includes(emoji)) {
+    if (esTitular) return;
+    if (esSuplente && data.jugadores.length < 4) {
+      data.suplentes = data.suplentes.filter(s => s !== sender);
+      data.jugadores.push(sender);
+      cambio = true;
+    } else if (!esTitular && !esSuplente && data.jugadores.length < 4) {
+      data.jugadores.push(sender);
+      cambio = true;
+    }
+  } else if (likes.includes(emoji)) {
+    if (esSuplente) return;
+    if (esTitular && data.suplentes.length < 2) {
+      data.jugadores = data.jugadores.filter(j => j !== sender);
+      data.suplentes.push(sender);
+      cambio = true;
+    } else if (!esTitular && !esSuplente && data.suplentes.length < 2) {
+      data.suplentes.push(sender);
+      cambio = true;
+    }
+  }
+
+  if (!cambio) return;
+
+  const conn = global.conn || require('../lib/baileys').conn;
+
+  const nuevoTexto = generarPlantilla(
+    data.jugadores.map(u => `@${u.split('@')[0]}`),
+    data.suplentes.map(u => `@${u.split('@')[0]}`),
+    data.modalidad,
+    data.horaMsg
+  );
+
+  // Eliminar el mensaje anterior
+  try {
+    await conn.sendMessage(data.chat, {
+      delete: {
+        remoteJid: data.chat,
+        fromMe: false,
+        id: key.id,
+        participant: sender
+      }
+    });
+  } catch (e) { }
+
+  // Enviar nuevo mensaje actualizado
+  const nuevoMsg = await conn.sendMessage(data.chat, {
+    text: nuevoTexto,
+    mentions: [...data.jugadores, ...data.suplentes]
+  });
+
+  // Actualizar el ID del nuevo mensaje
+  delete partidasVS4[key.id];
+  partidasVS4[nuevoMsg.key.id] = { ...data, mensajeId: nuevoMsg.key.id };
+});
