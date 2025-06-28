@@ -105,50 +105,27 @@ ${horaMsg}
     const emojisParticipar = ['❤️', '❤', '♥', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '❤️‍🔥']
     const emojisSuplente = ['👍', '👍🏻', '👍🏼', '👍🏽', '👍🏾', '👍🏿']
 
-    const esTitular = data.jugadores.includes(sender)
-    const esSuplente = data.suplentes.includes(sender)
+    if (jugadoresGlobal.has(sender)) return
 
-    // Suplente
-    if (emojisSuplente.includes(emoji)) {
-      if (esTitular) {
-        if (data.suplentes.length < 2) {
-          data.jugadores = data.jugadores.filter(j => j !== sender)
-          jugadoresGlobal.delete(sender)
-          data.suplentes.push(sender)
-        } else {
-          return // Suplentes llenos
-        }
-      } else if (!esSuplente) {
-        if (data.suplentes.length < 2) {
-          data.suplentes.push(sender)
-        } else {
-          return // Suplentes llenos
-        }
-      } else {
-        return // Ya es suplente
-      }
-    }
+    if (data.jugadores.includes(sender)) return
 
-    // Titular
-    else if (emojisParticipar.includes(emoji)) {
-      if (esTitular) return
-      if (esSuplente) {
-        if (data.jugadores.length < 4) {
-          data.suplentes = data.suplentes.filter(s => s !== sender)
+    if (emojisParticipar.includes(emoji)) {
+      if (data.jugadores.length < 4) {
+        let index = data.suplentes.indexOf(sender)
+        if (index !== -1) {
+          data.suplentes.splice(index, 1)
           data.jugadores.push(sender)
           jugadoresGlobal.add(sender)
         } else {
-          return // Titulares llenos
+          data.jugadores.push(sender)
+          jugadoresGlobal.add(sender)
         }
-      } else if (data.jugadores.length < 4) {
-        data.jugadores.push(sender)
-        jugadoresGlobal.add(sender)
-      } else {
-        return // Titulares llenos
       }
-    } else {
-      return // Emoji no válido
-    }
+    } else if (emojisSuplente.includes(emoji)) {
+      if (data.suplentes.length < 2 && !data.suplentes.includes(sender)) {
+        data.suplentes.push(sender)
+      }
+    } else return
 
     let jugadores = data.jugadores.map(u => `@${u.split('@')[0]}`)
     let suplentes = data.suplentes.map(u => `@${u.split('@')[0]}`)
@@ -179,4 +156,13 @@ ${data.horaMsg}
 `.trim()
 
     await conn.sendMessage(data.chat, { delete: data.originalMsgKey })
-    let newMsg = await conn.sendMessage(da
+    let newMsg = await conn.sendMessage(data.chat, { text: plantilla, mentions: [...data.jugadores, ...data.suplentes] })
+
+    partidasVS4[newMsg.key.id] = data
+    partidasVS4[newMsg.key.id].originalMsgKey = newMsg.key
+    delete partidasVS4[key.id]
+  })
+}
+
+handler.command = ['vs4']
+module.exports = handler
