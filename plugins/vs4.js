@@ -1,202 +1,157 @@
-// Reacciones compatibles
-const HEARTS = ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍", "🤎"];
-const LIKES = ["👍", "👍🏻", "👍🏼", "👍🏽", "👍🏾", "👍🏿"];
+let partidasVS4 = {};
+let jugadoresGlobal = new Set();
 
-const axios = require("axios");
-const yts = require("yt-search");
-const fs = require("fs");
-const path = require("path");
-const ffmpeg = require("fluent-ffmpeg");
-const { promisify } = require("util");
-const { pipeline } = require("stream");
-const streamPipe = promisify(pipeline);
+let handler = async (msg, { conn, args }) => {
+  const chatId = msg.key.remoteJid;
+  const sender = msg.key.participant || msg.key.remoteJid;
+  const senderNum = sender.replace(/[^0-9]/g, "");
+  const isOwner = global.owner.some(([id]) => id === senderNum);
+  const isFromMe = msg.key.fromMe;
 
-const pending = {}; // msgId => { chatId, video, userMsg, done }
+  if (!chatId.endsWith("@g.us")) {
+    return conn.sendMessage(chatId, { text: "❌ Este comando solo puede usarse en grupos." }, { quoted: msg });
+  }
 
-module.exports = async (msg, { conn, text }) => {
-  const subID = (conn.user.id || "").split(":")[0] + "@s.whatsapp.net";
-  const pref = (() => {
-    try {
-      const p = JSON.parse(fs.readFileSync("prefixes.json", "utf8"));
-      return p[subID] || ".";
-    } catch {
-      return ".";
-    }
-  })();
+  const meta = await conn.groupMetadata(chatId);
+  const isAdmin = meta.participants.find(p => p.id === sender)?.admin;
 
-  if (!text) {
-    return conn.sendMessage(msg.key.remoteJid, {
-      text: `✳️ Usa:\n${pref}playpro <término>\nEj: *${pref}playpro* bad bunny diles`,
+  if (!isAdmin && !isOwner && !isFromMe) {
+    return conn.sendMessage(chatId, { text: "❌ Solo *admins* o *el dueño del bot* pueden usar este comando." }, { quoted: msg });
+  }
+
+  const horaTexto = args[0];
+  const modalidad = args.slice(1).join(" ") || "VV2";
+  if (!horaTexto) {
+    return conn.sendMessage(chatId, {
+      text: "✳️ Usa el comando así:\n*.4vs4 [hora] [modalidad]*\nEjemplo: *.4vs4 10:00pm sala*",
     }, { quoted: msg });
   }
 
-  await conn.sendMessage(msg.key.remoteJid, {
-    react: { text: "⏳", key: msg.key }
-  });
-
-  const res = await yts(text);
-  const video = res.videos[0];
-  if (!video) {
-    return conn.sendMessage(msg.key.remoteJid, {
-      text: "❌ Sin resultados.",
-    }, { quoted: msg });
-  }
-
-  const { url: videoUrl, title, timestamp: duration, views, author, thumbnail } = video;
-
-  const caption = `
-╭──── ∘ 𝘼𝙯𝙪𝙧𝙖 𝙐𝙡𝙩𝙧𝙖 2.0 ∘ ────╮
-│🎧 *Título:* ${title}
-│⏱️ *Duración:* ${duration}
-│👁️ *Vistas:* ${views.toLocaleString()}
-│👤 *Autor:* ${author.name}
-│🔗 *Link:* ${videoUrl}
-╰────────────────────────────╯
-
-📥 *Reacciona para descargar:*
-👍 Audio MP3
-❤️ Video MP4
-📄 Audio como Documento
-📁 Video como Documento
-
-📦 *Otras opciones:*
-🎵 ${global.prefix}play5 ${text}
-🎥 ${global.prefix}play6 ${text}
-⚠️ ${global.prefix}ff
-`.trim();
-
-  const preview = await conn.sendMessage(msg.key.remoteJid, {
-    image: { url: thumbnail },
-    caption
-  }, { quoted: msg });
-
-  pending[preview.key.id] = {
-    chatId: msg.key.remoteJid,
-    video,
-    userMsg: msg,
-    done: {
-      audio: false,
-      video: false,
-      audioDoc: false,
-      videoDoc: false
-    }
+  const to24Hour = str => {
+    let [time, modifier] = str.toLowerCase().split(/(am|pm)/);
+    let [h, m] = time.split(":").map(n => parseInt(n));
+    if (modifier === 'pm' && h !== 12) h += 12;
+    if (modifier === 'am' && h === 12) h = 0;
+    return { h, m: m || 0 };
   };
 
-  await conn.sendMessage(msg.key.remoteJid, {
-    react: { text: "✅", key: msg.key }
-  });
+  const to12Hour = (h, m) => {
+    const suffix = h >= 12 ? 'pm' : 'am';
+    h = h % 12 || 12;
+    return `${h}:${m.toString().padStart(2, '0')}${suffix}`;
+  };
 
-  if (!conn._playproListener) {
-    conn._playproListener = true;
-    conn.ev.on("messages.upsert", async ev => {
-      for (const m of ev.messages) {
-        if (!m.message?.reactionMessage) continue;
+  const base = to24Hour(horaTexto);
+  const zonas = [
+    { pais: "🇲🇽 MÉXICO", offset: 0 },
+    { pais: "🇨🇴 COLOMBIA", offset: 1 }
+  ];
 
-        const { key, text: emoji } = m.message.reactionMessage;
-        const job = pending[key.id];
-        if (!job) continue;
+  const horaMsg = zonas.map(z => {
+    let newH = base.h + z.offset;
+    if (newH >= 24) newH -= 24;
+    return `┊ • ${to12Hour(newH, base.m)} ${z.pais}`;
+  }).join("\n");
 
-        try {
-          if (LIKES.includes(emoji) && !job.done.audio) {
-            job.done.audio = true;
-            await conn.sendMessage(job.chatId, {
-              text: "⏳ Descargando audio…", quoted: job.userMsg
-            });
-            await sendAudio(conn, job, false);
-          } else if (HEARTS.includes(emoji) && !job.done.video) {
-            job.done.video = true;
-            await conn.sendMessage(job.chatId, {
-              text: "⏳ Descargando vídeo…", quoted: job.userMsg
-            });
-            await sendVideo(conn, job, false);
-          } else if (emoji === "📄" && !job.done.audioDoc) {
-            job.done.audioDoc = true;
-            await conn.sendMessage(job.chatId, {
-              text: "⏳ Descargando audio (documento)…", quoted: job.userMsg
-            });
-            await sendAudio(conn, job, true);
-          } else if (emoji === "📁" && !job.done.videoDoc) {
-            job.done.videoDoc = true;
-            await conn.sendMessage(job.chatId, {
-              text: "⏳ Descargando vídeo (documento)…", quoted: job.userMsg
-            });
-            await sendVideo(conn, job, true);
-          }
+  const idPartida = Date.now().toString();
 
-          if (Object.values(job.done).every(v => v)) {
-            delete pending[key.id];
-          }
-        } catch (e) {
-          await conn.sendMessage(job.chatId, {
-            text: `❌ Error: ${e.message}`,
-            quoted: job.userMsg
-          });
-        }
+  let plantilla = genPlantilla({ modalidad, horaMsg, jugadores: [], suplentes: [] });
+
+  let tempMsg = await conn.sendMessage(chatId, { text: plantilla, mentions: [] }, { quoted: msg });
+
+  partidasVS4[tempMsg.key.id] = {
+    chat: chatId,
+    jugadores: [],
+    suplentes: [],
+    originalMsgKey: tempMsg.key,
+    modalidad,
+    horaMsg,
+    idPartida
+  };
+
+  conn.ev.on('messages.upsert', async ({ messages }) => {
+    let m = messages[0];
+    if (!m?.message?.reactionMessage) return;
+
+    let reaction = m.message.reactionMessage;
+    let key = reaction.key;
+    let emoji = reaction.text;
+    let sender = m.key.participant || m.key.remoteJid;
+
+    let data = partidasVS4[key.id];
+    if (!data) return;
+
+    const HEARTS = ['❤️', '❤', '♥', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '❤️‍🔥'];
+    const LIKES = ['👍', '👍🏻', '👍🏼', '👍🏽', '👍🏾', '👍🏿'];
+
+    const esTitular = data.jugadores.includes(sender);
+    const esSuplente = data.suplentes.includes(sender);
+
+    let cambio = false;
+
+    if (LIKES.includes(emoji)) {
+      if (esTitular && data.suplentes.length < 2) {
+        data.jugadores = data.jugadores.filter(j => j !== sender);
+        data.suplentes.push(sender);
+        jugadoresGlobal.delete(sender);
+        cambio = true;
+      } else if (!esTitular && !esSuplente && data.suplentes.length < 2) {
+        data.suplentes.push(sender);
+        cambio = true;
       }
+    } else if (HEARTS.includes(emoji)) {
+      if (esSuplente && data.jugadores.length < 4) {
+        data.suplentes = data.suplentes.filter(s => s !== sender);
+        data.jugadores.push(sender);
+        jugadoresGlobal.add(sender);
+        cambio = true;
+      } else if (!esTitular && !esSuplente && data.jugadores.length < 4) {
+        data.jugadores.push(sender);
+        jugadoresGlobal.add(sender);
+        cambio = true;
+      }
+    }
+
+    if (!cambio) return;
+
+    const jugadores = data.jugadores.map(u => `@${u.split('@')[0]}`);
+    const suplentes = data.suplentes.map(u => `@${u.split('@')[0]}`);
+
+    let nuevoTexto = genPlantilla({
+      modalidad: data.modalidad,
+      horaMsg: data.horaMsg,
+      jugadores,
+      suplentes
     });
-  }
+
+    await conn.sendMessage(data.chat, { text: nuevoTexto, mentions: [...data.jugadores, ...data.suplentes] }, { quoted: msg });
+  });
 };
 
-async function sendVideo(conn, { chatId, video, userMsg }, asDocument = false) {
-  const qList = ["720p", "480p", "360p"];
-  let url = null;
-  for (const q of qList) {
-    try {
-      const api = `https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(video.url)}&type=video&quality=${q}&apikey=russellxz`;
-      const r = await axios.get(api);
-      if (r.data?.status && r.data.data?.url) {
-        url = r.data.data.url;
-        break;
-      }
-    } catch { }
-  }
-  if (!url) throw new Error("No se pudo obtener el video");
+function genPlantilla({ modalidad, horaMsg, jugadores, suplentes }) {
+  return `
+ㅤ ㅤ4 \`𝗩𝗘𝗥𝗦𝗨𝗦\` 4
+╭─────────────╮
+┊ \`𝗠𝗢𝗗𝗢:\` \`\`\`${modalidad}\`\`\`
+┊
+┊ ⏱️ \`𝗛𝗢𝗥𝗔𝗥𝗜𝗢\`
+${horaMsg}
+┊
+┊ » \`𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔\`
+┊ 👑 ➤ ${jugadores[0] || ''}
+┊ ⚜️ ➤ ${jugadores[1] || ''}
+┊ ⚜️ ➤ ${jugadores[2] || ''}
+┊ ⚜️ ➤ ${jugadores[3] || ''}
+┊
+┊ » \`𝗦𝗨𝗣𝗟𝗘𝗡𝗧𝗘:\`
+┊ ⚜️ ➤ ${suplentes[0] || ''}
+┊ ⚜️ ➤ ${suplentes[1] || ''}
+╰─────────────╯
 
-  const tmp = path.join(__dirname, "../tmp");
-  if (!fs.existsSync(tmp)) fs.mkdirSync(tmp);
-  const file = path.join(tmp, Date.now() + "_vid.mp4");
+❤️ = Participar | 👍 = Suplente
 
-  await streamPipe((await axios.get(url, { responseType: "stream" })).data,
-    fs.createWriteStream(file));
-
-  await conn.sendMessage(chatId, {
-    [asDocument ? "document" : "video"]: fs.readFileSync(file),
-    mimetype: "video/mp4",
-    fileName: video.title + ".mp4",
-    caption: asDocument ? undefined : "🎬 Video listo."
-  }, { quoted: userMsg });
-
-  fs.unlinkSync(file);
+• Lista Activa Por 5 Minutos`.trim();
 }
 
-async function sendAudio(conn, { chatId, video, userMsg }, asDocument = false) {
-  const api = `https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(video.url)}&type=audio&quality=128kbps&apikey=russellxz`;
-  const r = await axios.get(api);
-  if (!r.data?.status || !r.data.data?.url) throw new Error("No se pudo obtener el audio");
-
-  const tmp = path.join(__dirname, "../tmp");
-  if (!fs.existsSync(tmp)) fs.mkdirSync(tmp);
-  const raw = path.join(tmp, Date.now() + "_raw.m4a");
-  const final = path.join(tmp, Date.now() + "_audio.mp3");
-
-  await streamPipe((await axios.get(r.data.data.url, { responseType: "stream" })).data,
-    fs.createWriteStream(raw));
-
-  await new Promise((ok, err) => {
-    ffmpeg(raw).audioCodec("libmp3lame").audioBitrate("128k").format("mp3")
-      .save(final).on("end", ok).on("error", err);
-  });
-
-  await conn.sendMessage(chatId, {
-    [asDocument ? "document" : "audio"]: fs.readFileSync(final),
-    mimetype: "audio/mpeg",
-    fileName: video.title + ".mp3",
-    ...(asDocument ? {} : { ptt: false }),
-    caption: asDocument ? undefined : "🎧 Audio listo."
-  }, { quoted: userMsg });
-
-  fs.unlinkSync(raw);
-  fs.unlinkSync(final);
-}
-
-module.exports.command = ["playpro"];
+module.exports = handler;
+handler.command = ["4vs4"];
