@@ -836,25 +836,25 @@ if (msg.message?.protocolMessage?.type === 0) {
 
     if (deletedData.media) {
   const mimetype = deletedData.mimetype || 'application/octet-stream';
-  const buffer = Buffer.from(deletedData.media, "base64");
-  const type = deletedData.type.replace("Message", "");
+  const buffer = Buffer.from(deletedData.media, 'base64');
+  const type = deletedData.type.replace('Message', '');
   const sendOpts = { quoted: msg };
 
   sendOpts[type] = buffer;
   sendOpts.mimetype = mimetype;
 
-  // ✅ Convertir senderNumber a número real (eliminar .lid si existe)
+  // ✅ Convertir senderNumber a número real sin ".lid"
   const userJid = senderNumber.includes('.lid') ? senderNumber.split('.')[0] : senderNumber;
   const mentionTag = [`${userJid}@s.whatsapp.net`];
 
-  if (type === "sticker") {
+  if (type === 'sticker') {
     const sent = await sock.sendMessage(chatId, sendOpts);
     await sock.sendMessage(chatId, {
       text: `📌 El sticker fue eliminado por @${userJid}`,
       mentions: mentionTag,
       quoted: sent
     });
-  } else if (type === "audio") {
+  } else if (type === 'audio') {
     const sent = await sock.sendMessage(chatId, sendOpts);
     await sock.sendMessage(chatId, {
       text: `🎧 El audio fue eliminado por @${userJid}`,
