@@ -834,49 +834,45 @@ if (msg.message?.protocolMessage?.type === 0) {
       if (isAdmin) return;
     }
 
-try {
-  if (deletedData.media) {
-    const mimetype = deletedData.mimetype || 'application/octet-stream';
-    const buffer = Buffer.from(deletedData.media, 'base64');
-    const type = deletedData.type.replace('Message', '');
-    const sendOpts = { quoted: msg };
+    if (deletedData.media) {
+      const mimetype = deletedData.mimetype || 'application/octet-stream';
+      const buffer = Buffer.from(deletedData.media, "base64");
+      const type = deletedData.type.replace("Message", "");
+      const sendOpts = { quoted: msg };
 
-    sendOpts[type] = buffer;
-    sendOpts.mimetype = mimetype;
+      sendOpts[type] = buffer;
+      sendOpts.mimetype = mimetype;
 
-    const senderJid = msg?.key?.participant || msg?.key?.remoteJid || '';
-    const number = senderJid.split('@')[0].split('.')[0];
-    const mentionTag = [`${number}@s.whatsapp.net`];
+      const mentionTag = [`${senderNumber}@s.whatsapp.net`];
 
-    if (type === 'sticker') {
-      const sent = await sock.sendMessage(chatId, sendOpts);
+      if (type === "sticker") {
+        const sent = await sock.sendMessage(chatId, sendOpts);
+        await sock.sendMessage(chatId, {
+          text: `📌 El sticker fue eliminado por @${senderNumber}`,
+          mentions: mentionTag,
+          quoted: sent
+        });
+      } else if (type === "audio") {
+        const sent = await sock.sendMessage(chatId, sendOpts);
+        await sock.sendMessage(chatId, {
+          text: `🎧 El audio fue eliminado por @${senderNumber}`,
+          mentions: mentionTag,
+          quoted: sent
+        });
+      } else {
+        sendOpts.caption = `📦 Mensaje eliminado por @${senderNumber}`;
+        sendOpts.mentions = mentionTag;
+        await sock.sendMessage(chatId, sendOpts, { quoted: msg });
+      }
+    } else if (deletedData.text) {
       await sock.sendMessage(chatId, {
-        text: `📌 El sticker fue eliminado por @${number}`,
-        mentions: mentionTag,
-        quoted: sent
-      });
-    } else if (type === 'audio') {
-      const sent = await sock.sendMessage(chatId, sendOpts);
-      await sock.sendMessage(chatId, {
-        text: `🎧 El audio fue eliminado por @${number}`,
-        mentions: mentionTag,
-        quoted: sent
-      });
-    } else {
-      sendOpts.caption = `📦 Mensaje eliminado por @${number}`;
-      sendOpts.mentions = mentionTag;
-      await sock.sendMessage(chatId, sendOpts, { quoted: msg });
+        text: `📝 *Mensaje eliminado:* ${deletedData.text}\n👤 *Usuario:* @${senderNumber}`,
+        mentions: [`${senderNumber}@s.whatsapp.net`]
+      }, { quoted: msg });
     }
-  } else if (deletedData.text) {
-    const senderJid = msg?.key?.participant || msg?.key?.remoteJid || '';
-    const number = senderJid.split('@')[0].split('.')[0];
-    await sock.sendMessage(chatId, {
-      text: `📝 *Mensaje eliminado:* ${deletedData.text}\n👤 *Usuario:* @${number}`,
-      mentions: [`${number}@s.whatsapp.net`]
-    }, { quoted: msg });
+  } catch (err) {
+    console.error("❌ Error en lógica antidelete:", err);
   }
-} catch (err) {
-  console.error("❌ Error en lógica antidelete:", err);
 }
 // === FIN DETECCIÓN DE MENSAJE ELIMINADO ===    
     
@@ -1435,7 +1431,7 @@ try {
   } catch (error) {
     console.error("❌ Error en messages.upsert:", error);
   }
-};
+});
             
             
             sock.ev.on("connection.update", async (update) => {
