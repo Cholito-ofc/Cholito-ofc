@@ -20,7 +20,7 @@ let handler = async (msg, { conn, args }) => {
   }
 
   const horaTexto = args[0]
-  const modalidad = args.slice(1).join(' ') || '🔫 Clásico'
+  const modalidad = args.slice(1).join(' ') || 'CLK'
   if (!horaTexto) {
     return conn.sendMessage(chatId, { text: "✳️ Usa el comando así:\n*.4vs4 [hora] [modalidad]*\nEjemplo: *.4vs4 5:00pm vs sala normal*" }, { quoted: msg })
   }
@@ -42,38 +42,40 @@ let handler = async (msg, { conn, args }) => {
   const base = to24Hour(horaTexto)
 
   const zonas = [
-    { pais: "🇲🇽 MÉXICO", offset: 0 },
-    { pais: "🇨🇴 COLOMBIA", offset: 1 }
+    { pais: "MÉXICO 🇲🇽", offset: 0 },
+    { pais: "COLOMBIA 🇨🇴", offset: 1 }
   ]
 
   const horaMsg = zonas.map(z => {
     let newH = base.h + z.offset
     let newM = base.m
     if (newH >= 24) newH -= 24
-    return `${z.pais} : ${to12Hour(newH, newM)}`
+    let hora = to12Hour(newH, newM)
+    let nombre = z.pais.replace(/🇲🇽|🇨🇴/g, '').trim()
+    let bandera = z.pais.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g)?.[0] || ''
+    return `┊ • ${hora} ${nombre} ${bandera}`
   }).join("\n")
 
   const idPartida = new Date().getTime().toString()
 
   let plantilla = `
-*𝟒 𝐕𝐄𝐑𝐒𝐔𝐒 𝟒*
-
-⏱ 𝐇𝐎𝐑𝐀𝐑𝐈𝐎                            
+ㅤ ㅤ4 \`𝗩𝗘𝗥𝗦𝗨𝗦\` 4
+╭─────────────╮
+┊ \`𝗠𝗢𝗗𝗢:\` \`\`\`${modalidad}\`\`\`
+┊
+┊ ⏱️ \`𝗛𝗢𝗥𝗔𝗥𝗜𝗢\`
 ${horaMsg}
-
-➥ 𝐌𝐎𝐃𝐀𝐋𝐈𝐃𝐀𝐃: ${modalidad}
-➥ 𝐉𝐔𝐆𝐀𝐃𝐎𝐑𝐄𝐒:
-
-      𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔 1
-    
-    👑 ┇  
-    🥷🏻 ┇  
-    🥷🏻 ┇ 
-    🥷🏻 ┇  
-    
-    ʚ 𝐒𝐔𝐏𝐋𝐄𝐍𝐓𝐄𝐒:
-    🥷🏻 ┇ 
-    🥷🏻 ┇
+┊
+┊ » \`𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔\`
+┊ 👑 ➤ 
+┊ ⚜️ ➤ 
+┊ ⚜️ ➤ 
+┊ ⚜️ ➤ 
+┊
+┊ » \`𝗦𝗨𝗣𝗟𝗘𝗡𝗧𝗘:\`
+┊ ⚜️ ➤ 
+┊ ⚜️ ➤ 
+╰─────────────╯
 
 ❤️ = Participar | 👍 = Suplente
 `.trim()
@@ -108,7 +110,6 @@ ${horaMsg}
     const esTitular = data.jugadores.includes(sender)
     const esSuplente = data.suplentes.includes(sender)
 
-    // Suplente
     if (emojisSuplente.includes(emoji)) {
       if (esTitular) {
         if (data.suplentes.length < 2) {
@@ -116,21 +117,18 @@ ${horaMsg}
           jugadoresGlobal.delete(sender)
           data.suplentes.push(sender)
         } else {
-          return // Suplentes llenos
+          return
         }
       } else if (!esSuplente) {
         if (data.suplentes.length < 2) {
           data.suplentes.push(sender)
         } else {
-          return // Suplentes llenos
+          return
         }
       } else {
-        return // Ya es suplente
+        return
       }
-    }
-
-    // Titular
-    else if (emojisParticipar.includes(emoji)) {
+    } else if (emojisParticipar.includes(emoji)) {
       if (esTitular) return
       if (esSuplente) {
         if (data.jugadores.length < 4) {
@@ -138,40 +136,39 @@ ${horaMsg}
           data.jugadores.push(sender)
           jugadoresGlobal.add(sender)
         } else {
-          return // Titulares llenos
+          return
         }
       } else if (data.jugadores.length < 4) {
         data.jugadores.push(sender)
         jugadoresGlobal.add(sender)
       } else {
-        return // Titulares llenos
+        return
       }
     } else {
-      return // Emoji no válido
+      return
     }
 
     let jugadores = data.jugadores.map(u => `@${u.split('@')[0]}`)
     let suplentes = data.suplentes.map(u => `@${u.split('@')[0]}`)
 
     let plantilla = `
-*𝟒 𝐕𝐄𝐑𝐒𝐔𝐒 𝟒*
-
-⏱ 𝐇𝐎𝐑𝐀𝐑𝐈𝐎                            
+ㅤ ㅤ4 \`𝗩𝗘𝗥𝗦𝗨𝗦\` 4
+╭─────────────╮
+┊ \`𝗠𝗢𝗗𝗢:\` \`\`\`${data.modalidad}\`\`\`
+┊
+┊ ⏱️ \`𝗛𝗢𝗥𝗔𝗥𝗜𝗢\`
 ${data.horaMsg}
-
-➥ 𝐌𝐎𝐃𝐀𝐋𝐈𝐃𝐀𝐃: ${data.modalidad}
-➥ 𝐉𝐔𝐆𝐀𝐃𝐎𝐑𝐄𝐒:
-
-      𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔 1
-    
-    👑 ┇ ${jugadores[0] || ''}
-    🥷🏻 ┇ ${jugadores[1] || ''}
-    🥷🏻 ┇ ${jugadores[2] || ''}
-    🥷🏻 ┇ ${jugadores[3] || ''}
-    
-    ʚ 𝐒𝐔𝐏𝐋𝐄𝐍𝐓𝐄𝐒:
-    🥷🏻 ┇ ${suplentes[0] || ''}
-    🥷🏻 ┇ ${suplentes[1] || ''}
+┊
+┊ » \`𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔\`
+┊ 👑 ➤ ${jugadores[0] || ''}
+┊ ⚜️ ➤ ${jugadores[1] || ''}
+┊ ⚜️ ➤ ${jugadores[2] || ''}
+┊ ⚜️ ➤ ${jugadores[3] || ''}
+┊
+┊ » \`𝗦𝗨𝗣𝗟𝗘𝗡𝗧𝗘:\`
+┊ ⚜️ ➤ ${suplentes[0] || ''}
+┊ ⚜️ ➤ ${suplentes[1] || ''}
+╰─────────────╯
 
 ❤️ = Participar | 👍 = Suplente
 
