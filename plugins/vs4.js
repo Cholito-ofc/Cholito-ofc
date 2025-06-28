@@ -22,7 +22,7 @@ let handler = async (msg, { conn, args }) => {
   const horaTexto = args[0]
   const modalidad = args.slice(1).join(' ') || 'CLK'
   if (!horaTexto) {
-    return conn.sendMessage(chatId, { text: "✳️ Usa el comando así:\n*.4vs4 [hora] [modalidad]*\nEjemplo: *.4vs4 5:00pm vs sala normal*" }, { quoted: msg })
+    return conn.sendMessage(chatId, { text: "✳️ Usa el comando así:\n*.4vs4 [hora] [modalidad]*\nEjemplo: *.4vs4 5:00pm CLK*" }, { quoted: msg })
   }
 
   const to24Hour = (str) => {
@@ -42,8 +42,8 @@ let handler = async (msg, { conn, args }) => {
   const base = to24Hour(horaTexto)
 
   const zonas = [
-    { pais: "MÉXICO 🇲🇽", offset: 0 },
-    { pais: "COLOMBIA 🇨🇴", offset: 1 }
+    { nombre: "MÉXICO", bandera: "🇲🇽", offset: 0 },
+    { nombre: "COLOMBIA", bandera: "🇨🇴", offset: 1 }
   ]
 
   const horaMsg = zonas.map(z => {
@@ -51,9 +51,7 @@ let handler = async (msg, { conn, args }) => {
     let newM = base.m
     if (newH >= 24) newH -= 24
     let hora = to12Hour(newH, newM)
-    let nombre = z.pais.replace(/🇲🇽|🇨🇴/g, '').trim()
-    let bandera = z.pais.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g)?.[0] || ''
-    return `┊ • ${hora} ${nombre} ${bandera}`
+    return `┊ • ${hora} ${z.nombre} ${z.bandera}`
   }).join("\n")
 
   const idPartida = new Date().getTime().toString()
@@ -186,46 +184,3 @@ ${data.horaMsg}
 
 handler.command = ['vs4']
 module.exports = handler
-
-// 🔒 .cerrarvs4
-let cerrarVS4 = async (msg, { conn }) => {
-  const chatId = msg.key.remoteJid
-  const sender = msg.key.participant || msg.key.remoteJid
-  const senderNum = sender.replace(/[^0-9]/g, "")
-  const isOwner = global.owner.some(([id]) => id === senderNum)
-
-  const meta = await conn.groupMetadata(chatId)
-  const isAdmin = meta.participants.find(p => p.id === sender)?.admin
-  if (!isAdmin && !isOwner) return conn.sendMessage(chatId, { text: '❌ Solo un admin o el dueño del bot puede cerrar la partida.' }, { quoted: msg })
-
-  let matchId = Object.keys(partidasVS4).find(id => partidasVS4[id].chat === chatId)
-  if (!matchId) return conn.sendMessage(chatId, { text: '⚠️ No hay partidas activas en este grupo.' }, { quoted: msg })
-
-  delete partidasVS4[matchId]
-  conn.sendMessage(chatId, { text: '✅ La partida ha sido cerrada. Ya no se pueden registrar jugadores.' }, { quoted: msg })
-}
-cerrarVS4.command = ['cerrarvs4']
-module.exports.cerrarvs4 = cerrarVS4
-
-// 🗑️ .cancelarvs4
-let cancelarVS4 = async (msg, { conn }) => {
-  const chatId = msg.key.remoteJid
-  const sender = msg.key.participant || msg.key.remoteJid
-  const senderNum = sender.replace(/[^0-9]/g, "")
-  const isOwner = global.owner.some(([id]) => id === senderNum)
-
-  const meta = await conn.groupMetadata(chatId)
-  const isAdmin = meta.participants.find(p => p.id === sender)?.admin
-  if (!isAdmin && !isOwner) return conn.sendMessage(chatId, { text: '❌ Solo un admin o el dueño del bot puede cancelar la partida.' }, { quoted: msg })
-
-  let matchId = Object.keys(partidasVS4).find(id => partidasVS4[id].chat === chatId)
-  if (!matchId) return conn.sendMessage(chatId, { text: '⚠️ No hay partidas activas en este grupo.' }, { quoted: msg })
-
-  let partida = partidasVS4[matchId]
-  await conn.sendMessage(chatId, { delete: partida.originalMsgKey })
-  delete partidasVS4[matchId]
-
-  conn.sendMessage(chatId, { text: '🗑️ La partida ha sido *cancelada y eliminada*.' }, { quoted: msg })
-}
-cancelarVS4.command = ['cancelarvs4']
-module.exports.cancelarvs4 = cancelarVS4
