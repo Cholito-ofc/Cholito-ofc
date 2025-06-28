@@ -31,7 +31,7 @@ module.exports = async (msg, { conn, text }) => {
   }
 
   await conn.sendMessage(msg.key.remoteJid, {
-    react: { text: "⏳", key: msg.key }
+    react: { text: "🕗", key: msg.key }
   });
 
   const res = await yts(text);
@@ -45,24 +45,21 @@ module.exports = async (msg, { conn, text }) => {
   const { url: videoUrl, title, timestamp: duration, views, author, thumbnail } = video;
 
   const caption = `
-╭──── ∘ 𝘼𝙯𝙪𝙧𝙖 𝙐𝙡𝙩𝙧𝙖 2.0 ∘ ────╮
-│🎧 *Título:* ${title}
-│⏱️ *Duración:* ${duration}
-│👁️ *Vistas:* ${views.toLocaleString()}
-│👤 *Autor:* ${author.name}
-│🔗 *Link:* ${videoUrl}
-╰────────────────────────────╯
+┏━[ *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎̀𝗌𝗂𝖼 🎧* ]━┓
+┃⥤🎧 *Título:* ${title}
+┃⥤⏱️ *Duración:* ${duration}
+┃⥤👁️ *Vistas:* ${views.toLocaleString()}
+┃⥤👤 *Autor:* ${author.name}
+┃⥤🔗 *Link:* ${videoUrl}
+┗━━━━━━━━━━━━━━━┛
 
-📥 *Reacciona para descargar:*
-👍 Audio MP3
-❤️ Video MP4
-📄 Audio como Documento
-📁 Video como Documento
-
-📦 *Otras opciones:*
-🎵 ${global.prefix}play5 ${text}
-🎥 ${global.prefix}play6 ${text}
-⚠️ ${global.prefix}ff
+┏━━━━━━━━━━━━━━━━
+┃↦📥 *Reacciona para descargar:*
+┃↦👍 Audio MP3
+┃↦❤️ Video MP4
+┃↦📄 Audio como Documento
+┃↦📁 Video como Document
+┗━━━━━━━━━━━━━━━┛
 `.trim();
 
   const preview = await conn.sendMessage(msg.key.remoteJid, {
@@ -100,25 +97,25 @@ module.exports = async (msg, { conn, text }) => {
           if (LIKES.includes(emoji) && !job.done.audio) {
             job.done.audio = true;
             await conn.sendMessage(job.chatId, {
-              text: "⏳ Descargando audio…", quoted: job.userMsg
+              text: "*🕗𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈...*", quoted: job.userMsg
             });
             await sendAudio(conn, job, false);
           } else if (HEARTS.includes(emoji) && !job.done.video) {
             job.done.video = true;
             await conn.sendMessage(job.chatId, {
-              text: "⏳ Descargando vídeo…", quoted: job.userMsg
+              text: "*🎬 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝗏𝗂́𝖽𝖾𝗈...*", quoted: job.userMsg
             });
             await sendVideo(conn, job, false);
           } else if (emoji === "📄" && !job.done.audioDoc) {
             job.done.audioDoc = true;
             await conn.sendMessage(job.chatId, {
-              text: "⏳ Descargando audio (documento)…", quoted: job.userMsg
+              text: *🕗𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈...* (documento)…", quoted: job.userMsg
             });
             await sendAudio(conn, job, true);
           } else if (emoji === "📁" && !job.done.videoDoc) {
             job.done.videoDoc = true;
             await conn.sendMessage(job.chatId, {
-              text: "⏳ Descargando vídeo (documento)…", quoted: job.userMsg
+              text: "*🎬 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝗏𝗂́𝖽𝖾𝗈...* (documento)…", quoted: job.userMsg
             });
             await sendVideo(conn, job, true);
           }
