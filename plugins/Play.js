@@ -100,16 +100,20 @@ const handler = async (msg, { conn, text }) => {
     });
 
 } catch (err) {
-    console.error(err);
+  console.error(err);
 
-    await conn.sendMessage(msg.key.remoteJid, {
-      text: `➤ \`UPS, ERROR\` ❌\n\n𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗋𝗈𝗅𝗂𝗍𝖺* *.𝗌𝗉𝗈𝗍𝗂𝖿𝗒* 𝗈 *.𝗉𝗅𝖺𝗒2*\n".𝗋𝖾𝗉𝗈𝗋𝗍 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"\n> 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗍𝖺𝗇 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
-    }, { quoted: msg });
+  await conn.sendMessage(msg.key.remoteJid, {
+    text: `➤ \`UPS, ERROR\` ❌
 
-    await conn.sendMessage(msg.key.remoteJid, {
-      react: { text: '❌', key: msg.key }
-    });
-  }
+𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗋𝗈𝗅𝗂𝗍𝖺* *.𝗌𝗉𝗈𝗍𝗂𝖿𝗒* 𝗈 *.𝗉𝗅𝖺𝗒2*
+".𝗋𝖾𝗉𝗈𝗋𝗍 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
+> 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗍𝖺𝗇 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
+  }, { quoted: msg });
+
+  await conn.sendMessage(msg.key.remoteJid, {
+    react: { text: '❌', key: msg.key }
+  });
+}
 
 handler.command = ['play'];
 module.exports = handler;
