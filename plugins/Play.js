@@ -1,124 +1,122 @@
+const axios = require('axios');
 const yts = require('yt-search');
 const fs = require('fs');
-const axios = require('axios');
+const path = require('path');
+const ffmpeg = require('fluent-ffmpeg');
+const { pipeline } = require('stream');
+const { promisify } = require('util');
+const streamPipeline = promisify(pipeline);
 
-const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const handler = async (msg, { conn, text }) => {
+  const rawID = conn.user?.id || "";
+  const subbotID = rawID.split(":")[0] + "@s.whatsapp.net";
 
-const TIMEOUT_MS = 10000;
-
-function isUserBlocked(userId) {
-  try {
-    const blockedUsers = JSON.parse(fs.readFileSync('./bloqueados.json', 'utf8'));
-    return blockedUsers.includes(userId);
-  } catch {
-    return false;
-  }
-}
-
-async function getDownloadUrl(query) {
-  try {
-    const apiUrl = `https://api.neoxr.eu/api/play?q=${encodeURIComponent(query)}&apikey=russellxz`;
-    const response = await axios.get(apiUrl, { timeout: TIMEOUT_MS });
-
-    if (response.data?.status === true && response.data?.data?.audio?.url) {
-      return {
-        url: response.data.data.audio.url.trim(),
-        title: response.data.data.title
-      };
-    }
-  } catch {
-    return null;
+  // Cargar prefijo personalizado
+  const prefixPath = path.resolve("prefixes.json");
+  let prefixes = {};
+  if (fs.existsSync(prefixPath)) {
+    prefixes = JSON.parse(fs.readFileSync(prefixPath, "utf-8"));
   }
 
-  return null;
-}
+  const usedPrefix = prefixes[subbotID] || "."; // Por defecto .
 
-async function sendAudioNormal(conn, chatId, audioUrl, quotedMsg) {
-  try {
-    await conn.sendMessage(
-      chatId,
-      {
-        audio: { url: audioUrl },
-        mimetype: 'audio/mpeg'
-      },
-      { quoted: quotedMsg }
-    );
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-const handler = async (msg, { conn, args }) => {
-  const chatId = msg.key.remoteJid;
-  const sender = msg.key.participant || msg.key.remoteJid;
-  const senderNum = sender.replace(/[^0-9]/g, "");
-
-  await conn.sendMessage(chatId, { react: { text: '🎶', key: msg.key } });
-
-  if (isUserBlocked(senderNum)) {
-    return conn.sendMessage(chatId, {
-      text: "🚫 Lo siento, estás en la lista de usuarios bloqueados."
+  if (!text) {
+    return await conn.sendMessage(msg.key.remoteJid, {
+      text: `✳️ Usa el comando correctamente:\n\n📌 Ejemplo: *${usedPrefix}play* bad bunny diles`
     }, { quoted: msg });
   }
 
-  if (!args || !args.join(" ").trim()) {
-    return conn.sendMessage(chatId, {
-      text: `╭─⬣「 *KilluaBot* 」⬣
-│ ≡◦ 🎧 *Uso correcto del comando:*
-│ ≡◦ .play Anuel perfecto
-╰─⬣
-> © ⍴᥆ᥕᥱrᥱძ ᑲᥡ һᥒ ᥴһ᥆ᥣі𝗍᥆`,
-    }, { quoted: msg });
-  }
-
-  const query = args.join(" ").trim();
+  await conn.sendMessage(msg.key.remoteJid, {
+    react: { text: '⏳', key: msg.key }
+  });
 
   try {
-    const searchResults = await yts(query);
-    if (!searchResults?.videos?.length) throw new Error('No se encontraron resultados.');
+    const search = await yts(text);
+    const video = search.videos[0];
+    if (!video) throw new Error('No se encontraron resultados');
 
-    const videoInfo = searchResults.videos[0];
-    const { title, timestamp: duration, url: videoUrl, image: thumbnail } = videoInfo;
+    const videoUrl = video.url;
+    const thumbnail = video.thumbnail;
+    const title = video.title;
+    const fduration = video.timestamp;
+    const views = video.views.toLocaleString();
+    const channel = video.author.name || 'Desconocido';
 
-    let imageBuffer = null;
-    try {
-      const response = await axios.get(thumbnail, { responseType: 'arraybuffer' });
-      imageBuffer = Buffer.from(response.data, 'binary');
-    } catch {}
+    const infoMessage = `
 
-    const caption = `*╭┈≫*「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
-┊  🎵 *Título:* ${title}
-┊  ⏱ *Duración:* ${duration || 'Desconocida'}
-┊  🔗 *URL:* ${videoUrl}
-*╰┈┈┈┈┈┈┈┈┈┈┈┈┈≫*
+   ✦ 𝘾𝙤𝙧𝙩𝙖𝙣𝙖 2.0 𝗦𝘂𝗯𝗯𝗼𝘁 ✦
 
-*[🛠️] 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈 𝖾𝗌𝗉𝖾𝗋𝖾...*
+📀 *Info del audio:*  
+❀ 🎼 *Título:* ${title}
+❀ ⏱️ *Duración:* ${fduration}
+❀ 👁️ *Vistas:* ${views}
+❀ 👤 *Autor:* ${channel}
+❀ 🔗 *Enlace:* ${videoUrl}
 
-> ® ⍴᥆ᥕᥱrᥱძ ᑲᥡ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍⚡`;
+📥 *Opciones:*  
+❀ 🎵 _${usedPrefix}play1 ${text}_
+❀ 🎥 _${usedPrefix}play2 ${text}_
+❀ 🎥 _${usedPrefix}play6 ${text}_
+❀ ⚠️ *¿No se reproduce?* Usa _${usedPrefix}ff_
 
-    await conn.sendMessage(chatId, {
-      image: imageBuffer,
-      caption: caption
+⏳ Procesando audio...
+═══════════════════`;
+
+    await conn.sendMessage(msg.key.remoteJid, {
+      image: { url: thumbnail },
+      caption: infoMessage
     }, { quoted: msg });
 
-    const downloadData = await getDownloadUrl(query);
-    if (!downloadData || !downloadData.url) {
-      throw new Error('No se pudo descargar la música.');
-    }
+    const apiURL = `https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(videoUrl)}&type=audio&quality=128kbps&apikey=russellxz`;
+    const res = await axios.get(apiURL);
+    const json = res.data;
 
-    await sendAudioNormal(conn, chatId, downloadData.url, msg);
+    if (!json.status || !json.data?.url) throw new Error("No se pudo obtener el audio");
 
-  } catch (error) {
-    return conn.sendMessage(chatId, {
-      text: `➤ \`UPS, ERROR\` ❌
+    const tmpDir = path.join(__dirname, '../tmp');
+    if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
 
-𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗋𝗈𝗅𝗂𝗍𝖺* *.𝗉𝗅𝖺𝗒1* 𝗈 *.𝗉𝗅𝖺𝗒2*
-".𝗋𝖾𝗉𝗈𝗋𝗍 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
-> 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗍𝖺𝗇 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
+    const rawPath = path.join(tmpDir, `${Date.now()}_raw.m4a`);
+    const finalPath = path.join(tmpDir, `${Date.now()}_final.mp3`);
+
+    const audioRes = await axios.get(json.data.url, { responseType: 'stream' });
+    await streamPipeline(audioRes.data, fs.createWriteStream(rawPath));
+
+    await new Promise((resolve, reject) => {
+      ffmpeg(rawPath)
+        .audioCodec('libmp3lame')
+        .audioBitrate('128k')
+        .format('mp3')
+        .save(finalPath)
+        .on('end', resolve)
+        .on('error', reject);
+    });
+
+    await conn.sendMessage(msg.key.remoteJid, {
+      audio: fs.readFileSync(finalPath),
+      mimetype: 'audio/mpeg',
+      fileName: `${title}.mp3`,
+      ptt: false
     }, { quoted: msg });
+
+    fs.unlinkSync(rawPath);
+    fs.unlinkSync(finalPath);
+
+    await conn.sendMessage(msg.key.remoteJid, {
+      react: { text: '✅', key: msg.key }
+    });
+
+  } catch (err) {
+    console.error(err);
+    await conn.sendMessage(msg.key.remoteJid, {
+      text: `❌ *Error:* ${err.message}`
+    }, { quoted: msg });
+
+    await conn.sendMessage(msg.key.remoteJid, {
+      react: { text: '❌', key: msg.key }
+    });
   }
 };
 
-handler.command = ["play"];
+handler.command = ['play'];
 module.exports = handler;
