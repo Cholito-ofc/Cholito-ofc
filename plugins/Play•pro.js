@@ -109,7 +109,7 @@ module.exports = async (msg, { conn, text }) => {
           } else if (emoji === "📄" && !job.done.audioDoc) {
             job.done.audioDoc = true;
             await conn.sendMessage(job.chatId, {
-              text: *🕗𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈...* (documento)…", quoted: job.userMsg
+              text: "*🕗𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈...* (documento)…", quoted: job.userMsg
             });
             await sendAudio(conn, job, true);
           } else if (emoji === "📁" && !job.done.videoDoc) {
