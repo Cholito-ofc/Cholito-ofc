@@ -17,13 +17,26 @@ function isUserBlocked(userId) {
   }
 }
 
-async function getDownloadUrl(videoUrl) {
-  const apis = [{ url: 'https://api.vreden.my.id/api/ytmp3?url=', type: 'vreden' }];
+async function getDownloadUrl(videoTitle) {
+  const apis = [
+    { url: `https://api.neoxr.eu/api/play?q=${encodeURIComponent(videoTitle)}&apikey=russellxz`, type: 'neoxr' },
+    { url: `https://api.vreden.my.id/api/ytmp3?url=`, type: 'vreden' }
+  ];
+
   for (const api of apis) {
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       try {
-        const response = await axios.get(`${api.url}${encodeURIComponent(videoUrl)}`, { timeout: TIMEOUT_MS });
+        const response = await axios.get(api.url, { timeout: TIMEOUT_MS });
+
+        if (api.type === 'neoxr' && response.data?.status === true && response.data?.data?.audio?.url) {
+          return {
+            url: response.data.data.audio.url.trim(),
+            title: response.data.data.title
+          };
+        }
+
         if (
+          api.type === 'vreden' &&
           response.data?.status === 200 &&
           response.data?.result?.download?.url &&
           response.data?.result?.download?.status === true
@@ -33,11 +46,13 @@ async function getDownloadUrl(videoUrl) {
             title: response.data.result.metadata.title
           };
         }
+
       } catch {
         if (attempt < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
       }
     }
   }
+
   return null;
 }
 
@@ -113,7 +128,7 @@ const handler = async (msg, { conn, args }) => {
       caption: caption
     }, { quoted: msg });
 
-    const downloadData = await getDownloadUrl(videoUrl);
+    const downloadData = await getDownloadUrl(title);
     if (!downloadData || !downloadData.url) {
       throw new Error('No se pudo descargar la música.');
     }
