@@ -848,25 +848,25 @@ if (msg.message?.protocolMessage?.type === 0) {
       if (type === "sticker") {
         const sent = await sock.sendMessage(chatId, sendOpts);
         await sock.sendMessage(chatId, {
-          text: `📌 El sticker fue eliminado por @${senderNumber}`,
+          text: `📌 El sticker fue eliminado por @${senderNum}}`,
           mentions: mentionTag,
           quoted: sent
         });
       } else if (type === "audio") {
         const sent = await sock.sendMessage(chatId, sendOpts);
         await sock.sendMessage(chatId, {
-          text: `🎧 El audio fue eliminado por @${senderNumber}`,
+          text: `🎧 El audio fue eliminado por @${senderNum}`,
           mentions: mentionTag,
           quoted: sent
         });
       } else {
-        sendOpts.caption = `📦 Mensaje eliminado por @${senderNumber}`;
+        sendOpts.caption = `📦 Mensaje eliminado por @${senderNum}`;
         sendOpts.mentions = mentionTag;
         await sock.sendMessage(chatId, sendOpts, { quoted: msg });
       }
     } else if (deletedData.text) {
       await sock.sendMessage(chatId, {
-        text: `📝 *Mensaje eliminado:* ${deletedData.text}\n👤 *Usuario:* @${senderNumber}`,
+        text: `📝 *Mensaje eliminado:* ${deletedData.text}\n👤 *Usuario:* @${senderNum}`,
         mentions: [`${senderNumber}@s.whatsapp.net`]
       }, { quoted: msg });
     }
