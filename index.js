@@ -834,45 +834,7 @@ if (msg.message?.protocolMessage?.type === 0) {
       if (isAdmin) return;
     }
 
-    if (deletedData.media) {
-  const mimetype = deletedData.mimetype || 'application/octet-stream';
-  const buffer = Buffer.from(deletedData.media, 'base64');
-  const type = deletedData.type.replace('Message', '');
-  const sendOpts = { quoted: msg };
-
-  sendOpts[type] = buffer;
-  sendOpts.mimetype = mimetype;
-
-  // ✅ Convertir senderNumber a número real sin ".lid"
-  const userJid = senderNumber.includes('.lid') ? senderNumber.split('.')[0] : senderNumber;
-  const mentionTag = [`${userJid}@s.whatsapp.net`];
-
-  if (type === 'sticker') {
-    const sent = await sock.sendMessage(chatId, sendOpts);
-    await sock.sendMessage(chatId, {
-      text: `📌 El sticker fue eliminado por @${userJid}`,
-      mentions: mentionTag,
-      quoted: sent
-    });
-  } else if (type === 'audio') {
-    const sent = await sock.sendMessage(chatId, sendOpts);
-    await sock.sendMessage(chatId, {
-      text: `🎧 El audio fue eliminado por @${userJid}`,
-      mentions: mentionTag,
-      quoted: sent
-    });
-  } else {
-    sendOpts.caption = `📦 Mensaje eliminado por @${userJid}`;
-    sendOpts.mentions = mentionTag;
-    await sock.sendMessage(chatId, sendOpts, { quoted: msg });
-  }
-} else if (deletedData.text) {
-  const userJid = senderNumber.includes('.lid') ? senderNumber.split('.')[0] : senderNumber;
-  await sock.sendMessage(chatId, {
-    text: `📝 *Mensaje eliminado:* ${deletedData.text}\n👤 *Usuario:* @${userJid}`,
-    mentions: [`${userJid}@s.whatsapp.net`]
-  }, { quoted: msg });
-}
+┃ 👑 *Acción por:* @${senderNum}
 // === FIN DETECCIÓN DE MENSAJE ELIMINADO ===    
     
 // === LÓGICA DE RESPUESTA AUTOMÁTICA CON PALABRA CLAVE ===
