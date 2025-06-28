@@ -100,15 +100,14 @@ const handler = async (msg, { conn, text }) => {
       react: { text: '✅', key: msg.key }
     });
 
-  } catch (err) {
-    console.error(err);
-    await conn.sendMessage(msg.key.remoteJid, {
-      text: `❌ *Error:* ${err.message}`
-    }, { quoted: msg });
+    } catch (error) {
+    return conn.sendMessage(chatId, {
+      text: `➤ \`UPS, ERROR\` ❌
 
-    await conn.sendMessage(msg.key.remoteJid, {
-      react: { text: '❌', key: msg.key }
-    });
+𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗋𝗈𝗅𝗂𝗍𝖺* *.𝗉𝗅𝖺𝗒1* 𝗈 *.𝗉𝗅𝖺𝗒2*
+".𝗋𝖾𝗉𝗈𝗋𝗍 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
+> 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺. 🚔`
+    }, { quoted: msg });
   }
 };
 
