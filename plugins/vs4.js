@@ -108,19 +108,29 @@ ${horaMsg}
     const esTitular = data.jugadores.includes(sender)
     const esSuplente = data.suplentes.includes(sender)
 
+    // Suplente
     if (emojisSuplente.includes(emoji)) {
       if (esTitular) {
         if (data.suplentes.length < 2) {
           data.jugadores = data.jugadores.filter(j => j !== sender)
-          data.suplentes.push(sender)
           jugadoresGlobal.delete(sender)
+          data.suplentes.push(sender)
+        } else {
+          return // Suplentes llenos
         }
-      } else if (!esSuplente && data.suplentes.length < 2) {
-        data.suplentes.push(sender)
+      } else if (!esSuplente) {
+        if (data.suplentes.length < 2) {
+          data.suplentes.push(sender)
+        } else {
+          return // Suplentes llenos
+        }
       } else {
-        return
+        return // Ya es suplente
       }
-    } else if (emojisParticipar.includes(emoji)) {
+    }
+
+    // Titular
+    else if (emojisParticipar.includes(emoji)) {
       if (esTitular) return
       if (esSuplente) {
         if (data.jugadores.length < 4) {
@@ -128,16 +138,16 @@ ${horaMsg}
           data.jugadores.push(sender)
           jugadoresGlobal.add(sender)
         } else {
-          return
+          return // Titulares llenos
         }
       } else if (data.jugadores.length < 4) {
         data.jugadores.push(sender)
         jugadoresGlobal.add(sender)
       } else {
-        return
+        return // Titulares llenos
       }
     } else {
-      return
+      return // Emoji no válido
     }
 
     let jugadores = data.jugadores.map(u => `@${u.split('@')[0]}`)
@@ -179,3 +189,46 @@ ${data.horaMsg}
 
 handler.command = ['vs4']
 module.exports = handler
+
+// 🔒 .cerrarvs4
+let cerrarVS4 = async (msg, { conn }) => {
+  const chatId = msg.key.remoteJid
+  const sender = msg.key.participant || msg.key.remoteJid
+  const senderNum = sender.replace(/[^0-9]/g, "")
+  const isOwner = global.owner.some(([id]) => id === senderNum)
+
+  const meta = await conn.groupMetadata(chatId)
+  const isAdmin = meta.participants.find(p => p.id === sender)?.admin
+  if (!isAdmin && !isOwner) return conn.sendMessage(chatId, { text: '❌ Solo un admin o el dueño del bot puede cerrar la partida.' }, { quoted: msg })
+
+  let matchId = Object.keys(partidasVS4).find(id => partidasVS4[id].chat === chatId)
+  if (!matchId) return conn.sendMessage(chatId, { text: '⚠️ No hay partidas activas en este grupo.' }, { quoted: msg })
+
+  delete partidasVS4[matchId]
+  conn.sendMessage(chatId, { text: '✅ La partida ha sido cerrada. Ya no se pueden registrar jugadores.' }, { quoted: msg })
+}
+cerrarVS4.command = ['cerrarvs4']
+module.exports.cerrarvs4 = cerrarVS4
+
+// 🗑️ .cancelarvs4
+let cancelarVS4 = async (msg, { conn }) => {
+  const chatId = msg.key.remoteJid
+  const sender = msg.key.participant || msg.key.remoteJid
+  const senderNum = sender.replace(/[^0-9]/g, "")
+  const isOwner = global.owner.some(([id]) => id === senderNum)
+
+  const meta = await conn.groupMetadata(chatId)
+  const isAdmin = meta.participants.find(p => p.id === sender)?.admin
+  if (!isAdmin && !isOwner) return conn.sendMessage(chatId, { text: '❌ Solo un admin o el dueño del bot puede cancelar la partida.' }, { quoted: msg })
+
+  let matchId = Object.keys(partidasVS4).find(id => partidasVS4[id].chat === chatId)
+  if (!matchId) return conn.sendMessage(chatId, { text: '⚠️ No hay partidas activas en este grupo.' }, { quoted: msg })
+
+  let partida = partidasVS4[matchId]
+  await conn.sendMessage(chatId, { delete: partida.originalMsgKey })
+  delete partidasVS4[matchId]
+
+  conn.sendMessage(chatId, { text: '🗑️ La partida ha sido *cancelada y eliminada*.' }, { quoted: msg })
+}
+cancelarVS4.command = ['cancelarvs4']
+module.exports.cancelarvs4 = cancelarVS4
