@@ -42,13 +42,14 @@ const handler = async (msg, { conn, text }) => {
     const views = video.views.toLocaleString();
     const channel = video.author.name || 'Desconocido';
 
-    // 🔥 NUEVO DISEÑO KilluaBot
+    // 🆕 NUEVO DISEÑO KilluaBot
     const infoMessage = `*╭┈┈≫* *「 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼 ⚡ 」┈┈╮*
 *┊»*
 *┊»* 🎼 𝗧𝗶́𝘁𝘂𝗹𝗼: ${title}
 *┊»* ⏱️ 𝗗𝘂𝗿𝗮𝗰𝗶𝗼́𝗻: ${fduration}
-*┊»* 👤 𝗔𝘂𝘁𝗼𝗿: ${chanel}
-*┊»* 👀 𝗩𝗶𝘀𝘁𝗮𝘀: $views}
+*┊»* 👤 𝗔𝘂𝘁𝗼𝗿: ${channel}
+*┊»* 👀 𝗩𝗶𝘀𝘁𝗮𝘀: ${views}
+*┊»* 🔗 𝗘𝗻𝗹𝗮𝗰𝗲: ${videoUrl}
 *╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫*
 *» 𝘌𝘕𝘝𝘐𝘈𝘕𝘋𝘖 𝘈𝘜𝘋𝘐𝘖  🎧*
 *» 𝘈𝘎𝘜𝘈𝘙𝘋𝘌 𝘜𝘕 𝘗𝘖𝘊𝘖...*
