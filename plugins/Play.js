@@ -11,6 +11,8 @@ const handler = async (msg, { conn, text }) => {
   const rawID = conn.user?.id || "";
   const subbotID = rawID.split(":")[0] + "@s.whatsapp.net";
 
+  const chatId = msg.key.remoteJid;
+
   // Cargar prefijo personalizado
   const prefixPath = path.resolve("prefixes.json");
   let prefixes = {};
@@ -21,12 +23,12 @@ const handler = async (msg, { conn, text }) => {
   const usedPrefix = prefixes[subbotID] || "."; // Por defecto .
 
   if (!text) {
-    return await conn.sendMessage(msg.key.remoteJid, {
+    return await conn.sendMessage(chatId, {
       text: `✳️ Usa el comando correctamente:\n\n📌 Ejemplo: *${usedPrefix}play* bad bunny diles`
     }, { quoted: msg });
   }
 
-  await conn.sendMessage(msg.key.remoteJid, {
+  await conn.sendMessage(chatId, {
     react: { text: '🕗', key: msg.key }
   });
 
@@ -42,7 +44,6 @@ const handler = async (msg, { conn, text }) => {
     const views = video.views.toLocaleString();
     const channel = video.author.name || 'Desconocido';
 
-    // 🆕 NUEVO DISEÑO KilluaBot
     const infoMessage = `*╭┈┈≫* *「 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼 ⚡ 」≪┈┈╮*
 *┊*
 *┊»* 🎼 𝗧𝗶́𝘁𝘂𝗹𝗼: ${title}
@@ -55,7 +56,7 @@ const handler = async (msg, { conn, text }) => {
 
 *⇆‌ ㅤ◁ㅤㅤ❚❚ㅤㅤ▷ㅤ↻*`;
 
-    await conn.sendMessage(msg.key.remoteJid, {
+    await conn.sendMessage(chatId, {
       image: { url: thumbnail },
       caption: infoMessage
     }, { quoted: msg });
@@ -85,7 +86,7 @@ const handler = async (msg, { conn, text }) => {
         .on('error', reject);
     });
 
-    await conn.sendMessage(msg.key.remoteJid, {
+    await conn.sendMessage(chatId, {
       audio: fs.readFileSync(finalPath),
       mimetype: 'audio/mpeg',
       fileName: `${title}.mp3`,
@@ -95,12 +96,12 @@ const handler = async (msg, { conn, text }) => {
     fs.unlinkSync(rawPath);
     fs.unlinkSync(finalPath);
 
-    await conn.sendMessage(msg.key.remoteJid, {
+    await conn.sendMessage(chatId, {
       react: { text: '✅', key: msg.key }
     });
 
-    } catch (error) {
-    return conn.sendMessage(msg.key.remoteJid, {
+  } catch (error) {
+    return conn.sendMessage(chatId, {
       text: `➤ \`UPS, ERROR\` ❌
 
 𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗉𝗅𝖺𝗒𝗉𝗋𝗈* *.𝗌𝗉𝗈𝗍𝗂𝖿𝗒* 𝗈 *.𝗋𝗈𝗅𝗂𝗍𝖺*
@@ -108,6 +109,7 @@ const handler = async (msg, { conn, text }) => {
 > 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
     }, { quoted: msg });
   }
+};
 
 handler.command = ['play'];
 module.exports = handler;
