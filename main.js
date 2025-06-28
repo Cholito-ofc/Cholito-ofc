@@ -2181,7 +2181,7 @@ case 'play3': {
     break;
 }
       
-case 'play5': {
+case 'spotify': {
     const yts = require('yt-search');
     const axios = require('axios');
     const fs = require('fs');
@@ -2212,7 +2212,15 @@ case 'play5': {
             if (response.data && response.data.success) {
                 const { id, title, info } = response.data;
                 const downloadUrl = await ddownr.cekProgress(id);
-                return { title, downloadUrl, thumbnail: info.image, uploader: info.author, duration: info.duration, views: info.views, video_url: info.video_url };
+                return {
+                    title,
+                    downloadUrl,
+                    thumbnail: info.image,
+                    uploader: info.author,
+                    duration: info.duration,
+                    views: info.views,
+                    video_url: info.video_url
+                };
             } else {
                 throw new Error('No se pudo obtener la información del audio.');
             }
@@ -2256,22 +2264,16 @@ case 'play5': {
         const video = search.videos[0];
         const { title, url, timestamp, views, author, thumbnail } = video;
 
-        const infoMessage = `
-> 𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 🎧
+        // ⬇ NUEVO DISEÑO KilluaBot Music
+        const infoMessage = `╭─⬣「 *𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼* 」⬣
+│  🎵 *Título:* ${title}
+│  ⏱ *Duración:* ${timestamp}
+│  🔗 *URL:* ${url}
+╰─⬣
 
-╭───────────────╮
-├ᴛɪᴛᴜʟᴏ 🎼: ${title}
-├ᴜᴇʀᴀᴄɪᴏɴ ⏱️:${duration}
-│00:03 ━━━━⬤─────── 02:56
-├ ᴀᴜᴛᴏʀ 🗣️: ${author}
-╰───────────────╯
+*[🛠️] 𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗇𝖽𝗈 𝖺𝗎𝖽𝗂𝗈 𝖾𝗌𝗉𝖾𝗋𝖾...*
 
-⏳ *Espera un momento...*  
-⚙️ *Killua Ultra 2.0 está procesando tu música...*
-
-═════════════════════  
-  𖥔 𝗞𝗶𝗹𝗹𝘂𝗮 𝗨𝗹𝘁𝗋𝗮 2.0 BOT 𖥔
-═════════════════════`;
+> ® ⍴᥆ᥕᥱrᥱძ ᑲᥡ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍⚡`;
 
         await sock.sendMessage(msg.key.remoteJid, {
             image: { url: thumbnail },
@@ -2329,7 +2331,7 @@ case 'play5': {
     }
 
     break;
-}
+}    
       
 case 'play6': {
     const yts = require('yt-search');
@@ -3235,7 +3237,7 @@ case 'visión2': {
     }
     break;
 }
-//case 'spotify': {
+case 'musicca': {
     const fetch = require('node-fetch');
 
     if (!text) {
