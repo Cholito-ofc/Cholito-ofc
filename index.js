@@ -844,9 +844,8 @@ try {
     sendOpts[type] = buffer;
     sendOpts.mimetype = mimetype;
 
-    // ✅ Obtener el número real sin .lid
     const senderJid = msg?.key?.participant || msg?.key?.remoteJid || '';
-    const number = senderJid.split('@')[0].split('.')[0]; // Elimina .lid si existe
+    const number = senderJid.split('@')[0].split('.')[0];
     const mentionTag = [`${number}@s.whatsapp.net`];
 
     if (type === 'sticker') {
