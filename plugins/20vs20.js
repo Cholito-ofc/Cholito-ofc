@@ -1,114 +1,220 @@
-const handler = async (msg, { conn, args }) => {
-  const chatId = msg.key.remoteJid;
-  const sender = msg.key.participant || msg.key.remoteJid;
-  const senderNum = sender.replace(/[^0-9]/g, "");
-  const isOwner = global.owner.some(([id]) => id === senderNum);
-  const isFromMe = msg.key.fromMe;
+let partidasVS20 = {}
+let jugadoresGlobal = new Set()
+
+let handler = async (msg, { conn, args }) => {
+  const chatId = msg.key.remoteJid
+  const sender = msg.key.participant || msg.key.remoteJid
+  const senderNum = sender.replace(/[^0-9]/g, "")
+  const isOwner = global.owner.some(([id]) => id === senderNum)
+  const isFromMe = msg.key.fromMe
 
   if (!chatId.endsWith("@g.us")) {
-    return conn.sendMessage(chatId, { text: "❌ Este comando solo puede usarse en grupos." }, { quoted: msg });
+    return conn.sendMessage(chatId, { text: "❌ Este comando solo puede usarse en grupos." }, { quoted: msg })
   }
 
-  const meta = await conn.groupMetadata(chatId);
-  const isAdmin = meta.participants.find(p => p.id === sender)?.admin;
+  const meta = await conn.groupMetadata(chatId)
+  const isAdmin = meta.participants.find(p => p.id === sender)?.admin
 
   if (!isAdmin && !isOwner && !isFromMe) {
-    return conn.sendMessage(chatId, {
-      text: "❌ Solo *admins* o *el dueño del bot* pueden usar este comando."
-    }, { quoted: msg });
+    return conn.sendMessage(chatId, { text: "❌ Solo *admins* o *el dueño del bot* pueden usar este comando." }, { quoted: msg })
   }
 
-  const horaTexto = args.join(" ").trim();
+  const horaTexto = args[0]
+  const modalidad = args.slice(1).join(' ') || 'CLK'
   if (!horaTexto) {
-    return conn.sendMessage(chatId, {
-      text: "✳️ Usa el comando así:\n*.20vs20 [hora]*\nEjemplo: *.20vs20 8:30pm*"
-    }, { quoted: msg });
+    return conn.sendMessage(chatId, { text: "✳️ Usa el comando así:\n*.20vs20 [hora] [modalidad]*\nEjemplo: *.20vs20 5:00pm CLK*" }, { quoted: msg })
   }
 
-  await conn.sendMessage(chatId, { react: { text: '🎮', key: msg.key } });
-
-  // Funciones de hora
   const to24Hour = (str) => {
-    let [time, mod] = str.toLowerCase().split(/(am|pm)/);
-    let [h, m] = time.split(":").map(Number);
-    if (mod === 'pm' && h !== 12) h += 12;
-    if (mod === 'am' && h === 12) h = 0;
-    return { h, m: m || 0 };
-  };
+    let [time, modifier] = str.toLowerCase().split(/(am|pm)/)
+    let [h, m] = time.split(":").map(n => parseInt(n))
+    if (modifier === 'pm' && h !== 12) h += 12
+    if (modifier === 'am' && h === 12) h = 0
+    return { h, m: m || 0 }
+  }
+
   const to12Hour = (h, m) => {
-    const ampm = h >= 12 ? 'pm' : 'am';
-    h = h % 12 || 12;
-    return `${h}:${m.toString().padStart(2, '0')}${ampm}`;
-  };
+    const suffix = h >= 12 ? 'pm' : 'am'
+    h = h % 12 || 12
+    return `${h}:${m.toString().padStart(2, '0')}${suffix}`
+  }
 
-  const base = to24Hour(horaTexto);
+  const base = to24Hour(horaTexto)
+
   const zonas = [
-    { pais: "🇲🇽 MÉXICO", offset: 0 },
-    { pais: "🇨🇴 COLOMBIA", offset: 0 },
-    { pais: "🇵🇪 PERÚ", offset: 0 },
-    { pais: "🇵🇦 PANAMÁ", offset: 0 },
-    { pais: "🇸🇻 EL SALVADOR", offset: 0 },
-    { pais: "🇨🇱 CHILE", offset: 2 },
-    { pais: "🇦🇷 ARGENTINA", offset: 2 },
-    { pais: "🇪🇸 ESPAÑA", offset: 7 }
-  ];
+    { nombre: "MÉXICO", bandera: "🇲🇽", offset: 0 },
+    { nombre: "COLOMBIA", bandera: "🇨🇴", offset: 1 }
+  ]
+
   const horaMsg = zonas.map(z => {
-    let newH = base.h + z.offset;
-    if (newH >= 24) newH -= 24;
-    return `${z.pais} : ${to12Hour(newH, base.m)}`;
-  }).join("\n");
+    let newH = base.h + z.offset
+    let newM = base.m
+    if (newH >= 24) newH -= 24
+    let hora = to12Hour(newH, newM)
+    return `┊ • ${hora} ${z.nombre} ${z.bandera}`
+  }).join("\n")
 
-  const participantes = meta.participants.filter(p => p.id !== conn.user.id);
-  if (participantes.length < 36) {
-    return conn.sendMessage(chatId, {
-      text: "⚠️ Se necesitan al menos *36 usuarios* (24 titulares + 12 suplentes) para 6 escuadras."
-    }, { quoted: msg });
+  const idPartida = new Date().getTime().toString()
+
+  let plantilla = `
+ㅤㅤ20 \`𝗩𝗘𝗥𝗦𝗨𝗦\` 20
+╭────────────────╮
+┊ \`𝗠𝗢𝗗𝗢:\` \`\`\`${modalidad}\`\`\`
+┊
+┊ ⏱️ \`𝗛𝗢𝗥𝗔𝗥𝗜𝗢\`
+${horaMsg}
+┊
+┊ » \`𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔 1\`
+┊ 👑 ➤ 
+┊ ⚜️ ➤ 
+┊ ⚜️ ➤ 
+┊ ⚜️ ➤ 
+┊
+┊ » \`𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔 2\`
+┊ 👑 ➤ 
+┊ ⚜️ ➤ 
+┊ ⚜️ ➤ 
+┊ ⚜️ ➤ 
+┊
+┊ » \`𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔 3\`
+┊ 👑 ➤ 
+┊ ⚜️ ➤ 
+┊ ⚜️ ➤ 
+┊ ⚜️ ➤ 
+┊
+┊ » \`𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔 4\`
+┊ 👑 ➤ 
+┊ ⚜️ ➤ 
+┊ ⚜️ ➤ 
+┊ ⚜️ ➤ 
+┊
+┊ » \`𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔 5\`
+┊ 👑 ➤ 
+┊ ⚜️ ➤ 
+┊ ⚜️ ➤ 
+┊ ⚜️ ➤ 
+┊
+┊ » \`𝗦𝗨𝗣𝗟𝗘𝗡𝗧𝗘:\`
+┊ ⚜️ ➤ 
+┊ ⚜️ ➤ 
+╰────────────────╯
+
+❤️ = Participar | 👍 = Suplente
+`.trim()
+
+  let tempMsg = await conn.sendMessage(chatId, { text: plantilla }, { quoted: msg })
+
+  partidasVS20[tempMsg.key.id] = {
+    chat: chatId,
+    jugadores: [],
+    suplentes: [],
+    originalMsgKey: tempMsg.key,
+    modalidad,
+    horaMsg,
+    idPartida
   }
 
-  const pasos = [
-    "⚙️ Configurando partida 20 vs 20...",
-    "🎲 Barajando jugadores...",
-    "📋 Repartiendo escuadras...",
-    "✅ ¡Listo! Aquí están los equipos:"
-  ];
+  conn.ev.on('messages.upsert', async ({ messages }) => {
+    let m = messages[0]
+    if (!m?.message?.reactionMessage) return
 
-  const tempMsg = await conn.sendMessage(chatId, {
-    text: pasos[0]
-  }, { quoted: msg });
+    let reaction = m.message.reactionMessage
+    let key = reaction.key
+    let emoji = reaction.text
+    let sender = m.key.participant || m.key.remoteJid
 
-  for (let i = 1; i < pasos.length; i++) {
-    await new Promise(r => setTimeout(r, 1500));
-    await conn.sendMessage(chatId, {
-      edit: tempMsg.key,
-      text: pasos[i]
-    });
-  }
+    let data = partidasVS20[key.id]
+    if (!data) return
 
-  const shuffled = participantes.sort(() => Math.random() - 0.5);
-  const equipos = [];
-  const suplentes = [];
+    const emojisParticipar = ['❤️', '❤', '♥', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '❤️‍🔥']
+    const emojisSuplente = ['👍', '👍🏻', '👍🏼', '👍🏽', '👍🏾', '👍🏿']
 
-  for (let i = 0; i < 6; i++) {
-    equipos.push(shuffled.slice(i * 4, i * 4 + 4));
-    suplentes.push(shuffled.slice(24 + i * 2, 24 + i * 2 + 2));
-  }
+    const esTitular = data.jugadores.includes(sender)
+    const esSuplente = data.suplentes.includes(sender)
 
-  const renderJugadores = (arr) => arr.map((u, i) => `${i === 0 ? "👑" : "🥷🏻"} ┇ @${u.id.split("@")[0]}`).join("\n");
+    if (emojisSuplente.includes(emoji)) {
+      if (esTitular) {
+        if (data.suplentes.length < 2) {
+          data.jugadores = data.jugadores.filter(j => j !== sender)
+          jugadoresGlobal.delete(sender)
+          data.suplentes.push(sender)
+        } else return
+      } else if (!esSuplente && data.suplentes.length < 2) {
+        data.suplentes.push(sender)
+      } else return
+    } else if (emojisParticipar.includes(emoji)) {
+      if (esTitular) return
+      if (esSuplente) {
+        if (data.jugadores.length < 20) {
+          data.suplentes = data.suplentes.filter(s => s !== sender)
+          data.jugadores.push(sender)
+          jugadoresGlobal.add(sender)
+        } else return
+      } else if (data.jugadores.length < 20) {
+        data.jugadores.push(sender)
+        jugadoresGlobal.add(sender)
+      } else return
+    } else return
 
-  let textoFinal = `*🔥 20 𝐕𝐒 20 - 6 ESCUADRAS 🔥*\n\n⏱ 𝐇𝐎𝐑𝐀𝐑𝐈𝐎\n${horaMsg}\n\n➥ 𝐌𝐎𝐃𝐀𝐋𝐈𝐃𝐀𝐃: 🔫 Clásico\n➥ 𝐉𝐔𝐆𝐀𝐃𝐎𝐑𝐄𝐒:\n`;
+    let jugadores = data.jugadores.map(u => `@${u.split('@')[0]}`)
+    let suplentes = data.suplentes.map(u => `@${u.split('@')[0]}`)
 
-  for (let i = 0; i < 6; i++) {
-    textoFinal += `\n     𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔 ${i + 1}\n\n${renderJugadores(equipos[i])}\n\n    ㅤʚ 𝐒𝐔𝐏𝐋𝐄𝐍𝐓𝐄𝐒:\n${renderJugadores(suplentes[i])}\n`;
-  }
+    let plantilla = `
+ㅤㅤ20 \`𝗩𝗘𝗥𝗦𝗨𝗦\` 20
+╭────────────────╮
+┊ \`𝗠𝗢𝗗𝗢:\` \`\`\`${data.modalidad}\`\`\`
+┊
+┊ ⏱️ \`𝗛𝗢𝗥𝗔𝗥𝗜𝗢\`
+${data.horaMsg}
+┊
+┊ » \`𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔 1\`
+┊ 👑 ➤ ${jugadores[0] || ''}
+┊ ⚜️ ➤ ${jugadores[1] || ''}
+┊ ⚜️ ➤ ${jugadores[2] || ''}
+┊ ⚜️ ➤ ${jugadores[3] || ''}
+┊
+┊ » \`𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔 2\`
+┊ 👑 ➤ ${jugadores[4] || ''}
+┊ ⚜️ ➤ ${jugadores[5] || ''}
+┊ ⚜️ ➤ ${jugadores[6] || ''}
+┊ ⚜️ ➤ ${jugadores[7] || ''}
+┊
+┊ » \`𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔 3\`
+┊ 👑 ➤ ${jugadores[8] || ''}
+┊ ⚜️ ➤ ${jugadores[9] || ''}
+┊ ⚜️ ➤ ${jugadores[10] || ''}
+┊ ⚜️ ➤ ${jugadores[11] || ''}
+┊
+┊ » \`𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔 4\`
+┊ 👑 ➤ ${jugadores[12] || ''}
+┊ ⚜️ ➤ ${jugadores[13] || ''}
+┊ ⚜️ ➤ ${jugadores[14] || ''}
+┊ ⚜️ ➤ ${jugadores[15] || ''}
+┊
+┊ » \`𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔 5\`
+┊ 👑 ➤ ${jugadores[16] || ''}
+┊ ⚜️ ➤ ${jugadores[17] || ''}
+┊ ⚜️ ➤ ${jugadores[18] || ''}
+┊ ⚜️ ➤ ${jugadores[19] || ''}
+┊
+┊ » \`𝗦𝗨𝗣𝗟𝗘𝗡𝗧𝗘:\`
+┊ ⚜️ ➤ ${suplentes[0] || ''}
+┊ ⚜️ ➤ ${suplentes[1] || ''}
+╰────────────────╯
 
-  const mentions = [...equipos.flat(), ...suplentes.flat()].map(p => p.id);
+❤️ = Participar | 👍 = Suplente
 
-  await conn.sendMessage(chatId, {
-    edit: tempMsg.key,
-    text: textoFinal,
-    mentions
-  });
-};
+• Lista Activa Por 5 Minutos
+`.trim()
 
-handler.command = ['20vs20'];
-module.exports = handler;
+    await conn.sendMessage(data.chat, { delete: data.originalMsgKey })
+    let newMsg = await conn.sendMessage(data.chat, { text: plantilla, mentions: [...data.jugadores, ...data.suplentes] })
+
+    partidasVS20[newMsg.key.id] = data
+    partidasVS20[newMsg.key.id].originalMsgKey = newMsg.key
+    delete partidasVS20[key.id]
+  })
+}
+
+handler.command = ['vs20']
+module.exports = handler
