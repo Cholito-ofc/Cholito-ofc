@@ -3235,7 +3235,7 @@ case 'visión2': {
     }
     break;
 }
-case 'spotify': {
+//case 'spotify': {
     const fetch = require('node-fetch');
 
     if (!text) {
