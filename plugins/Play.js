@@ -44,14 +44,15 @@ const handler = async (msg, { conn, text }) => {
 
     // 🆕 NUEVO DISEÑO KilluaBot
     const infoMessage = `*╭┈┈≫* *「 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼 ⚡ 」┈┈╮*
-*┊*
+*┊»*
 *┊»* 🎼 𝗧𝗶́𝘁𝘂𝗹𝗼: ${title}
 *┊»* ⏱️ 𝗗𝘂𝗿𝗮𝗰𝗶𝗼́𝗻: ${fduration}
 *┊»* 👤 𝗔𝘂𝘁𝗼𝗿: ${channel}
 *┊»* 👀 𝗩𝗶𝘀𝘁𝗮𝘀: ${views}
+*┊»* 🔗 𝗘𝗻𝗹𝗮𝗰𝗲: ${videoUrl}
 *╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫*
-  *» 𝘌𝘕𝘝𝘐𝘈𝘕𝘋𝘖 𝘈𝘜𝘋𝘐𝘖  🎧*
-  *» 𝘈𝘎𝘜𝘈𝘙𝘋𝘌 𝘜𝘕 𝘗𝘖𝘊𝘖...*
+*» 𝘌𝘕𝘝𝘐𝘈𝘕𝘋𝘖 𝘈𝘜𝘋𝘐𝘖  🎧*
+*» 𝘈𝘎𝘜𝘈𝘙𝘋𝘌 𝘜𝘕 𝘗𝘖𝘊𝘖...*
 
  *⇆‌ ㅤ◁ㅤㅤ❚❚ㅤㅤ▷ㅤ↻*`;
 
@@ -99,21 +100,17 @@ const handler = async (msg, { conn, text }) => {
       react: { text: '✅', key: msg.key }
     });
 
-} catch (err) {
-  console.error(err);
+  } catch (err) {
+    console.error(err);
+    await conn.sendMessage(msg.key.remoteJid, {
+      text: `❌ *Error:* ${err.message}`
+    }, { quoted: msg });
 
-  await conn.sendMessage(msg.key.remoteJid, {
-    text: `➤ \`UPS, ERROR\` ❌
-
-𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗋𝗈𝗅𝗂𝗍𝖺* *.𝗌𝗉𝗈𝗍𝗂𝖿𝗒* 𝗈 *.𝗉𝗅𝖺𝗒2*
-".𝗋𝖾𝗉𝗈𝗋𝗍 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
-> 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗍𝖺𝗇 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
-  }, { quoted: msg });
-
-  await conn.sendMessage(msg.key.remoteJid, {
-    react: { text: '❌', key: msg.key }
-  });
-}
+    await conn.sendMessage(msg.key.remoteJid, {
+      react: { text: '❌', key: msg.key }
+    });
+  }
+};
 
 handler.command = ['play'];
 module.exports = handler;
