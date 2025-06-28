@@ -4,9 +4,7 @@ const axios = require('axios');
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const MAX_RETRIES = 2;
 const TIMEOUT_MS = 10000;
-const RETRY_DELAY_MS = 12000;
 
 function isUserBlocked(userId) {
   try {
@@ -17,62 +15,38 @@ function isUserBlocked(userId) {
   }
 }
 
-async function getDownloadUrl(videoTitle) {
-  const apis = [
-    { url: `https://api.neoxr.eu/api/play?q=${encodeURIComponent(videoTitle)}&apikey=russellxz`, type: 'neoxr' },
-    { url: `https://api.vreden.my.id/api/ytmp3?url=`, type: 'vreden' }
-  ];
+async function getDownloadUrl(query) {
+  try {
+    const apiUrl = `https://api.neoxr.eu/api/play?q=${encodeURIComponent(query)}&apikey=russellxz`;
+    const response = await axios.get(apiUrl, { timeout: TIMEOUT_MS });
 
-  for (const api of apis) {
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      try {
-        const response = await axios.get(api.url, { timeout: TIMEOUT_MS });
-
-        if (api.type === 'neoxr' && response.data?.status === true && response.data?.data?.audio?.url) {
-          return {
-            url: response.data.data.audio.url.trim(),
-            title: response.data.data.title
-          };
-        }
-
-        if (
-          api.type === 'vreden' &&
-          response.data?.status === 200 &&
-          response.data?.result?.download?.url &&
-          response.data?.result?.download?.status === true
-        ) {
-          return {
-            url: response.data.result.download.url.trim(),
-            title: response.data.result.metadata.title
-          };
-        }
-
-      } catch {
-        if (attempt < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
-      }
+    if (response.data?.status === true && response.data?.data?.audio?.url) {
+      return {
+        url: response.data.data.audio.url.trim(),
+        title: response.data.data.title
+      };
     }
+  } catch {
+    return null;
   }
 
   return null;
 }
 
 async function sendAudioNormal(conn, chatId, audioUrl, quotedMsg) {
-  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    try {
-      await conn.sendMessage(
-        chatId,
-        {
-          audio: { url: audioUrl },
-          mimetype: 'audio/mpeg'
-        },
-        { quoted: quotedMsg }
-      );
-      return true;
-    } catch {
-      if (attempt < MAX_RETRIES - 1) await wait(RETRY_DELAY_MS);
-    }
+  try {
+    await conn.sendMessage(
+      chatId,
+      {
+        audio: { url: audioUrl },
+        mimetype: 'audio/mpeg'
+      },
+      { quoted: quotedMsg }
+    );
+    return true;
+  } catch {
+    return false;
   }
-  return false;
 }
 
 const handler = async (msg, { conn, args }) => {
@@ -105,7 +79,7 @@ const handler = async (msg, { conn, args }) => {
     if (!searchResults?.videos?.length) throw new Error('No se encontraron resultados.');
 
     const videoInfo = searchResults.videos[0];
-    const { title, timestamp: duration, views, ago, url: videoUrl, image: thumbnail } = videoInfo;
+    const { title, timestamp: duration, url: videoUrl, image: thumbnail } = videoInfo;
 
     let imageBuffer = null;
     try {
@@ -128,7 +102,7 @@ const handler = async (msg, { conn, args }) => {
       caption: caption
     }, { quoted: msg });
 
-    const downloadData = await getDownloadUrl(title);
+    const downloadData = await getDownloadUrl(query);
     if (!downloadData || !downloadData.url) {
       throw new Error('No se pudo descargar la música.');
     }
