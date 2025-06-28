@@ -50,11 +50,10 @@ module.exports = async (msg, { conn, text }) => {
 ┃⥤⏱️ *Duración:* ${duration}
 ┃⥤👁️ *Vistas:* ${views.toLocaleString()}
 ┃⥤👤 *Autor:* ${author.name}
-┃⥤🔗 *Link:* ${videoUrl}
 ┗━━━━━━━━━━━━━━━┛
 
 ┏━━━━━━━━━━━━━━━━
-┃↦📥 *Reacciona para descargar:*
+┃📥 *Reacciona para descargar:*
 ┃↦👍 Audio MP3
 ┃↦❤️ Video MP4
 ┃↦📄 Audio como Documento
