@@ -99,17 +99,17 @@ const handler = async (msg, { conn, text }) => {
       react: { text: '✅', key: msg.key }
     });
 
-  } catch (err) {
+} catch (err) {
     console.error(err);
+
     await conn.sendMessage(msg.key.remoteJid, {
-      text: `❌ *Error:* ${err.message}`
+      text: `➤ \`UPS, ERROR\` ❌\n\n𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗋𝗈𝗅𝗂𝗍𝖺* *.𝗉𝗅𝖺𝗒1* 𝗈 *.𝗉𝗅𝖺𝗒2*\n".𝗋𝖾𝗉𝗈𝗋𝗍 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"\n> 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗍𝖺𝗇 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
     }, { quoted: msg });
 
     await conn.sendMessage(msg.key.remoteJid, {
       react: { text: '❌', key: msg.key }
     });
   }
-};
 
 handler.command = ['play'];
 module.exports = handler;
