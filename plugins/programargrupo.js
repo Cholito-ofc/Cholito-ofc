@@ -18,144 +18,125 @@ const zonasAlias = {
 };
 
 function convertirHora(horaStr) {
-    const match = horaStr.match(/(\d{1,2}):(\d{2})\s*(am|pm)/i);
-    if (!match) return null;
-    let [_, h, m, ap] = match;
-    h = parseInt(h);
-    m = m.padStart(2, "0");
-    ap = ap.toLowerCase();
-    if (ap === "pm" && h !== 12) h += 12;
-    if (ap === "am" && h === 12) h = 0;
-    return `${h.toString().padStart(2, "0")}:${m}`;
+  const match = horaStr.match(/(\d{1,2}):(\d{2})\s*(am|pm)/i);
+  if (!match) return null;
+  let [_, h, m, ap] = match;
+  h = parseInt(h);
+  m = m.padStart(2, "0");
+  ap = ap.toLowerCase();
+  if (ap === "pm" && h !== 12) h += 12;
+  if (ap === "am" && h === 12) h = 0;
+  return `${h.toString().padStart(2, "0")}:${m}`;
+}
+
+function formatearHora12(hora24) {
+  let [h, m] = hora24.split(":").map(Number);
+  const ap = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  return `${h}:${m.toString().padStart(2, "0")} ${ap}`;
 }
 
 function cargarHorarios() {
-    if (!fs.existsSync(horariosPath)) return {};
-    return JSON.parse(fs.readFileSync(horariosPath, "utf-8"));
+  if (!fs.existsSync(horariosPath)) return {};
+  return JSON.parse(fs.readFileSync(horariosPath, "utf-8"));
 }
 
 function guardarHorarios(data) {
-    fs.writeFileSync(horariosPath, JSON.stringify(data, null, 2));
+  fs.writeFileSync(horariosPath, JSON.stringify(data, null, 2));
 }
 
 const handler = async (msg, { conn, args }) => {
-    const chatId = msg.key.remoteJid;
-    const isGroup = chatId.endsWith("@g.us");
-    const senderId = msg.key.participant || msg.key.remoteJid;
-    const senderNum = senderId.replace(/[^0-9]/g, "");
-    const isOwner = global.owner.some(([id]) => id === senderNum);
-    const isFromMe = msg.key.fromMe;
+  const chatId = msg.key.remoteJid;
+  const isGroup = chatId.endsWith("@g.us");
+  const senderId = msg.key.participant || msg.key.remoteJid;
+  const senderNum = senderId.replace(/[^0-9]/g, "");
+  const isOwner = global.owner.some(([id]) => id === senderNum);
+  const isFromMe = msg.key.fromMe;
 
-    if (isGroup && !isOwner && !isFromMe) {
-        const metadata = await conn.groupMetadata(chatId);
-        const participant = metadata.participants.find(p => p.id === senderId);
-        const isAdmin = participant?.admin === "admin" || participant?.admin === "superadmin";
-        if (!isAdmin) {
-            return conn.sendMessage(chatId, { text: "🚫 *Solo admins, owner o bot pueden usar este comando.*" }, { quoted: msg });
-        }
-    } else if (!isGroup && !isOwner && !isFromMe) {
-        return conn.sendMessage(chatId, { text: "🚫 *Solo el owner o el bot pueden usar este comando en privado.*" }, { quoted: msg });
+  if (isGroup && !isOwner && !isFromMe) {
+    const metadata = await conn.groupMetadata(chatId);
+    const participant = metadata.participants.find(p => p.id === senderId);
+    const isAdmin = participant?.admin === "admin" || participant?.admin === "superadmin";
+    if (!isAdmin) {
+      return conn.sendMessage(chatId, { text: "🚫 *Solo admins, owner o bot pueden usar este comando.*" }, { quoted: msg });
     }
+  } else if (!isGroup && !isOwner && !isFromMe) {
+    return conn.sendMessage(chatId, { text: "🚫 *Solo el owner o el bot pueden usar este comando en privado.*" }, { quoted: msg });
+  }
 
-    // Cambiar zona horaria: .programargrupo zona America/Mexico_City
-    if (args[0] && args[0].toLowerCase() === "zona") {
-        const zona = args[1];
-        if (!zonas.includes(zona)) {
-            return conn.sendMessage(chatId, {
-                text: `❌ *Zona horaria no soportada.*\n*Soportadas:* ${zonas.map(z=>`\n• ${z}`).join("")}`,
-                quoted: msg
-            });
-        }
-        let data = cargarHorarios();
-        if (!data[chatId]) data[chatId] = {};
-        data[chatId].zona = zona;
-        guardarHorarios(data);
-        return conn.sendMessage(chatId, {
-            text: `🌎 *Zona horaria del grupo configurada a:* _${zona}_`,
-            quoted: msg
-        });
+  const rawText = args.join(" ").trim();
+  const lowerText = rawText.toLowerCase();
+
+  let zonaDetectada;
+  for (let alias in zonasAlias) {
+    if (lowerText.endsWith(" " + alias)) {
+      zonaDetectada = zonasAlias[alias];
+      break;
     }
+  }
 
-    // --- PARSEO FLEXIBLE DEL COMANDO ---
-    const text = args.join(" ").trim().toLowerCase();
+  let textoSinZona = zonaDetectada
+    ? rawText.replace(new RegExp(`\\s*(${Object.keys(zonasAlias).join("|")})$`, "i"), "").trim()
+    : rawText;
 
-    // Detectar zona horaria tipo "méxico" al final
-    let zonaDetectada;
-    for (let alias in zonasAlias) {
-        if (text.endsWith(alias)) {
-            zonaDetectada = zonasAlias[alias];
-            break;
-        }
+  let abrirMatch = textoSinZona.match(/abrir\s+(\d{1,2}:\d{2}\s*(am|pm)?)/i);
+  let cerrarMatch = textoSinZona.match(/cerrar\s+(\d{1,2}:\d{2}\s*(am|pm)?)/i);
+
+  if (!abrirMatch && !cerrarMatch) {
+    return conn.sendMessage(chatId, {
+      text: `🌅 *Programación de grupo*\n\n` +
+        `*Uso correcto:*\n` +
+        `» .programargrupo abrir 8:00 am cerrar 10:30 pm\n` +
+        `» .programargrupo abrir 8:00 cerrar 10:30 pm\n` +
+        `» .programargrupo cerrar 10:30 abrir 8:00 am México\n` +
+        `» .programargrupo zona America/Mexico_City\n\n` +
+        `*Ejemplos:*\n` +
+        `• .programargrupo abrir 7:45 am\n` +
+        `• .programargrupo cerrar 11:15 pm\n` +
+        `• .programargrupo abrir 8:30 am cerrar 10:00 pm\n` +
+        `• .programargrupo abrir 8:30 cerrar 10:00 pm México\n` +
+        `• .programargrupo zona America/Bogota\n\n` +
+        `⏰ *Puedes usar hora y minutos, y puedes poner am o pm solo al final.*\n` +
+        `🌎 *Zonas soportadas:* México, Bogota, Lima, Argentina`,
+      quoted: msg
+    });
+  }
+
+  let data = cargarHorarios();
+  if (!data[chatId]) data[chatId] = {};
+  let msgBonito = "🕑 *Nuevos horarios programados:*\n";
+
+  if (abrirMatch) {
+    let horaStr = abrirMatch[1].trim();
+    if (!horaStr.match(/am|pm/i) && cerrarMatch?.[2]) {
+      horaStr += ` ${cerrarMatch[2]}`;
     }
+    const hora24 = convertirHora(horaStr);
+    if (!hora24) return conn.sendMessage(chatId, { text: "❌ *Formato de hora inválido para abrir.*\nEjemplo: 7:30 am", quoted: msg });
+    data[chatId].abrir = hora24;
+    msgBonito += `🌤️  Abrir grupo: *${formatearHora12(hora24)}* (${hora24})\n`;
+  }
 
-    let comando = text;
-    if (zonaDetectada) {
-        comando = comando.replace(new RegExp(`\\s*(${Object.keys(zonasAlias).join("|")})$`, "i"), "").trim();
+  if (cerrarMatch) {
+    let horaStr = cerrarMatch[1].trim();
+    if (!horaStr.match(/am|pm/i) && abrirMatch?.[2]) {
+      horaStr += ` ${abrirMatch[2]}`;
     }
+    const hora24 = convertirHora(horaStr);
+    if (!hora24) return conn.sendMessage(chatId, { text: "❌ *Formato de hora inválido para cerrar.*\nEjemplo: 11:15 pm", quoted: msg });
+    data[chatId].cerrar = hora24;
+    msgBonito += `🌙  Cerrar grupo: *${formatearHora12(hora24)}* (${hora24})\n`;
+  }
 
-    // Buscar si am/pm sólo viene al final
-    let ampmMatch = comando.match(/\b(am|pm)\b$/i);
-    let ampm = ampmMatch ? ampmMatch[1].toLowerCase() : null;
+  if (zonaDetectada) data[chatId].zona = zonaDetectada;
+  if (!data[chatId].zona) data[chatId].zona = "America/Mexico_City";
 
-    // Buscar ambos comandos, en cualquier orden, y aplicar am/pm si sólo está al final
-    let abrirMatch, cerrarMatch;
-    if (ampm) {
-        abrirMatch = comando.match(/abrir\s+(\d{1,2}:\d{2})/i);
-        cerrarMatch = comando.match(/cerrar\s+(\d{1,2}:\d{2})/i);
-        if (abrirMatch) abrirMatch[1] = abrirMatch[1] + " " + ampm;
-        if (cerrarMatch) cerrarMatch[1] = cerrarMatch[1] + " " + ampm;
-    } else {
-        abrirMatch = comando.match(/abrir\s+(\d{1,2}:\d{2}\s*(?:am|pm))/i);
-        cerrarMatch = comando.match(/cerrar\s+(\d{1,2}:\d{2}\s*(?:am|pm))/i);
-    }
+  guardarHorarios(data);
 
-    if (!abrirMatch && !cerrarMatch) {
-        return conn.sendMessage(chatId, {
-            text: `🌅 *Programación de grupo*\n\n` +
-                  `*Uso correcto:*\n` +
-                  `» .programargrupo abrir 8:00 am cerrar 10:30 pm\n` +
-                  `» .programargrupo abrir 8:00 cerrar 10:30 pm\n` +
-                  `» .programargrupo cerrar 10:30 abrir 8:00 am México\n` +
-                  `» .programargrupo zona America/Mexico_City\n\n` +
-                  `*Ejemplos:*\n` +
-                  `• .programargrupo abrir 7:45 am\n` +
-                  `• .programargrupo cerrar 11:15 pm\n` +
-                  `• .programargrupo abrir 8:30 am cerrar 10:00 pm\n` +
-                  `• .programargrupo abrir 8:30 cerrar 10:00 pm México\n` +
-                  `• .programargrupo zona America/Bogota\n\n` +
-                  `⏰ *Puedes usar hora y minutos, y puedes poner am o pm solo al final.*\n` +
-                  `🌎 *Zonas soportadas:* México, Bogota, Lima, Argentina`,
-            quoted: msg
-        });
-    }
+  msgBonito += `\n🌎 Zona horaria: *${data[chatId].zona}*`;
+  msgBonito += "\n🔄 *El bot abrirá y cerrará el grupo automáticamente a esas horas!*";
 
-    let data = cargarHorarios();
-    if (!data[chatId]) data[chatId] = {};
-    let msgBonito = "🕑 *Nuevos horarios programados:*\n";
-
-    if (abrirMatch) {
-        const hora24 = convertirHora(abrirMatch[1].trim());
-        if (!hora24) return conn.sendMessage(chatId, { text: "❌ *Formato de hora inválido para abrir.*\nEjemplo: 7:30 am", quoted: msg });
-        data[chatId].abrir = hora24;
-        msgBonito += `🌤️  Abrir grupo: *${abrirMatch[1].toUpperCase()}* (${hora24})\n`;
-    }
-    if (cerrarMatch) {
-        const hora24 = convertirHora(cerrarMatch[1].trim());
-        if (!hora24) return conn.sendMessage(chatId, { text: "❌ *Formato de hora inválido para cerrar.*\nEjemplo: 11:15 pm", quoted: msg });
-        data[chatId].cerrar = hora24;
-        msgBonito += `🌙  Cerrar grupo: *${cerrarMatch[1].toUpperCase()}* (${hora24})\n`;
-    }
-
-    if (zonaDetectada) {
-        data[chatId].zona = zonaDetectada;
-    }
-    if (!data[chatId].zona) data[chatId].zona = "America/Mexico_City"; // Default México
-
-    guardarHorarios(data);
-
-    msgBonito += `\n🌎 Zona horaria: *${data[chatId].zona}*`;
-    msgBonito += "\n🔄 *El bot abrirá y cerrará el grupo automáticamente a esas horas!*";
-    await conn.sendMessage(chatId, { text: msgBonito, quoted: msg });
+  await conn.sendMessage(chatId, { text: msgBonito, quoted: msg });
 };
 
 handler.command = ["programargrupo"];
