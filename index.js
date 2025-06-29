@@ -403,23 +403,29 @@ const farewellTexts = [
 
 // BIENVENIDA: solo cuando alguien entra
 const axios = require("axios");
+const Jimp = require("jimp");
 
 if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
     const defaultPicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
-
     let thumbnailBuffer;
 
     try {
       const realUrl = await sock.profilePictureUrl(participant, "image");
       const res = await axios.get(realUrl, { responseType: "arraybuffer" });
-      thumbnailBuffer = Buffer.from(res.data); // Clona el buffer
+      thumbnailBuffer = Buffer.from(res.data);
     } catch (e) {
       try {
-        const resDefault = await axios.get(defaultPicUrl, { responseType: "arraybuffer" });
-        thumbnailBuffer = Buffer.from(resDefault.data); // También clonado
+        const res = await axios.get(defaultPicUrl, { responseType: "arraybuffer" });
+        const jimpImg = await Jimp.read(res.data);
+
+        // Cambiar un píxel invisible (posición 0,0) a sí mismo para forzar nueva salida
+        jimpImg.setPixelColor(jimpImg.getPixelColor(0, 0), 0, 0);
+
+        // Reexportar imagen a buffer
+        thumbnailBuffer = await jimpImg.getBufferAsync(Jimp.MIME_JPEG);
       } catch (err2) {
         thumbnailBuffer = null;
       }
