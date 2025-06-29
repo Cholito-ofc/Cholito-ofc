@@ -464,10 +464,14 @@ if (update.action === "add" && welcomeActivo) {
 }
 
 // DESPEDIDA: solo cuando alguien sale
+const axios = require("axios");
+const fs = require("fs");
+
 if (update.action === "remove" && despedidasActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
-    // Carga el mensaje personalizado desde el archivo byemsgs.json
+
+    // Cargar mensaje personalizado de byemsgs.json
     let customBye = "";
     try {
       const data = fs.existsSync("./byemsgs.json")
@@ -476,18 +480,26 @@ if (update.action === "remove" && despedidasActivo) {
       customBye = data[update.id];
     } catch (e) {}
 
-    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
-    try {
-      profilePicUrl = await sock.profilePictureUrl(participant, "image");
-    } catch (err) {}
+    const defaultPicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
+    let thumbnailBuffer;
 
-    // Mensaje predeterminado con cuadritos
+    try {
+      const realUrl = await sock.profilePictureUrl(participant, "image");
+      const res = await axios.get(realUrl, { responseType: "arraybuffer" });
+      thumbnailBuffer = res.data;
+    } catch (e) {
+      try {
+        const fallback = await axios.get(defaultPicUrl, { responseType: "arraybuffer" });
+        thumbnailBuffer = fallback.data;
+      } catch (err2) {
+        thumbnailBuffer = null;
+      }
+    }
+
     const defaultBye = `╔═══════════════════\n║  👋  Hasta pronto, ${mention}!\n║  Esperamos verte de nuevo en el grupo.\n╚═══════════════════`;
 
-    // Usa el personalizado si existe, si no el predeterminado
-    let byeText;
+    let byeText = "";
     if (customBye) {
-      // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio
       byeText = /@user/gi.test(customBye)
         ? customBye.replace(/@user/gi, mention)
         : `${mention} ${customBye}`;
@@ -496,9 +508,20 @@ if (update.action === "remove" && despedidasActivo) {
     }
 
     await sock.sendMessage(update.id, {
-      image: { url: profilePicUrl },
-      caption: byeText,
-      mentions: [participant]
+      text: byeText,
+      contextInfo: {
+        mentionedJid: [participant],
+        forwardingScore: 9999,
+        isForwarded: true,
+        externalAdReply: {
+          title: "❌ Usuario salió",
+          body: "⚡ KilluaBot - Despedida ⚡",
+          mediaType: 1,
+          thumbnail: thumbnailBuffer,
+          renderLargerThumbnail: true,
+          showAdAttribution: false
+        }
+      }
     });
   }
 }
