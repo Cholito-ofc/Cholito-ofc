@@ -1,6 +1,6 @@
 (async () => {
 let canalId = ["120363400979242290@newsletter"];  
-let canalNombre = ["👑 𝙺𝙸𝙻𝙻𝚄𝙰-𝙱𝙾𝚃 👑"]
+let canalNombre = ["𝗞𝗜𝗟𝗟𝗨𝗔-𝗕𝗢𝗧 👑"]
   function setupConnection(conn) {
   conn.sendMessage2 = async (chat, content, m, options = {}) => {
     const firstChannel = { 
@@ -402,49 +402,29 @@ const farewellTexts = [
 ];
 
 // BIENVENIDA: solo cuando alguien entra
-const axios = require("axios");
-const Jimp = require("jimp");
-
 if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
-    const defaultPicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
-    let thumbnailBuffer;
-
+    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
     try {
-      const realUrl = await sock.profilePictureUrl(participant, "image");
-      const res = await axios.get(realUrl, { responseType: "arraybuffer" });
-      thumbnailBuffer = Buffer.from(res.data);
-    } catch (e) {
-      try {
-        const res = await axios.get(defaultPicUrl, { responseType: "arraybuffer" });
-        const jimpImg = await Jimp.read(res.data);
-
-        // Cambiar un píxel invisible (posición 0,0) a sí mismo para forzar nueva salida
-        jimpImg.setPixelColor(jimpImg.getPixelColor(0, 0), 0, 0);
-
-        // Reexportar imagen a buffer
-        thumbnailBuffer = await jimpImg.getBufferAsync(Jimp.MIME_JPEG);
-      } catch (err2) {
-        thumbnailBuffer = null;
-      }
-    }
+      profilePicUrl = await sock.profilePictureUrl(participant, "image");
+    } catch (err) {}
 
     let textoFinal = "";
     if (customMessage) {
+      // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio, siempre con manito y salto de línea
       if (/(@user)/gi.test(customMessage)) {
         textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${customMessage.replace(/@user/gi, mention)}`;
       } else {
         textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${customMessage}`;
       }
     } else {
+      // Si no hay mensaje personalizado, solo manda la descripción del grupo
       let groupDesc = "";
       try {
         const metadata = await sock.groupMetadata(update.id);
-        groupDesc = metadata.desc
-          ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}`
-          : "\n\n📜 *Este grupo no tiene descripción.*";
+        groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
       } catch (err) {
         groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
       }
@@ -452,20 +432,9 @@ if (update.action === "add" && welcomeActivo) {
     }
 
     await sock.sendMessage(update.id, {
-      text: textoFinal,
-      contextInfo: {
-        mentionedJid: [participant],
-        forwardingScore: 9999,
-        isForwarded: true,
-        externalAdReply: {
-          title: "👤 ¡Nuevo Miembro!",
-          body: "⚡ KilluaBot Bienvenido/a ⚡",
-          mediaType: 1,
-          thumbnail: thumbnailBuffer,
-          renderLargerThumbnail: true,
-          showAdAttribution: false
-        }
-      }
+      image: { url: profilePicUrl },
+      caption: textoFinal,
+      mentions: [participant] // SIEMPRE etiqueta al usuario
     });
   }
 }
@@ -474,8 +443,7 @@ if (update.action === "add" && welcomeActivo) {
 if (update.action === "remove" && despedidasActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
-
-    // Cargar mensaje personalizado de byemsgs.json
+    // Carga el mensaje personalizado desde el archivo byemsgs.json
     let customBye = "";
     try {
       const data = fs.existsSync("./byemsgs.json")
@@ -484,26 +452,18 @@ if (update.action === "remove" && despedidasActivo) {
       customBye = data[update.id];
     } catch (e) {}
 
-    const defaultPicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
-    let thumbnailBuffer;
-
+    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
     try {
-      const realUrl = await sock.profilePictureUrl(participant, "image");
-      const res = await axios.get(realUrl, { responseType: "arraybuffer" });
-      thumbnailBuffer = res.data;
-    } catch (e) {
-      try {
-        const fallback = await axios.get(defaultPicUrl, { responseType: "arraybuffer" });
-        thumbnailBuffer = fallback.data;
-      } catch (err2) {
-        thumbnailBuffer = null;
-      }
-    }
+      profilePicUrl = await sock.profilePictureUrl(participant, "image");
+    } catch (err) {}
 
+    // Mensaje predeterminado con cuadritos
     const defaultBye = `╔═══════════════════\n║  👋  Hasta pronto, ${mention}!\n║  Esperamos verte de nuevo en el grupo.\n╚═══════════════════`;
 
-    let byeText = "";
+    // Usa el personalizado si existe, si no el predeterminado
+    let byeText;
     if (customBye) {
+      // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio
       byeText = /@user/gi.test(customBye)
         ? customBye.replace(/@user/gi, mention)
         : `${mention} ${customBye}`;
@@ -512,20 +472,9 @@ if (update.action === "remove" && despedidasActivo) {
     }
 
     await sock.sendMessage(update.id, {
-      text: byeText,
-      contextInfo: {
-        mentionedJid: [participant],
-        forwardingScore: 9999,
-        isForwarded: true,
-        externalAdReply: {
-          title: "❌ Usuario salió",
-          body: "⚡ KilluaBot - Despedida ⚡",
-          mediaType: 1,
-          thumbnail: thumbnailBuffer,
-          renderLargerThumbnail: true,
-          showAdAttribution: false
-        }
-      }
+      image: { url: profilePicUrl },
+      caption: byeText,
+      mentions: [participant]
     });
   }
 }
