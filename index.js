@@ -464,7 +464,6 @@ if (update.action === "add" && welcomeActivo) {
 }
 
 // DESPEDIDA: solo cuando alguien sale
-const axios = require("axios");
 const fs = require("fs");
 
 if (update.action === "remove" && despedidasActivo) {
