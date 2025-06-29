@@ -409,26 +409,45 @@ if (update.action === "add" && welcomeActivo) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
 
- const defaultPicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
-let thumbnailBuffer;
+    const defaultPicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
+    let thumbnailBuffer;
 
-try {
-  // Intentar obtener y descargar la foto real del perfil
-  const realUrl = await sock.profilePictureUrl(participant, "image");
-  if (realUrl && realUrl.startsWith("https://")) {
-    const res = await axios.get(realUrl, { responseType: "arraybuffer" });
-    thumbnailBuffer = res.data;
-  } else throw new Error("URL no válida");
-} catch (e) {
-  // Si falla, descargar imagen predeterminada
-  try {
-    const resDefault = await axios.get(defaultPicUrl, { responseType: "arraybuffer" });
-    thumbnailBuffer = resDefault.data;
-  } catch (err) {
-    thumbnailBuffer = null;
-  }
-}
+    // INTENTO 1: Usar sock.query para obtener foto real
+    try {
+      const node = await sock.query({
+        tag: 'iq',
+        attrs: {
+          to: participant,
+          type: 'get',
+          xmlns: 'w:profile:picture'
+        },
+        content: [{ tag: 'picture', attrs: { type: 'image' } }]
+      });
 
+      const realUrl = node?.content?.[0]?.attrs?.url;
+      if (realUrl && realUrl.startsWith("https://")) {
+        const res = await axios.get(realUrl, { responseType: "arraybuffer" });
+        thumbnailBuffer = res.data;
+      } else throw new Error("No se pudo obtener imagen con query");
+    } catch (e) {
+      // INTENTO 2: esperar y reintentar con profilePictureUrl
+      try {
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        const backupUrl = await sock.profilePictureUrl(participant, "image");
+        const res2 = await axios.get(backupUrl, { responseType: "arraybuffer" });
+        thumbnailBuffer = res2.data;
+      } catch (err) {
+        // INTENTO 3: usar imagen por defecto
+        try {
+          const fallback = await axios.get(defaultPicUrl, { responseType: "arraybuffer" });
+          thumbnailBuffer = fallback.data;
+        } catch (err2) {
+          thumbnailBuffer = null;
+        }
+      }
+    }
+
+    // Crear mensaje personalizado o con descripción
     let textoFinal = "";
     if (customMessage) {
       if (/(@user)/gi.test(customMessage)) {
@@ -449,11 +468,12 @@ try {
       textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
     }
 
+    // Enviar mensaje con miniatura estática tipo tarjeta
     await sock.sendMessage(update.id, {
       text: textoFinal,
       contextInfo: {
         mentionedJid: [participant],
-        jpegThumbnail: thumbnailBuffer, // Miniatura que no se puede abrir
+        jpegThumbnail: thumbnailBuffer,
         forwardingScore: 9999,
         isForwarded: true,
         externalAdReply: {
