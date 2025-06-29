@@ -409,19 +409,25 @@ if (update.action === "add" && welcomeActivo) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
 
-    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
-    try {
-      profilePicUrl = await sock.profilePictureUrl(participant, "image");
-    } catch (err) {}
+ const defaultPicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
+let thumbnailBuffer;
 
-    // Descargar la imagen como buffer para usarla como miniatura
-    let thumbnailBuffer;
-    try {
-      const response = await axios.get(profilePicUrl, { responseType: "arraybuffer" });
-      thumbnailBuffer = response.data;
-    } catch (e) {
-      thumbnailBuffer = null;
-    }
+try {
+  // Intentar obtener y descargar la foto real del perfil
+  const realUrl = await sock.profilePictureUrl(participant, "image");
+  if (realUrl && realUrl.startsWith("https://")) {
+    const res = await axios.get(realUrl, { responseType: "arraybuffer" });
+    thumbnailBuffer = res.data;
+  } else throw new Error("URL no válida");
+} catch (e) {
+  // Si falla, descargar imagen predeterminada
+  try {
+    const resDefault = await axios.get(defaultPicUrl, { responseType: "arraybuffer" });
+    thumbnailBuffer = resDefault.data;
+  } catch (err) {
+    thumbnailBuffer = null;
+  }
+}
 
     let textoFinal = "";
     if (customMessage) {
