@@ -408,46 +408,22 @@ if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
-
     const defaultPicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
     let thumbnailBuffer;
 
-    // INTENTO 1: Usar sock.query para obtener foto real
     try {
-      const node = await sock.query({
-        tag: 'iq',
-        attrs: {
-          to: participant,
-          type: 'get',
-          xmlns: 'w:profile:picture'
-        },
-        content: [{ tag: 'picture', attrs: { type: 'image' } }]
-      });
-
-      const realUrl = node?.content?.[0]?.attrs?.url;
-      if (realUrl && realUrl.startsWith("https://")) {
-        const res = await axios.get(realUrl, { responseType: "arraybuffer" });
-        thumbnailBuffer = res.data;
-      } else throw new Error("No se pudo obtener imagen con query");
+      const realUrl = await sock.profilePictureUrl(participant, "image");
+      const res = await axios.get(realUrl, { responseType: "arraybuffer" });
+      thumbnailBuffer = res.data;
     } catch (e) {
-      // INTENTO 2: esperar y reintentar con profilePictureUrl
       try {
-        await new Promise(resolve => setTimeout(resolve, 5000));
-        const backupUrl = await sock.profilePictureUrl(participant, "image");
-        const res2 = await axios.get(backupUrl, { responseType: "arraybuffer" });
-        thumbnailBuffer = res2.data;
-      } catch (err) {
-        // INTENTO 3: usar imagen por defecto
-        try {
-          const fallback = await axios.get(defaultPicUrl, { responseType: "arraybuffer" });
-          thumbnailBuffer = fallback.data;
-        } catch (err2) {
-          thumbnailBuffer = null;
-        }
+        const fallback = await axios.get(defaultPicUrl, { responseType: "arraybuffer" });
+        thumbnailBuffer = fallback.data;
+      } catch (err2) {
+        thumbnailBuffer = null;
       }
     }
 
-    // Crear mensaje personalizado o con descripción
     let textoFinal = "";
     if (customMessage) {
       if (/(@user)/gi.test(customMessage)) {
@@ -468,12 +444,10 @@ if (update.action === "add" && welcomeActivo) {
       textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
     }
 
-    // Enviar mensaje con miniatura estática tipo tarjeta
     await sock.sendMessage(update.id, {
       text: textoFinal,
       contextInfo: {
         mentionedJid: [participant],
-        jpegThumbnail: thumbnailBuffer,
         forwardingScore: 9999,
         isForwarded: true,
         externalAdReply: {
