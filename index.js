@@ -402,6 +402,8 @@ const farewellTexts = [
 ];
 
 // BIENVENIDA: solo cuando alguien entra
+const axios = require("axios");
+
 if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
@@ -411,6 +413,15 @@ if (update.action === "add" && welcomeActivo) {
     try {
       profilePicUrl = await sock.profilePictureUrl(participant, "image");
     } catch (err) {}
+
+    // Descargar la imagen como buffer para usarla como miniatura
+    let thumbnailBuffer;
+    try {
+      const response = await axios.get(profilePicUrl, { responseType: "arraybuffer" });
+      thumbnailBuffer = response.data;
+    } catch (e) {
+      thumbnailBuffer = null;
+    }
 
     let textoFinal = "";
     if (customMessage) {
@@ -423,7 +434,9 @@ if (update.action === "add" && welcomeActivo) {
       let groupDesc = "";
       try {
         const metadata = await sock.groupMetadata(update.id);
-        groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
+        groupDesc = metadata.desc
+          ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}`
+          : "\n\n📜 *Este grupo no tiene descripción.*";
       } catch (err) {
         groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
       }
@@ -434,12 +447,14 @@ if (update.action === "add" && welcomeActivo) {
       text: textoFinal,
       contextInfo: {
         mentionedJid: [participant],
+        jpegThumbnail: thumbnailBuffer, // Miniatura que no se puede abrir
+        forwardingScore: 9999,
+        isForwarded: true,
         externalAdReply: {
           title: "👤 ¡Nuevo Miembro!",
           body: "⚡ KilluaBot Bienvenido/a ⚡",
-          thumbnailUrl: profilePicUrl,
-          sourceUrl: `https://wa.me/${participant.split("@")[0]}`,
           mediaType: 1,
+          thumbnail: thumbnailBuffer,
           renderLargerThumbnail: true,
           showAdAttribution: false
         }
