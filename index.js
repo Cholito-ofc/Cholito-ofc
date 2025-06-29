@@ -408,20 +408,19 @@ if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
-    const defaultPicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
-    let thumbnailBuffer;
 
+    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
     try {
-      const realUrl = await sock.profilePictureUrl(participant, "image");
-      const res = await axios.get(realUrl, { responseType: "arraybuffer" });
-      thumbnailBuffer = res.data;
+      profilePicUrl = await sock.profilePictureUrl(participant, "image");
+    } catch (err) {}
+
+    // Descargar la imagen como buffer para usarla como miniatura
+    let thumbnailBuffer;
+    try {
+      const response = await axios.get(profilePicUrl, { responseType: "arraybuffer" });
+      thumbnailBuffer = response.data;
     } catch (e) {
-      try {
-        const fallback = await axios.get(defaultPicUrl, { responseType: "arraybuffer" });
-        thumbnailBuffer = fallback.data;
-      } catch (err2) {
-        thumbnailBuffer = null;
-      }
+      thumbnailBuffer = null;
     }
 
     let textoFinal = "";
@@ -448,6 +447,7 @@ if (update.action === "add" && welcomeActivo) {
       text: textoFinal,
       contextInfo: {
         mentionedJid: [participant],
+        jpegThumbnail: thumbnailBuffer, // Miniatura que no se puede abrir
         forwardingScore: 9999,
         isForwarded: true,
         externalAdReply: {
