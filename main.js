@@ -3962,6 +3962,7 @@ case 'menu': {
 ┃➜ ${global.prefix}speedtest
 ┃➜ ${global.prefix}ping
 ┃➜ ${global.prefix}creador
+┃➜ ${global.prefix}𝗁𝗈𝗋𝖺𝗋𝗂𝗈
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 ╭━━[ MENÚS DISPONIBLES 🗂️ ]━⬣
@@ -4002,6 +4003,7 @@ case 'menu': {
 
 ╭━━[ DESCARGAS 📥 ]━⬣
 ┃➜ ${global.prefix}play
+┃➜ ${global.prefix}𝗉𝗅𝖺𝗒𝗉𝗋𝗈
 ┃➜ ${global.prefix}play1
 ┃➜ ${global.prefix}play2
 ┃➜ ${global.prefix}play3
