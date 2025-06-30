@@ -14811,7 +14811,7 @@ case "kick": {
     const sender = (msg.key.participant || msg.participant || msg.key.remoteJid).replace(/[^0-9]/g, "");
     const isGroup = chatId.endsWith("@g.us");
 
-    await sock.sendMessage(chatId, { react: { text: "🛑", key: msg.key } });
+    await sock.sendMessage(chatId, { react: { text: "☠️", key: msg.key } });
 
     if (!isGroup) {
       return await sock.sendMessage(chatId, {
@@ -14865,7 +14865,7 @@ case "kick": {
     await sock.groupParticipantsUpdate(chatId, [userToKick], "remove");
 
     await sock.sendMessage(chatId, {
-      text: `🚷 *El usuario @${userToKick.split("@")[0]} ha sido expulsado${isTargetAdmin ? ' (era administrador)' : ''} del grupo.*`,
+      text: `*_El usuario @${userToKick.split("@")[0]} ha sido eliminado${isTargetAdmin ? ' (era administrador)' : ''} por inútil_*`,
       mentions: [userToKick]
     }, { quoted: msg });
 
