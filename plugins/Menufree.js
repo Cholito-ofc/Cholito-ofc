@@ -10,7 +10,7 @@ const handler = async (msg, { conn }) => {
     const imgUrl = 'https://cdn.russellxz.click/964add8b.jpeg';
 
     // Texto del menú rediseñado
-    const texto = `🎮 𓆩 𝐊𝐈𝐋𝐋𝐔𝐀 𝟐.𝟎 — 𝐌𝐄𝐍𝐔́ 𝐅𝐑𝐄𝐄 𝐅𝐈𝐑𝐄 𓆪
+    const texto = `🎮 *KILLUA BOT MENU FF*
 
 🍉 𝐌𝐀𝐏𝐀𝐒 𝐃𝐄 𝐉𝐔𝐄𝐆𝐎  
 📍 ➤ ${prefix}mapas
