@@ -20,18 +20,18 @@ const handler = async (msg, { conn }) => {
 🖊️ ➤ ${prefix}setreglas
 
 ⚔️ 𝐋𝐈𝐒𝐓𝐀 𝐕𝐄𝐑𝐒𝐔𝐒 𝐃𝐄 𝐂𝐋𝐀𝐍𝐄𝐒  
-🛡️ ➤ ${prefix}4vs4  
-🛡️ ➤ ${prefix}6vs6  
-🛡️ ➤ ${prefix}12vs12  
-🛡️ ➤ ${prefix}16vs16  
-🛡️ ➤ ${prefix}20vs20  
-🛡️ ➤ ${prefix}24vs24  
-🛡️ ➤ ${prefix}scrims
+⚡ ➤ ${prefix}vs4  
+⚡ ➤ ${prefix}vs6  
+⚡ ➤ ${prefix}vs12  
+⚡ ➤ ${prefix}vs16  
+⚡ ➤ ${prefix}vs20  
+⚡ ➤ ${prefix}vs24  
+⚡ ➤ ${prefix}scrims
 🏹 ➤ ${prefix}guerr
 
 ───────────────────
 👨‍💻 *Desarrollado por:* 𝐂𝐡𝐨𝐥𝐨 𝐱𝐳 
-🤖 *Killua 2.0 Bot — Sección Free Fire*`;
+🤖 *KilluaBot — Sección Free Fire*`;
 
     await conn.sendMessage(chatId, {
       image: { url: imgUrl },
