@@ -12,7 +12,7 @@ const handler = async (msg, { conn }) => {
     // Texto del menú rediseñado
     const texto = `🎮 *KILLUA BOT MENU FF*
 
-🍉 𝐌𝐀𝐏𝐀𝐒 𝐃𝐄 𝐉𝐔𝐄𝐆𝐎  
+🧾 𝐌𝐀𝐏𝐀𝐒 𝐃𝐄 𝐉𝐔𝐄𝐆𝐎  
 📍 ➤ ${prefix}mapas
 
 📃 𝐑𝐄𝐆𝐋𝐀𝐒 𝐃𝐄 𝐄𝐍𝐅𝐑𝐄𝐍𝐓𝐀𝐌𝐈𝐄𝐍𝐓𝐎  
