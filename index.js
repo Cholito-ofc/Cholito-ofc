@@ -727,79 +727,82 @@ try {
   console.error("❌ Error en respuesta play10:", err);
 }
 // === FIN DETECTOR DE RESPUESTAS A MENSAJES DEL BOT ===
-// === INICIO GUARDADO ANTIDELETE ===
-try {
-  const activos = fs.existsSync('./activos.json')
-    ? JSON.parse(fs.readFileSync('./activos.json', 'utf-8'))
-    : {};
-  const activos2 = fs.existsSync('./activos2.json')
-    ? JSON.parse(fs.readFileSync('./activos2.json', 'utf-8'))
-    : {};
-  const isGroup = chatId.endsWith('@g.us');
-  const isAntideleteGroup = activos.antidelete?.[chatId] === true;
-  const isAntideletePriv = activos2.antideletepri === true;
-  const filePath = isGroup ? './antidelete.json' : './antideletepri.json';
+// === INICIO DETECCIÓN DE MENSAJE ELIMINADO ===
+if (msg.message?.protocolMessage?.type === 0) {
+  try {
+    const deletedId = msg.message.protocolMessage.key.id;
+    const whoDeleted = msg.message.protocolMessage.key.participant || msg.key.participant || msg.key.remoteJid;
+    const isGroup = chatId.endsWith('@g.us');
 
-  if ((isGroup && isAntideleteGroup) || (!isGroup && isAntideletePriv)) {
-    if (!fs.existsSync(filePath)) {
-      fs.writeFileSync(filePath, JSON.stringify({}, null, 2));
+    const activos = fs.existsSync('./activos.json') ? JSON.parse(fs.readFileSync('./activos.json', 'utf-8')) : {};
+    const activos2 = fs.existsSync('./activos2.json') ? JSON.parse(fs.readFileSync('./activos2.json', 'utf-8')) : {};
+    const isAntideleteGroup = activos.antidelete?.[chatId] === true;
+    const isAntideletePriv = activos2.antideletepri === true;
+    const filePath = isGroup ? './antidelete.json' : './antideletepri.json';
+
+    if (!(isGroup ? isAntideleteGroup : isAntideletePriv)) return;
+    if (!fs.existsSync(filePath)) return;
+
+    const data = JSON.parse(fs.readFileSync(filePath));
+    const deletedData = data[deletedId];
+    if (!deletedData) return;
+
+    const senderJid = whoDeleted || '';
+    const senderNumber = senderJid.replace(/[^0-9]/g, '') + '@s.whatsapp.net';
+
+    // Validar si quien lo eliminó es el mismo que lo envió
+    const originalSender = (deletedData.sender || '').replace(/[^0-9]/g, '') + '@s.whatsapp.net';
+    if (originalSender !== senderJid) return;
+
+    // Ignorar si es admin
+    if (isGroup) {
+      const meta = await sock.groupMetadata(chatId);
+      const isAdmin = meta.participants.find(p => p.id === senderJid)?.admin;
+      if (isAdmin) return;
     }
 
-    const type = Object.keys(msg.message || {})[0];
-    const content = msg.message[type];
-    const idMsg = msg.key.id;
+    // Obtener nombre del usuario
+    const userName = (await sock.onWhatsApp(senderJid))[0]?.notify || 'Usuario';
 
-    // CAMBIO: Detectar correctamente el senderId incluso en privado
-    const botNumber = sock.user.id.split(":")[0] + "@s.whatsapp.net";
-    const senderId = msg.key.participant || (msg.key.fromMe ? botNumber : msg.key.remoteJid);
+    const mentionTag = [senderJid];
 
-    // Si es multimedia y supera 10 MB, no guardamos NADA
-    if (
-      ['imageMessage','videoMessage','audioMessage','documentMessage','stickerMessage'].includes(type) &&
-      content.fileLength > 10 * 1024 * 1024
-    ) {
-      return; // Sale sin guardar
-    }
+    if (deletedData.media) {
+      const mimetype = deletedData.mimetype || 'application/octet-stream';
+      const buffer = Buffer.from(deletedData.media, "base64");
+      const type = deletedData.type.replace("Message", "");
+      const sendOpts = { quoted: msg };
 
-    const guardado = {
-      chatId,
-      sender: senderId,
-      type,
-      timestamp: Date.now()
-    };
+      sendOpts[type] = buffer;
+      sendOpts.mimetype = mimetype;
 
-    const saveBase64 = async (mediaType, data) => {
-      const stream = await downloadContentFromMessage(data, mediaType);
-      let buffer = Buffer.alloc(0);
-      for await (const chunk of stream) {
-        buffer = Buffer.concat([buffer, chunk]);
+      if (type === "sticker") {
+        const sent = await sock.sendMessage(chatId, sendOpts);
+        await sock.sendMessage(chatId, {
+          text: `📌 *Sticker eliminado por:* @${senderJid.split('@')[0]} (${userName})`,
+          mentions: mentionTag,
+          quoted: sent
+        });
+      } else if (type === "audio") {
+        const sent = await sock.sendMessage(chatId, sendOpts);
+        await sock.sendMessage(chatId, {
+          text: `🎧 *Audio eliminado por:* @${senderJid.split('@')[0]} (${userName})`,
+          mentions: mentionTag,
+          quoted: sent
+        });
+      } else {
+        sendOpts.caption = `📦 *Mensaje eliminado por:* @${senderJid.split('@')[0]} (${userName})`;
+        sendOpts.mentions = mentionTag;
+        await sock.sendMessage(chatId, sendOpts, { quoted: msg });
       }
-      guardado.media = buffer.toString("base64");
-      guardado.mimetype = data.mimetype;
-    };
-
-    if (msg.message?.viewOnceMessageV2) {
-      const inner = msg.message.viewOnceMessageV2.message;
-      const viewType = Object.keys(inner)[0];
-      const viewData = inner[viewType];
-      const mediaType = viewType.replace("Message", "");
-      guardado.type = viewType;
-      await saveBase64(mediaType, viewData);
-
-    } else if (['imageMessage','videoMessage','audioMessage','documentMessage','stickerMessage'].includes(type)) {
-      const mediaType = type.replace('Message', '');
-      await saveBase64(mediaType, content);
-
-    } else if (type === 'conversation' || type === 'extendedTextMessage') {
-      guardado.text = msg.message.conversation || msg.message.extendedTextMessage?.text || '';
+    } else if (deletedData.text) {
+      await sock.sendMessage(chatId, {
+        text: `📝 *Mensaje eliminado:* ${deletedData.text}\n👤 *Usuario:* @${senderJid.split('@')[0]} (${userName})`,
+        mentions: mentionTag
+      }, { quoted: msg });
     }
-
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    data[idMsg] = guardado;
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+  } catch (err) {
+    console.error("❌ Error en lógica antidelete:", err);
   }
-} catch (e) {
-  console.error("❌ Error al guardar mensaje antidelete:", e);
 }
 // === FIN GUARDADO ANTIDELETE ===
 // === INICIO DETECCIÓN DE MENSAJE ELIMINADO ===
