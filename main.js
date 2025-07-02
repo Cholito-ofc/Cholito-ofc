@@ -3777,7 +3777,7 @@ case 'allmenu': {
 
     // 3. Construcción del menú
     const listaFinal = [...comandosSet].sort();
-    let texto = toSmallCaps(`📚 𓆩 MENÚ COMPLETO - KILLUA 2.0 BOT 𓆪
+    let texto = toSmallCaps(`KILLUA BOT MENU COMPLETO ⚡
 
 🚩 TOTAL DE COMANDOS: ${listaFinal.length}
 🚩 PREFIJO ACTUAL: 『${global.prefix}』
@@ -3786,14 +3786,13 @@ case 'allmenu': {
 ━━━━━━━━━━━━━━━━━━━`);
 
     listaFinal.forEach(cmd => {
-      texto += `\n${toSmallCaps(`➤ ${global.prefix}${cmd}`)}`;
+      texto += `\n${toSmallCaps(`*┊»* ${global.prefix}${cmd}`)}`;
     });
 
     texto += toSmallCaps(`
 
 ━━━━━━━━━━━━━━━━━━━
-👨‍💻 DESARROLLADO POR: CHOLO XZ
-🤖 KILLUA 2.0 — ASISTENTE AVANZADO`);
+> DESARROLLADO POR: CHOLO XZ);
 
     // 4. Enviar como imagen + caption
     await sock.sendMessage(chatId, {
