@@ -3701,13 +3701,35 @@ case 'allmenu': {
     const path = require("path");
 
     const chatId = msg.key.remoteJid;
+
+    // Función para convertir texto a smallcaps
+    const toSmallCaps = (text) => {
+      const smallCapsMap = {
+        a: 'ᴀ', b: 'ʙ', c: 'ᴄ', d: 'ᴅ', e: 'ᴇ', f: 'ꜰ',
+        g: 'ɢ', h: 'ʜ', i: 'ɪ', j: 'ᴊ', k: 'ᴋ', l: 'ʟ',
+        m: 'ᴍ', n: 'ɴ', o: 'ᴏ', p: 'ᴘ', q: 'ǫ', r: 'ʀ',
+        s: 's', t: 'ᴛ', u: 'ᴜ', v: 'ᴠ', w: 'ᴡ', x: 'x',
+        y: 'ʏ', z: 'ᴢ',
+        A: 'ᴀ', B: 'ʙ', C: 'ᴄ', D: 'ᴅ', E: 'ᴇ', F: 'ꜰ',
+        G: 'ɢ', H: 'ʜ', I: 'ɪ', J: 'ᴊ', K: 'ᴋ', L: 'ʟ',
+        M: 'ᴍ', N: 'ɴ', O: 'ᴏ', P: 'ᴘ', Q: 'ǫ', R: 'ʀ',
+        S: 's', T: 'ᴛ', U: 'ᴜ', V: 'ᴠ', W: 'ᴡ', X: 'x',
+        Y: 'ʏ', Z: 'ᴢ',
+        " ": " ", ".": ".", ":": ":", "—": "—", "–": "–", "’": "’", "'": "'", "`": "`", "-": "-", "_": "_", "(": "(", ")": ")", "¡": "¡", "!": "!", "?": "?", "¿": "¿", "/": "/", "\\": "\\", "&": "&", "=": "=", "+": "+", "“": "“", "”": "”", '"': '"'
+      };
+      return text
+        .split("")
+        .map((char) => smallCapsMap[char] || char)
+        .join("");
+    };
+
     await sock.sendMessage(chatId, {
       react: { text: "📜", key: msg.key }
     });
 
     const comandos = new Set();
 
-    // 1. Leer comandos del main.js
+    // 1. Comandos del main.js
     const mainPath = path.join(__dirname, "main.js");
     if (fs.existsSync(mainPath)) {
       const contenido = fs.readFileSync(mainPath, "utf-8");
@@ -3718,7 +3740,7 @@ case 'allmenu': {
       }
     }
 
-    // 2. Leer comandos de plugins/
+    // 2. Comandos de plugins/
     const pluginPath = path.join(__dirname, "plugins");
     if (fs.existsSync(pluginPath)) {
       const archivos = fs.readdirSync(pluginPath).filter(f => f.endsWith(".js"));
@@ -3737,26 +3759,26 @@ case 'allmenu': {
 
     const listaFinal = [...comandos].sort();
 
-    // 3. Armar el texto final
-    let texto = `📚 𓆩 𝐌𝐄𝐍𝐔́ 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐎 - 𝐊𝐈𝐋𝐋𝐔𝐀 𝟐.𝟎 𝐁𝐎𝐓 𓆪
+    // 3. Construir el texto con fuente smallcaps
+    let texto = toSmallCaps(`📚 𓆩 MENÚ COMPLETO - KILLUA 2.0 BOT 𓆪
 
-🚩 *Total de comandos:* ${listaFinal.length}
-🚩 *Prefijo actual:* 『${global.prefix}』
-🚩 Usa el prefijo antes de cada comando.
+🚩 TOTAL DE COMANDOS: ${listaFinal.length}
+🚩 PREFIJO ACTUAL: 『${global.prefix}』
+🚩 USA EL PREFIJO ANTES DE CADA COMANDO.
 
-━━━━━━━━━━━━━━━━━━━`;
+━━━━━━━━━━━━━━━━━━━`);
 
     listaFinal.forEach(cmd => {
-      texto += `\n➤ ${global.prefix}${cmd}`;
+      texto += `\n${toSmallCaps(`*┊»* ${global.prefix}${cmd}`)}`;
     });
 
-    texto += `
+    texto += toSmallCaps(`
 
 ━━━━━━━━━━━━━━━━━━━
-👨‍💻 *Desarrollado por:* Cholo XZ
-🤖 *Killua 2.0 — Asistente Avanzado*`;
+👨‍💻 DESARROLLADO POR: CHOLO XZ
+🤖 KILLUA 2.0 — ASISTENTE AVANZADO`);
 
-    // Enviar con imagen
+    // 4. Enviar el menú con imagen
     await sock.sendMessage(chatId, {
       image: { url: "https://cdn.russellxz.click/1e4c9ec7.jpeg" },
       caption: texto
@@ -3765,7 +3787,7 @@ case 'allmenu': {
   } catch (error) {
     console.error("❌ Error en allmenu:", error);
     await sock.sendMessage(msg.key.remoteJid, {
-      text: "❌ *Ocurrió un error al generar el menú. Revisa la consola.*"
+      text: "❌ *Error al generar el menú. Revisa la consola.*"
     }, { quoted: msg });
   }
 
