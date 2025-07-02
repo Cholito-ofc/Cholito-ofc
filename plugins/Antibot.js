@@ -1,12 +1,15 @@
 const fs = require('fs');
 const path = require('path');
 
+// 📁 Rutas de los archivos JSON
 const SETTINGS_PATH = path.join(__dirname, '../antibot-config.json');
 const WARNINGS_PATH = path.join(__dirname, '../antibot-warnings.json');
 
+// 📦 Cargar configuraciones y advertencias
 let settings = fs.existsSync(SETTINGS_PATH) ? JSON.parse(fs.readFileSync(SETTINGS_PATH)) : {};
 let warnings = fs.existsSync(WARNINGS_PATH) ? JSON.parse(fs.readFileSync(WARNINGS_PATH)) : {};
 
+// 💾 Guardar datos en archivos
 function guardarDatos() {
   fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
   fs.writeFileSync(WARNINGS_PATH, JSON.stringify(warnings, null, 2));
@@ -16,6 +19,8 @@ module.exports = {
   name: 'antibot',
   description: 'Activa o desactiva el sistema antibot en grupos',
   group: true,
+
+  // 🛡️ Sistema automático antes de cada mensaje
   async before(msg, { conn, isBotAdmin }) {
     const chatId = msg.key.remoteJid;
     const sender = msg.key.participant || msg.key.remoteJid;
@@ -54,6 +59,7 @@ module.exports = {
     }
   },
 
+  // ⚙️ Comando .antibot on / off
   run: async (msg, { conn, args }) => {
     const chatId = msg.key.remoteJid;
     const sender = msg.key.participant || msg.key.remoteJid;
