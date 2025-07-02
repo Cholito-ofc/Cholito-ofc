@@ -3701,68 +3701,79 @@ case 'allmenu': {
     const path = require("path");
 
     const chatId = msg.key.remoteJid;
-
     await sock.sendMessage(chatId, {
       react: { text: "📜", key: msg.key }
     });
 
-    const categorias = {
-      grupo: "👥",
-      descargas: "📥",
-      utilidad: "🛠",
-      creador: "👨‍💻",
-      juegos: "🎮",
-      anime: "🌸",
-      admin: "🛡",
-      sticker: "🧩",
-      otros: "📦"
-    };
-
-    const pluginsFolder = path.join(__dirname, "plugins");
-    const files = fs.readdirSync(pluginsFolder).filter(f => f.endsWith(".js"));
-
     const comandosPorCategoria = {};
+    const totalComandos = new Set();
 
-    for (const file of files) {
-      try {
-        const pluginPath = path.join(pluginsFolder, file);
-        const plugin = require(pluginPath);
-        const comandos = plugin?.command;
-        const categoria = plugin?.category?.toLowerCase() || "otros";
+    // 🧩 1. Leer comandos del main.js con categorías
+    const mainPath = path.join(__dirname, "main.js");
+    if (fs.existsSync(mainPath)) {
+      const contenido = fs.readFileSync(mainPath, "utf-8");
+      const lineas = contenido.split("\n");
+      let categoriaActual = "📦 OTROS";
 
-        if (!comandos) continue;
+      for (let linea of lineas) {
+        const catMatch = linea.match(/\/\/\s*(.+)/);
+        if (catMatch) {
+          categoriaActual = catMatch[1].trim().toUpperCase();
+          continue;
+        }
 
-        const cmds = Array.isArray(comandos) ? comandos : [comandos];
-
-        if (!comandosPorCategoria[categoria]) comandosPorCategoria[categoria] = [];
-        comandosPorCategoria[categoria].push(...cmds);
-      } catch (err) {
-        console.log(`❌ Plugin roto: ${file}`);
-        console.log("🧠 Error:", err.message);
-        continue; // sigue con los demás plugins
+        const cmdMatch = linea.match(/case\s+['"`]([^'"`]+)['"`]:/);
+        if (cmdMatch) {
+          const comando = cmdMatch[1];
+          comandosPorCategoria[categoriaActual] = comandosPorCategoria[categoriaActual] || [];
+          comandosPorCategoria[categoriaActual].push(comando);
+          totalComandos.add(comando);
+        }
       }
     }
 
-    const total = Object.values(comandosPorCategoria).flat().length;
-    if (total === 0) {
-      return await sock.sendMessage(chatId, {
-        text: "❌ No se encontraron comandos válidos.",
-      }, { quoted: msg });
+    // 🧩 2. Leer comandos de plugins/
+    const pluginPath = path.join(__dirname, "plugins");
+    if (fs.existsSync(pluginPath)) {
+      const archivos = fs.readdirSync(pluginPath).filter(f => f.endsWith(".js"));
+
+      for (const archivo of archivos) {
+        try {
+          const plugin = require(path.join(pluginPath, archivo));
+          const comandos = plugin?.command;
+          const categoria = plugin?.category?.toUpperCase() || "📦 OTROS";
+
+          if (!comandos) continue;
+
+          const cmds = Array.isArray(comandos) ? comandos : [comandos];
+
+          comandosPorCategoria[categoria] = comandosPorCategoria[categoria] || [];
+          cmds.forEach(cmd => {
+            comandosPorCategoria[categoria].push(cmd);
+            totalComandos.add(cmd);
+          });
+        } catch (err) {
+          console.log(`⚠️ Plugin fallido: ${archivo} — ${err.message}`);
+          continue;
+        }
+      }
     }
 
+    // ✅ 3. Construir menú
     let texto = `📚 𓆩 𝐌𝐄𝐍𝐔́ 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐎 - 𝐊𝐈𝐋𝐋𝐔𝐀 𝟐.𝟎 𝐁𝐎𝐓 𓆪
 
-🚩 *Total de comandos:* ${total}
+🚩 *Total de comandos:* ${totalComandos.size}
 🚩 *Prefijo actual:* 『${global.prefix}』
 🚩 Usa el prefijo antes de cada comando.
 
 ━━━━━━━━━━━━━━━━━━━`;
 
-    for (const [cat, cmds] of Object.entries(comandosPorCategoria)) {
-      const emoji = categorias[cat] || "📦";
-      texto += `\n\n${emoji} *${cat.toUpperCase()}*\n`;
-      const únicos = [...new Set(cmds)].sort();
-      únicos.forEach(cmd => {
+    const categoriasOrdenadas = Object.keys(comandosPorCategoria).sort();
+
+    for (const categoria of categoriasOrdenadas) {
+      const cmds = [...new Set(comandosPorCategoria[categoria])].sort();
+      texto += `\n\n${categoria}\n`;
+      cmds.forEach(cmd => {
         texto += `➤ ${global.prefix}${cmd}\n`;
       });
     }
@@ -3773,20 +3784,21 @@ case 'allmenu': {
 👨‍💻 *Desarrollado por:* Cholo XZ
 🤖 *Killua 2.0 — Asistente Avanzado*`;
 
+    // ✅ Enviar con imagen
     await sock.sendMessage(chatId, {
       image: { url: "https://cdn.russellxz.click/1e4c9ec7.jpeg" },
       caption: texto
     }, { quoted: msg });
 
   } catch (error) {
-    console.error("❌ Error al generar el menú general:", error);
+    console.error("❌ Error en allmenu:", error);
     await sock.sendMessage(msg.key.remoteJid, {
-      text: "❌ *Ocurrió un error crítico. Revisa la consola para más detalles.*"
+      text: "❌ *Ocurrió un error al generar el menú. Revisa la consola.*"
     }, { quoted: msg });
   }
 
   break;
-}  
+}
         
 case 'menuowner': {
   try {
