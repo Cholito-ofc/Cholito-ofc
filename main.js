@@ -3706,7 +3706,6 @@ case 'allmenu': {
       react: { text: "📜", key: msg.key }
     });
 
-    // === Categorías con emojis ===
     const categorias = {
       grupo: "👥",
       descargas: "📥",
@@ -3737,14 +3736,22 @@ case 'allmenu': {
         if (!comandosPorCategoria[categoria]) comandosPorCategoria[categoria] = [];
         comandosPorCategoria[categoria].push(...cmds);
       } catch (err) {
-        console.error(`❌ Error al cargar plugin ${file}:`, err);
+        console.log(`⚠️ Error cargando plugin: ${file}\n`, err.message);
+        continue;
       }
     }
 
-    // === Construir menú final ===
+    const total = Object.values(comandosPorCategoria).flat().length;
+    if (total === 0) {
+      await sock.sendMessage(chatId, {
+        text: "❌ No se encontraron comandos disponibles.",
+      }, { quoted: msg });
+      return;
+    }
+
     let texto = `📚 𓆩 𝐌𝐄𝐍𝐔́ 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐎 - 𝐊𝐈𝐋𝐋𝐔𝐀 𝟐.𝟎 𝐁𝐎𝐓 𓆪
 
-🚩 *Total de comandos:* ${Object.values(comandosPorCategoria).flat().length}
+🚩 *Total de comandos:* ${total}
 🚩 *Prefijo actual:* 『${global.prefix}』
 🚩 Usa el prefijo antes de cada comando.
 
@@ -3765,26 +3772,23 @@ case 'allmenu': {
 👨‍💻 *Desarrollado por:* Cholo XZ
 🤖 *Killua 2.0 — Asistente Avanzado*`;
 
-    // Enviar menú con imagen
-    await sock.sendMessage2(
+    await sock.sendMessage(
       chatId,
       {
         image: { url: "https://cdn.russellxz.click/1e4c9ec7.jpeg" },
         caption: texto
       },
-      msg
+      { quoted: msg }
     );
   } catch (error) {
     console.error("❌ Error en comando allmenu:", error);
-    await sock.sendMessage2(
-      msg.key.remoteJid,
-      "❌ *Ocurrió un error al generar el menú. Inténtalo de nuevo.*",
-      msg
-    );
+    await sock.sendMessage(msg.key.remoteJid, {
+      text: "❌ *Ocurrió un error al generar el menú. Revisa los logs o plugins.*",
+    }, { quoted: msg });
   }
   break;
-}  
-
+}
+        
 case 'menuowner': {
   try {
     await sock.sendMessage(msg.key.remoteJid, {
