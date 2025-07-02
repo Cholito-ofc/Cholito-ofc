@@ -3725,7 +3725,8 @@ case 'allmenu': {
 
     for (const file of files) {
       try {
-        const plugin = require(path.join(pluginsFolder, file));
+        const pluginPath = path.join(pluginsFolder, file);
+        const plugin = require(pluginPath);
         const comandos = plugin?.command;
         const categoria = plugin?.category?.toLowerCase() || "otros";
 
@@ -3736,17 +3737,17 @@ case 'allmenu': {
         if (!comandosPorCategoria[categoria]) comandosPorCategoria[categoria] = [];
         comandosPorCategoria[categoria].push(...cmds);
       } catch (err) {
-        console.log(`⚠️ Error cargando plugin: ${file}\n`, err.message);
-        continue;
+        console.log(`❌ Plugin roto: ${file}`);
+        console.log("🧠 Error:", err.message);
+        continue; // sigue con los demás plugins
       }
     }
 
     const total = Object.values(comandosPorCategoria).flat().length;
     if (total === 0) {
-      await sock.sendMessage(chatId, {
-        text: "❌ No se encontraron comandos disponibles.",
+      return await sock.sendMessage(chatId, {
+        text: "❌ No se encontraron comandos válidos.",
       }, { quoted: msg });
-      return;
     }
 
     let texto = `📚 𓆩 𝐌𝐄𝐍𝐔́ 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐎 - 𝐊𝐈𝐋𝐋𝐔𝐀 𝟐.𝟎 𝐁𝐎𝐓 𓆪
@@ -3772,22 +3773,20 @@ case 'allmenu': {
 👨‍💻 *Desarrollado por:* Cholo XZ
 🤖 *Killua 2.0 — Asistente Avanzado*`;
 
-    await sock.sendMessage(
-      chatId,
-      {
-        image: { url: "https://cdn.russellxz.click/1e4c9ec7.jpeg" },
-        caption: texto
-      },
-      { quoted: msg }
-    );
+    await sock.sendMessage(chatId, {
+      image: { url: "https://cdn.russellxz.click/1e4c9ec7.jpeg" },
+      caption: texto
+    }, { quoted: msg });
+
   } catch (error) {
-    console.error("❌ Error en comando allmenu:", error);
+    console.error("❌ Error al generar el menú general:", error);
     await sock.sendMessage(msg.key.remoteJid, {
-      text: "❌ *Ocurrió un error al generar el menú. Revisa los logs o plugins.*",
+      text: "❌ *Ocurrió un error crítico. Revisa la consola para más detalles.*"
     }, { quoted: msg });
   }
+
   break;
-}
+}  
         
 case 'menuowner': {
   try {
