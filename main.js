@@ -3718,7 +3718,7 @@ case 'allmenu': {
       otros: "📦"
     };
 
-    const pluginsFolder = path.join(__dirname, "../plugins");
+    const pluginsFolder = path.join(__dirname, "plugins");
     const files = fs.readdirSync(pluginsFolder).filter(f => f.endsWith(".js"));
 
     const comandosPorCategoria = {};
