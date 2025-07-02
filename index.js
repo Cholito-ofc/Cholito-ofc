@@ -747,23 +747,19 @@ if (msg.message?.protocolMessage?.type === 0) {
     const deletedData = data[deletedId];
     if (!deletedData) return;
 
-    const senderJid = whoDeleted || '';
-    const senderNumber = senderJid.replace(/[^0-9]/g, '') + '@s.whatsapp.net';
+    const senderJid = (whoDeleted || '').includes('@s.whatsapp.net') ? whoDeleted : `${whoDeleted.replace(/[^0-9]/g, '')}@s.whatsapp.net`;
+    const originalSender = (deletedData.sender || '').includes('@s.whatsapp.net') ? deletedData.sender : `${deletedData.sender.replace(/[^0-9]/g, '')}@s.whatsapp.net`;
 
-    // Validar si quien lo eliminó es el mismo que lo envió
-    const originalSender = (deletedData.sender || '').replace(/[^0-9]/g, '') + '@s.whatsapp.net';
-    if (originalSender !== senderJid) return;
+    // ⚠️ No compares si no estás seguro del ID, esto evita que se bloquee:
+    // if (originalSender !== senderJid) return;
 
-    // Ignorar si es admin
     if (isGroup) {
       const meta = await sock.groupMetadata(chatId);
       const isAdmin = meta.participants.find(p => p.id === senderJid)?.admin;
       if (isAdmin) return;
     }
 
-    // Obtener nombre del usuario
-    const userName = (await sock.onWhatsApp(senderJid))[0]?.notify || 'Usuario';
-
+    const name = (await sock.getName(senderJid)) || 'Usuario';
     const mentionTag = [senderJid];
 
     if (deletedData.media) {
@@ -778,25 +774,25 @@ if (msg.message?.protocolMessage?.type === 0) {
       if (type === "sticker") {
         const sent = await sock.sendMessage(chatId, sendOpts);
         await sock.sendMessage(chatId, {
-          text: `📌 *Sticker eliminado por:* @${senderJid.split('@')[0]} (${userName})`,
+          text: `📌 *Sticker eliminado por:* @${senderJid.split('@')[0]} (${name})`,
           mentions: mentionTag,
           quoted: sent
         });
       } else if (type === "audio") {
         const sent = await sock.sendMessage(chatId, sendOpts);
         await sock.sendMessage(chatId, {
-          text: `🎧 *Audio eliminado por:* @${senderJid.split('@')[0]} (${userName})`,
+          text: `🎧 *Audio eliminado por:* @${senderJid.split('@')[0]} (${name})`,
           mentions: mentionTag,
           quoted: sent
         });
       } else {
-        sendOpts.caption = `📦 *Mensaje eliminado por:* @${senderJid.split('@')[0]} (${userName})`;
+        sendOpts.caption = `📦 *Mensaje eliminado por:* @${senderJid.split('@')[0]} (${name})`;
         sendOpts.mentions = mentionTag;
         await sock.sendMessage(chatId, sendOpts, { quoted: msg });
       }
     } else if (deletedData.text) {
       await sock.sendMessage(chatId, {
-        text: `📝 *Mensaje eliminado:* ${deletedData.text}\n👤 *Usuario:* @${senderJid.split('@')[0]} (${userName})`,
+        text: `📝 *Mensaje eliminado:* ${deletedData.text}\n👤 *Usuario:* @${senderJid.split('@')[0]} (${name})`,
         mentions: mentionTag
       }, { quoted: msg });
     }
