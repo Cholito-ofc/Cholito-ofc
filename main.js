@@ -3698,16 +3698,7 @@ case 'bc': {
 case 'allmenu': {
   try {
     const fs = require("fs");
-
-    const mainFilePath = "./main.js";
-    if (!fs.existsSync(mainFilePath)) {
-      await sock.sendMessage2(
-        msg.key.remoteJid,
-        "❌ *Error:* No se encontró el archivo de comandos.",
-        msg
-      );
-      return;
-    }
+    const path = require("path");
 
     const chatId = msg.key.remoteJid;
 
@@ -3715,55 +3706,84 @@ case 'allmenu': {
       react: { text: "📜", key: msg.key }
     });
 
-    const mainFileContent = fs.readFileSync(mainFilePath, "utf-8");
-    const commandRegex = /case\s+['"]([^'"]+)['"]:/g;
-    let commands = [];
-    let match;
+    // === Categorías con emojis ===
+    const categorias = {
+      grupo: "👥",
+      descargas: "📥",
+      utilidad: "🛠",
+      creador: "👨‍💻",
+      juegos: "🎮",
+      anime: "🌸",
+      admin: "🛡",
+      sticker: "🧩",
+      otros: "📦"
+    };
 
-    while ((match = commandRegex.exec(mainFileContent)) !== null) {
-      commands.push(match[1]);
+    const pluginsFolder = path.join(__dirname, "../plugins");
+    const files = fs.readdirSync(pluginsFolder).filter(f => f.endsWith(".js"));
+
+    const comandosPorCategoria = {};
+
+    for (const file of files) {
+      try {
+        const plugin = require(path.join(pluginsFolder, file));
+        const comandos = plugin?.command;
+        const categoria = plugin?.category?.toLowerCase() || "otros";
+
+        if (!comandos) continue;
+
+        const cmds = Array.isArray(comandos) ? comandos : [comandos];
+
+        if (!comandosPorCategoria[categoria]) comandosPorCategoria[categoria] = [];
+        comandosPorCategoria[categoria].push(...cmds);
+      } catch (err) {
+        console.error(`❌ Error al cargar plugin ${file}:`, err);
+      }
     }
 
-    commands = [...new Set(commands)].sort();
-    let totalComandos = commands.length;
+    // === Construir menú final ===
+    let texto = `📚 𓆩 𝐌𝐄𝐍𝐔́ 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐎 - 𝐊𝐈𝐋𝐋𝐔𝐀 𝟐.𝟎 𝐁𝐎𝐓 𓆪
 
-    // Menú visual estilizado
-    let commandList = `📚 𓆩 𝐌𝐄𝐍𝐔́ 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐎 - 𝐊𝐈𝐋𝐋𝐔𝐀 𝟐.𝟎 𝐁𝐎𝐓 𓆪
-
-🚩 *Total de comandos:* ${totalComandos}
+🚩 *Total de comandos:* ${Object.values(comandosPorCategoria).flat().length}
 🚩 *Prefijo actual:* 『${global.prefix}』
 🚩 Usa el prefijo antes de cada comando.
 
 ━━━━━━━━━━━━━━━━━━━`;
 
-    commands.forEach(cmd => {
-      commandList += `\n➤ ${global.prefix}${cmd}`;
-    });
+    for (const [cat, cmds] of Object.entries(comandosPorCategoria)) {
+      const emoji = categorias[cat] || "📦";
+      texto += `\n\n${emoji} *${cat.toUpperCase()}*\n`;
+      const únicos = [...new Set(cmds)].sort();
+      únicos.forEach(cmd => {
+        texto += `➤ ${global.prefix}${cmd}\n`;
+      });
+    }
 
-    commandList += `
+    texto += `
 
 ━━━━━━━━━━━━━━━━━━━
 👨‍💻 *Desarrollado por:* Cholo XZ
 🤖 *Killua 2.0 — Asistente Avanzado*`;
 
+    // Enviar menú con imagen
     await sock.sendMessage2(
       chatId,
       {
         image: { url: "https://cdn.russellxz.click/1e4c9ec7.jpeg" },
-        caption: commandList
+        caption: texto
       },
       msg
     );
   } catch (error) {
-    console.error("Error en comando allmenu:", error);
+    console.error("❌ Error en comando allmenu:", error);
     await sock.sendMessage2(
       msg.key.remoteJid,
-      "❌ *Ocurrió un error al obtener la lista de comandos. Inténtalo de nuevo.*",
+      "❌ *Ocurrió un error al generar el menú. Inténtalo de nuevo.*",
       msg
     );
   }
   break;
-}
+}  
 
 case 'menuowner': {
   try {
