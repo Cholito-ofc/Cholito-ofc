@@ -1,11 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 
-// ⚙️ Rutas a los archivos de configuración
+// 🛠 Archivos donde se guardan las configuraciones
 const SETTINGS_PATH = path.join(__dirname, '../antibot-config.json');
 const WARNINGS_PATH = path.join(__dirname, '../antibot-warnings.json');
 
-// 📦 Cargar configuración
+// 🧠 Cargar datos persistentes
 let settings = fs.existsSync(SETTINGS_PATH) ? JSON.parse(fs.readFileSync(SETTINGS_PATH)) : {};
 let warnings = fs.existsSync(WARNINGS_PATH) ? JSON.parse(fs.readFileSync(WARNINGS_PATH)) : {};
 
@@ -17,21 +17,23 @@ function guardarDatos() {
 
 module.exports = {
   name: 'antibot',
-  tags: ['group', 'security'],
+  description: 'Sistema antibot para expulsar bots que mandan comandos',
   group: true,
+
+  // 📌 Revisión automática antes de cada mensaje
   async before(m, { conn, isBotAdmin }) {
     const chatId = m.key.remoteJid;
     const sender = m.key.participant || m.key.remoteJid;
     const senderNum = sender.split('@')[0];
-    const body = m.message?.conversation || m.message?.extendedTextMessage?.text || '';
+    const texto = m.message?.conversation || m.message?.extendedTextMessage?.text || '';
 
-    if (!settings[chatId]) return;
+    if (!settings[chatId]) return; // si no está activado
 
-    const permitido = [conn.user.jid];
-    if (permitido.includes(sender) || sender === conn.user.jid) return;
+    const esBotPermitido = [conn.user.jid].includes(sender);
+    if (esBotPermitido) return;
 
-    const sospechoso = body.includes('.') || body.includes('/') || body.length > 100 || body.toLowerCase().includes('comando');
-    if (!sospechoso) return;
+    const pareceBot = texto.includes('.') || texto.includes('/') || texto.length > 100 || texto.toLowerCase().includes('comando');
+    if (!pareceBot) return;
 
     warnings[chatId] = warnings[chatId] || {};
     warnings[chatId][sender] = (warnings[chatId][sender] || 0) + 1;
@@ -39,14 +41,14 @@ module.exports = {
 
     if (warnings[chatId][sender] === 1) {
       await conn.sendMessage(chatId, {
-        text: `⚠️ @${senderNum}, estás enviando mensajes automáticos.\nEste grupo tiene activado el *modo anti-bot*. Si sigues, serás eliminado.`,
+        text: `⚠️ @${senderNum}, estás enviando mensajes automáticos. Este grupo tiene activado el *modo antibot*. Si lo sigues haciendo serás eliminado.`,
         mentions: [sender]
       });
     } else if (warnings[chatId][sender] >= 2) {
       if (!isBotAdmin) return;
       await conn.groupParticipantsUpdate(chatId, [sender], 'remove');
       await conn.sendMessage(chatId, {
-        text: `🤖 @${senderNum} fue *expulsado automáticamente* por actividad automática.`,
+        text: `🤖 @${senderNum} fue *expulsado automáticamente* por actividad de bot (antibot activado).`,
         mentions: [sender]
       });
       delete warnings[chatId][sender];
@@ -54,35 +56,35 @@ module.exports = {
     }
   },
 
+  // 📦 Comando .antibot on/off
   run: async (m, { conn, args }) => {
     const chatId = m.key.remoteJid;
     const sender = m.key.participant || m.key.remoteJid;
 
-    const groupMetadata = await conn.groupMetadata(chatId);
-    const isAdmin = groupMetadata.participants
-      .filter(p => p.admin)
-      .some(p => p.id === sender);
+    const metadata = await conn.groupMetadata(chatId);
+    const isAdmin = metadata.participants.find(p => p.id === sender && /admin|superadmin/.test(p.admin));
 
     if (!m.isGroup) {
       return conn.sendMessage(chatId, { text: '❗Este comando solo funciona en grupos.' });
     }
 
     if (!isAdmin) {
-      return conn.sendMessage(chatId, { text: '🚫 Solo los administradores pueden usar este comando.' });
+      return conn.sendMessage(chatId, { text: '🚫 Solo los administradores pueden activar o desactivar el antibot.' });
     }
 
     const accion = args[0]?.toLowerCase();
+
     if (accion === 'on') {
       settings[chatId] = true;
       guardarDatos();
-      return conn.sendMessage(chatId, { text: '✅ *Anti-Bot activado* en este grupo.' });
+      return conn.sendMessage(chatId, { text: '✅ *Antibot activado* correctamente en este grupo.' });
     } else if (accion === 'off') {
       settings[chatId] = false;
       guardarDatos();
-      return conn.sendMessage(chatId, { text: '❌ *Anti-Bot desactivado* en este grupo.' });
+      return conn.sendMessage(chatId, { text: '❌ *Antibot desactivado* en este grupo.' });
     } else {
       return conn.sendMessage(chatId, {
-        text: '📌 Usa el comando así:\n.antibot on — Activar\n.antibot off — Desactivar'
+        text: '✳️ Usa:\n.antibot on — Activar\n.antibot off — Desactivar'
       });
     }
   }
