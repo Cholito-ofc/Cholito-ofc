@@ -3792,7 +3792,7 @@ case 'allmenu': {
     texto += toSmallCaps(`
 
 ━━━━━━━━━━━━━━━━━━━
-> DESARROLLADO POR: CHOLO XZ);
+> DESARROLLADO POR: CHOLO XZ`);
 
     // 4. Enviar como imagen + caption
     await sock.sendMessage(chatId, {
