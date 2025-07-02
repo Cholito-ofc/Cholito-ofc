@@ -3,7 +3,6 @@ const path = require("path");
 
 const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
-  const senderId = msg.key.participant || msg.key.remoteJid;
   const isGroup = chatId.endsWith("@g.us");
 
   if (!isGroup) {
@@ -12,38 +11,38 @@ const handler = async (msg, { conn }) => {
     }, { quoted: msg });
   }
 
-  const context = msg.message?.extendedTextMessage?.contextInfo;
-  const mentionedJid = context?.mentionedJid || [];
-
-  let target = null;
-
-  if (context?.participant) {
-    target = context.participant;
-  } else if (mentionedJid.length > 0) {
-    target = mentionedJid[0];
-  }
-
-  if (!target) {
+  const warnPath = path.resolve("./database/warns.json");
+  if (!fs.existsSync(warnPath)) {
     return conn.sendMessage(chatId, {
-      text: "📍 *Debes responder o mencionar al usuario para ver sus advertencias.*",
+      text: "❌ *No hay advertencias registradas en este grupo.*",
     }, { quoted: msg });
   }
 
-  const warnPath = path.resolve("./database/warns.json");
-  const warnData = fs.existsSync(warnPath) ? JSON.parse(fs.readFileSync(warnPath)) : {};
-  const totalWarns = warnData?.[chatId]?.[target] || 0;
+  const warnData = JSON.parse(fs.readFileSync(warnPath));
+  const warnsGroup = warnData[chatId];
+
+  if (!warnsGroup || Object.keys(warnsGroup).length === 0) {
+    return conn.sendMessage(chatId, {
+      text: "✅ *Todos los miembros del grupo están sin advertencias.*",
+    }, { quoted: msg });
+  }
+
+  let msgList = `╭─⬣「 *Advertencias del grupo* 」⬣\n`;
+  const mentionList = [];
+
+  for (const jid in warnsGroup) {
+    const count = warnsGroup[jid];
+    msgList += `│ 👤 @${jid.split("@")[0]} — ⚠️ ${count}/3\n`;
+    mentionList.push(jid);
+  }
+
+  msgList += `╰─⬣`;
 
   await conn.sendMessage(chatId, {
-    text:
-`📋 *Advertencias actuales*
-
-╭─⬣「 *Ver Warns* 」⬣
-│ 👤 Usuario: @${target.split("@")[0]}
-│ ⚠️ Advertencias: ${totalWarns}/3
-╰─⬣`,
-    mentions: [target]
+    text: msgList.trim(),
+    mentions: mentionList
   }, { quoted: msg });
 };
 
-handler.command = ["verwarns"];
+handler.command = ["advertenciasgrupo"];
 module.exports = handler;
