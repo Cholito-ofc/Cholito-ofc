@@ -2,21 +2,16 @@ const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
   const comando = msg.body?.split(' ')[0]?.slice(1)?.toLowerCase();
 
-  // Obtener JID mencionado o desde mensaje respondido
-  let mentionedJid;
+  // Obtener JID del usuario: por etiqueta o respuesta
+  let mentionedJid = null;
   try {
-    if (msg.message?.extendedTextMessage?.contextInfo?.mentionedJid?.length) {
-      mentionedJid = msg.message.extendedTextMessage.contextInfo.mentionedJid[0];
-    } else if (msg.message?.contextInfo?.mentionedJid?.length) {
-      mentionedJid = msg.message.contextInfo.mentionedJid[0];
-    } else if (msg.message?.extendedTextMessage?.contextInfo?.participant) {
-      mentionedJid = msg.message.extendedTextMessage.contextInfo.participant;
-    } else if (msg.message?.contextInfo?.participant) {
-      mentionedJid = msg.message.contextInfo.participant;
+    const contextInfo = msg.message?.extendedTextMessage?.contextInfo || msg.message?.contextInfo;
+    if (contextInfo?.mentionedJid?.length) {
+      mentionedJid = contextInfo.mentionedJid[0];
+    } else if (contextInfo?.participant) {
+      mentionedJid = contextInfo.participant;
     }
-  } catch {
-    mentionedJid = null;
-  }
+  } catch (e) {}
 
   if (!mentionedJid) {
     return await conn.sendMessage(chatId, {
@@ -43,6 +38,7 @@ const handler = async (msg, { conn }) => {
     }, { quoted: msg });
   }
 
+  // Frases por comando
   const frases = {
     puta: [
       '✦ Naciste para cobrar sin amor.',
@@ -118,7 +114,7 @@ const handler = async (msg, { conn }) => {
     ],
   };
 
-  if (!Object.keys(frases).includes(comando)) return;
+  if (!frases[comando]) return;
 
   const remate = frases[comando][Math.floor(Math.random() * frases[comando].length)];
   const cierreOpciones = [
