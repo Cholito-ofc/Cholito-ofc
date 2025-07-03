@@ -1,6 +1,9 @@
 const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
-  
+  // Desde dónde salió el mensaje
+  const fromUser = msg.key.participant || msg.key.remoteJid;
+
+  // Frases protección Owner
   const frasesOwner = [
     '🛡️ *Protección Suprema Activada*\n@{user} es el alfa, el omega y el padre del comando. Intocable.',
     '👑 *Error de Sistema*\nIntentaste escanear al Creador. Abortando misión.',
@@ -9,8 +12,8 @@ const handler = async (msg, { conn }) => {
     '⚠️ Escanear al Owner está prohibido por ley universal. Respeta jerarquías.'
   ];
 
-  // Obtener mencionado o reply
-  let mentionedJid;
+  // Intentar obtener JID mencionado o respondido
+  let mentionedJid = null;
   try {
     if (msg.message?.extendedTextMessage?.contextInfo?.mentionedJid?.length) {
       mentionedJid = msg.message.extendedTextMessage.contextInfo.mentionedJid[0];
@@ -20,6 +23,8 @@ const handler = async (msg, { conn }) => {
       mentionedJid = msg.message.extendedTextMessage.contextInfo.participant;
     } else if (msg.message?.contextInfo?.participant) {
       mentionedJid = msg.message.contextInfo.participant;
+    } else if (msg.key.participant) {
+      mentionedJid = msg.key.participant;
     }
   } catch {
     mentionedJid = null;
@@ -32,8 +37,8 @@ const handler = async (msg, { conn }) => {
   }
 
   const numero = mentionedJid.split('@')[0];
-  
-  // Protección Owner
+
+  // Protección owner igual que en gay
   const isTaggedOwner = Array.isArray(global.owner) && global.owner.some(([id]) => id === numero);
   if (isTaggedOwner) {
     const frase = frasesOwner[Math.floor(Math.random() * frasesOwner.length)].replace('{user}', numero);
@@ -43,10 +48,10 @@ const handler = async (msg, { conn }) => {
     }, { quoted: msg });
   }
 
-  // Detectar comando usado (quita el prefijo, por ejemplo .puta -> puta)
+  // Obtener comando usado (quita prefijo)
   const comando = msg.text ? msg.text.toLowerCase().split(' ')[0].replace(/^[.!/#]/, '') : '';
 
-  // Frases agresivas por comando
+  // Frases para cada comando
   const frasesPorComando = {
     puta: [
       '𐀔 Naciste para cobrar sin amor.',
