@@ -799,11 +799,19 @@ if ((isGroup && isAntideleteGroup) || (!isGroup && isAntideletePriv)) {
 }
 // === FIN GUARDADO ANTIDELETE ===
 
+
 // === INICIO DETECCIÓN DE MENSAJE ELIMINADO ===
 if (msg.message?.protocolMessage?.type === 0) {
 try {
   const deletedId = msg.message.protocolMessage.key.id;
-  const whoDeleted = msg.message.protocolMessage.key.participant || msg.key.participant || msg.key.remoteJid;
+
+  // ✅ Corrección robusta del número del que elimina
+  let whoDeleted = msg.message?.protocolMessage?.key?.participant || msg.participant || msg.key?.participant || msg.key?.remoteJid || "";
+  const senderNumber = typeof whoDeleted === "string" ? whoDeleted.replace(/[^0-9]/g, "") : "";
+  const targetNumber = senderNumber;
+  const target = `${targetNumber}@s.whatsapp.net`;
+  const mentionTag = [target];
+
   const isGroup = chatId.endsWith('@g.us');
 
   const activos = fs.existsSync('./activos.json') ? JSON.parse(fs.readFileSync('./activos.json', 'utf-8')) : {};
@@ -820,13 +828,7 @@ try {
   if (!deletedData) return;
 
   const senderClean = (deletedData.sender || '').replace(/[^0-9]/g, '');
-  const whoDeletedClean = (whoDeleted || '').replace(/[^0-9]/g, '');
-  if (senderClean !== whoDeletedClean) return;
-
-  const senderNumber = whoDeletedClean;
-  const targetNumber = senderNumber;
-  const target = `${targetNumber}@s.whatsapp.net`;
-  const mentionTag = [target];
+  if (senderClean !== senderNumber) return;
 
   if (isGroup) {
     const meta = await sock.groupMetadata(chatId);
