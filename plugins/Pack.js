@@ -102,7 +102,7 @@ const handler = async (msg, { conn }) => {
   }
 };
 
-handler.command = ["pornololi"];
+handler.command = ["loli"];
 handler.tags = ["nsfw"];
 handler.help = ["pornololi"];
 module.exports = handler;
