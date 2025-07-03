@@ -4017,7 +4017,7 @@ case 'menu': {
 ┃➜ ${global.prefix}menurpg
 ┃➜ ${global.prefix}info
 ┃➜ ${global.prefix}menuowner
-┃➜ ${global.prefix}menufree
+┃➜ ${global.prefix}menuff
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 ╭━━[ SISTEMA DE VENTAS 🛍️ ]━⬣
