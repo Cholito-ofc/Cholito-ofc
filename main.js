@@ -579,6 +579,15 @@ break;
 case 'pack2': {
   const chatId = msg.key.remoteJid;
 
+  // 🔥 Validación de modo caliente
+  const chatData = global.db.data.chats[chatId] || {};
+  if (!chatData.modoCaliente) {
+    await sock.sendMessage(chatId, {
+      text: '🚫 El modo caliente no está activado en este grupo.\n\nActívalo con: *.modocaliente on*'
+    }, { quoted: msg });
+    break;
+  }
+
   // URLs de ejemplo
   const urls = [
     'https://telegra.ph/file/c0da7289bee2d97048feb.jpg',
@@ -616,7 +625,7 @@ case 'pack2': {
     }, { quoted: msg });
   }
 }
-break;
+break;  
       
 case "modoadmins": {
   try {
