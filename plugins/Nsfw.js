@@ -134,12 +134,12 @@ const handler = async (msg, { conn, command }) => {
 };
 
 handler.command = [
-  "pack",
+  "pack1",
   "pack2",
   "pack3",
   "videoxxx",
   "videoxxxlesbi"
 ];
 handler.tags = ["nsfw"];
-handler.help = ["pack", "pack2", "pack3", "videoxxx", "videoxxxlesbi"];
+handler.help = ["pack1", "pack2", "pack3", "videoxxx", "videoxxxlesbi"];
 module.exports = handler;
