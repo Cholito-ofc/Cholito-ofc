@@ -18,7 +18,7 @@ const handler = async (msg, { conn }) => {
     }, { quoted: msg });
   }
 
-  const nombre = (await conn.getName(mentionedJid)) || 'Usuario';
+  const numero = mentionedJid.split('@')[0];
   const porcentaje = Math.floor(Math.random() * 101); // 0 a 100%
   const barra = (valor) => {
     const total = 10;
@@ -28,7 +28,7 @@ const handler = async (msg, { conn }) => {
 
   // Mensaje inicial
   const mensajeInicial = await conn.sendMessage(chatId, {
-    text: `🌈 Calculando porcentaje gay de @${mentionedJid.split("@")[0]}...`,
+    text: `🌈 Calculando porcentaje gay de @${numero}...`,
     mentions: [mentionedJid]
   }, { quoted: msg });
 
@@ -44,7 +44,7 @@ const handler = async (msg, { conn }) => {
   // Resultado final
   await new Promise(resolve => setTimeout(resolve, 600));
   await conn.sendMessage(chatId, {
-    text: `🏳️‍🌈 *Resultado final:*\n${barra(porcentaje)} ${porcentaje}%\n\n@${mentionedJid.split("@")[0]} tiene un *${porcentaje}% de gay* 😅`,
+    text: `🏳️‍🌈 *Resultado final:*\n${barra(porcentaje)} ${porcentaje}%\n\n@${numero} tiene un *${porcentaje}% de gay* 😅`,
     mentions: [mentionedJid],
     edit: mensajeInicial.key
   });
