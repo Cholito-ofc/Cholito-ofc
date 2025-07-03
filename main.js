@@ -14470,7 +14470,7 @@ case "perfil": {
 }
 
 case 'owner':
-ase 'creador': {
+case 'creador': {
   // 1) DATOS BÁSICOS ------------------------------------
   const ownerNumber = '50489513153';                 // sin @s.whatsapp.net
   const ownerName   = 'ᥴһ᥆ᥣі𝗍᥆ ᥊ᥡz⚡';           // nombre que verá el usuario
