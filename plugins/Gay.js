@@ -26,25 +26,35 @@ const handler = async (msg, { conn }) => {
     return `[${'█'.repeat(llenos)}${'░'.repeat(total - llenos)}]`;
   };
 
-  // Mensaje inicial
+  // Fase 1: Mensaje "Calculando..."
   const mensajeInicial = await conn.sendMessage(chatId, {
-    text: `🌈 Calculando porcentaje gay de @${numero}...`,
+    text: `🧠 Calculando porcentaje gay de @${numero}...`,
     mentions: [mentionedJid]
   }, { quoted: msg });
 
-  // Simulación de barra de carga
+  // Fase 2: barra animada
   for (let i = 0; i <= porcentaje; i += 20) {
     await new Promise(resolve => setTimeout(resolve, 500));
     await conn.sendMessage(chatId, {
-      text: `🌈 Calculando...\n${barra(i)} ${i}%`,
+      text: `📊 Progreso...\n${barra(i)} ${i}%`,
       edit: mensajeInicial.key
     });
   }
 
-  // Resultado final
+  // Fase 3: Resultado final con estilo único
   await new Promise(resolve => setTimeout(resolve, 600));
+  let mensajeFinal = '';
+
+  if (porcentaje <= 30) {
+    mensajeFinal = `🔹 Los cálculos muestran que @${numero} es apenas un ${porcentaje}% Gay 🌈\n💬 Nada grave, solo te gusta experimentar un poquito.`;
+  } else if (porcentaje <= 70) {
+    mensajeFinal = `🔸 Atención, atención...\n@${numero} tiene un ${porcentaje}% de Gayómetro activado 🌈\n🧪 Lo llevas en la sangre, pero con estilo.`;
+  } else {
+    mensajeFinal = `🔴 ¡Confirmado!\n@${numero} tiene un *${porcentaje}% de gay* 😱🏳️‍🌈\n🎉 ¡El arcoíris te representa, orgullo total!`;
+  }
+
   await conn.sendMessage(chatId, {
-    text: `🏳️‍🌈 *Resultado final:*\n${barra(porcentaje)} ${porcentaje}%\n\n@${numero} tiene un *${porcentaje}% de gay* 😅`,
+    text: `${mensajeFinal}\n\n✨ El universo no se equivoca.`,
     mentions: [mentionedJid],
     edit: mensajeInicial.key
   });
