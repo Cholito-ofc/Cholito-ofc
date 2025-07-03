@@ -19,7 +19,7 @@ const handler = async (msg, { conn, command }) => {
     }, { quoted: msg });
   }
 
-  const pack = [
+  const pack1 = [
     'https://telegra.ph/file/957fe4031132ef90b66ec.jpg',
     'https://telegra.ph/file/c4b85bd53030cb648382f.jpg',
     'https://telegra.ph/file/df56f8a76145df9c923ad.jpg'
@@ -50,7 +50,7 @@ const handler = async (msg, { conn, command }) => {
   ];
 
   const dataMap = {
-    pack,
+    pack1,
     pack2,
     pack3,
     videoxxx,
