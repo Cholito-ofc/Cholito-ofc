@@ -1,14 +1,14 @@
 const handler = async (msg, { conn }) => { const chatId = msg.key.remoteJid;
 
-const rawText = msg.text || msg.message?.conversation || msg.message?.extendedTextMessage?.text || ''; const text = rawText.trim(); const comandoMatch = text.match(/^[.!/#]?\s*(\w+)/i); const comando = comandoMatch ? comandoMatch[1].toLowerCase() : '';
+const text = (msg.text || msg.message?.conversation || msg.message?.extendedTextMessage?.text || '').toLowerCase(); const comando = text.trim().split(/\s+/)[0].replace(/^[.!/#]/, '').toLowerCase();
 
 const comandosValidos = [ 'puta', 'puto', 'peruano', 'peruana', 'negro', 'negra', 'manca', 'manco', 'fea', 'feo', 'enano', 'enana', 'cachudo', 'cachuda', 'pajero', 'pajera', 'rata', 'adoptado', 'adoptada' ];
 
 if (!comandosValidos.includes(comando)) return;
 
-let mentionedJid = null; try { if (msg.message?.extendedTextMessage?.contextInfo?.mentionedJid?.length) { mentionedJid = msg.message.extendedTextMessage.contextInfo.mentionedJid[0]; } else if (msg.message?.contextInfo?.mentionedJid?.length) { mentionedJid = msg.message.contextInfo.mentionedJid[0]; } else if (msg.message?.extendedTextMessage?.contextInfo?.participant) { mentionedJid = msg.message.extendedTextMessage.contextInfo.participant; } else if (msg.message?.contextInfo?.participant) { mentionedJid = msg.message.contextInfo.participant; } else if (msg.key.participant && msg.key.participant !== conn.user?.id) { mentionedJid = msg.key.participant; } } catch { mentionedJid = null; }
+let mentionedJid = null; try { if (msg.message?.extendedTextMessage?.contextInfo?.mentionedJid?.length) { mentionedJid = msg.message.extendedTextMessage.contextInfo.mentionedJid[0]; } else if (msg.message?.contextInfo?.mentionedJid?.length) { mentionedJid = msg.message.contextInfo.mentionedJid[0]; } else if (msg.message?.extendedTextMessage?.contextInfo?.participant) { mentionedJid = msg.message.extendedTextMessage.contextInfo.participant; } else if (msg.message?.contextInfo?.participant) { mentionedJid = msg.message.contextInfo.participant; } } catch { mentionedJid = null; }
 
-if (!mentionedJid) { return await conn.sendMessage(chatId, { text: '❗ Debes etiquetar o responder a alguien para usar este comando.', }, { quoted: msg }); }
+if (!mentionedJid) { return await conn.sendMessage(chatId, { text: ❗ *Uso incorrecto del comando.*\nDebes etiquetar o responder al mensaje de la persona que deseas escanear.\n\n*Ejemplos correctos:*\n➡️ .${comando} @usuario\n➡️ .${comando} (respondiendo al mensaje de alguien) }, { quoted: msg }); }
 
 const numero = mentionedJid.split('@')[0];
 
@@ -22,27 +22,13 @@ const cierres = [ '➢ Los científicos lo confirman.', '➢ El universo no se e
 
 const remate = frasesPorComando[comando][Math.floor(Math.random() * frasesPorComando[comando].length)]; const cierre = cierres[Math.floor(Math.random() * cierres.length)]; const porcentaje = Math.floor(Math.random() * 101);
 
-const textoFinal = `💫 ESCÁNER COMPLETO
-
-🔥 𝙻𝙾𝚂 𝙲𝙰́𝙻𝙲𝚄𝙻𝙾𝚂 𝙷𝙰𝙽 𝙰𝚁𝙾𝙹𝙰𝙳𝙾 𝚀𝚄𝙴 @${numero} 𝙴𝚂 『 ${porcentaje}% 』 ${comando.toUpperCase()}
-
-> ${remate}
-
-${cierre}`;
+const textoFinal = 💫 ESCÁNER COMPLETO\n\n🔥 𝙻𝙾𝚂 𝙲𝙰́𝙻𝙲𝚄𝙻𝙾𝚂 𝙷𝙰𝙽 𝙰𝚁𝙾𝙹𝙰𝙳𝙾 𝚀𝚄𝙴 @${numero} 𝙴𝚂 『 ${porcentaje}% 』 ${comando.toUpperCase()}\n\n> ${remate}\n\n${cierre};
 
 await conn.sendMessage(chatId, { text: textoFinal, mentions: [mentionedJid] }, { quoted: msg }); };
 
-handler.command = [
-  'puta', 'puto', 'peruano', 'peruana',
-  'negro', 'negra', 'manca', 'manco',
-  'fea', 'feo', 'enano', 'enana',
-  'cachudo', 'cachuda', 'pajero', 'pajera',
-  'rata', 'adoptado', 'adoptada',
-];
+handler.command = [ 'puta', 'puto', 'peruano', 'peruana', 'negro', 'negra', 'manca', 'manco', 'fea', 'feo', 'enano', 'enana', 'cachudo', 'cachuda', 'pajero', 'pajera', 'rata', 'adoptado', 'adoptada' ];
 
-handler.tags = ['diversión'];
-handler.help = handler.command.map(c => `${c} @usuario o responde`);
-handler.group = true;
-handler.register = true;
+handler.tags = ['diversión']; handler.help = handler.command.map(c => ${c} @usuario o responde); handler.group = true; handler.register = true;
 
 module.exports = handler;
+
