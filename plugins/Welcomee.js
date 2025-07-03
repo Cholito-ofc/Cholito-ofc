@@ -1,48 +1,93 @@
-const fs = require("fs"); const path = require("path"); const canvafy = require("canvafy");
+/* plugins/welcome.js  (o el nombre que prefieras) */
 
-export async function before(m, { conn, participants, groupMetadata }) { const chatId = m.chat; const isGroup = chatId.endsWith("@g.us"); if (!m.messageStubType || !isGroup) return;
+const fs = require('fs');
+const path = require('path');
+const canvafy = require('canvafy');
 
-// Leer configuración welcome desde activos.json const activosPath = path.resolve("./activos.json"); let activos = {}; if (fs.existsSync(activosPath)) { activos = JSON.parse(fs.readFileSync(activosPath, "utf-8")); } if (!activos.welcome || !activos.welcome[chatId]) return;
+/**
+ * Se dispara antes de procesar cada mensaje.
+ * @param {Object} m – mensaje recibido
+ * @param {Object} helpers – helpers de la framework
+ */
+async function before (m, { conn, participants, groupMetadata }) {
+  const chatId  = m.chat;
+  const isGroup = chatId.endsWith('@g.us');
+  if (!m.messageStubType || !isGroup) return;            // no es un evento de sistema o no es grupo
 
-const who = m.messageStubParameters[0] + '@s.whatsapp.net'; const userName = (global.db.data.users[who]?.name) || await conn.getName(who);
+  /* ───── Comprobamos si la bienvenida/despedida está activa ───── */
+  const activosPath = path.resolve('./activos.json');
+  let activos = {};
+  if (fs.existsSync(activosPath)) {
+    try {
+      activos = JSON.parse(fs.readFileSync(activosPath, 'utf-8'));
+    } catch (e) {
+      console.error('[WELCOME] activos.json corrupto:', e);
+    }
+  }
+  if (!activos.welcome || !activos.welcome[chatId]) return;
 
-const getUserAvatar = async () => { try { return await conn.profilePictureUrl(who, 'image'); } catch (err) { return 'https://i.ibb.co/cFzgdNw/file.jpg'; } };
+  /* ───── Datos del usuario ───── */
+  const who      = m.messageStubParameters[0] + '@s.whatsapp.net';
+  const userName = (global.db?.data?.users?.[who]?.name) || await conn.getName(who);
 
-const generateImage = async (title, description, backgroundImage) => { const userAvatar = await getUserAvatar(); const img = await new canvafy.WelcomeLeave() .setAvatar(userAvatar) .setBackground('image', backgroundImage) .setTitle(title) .setDescription(description) .setBorder('#2a2e35') .setAvatarBorder('#2a2e35') .setOverlayOpacity(0.1) .build(); return img; };
+  const getUserAvatar = async () => {
+    try   { return await conn.profilePictureUrl(who, 'image'); }
+    catch { return 'https://i.ibb.co/cFzgdNw/file.jpg'; }
+  };
 
-const groupName = groupMetadata.subject.trim(); const groupSize = participants.length + (m.messageStubType === 27 ? 1 : (m.messageStubType === 28 || m.messageStubType === 32 ? -1 : 0)); const grupoLink = 'https://chat.whatsapp.com/'; // Puedes personalizarlo si quieres
+  const generateImage = async (title, description, bg) => {
+    const avatar = await getUserAvatar();
+    return new canvafy.WelcomeLeave()
+      .setAvatar(avatar)
+      .setBackground('image', bg)
+      .setTitle(title)
+      .setDescription(description)
+      .setBorder('#2a2e35')
+      .setAvatarBorder('#2a2e35')
+      .setOverlayOpacity(0.1)
+      .build();
+  };
 
-const userTag = @${who.split('@')[0]}; const userMention = [who];
+  /* ───── Texto e imagen dinámicos ───── */
+  const groupName = groupMetadata.subject.trim();
+  const groupSize = participants.length +
+    (m.messageStubType === 27 ? 1 : (m.messageStubType === 28 || m.messageStubType === 32 ? -1 : 0));
 
-if (m.messageStubType === 27) { // BIENVENIDA const bienvenida = `❀ Se unió al grupo ${groupName} ✰ ${userTag}
+  const userTag     = '@' + who.split('@')[0];
+  const userMention = [who];
 
-Ꮚ⁠˘⁠ ⁠ꈊ⁠ ⁠˘⁠ ⁠Ꮚ ¡Bienvenido/a! Que tengas un excelente día ✨
+  if (m.messageStubType === 27) {          // ──── Bienvenida ────
+    const caption = `❀ *Se unió* al grupo *${groupName}* ✰ ${userTag}
 
-> 🧠 Usa #menu si necesitas ayuda. 💬 Disfruta del grupo.`;
+Ꮚ˘ ꈊ ˘Ꮚ ¡Bienvenido/a, ${userName}! Que tengas un excelente día ✨
 
+🧠 Usa *#menu* si necesitas ayuda.
+💬 Disfruta del grupo.`;
 
+    const img = await generateImage(
+      '¡BIENVENID@!',
+      `Ahora somos ${groupSize} miembros.`,
+      'https://i.ibb.co/1fVJfvxk/file.jpg'
+    );
 
-const img = await generateImage('¡BIENVENIDO/A!', `Ahora somos ${groupSize} miembros.`, 'https://i.ibb.co/1fVJfvxk/file.jpg');
-await conn.sendMessage(chatId, {
-  image: img,
-  caption: bienvenida,
-  mentions: userMention
-});
+    await conn.sendMessage(chatId, { image: img, caption, mentions: userMention });
 
-} else if (m.messageStubType === 28 || m.messageStubType === 32) { // DESPEDIDA const despedida = `❀ Salió del grupo ${groupName} ✰ ${userTag}
+  } else if (m.messageStubType === 28 || m.messageStubType === 32) {   // ──── Despedida ────
+    const caption = `❀ *Salió del grupo* *${groupName}* ✰ ${userTag}
 
-Ꮚ⁠˘⁠ ⁠ꈊ⁠ ⁠˘⁠ ⁠Ꮚ ¡Nos vemos pronto! Cuídate mucho ✨
+Ꮚ˘ ꈊ ˘Ꮚ ¡Nos vemos pronto! Cuídate mucho ✨
 
-> 🚪 Ha dejado el grupo.`;
+🚪 Ha dejado el grupo.`;
 
+    const img = await generateImage(
+      '¡HASTA PRONTO!',
+      `Ahora somos ${groupSize} miembros.`,
+      'https://i.ibb.co/Kcf0xdrQ/file.jpg'
+    );
 
+    await conn.sendMessage(chatId, { image: img, caption, mentions: userMention });
+  }
+}
 
-const img = await generateImage('¡HASTA PRONTO!', `Ahora somos ${groupSize} miembros.`, 'https://i.ibb.co/Kcf0xdrQ/file.jpg');
-await conn.sendMessage(chatId, {
-  image: img,
-  caption: despedida,
-  mentions: userMention
-});
-
-} }
-
+/* Exportación estilo CommonJS (lo que tu bot espera) */
+module.exports = { before };
