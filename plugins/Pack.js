@@ -1,32 +1,18 @@
-const packUrls = [
-  "https://cdn.russellxz.click/30302e59.jpeg",
-  "https://cdn.russellxz.click/5b056ca3.jpeg",
+const imagenesXXX = [
   "https://cdn.russellxz.click/56b2e2b4.jpeg",
   "https://cdn.russellxz.click/556fa4bc.jpeg",
-  // Puedes agregar más URLs aquí
+  "https://cdn.russellxz.click/5b056ca3.jpeg",
+  // más URLs aquí
 ];
 
-let cachePack = {}; // Guarda mensajes activos { idMensaje: { chatId, sender } }
-let usosPackUsuario = {}; // Contador reacciones por usuario
+let cachePornololi = {}; // ID mensaje => { chatId, data }
+let usosPorUsuario = {}; // usuario => cantidad
 
 const handler = async (msg, { conn }) => {
+  const chatId = msg.key.remoteJid;
+  const sender = msg.key.participant || msg.key.remoteJid;
+
   try {
-    // Inicializa global.db si no existe para evitar errores
-    if (!global.db) global.db = {};
-    if (!global.db.data) global.db.data = {};
-    if (!global.db.data.chats) global.db.data.chats = {};
-
-    const chatId = msg.key.remoteJid;
-    const sender = msg.key.participant || msg.key.remoteJid;
-
-    const chat = global.db.data.chats[chatId] || {};
-
-    if (!chat.modohorny) {
-      return await conn.sendMessage(chatId, {
-        text: "🔞 El modo *NSFW* está desactivado en este grupo.",
-      }, { quoted: msg });
-    }
-
     // Reacción de "procesando"
     await conn.sendMessage(chatId, {
       react: {
@@ -35,13 +21,12 @@ const handler = async (msg, { conn }) => {
       },
     });
 
-    // Elegir URL aleatoria
-    const url = packUrls[Math.floor(Math.random() * packUrls.length)];
+    // Elegir URL aleatoria de arreglo local
+    const url = imagenesXXX[Math.floor(Math.random() * imagenesXXX.length)];
 
-    // Enviar imagen
     const sentMsg = await conn.sendMessage(chatId, {
       image: { url },
-      caption: "🔥 Reacciona a esta imagen para ver otro pack.",
+      caption: "🥵 Reacciona a este mensaje para ver otra imagen.",
     }, { quoted: msg });
 
     // Reacción de "listo"
@@ -52,79 +37,75 @@ const handler = async (msg, { conn }) => {
       },
     });
 
-    // Guardar mensaje para seguimiento de reacciones
-    cachePack[sentMsg.key.id] = {
+    // Guardar imagen enviada y el arreglo (data) para reacciones
+    cachePornololi[sentMsg.key.id] = {
       chatId,
+      data: imagenesXXX,
       sender,
     };
 
-    // Inicializar contador si no existe
-    usosPackUsuario[sender] = usosPackUsuario[sender] || 0;
+    usosPorUsuario[sender] = usosPorUsuario[sender] || 0;
+
+    // ESCUCHAR REACCIONES ESTILO VS4
+    conn.ev.on("messages.upsert", async ({ messages }) => {
+      const m = messages[0];
+      if (!m?.message?.reactionMessage) return;
+
+      const reaction = m.message.reactionMessage;
+      const reactedMsgId = reaction.key?.id;
+      const user = m.key.participant || m.key.remoteJid;
+
+      // Verifica si la reacción es válida
+      if (!cachePornololi[reactedMsgId]) return;
+      if (user !== cachePornololi[reactedMsgId].sender) return;
+
+      // Limite de 3 reacciones
+      if ((usosPorUsuario[user] || 0) >= 3) {
+        return await conn.sendMessage(cachePornololi[reactedMsgId].chatId, {
+          text: `❌ Ya viste suficiente por ahora.\n🕒 Espera *5 minutos* para seguir viendo contenido 😏.`,
+          mentions: [user],
+        });
+      }
+
+      const { chatId, data } = cachePornololi[reactedMsgId];
+      const newUrl = data[Math.floor(Math.random() * data.length)];
+
+      const newMsg = await conn.sendMessage(chatId, {
+        image: { url: newUrl },
+        caption: "🥵 Otra más... Reacciona de nuevo.",
+      });
+
+      await conn.sendMessage(chatId, {
+        react: {
+          text: "✅",
+          key: newMsg.key,
+        },
+      });
+
+      // Guardar nuevo y eliminar anterior
+      cachePornololi[newMsg.key.id] = {
+        chatId,
+        data,
+        sender: user
+      };
+      delete cachePornololi[reactedMsgId];
+
+      // Sumar reacción
+      usosPorUsuario[user] = (usosPorUsuario[user] || 0) + 1;
+
+      // Reset después de 5 minutos
+      setTimeout(() => {
+        usosPorUsuario[user] = 0;
+      }, 5 * 60 * 1000); // 5 min
+    });
 
   } catch (e) {
-    console.error("❌ Error en comando .pack:", e);
-    await msg.reply("❌ No se pudo obtener el pack.");
+    console.error("❌ Error en .pornololi:", e);
+    await msg.reply("❌ No se pudo obtener el contenido.");
   }
 };
 
-// Escuchar las reacciones solo una vez
-let listenerRegistrado = false;
-
-function registerPackListener(conn) {
-  if (listenerRegistrado) return;
-  listenerRegistrado = true;
-
-  conn.ev.on("messages.upsert", async ({ messages }) => {
-    const m = messages[0];
-    if (!m?.message?.reactionMessage) return;
-
-    const reaction = m.message.reactionMessage;
-    const reactedMsgId = reaction.key?.id;
-    const user = m.key.participant || m.key.remoteJid;
-
-    if (!cachePack[reactedMsgId]) return;
-    if (user !== cachePack[reactedMsgId].sender) return; // Solo el que usó el comando puede reaccionar
-
-    if ((usosPackUsuario[user] || 0) >= 3) {
-      return await conn.sendMessage(cachePack[reactedMsgId].chatId, {
-        text: "❌ Ya viste suficiente por ahora. Espera 5 minutos para seguir viendo 🔥.",
-        mentions: [user],
-      });
-    }
-
-    const { chatId } = cachePack[reactedMsgId];
-    const newUrl = packUrls[Math.floor(Math.random() * packUrls.length)];
-
-    const newMsg = await conn.sendMessage(chatId, {
-      image: { url: newUrl },
-      caption: "🔥 Otro pack más... Reacciona de nuevo si quieres otro.",
-    });
-
-    await conn.sendMessage(chatId, {
-      react: {
-        text: "✅",
-        key: newMsg.key,
-      },
-    });
-
-    // Actualizar cache y contador
-    cachePack[newMsg.key.id] = {
-      chatId,
-      sender: user,
-    };
-    delete cachePack[reactedMsgId];
-
-    usosPackUsuario[user] = (usosPackUsuario[user] || 0) + 1;
-
-    // Reset contador después de 5 minutos
-    setTimeout(() => {
-      usosPackUsuario[user] = 0;
-    }, 5 * 60 * 1000);
-  });
-}
-
-handler.command = ["pack"];
+handler.command = ["pornololi"];
 handler.tags = ["nsfw"];
-handler.help = ["pack"];
-
-module.exports = { handler, registerPackListener };
+handler.help = ["pornololi"];
+module.exports = handler;
