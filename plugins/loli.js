@@ -5,19 +5,22 @@ const handler = async (msg, { conn }) => {
     const res = await axios.get("https://raw.githubusercontent.com/BrunoSobrino/TheMystic-Bot-MD/master/src/JSON/nsfwloli.json");
     const url = res.data[Math.floor(Math.random() * res.data.length)];
 
-    await conn.sendMessage(msg.key.remoteJid, {
+    const templateMessage = {
       image: { url },
       caption: "🥵 Aquí tienes una loli 🔞",
-      footer: "Presiona el botón para otra imagen",
-      buttons: [
+      footer: "Presiona el botón para ver otra imagen",
+      templateButtons: [
         {
-          buttonId: ".pornololi",
-          buttonText: { displayText: "🔁 Siguiente" },
-          type: 1
+          index: 1,
+          quickReplyButton: {
+            displayText: "🔁 Siguiente",
+            id: ".pornololi"
+          }
         }
-      ],
-      headerType: 4
-    }, { quoted: msg });
+      ]
+    };
+
+    await conn.sendMessage(msg.key.remoteJid, templateMessage, { quoted: msg });
 
   } catch (e) {
     console.error("❌ Error en comando pornololi:", e);
