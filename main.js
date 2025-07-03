@@ -4104,6 +4104,27 @@ case 'menu': {
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 ╭━━[ MINI JUEGOS 🎮 ]━⬣
+┃➜ ${global.prefix}puto
+┃➜ ${global.prefix}puta
+┃➜ ${global.prefix}peruano
+┃➜ ${global.prefix}peruana
+┃➜ ${global.prefix}lesbiana
+┃➜ ${global.prefix}gay
+┃➜ ${global.prefix}negra
+┃➜ ${global.prefix}negro
+┃➜ ${global.prefix}manca
+┃➜ ${global.prefix}manco
+┃➜ ${global.prefix}fea
+┃➜ ${global.prefix}feo
+┃➜ ${global.prefix}enana
+┃➜ ${global.prefix}enano
+┃➜ ${global.prefix}pajera
+┃➜ ${global.prefix}pajero
+┃➜ ${global.prefix}cachuda
+┃➜ ${global.prefix}cachudo
+┃➜ ${global.prefix}adoptada
+┃➜ ${global.prefix}adoptado
+┃➜ ${global.prefix}rata
 ┃➜ ${global.prefix}verdad
 ┃➜ ${global.prefix}reto
 ┃➜ ${global.prefix}ship
