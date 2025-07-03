@@ -4104,6 +4104,8 @@ case 'menu': {
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 ╭━━[ MINI JUEGOS 🎮 ]━⬣
+┃➜ ${global.prefix}minovia
+┃➜ ${global.prefix}minovio
 ┃➜ ${global.prefix}puto
 ┃➜ ${global.prefix}puta
 ┃➜ ${global.prefix}peruano
@@ -4142,7 +4144,7 @@ case 'menu': {
 ┃➜ ${global.prefix}nsfwwaifu
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
-> *⍴᥆ᥕᥱrᥱძ ᑲᥡ һᥒ ᥴһ᥆ᥣ᥆*`;
+> *⍴᥆ᥕᥱrᥱძ ᑲᥡ һᥒ ᥴһ᥆ᥣі𝗍᥆*`;
 
     await sock.sendMessage2(
       chatId,
