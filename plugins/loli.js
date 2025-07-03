@@ -43,7 +43,7 @@ const handler = async (msg, { conn }) => {
     // Inicializar contador si no existe
     usosPorUsuario[sender] = usosPorUsuario[sender] || 0;
 
-    // ESCUCHAR SOLO UNA VEZ (como en .vs4)
+    // ESCUCHAR REACCIONES ESTILO VS4
     conn.ev.on("messages.upsert", async ({ messages }) => {
       const m = messages[0];
       if (!m?.message?.reactionMessage) return;
@@ -52,12 +52,14 @@ const handler = async (msg, { conn }) => {
       const reactedMsgId = reaction.key?.id;
       const user = m.key.participant || m.key.remoteJid;
 
+      // Verifica si la reacción es válida
       if (!cachePornololi[reactedMsgId]) return;
-      if (user !== cachePornololi[reactedMsgId].sender) return; // Solo el mismo usuario puede seguir
+      if (user !== cachePornololi[reactedMsgId].sender) return;
 
-      if ((usosPorUsuario[user] || 0) >= 5) {
+      // Limite de 3 reacciones
+      if ((usosPorUsuario[user] || 0) >= 3) {
         return await conn.sendMessage(cachePornololi[reactedMsgId].chatId, {
-          text: `❌ Ya viste mucho contenido. Espera un rato para seguir disfrutando 😏.`,
+          text: `❌ Ya viste suficiente por ahora.\n🕒 Espera *5 minutos* para seguir viendo contenido 😏.`,
           mentions: [user],
         });
       }
@@ -70,7 +72,6 @@ const handler = async (msg, { conn }) => {
         caption: "🥵 Otra más... Reacciona de nuevo.",
       });
 
-      // Reacción de "listo"
       await conn.sendMessage(chatId, {
         react: {
           text: "✅",
@@ -78,7 +79,7 @@ const handler = async (msg, { conn }) => {
         },
       });
 
-      // Actualizar nuevo mensaje
+      // Guardar nuevo y eliminar anterior
       cachePornololi[newMsg.key.id] = {
         chatId,
         data,
@@ -86,13 +87,13 @@ const handler = async (msg, { conn }) => {
       };
       delete cachePornololi[reactedMsgId];
 
-      // Aumentar contador
+      // Sumar reacción
       usosPorUsuario[user] = (usosPorUsuario[user] || 0) + 1;
 
       // Reset después de 5 minutos
       setTimeout(() => {
         usosPorUsuario[user] = 0;
-      }, 5 * 60 * 1000);
+      }, 5 * 60 * 1000); // 5 min
     });
 
   } catch (e) {
