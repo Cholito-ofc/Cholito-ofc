@@ -62,16 +62,16 @@ const handler = async (msg, { conn }) => {
   const porcentaje = Math.floor(Math.random() * 101);
 
   const frasesFinales = [
-    '✰ Lo tuyo, lo tuyo es que eres gay.',
-    '✰ Y eso no lo arregla ni rezando.',
-    '✰ Ya ni el closet te quiere dentro.',
-    '✰ No lo niegues, se te nota desde el saludo.',
-    '✰ Eres más gay que el filtro de corazones.',
-    '✰ Confirmado por la NASA y tu ex.',
-    '✰ Te escaneamos... y explotó el gayómetro.',
-    '✰ Modo diva activado sin retorno.',
-    '✰ Si fueras más gay, serías una bandera con patas.',
-    '✰ Esto ya no es sospecha, es evidencia científica.',
+    '𐀔 Lo tuyo, lo tuyo es que eres gay.',
+    '𐀔 Y eso no lo arregla ni rezando.',
+    '𐀔 Ya ni el closet te quiere dentro.',
+    '𐀔 No lo niegues, se te nota desde el saludo.',
+    '𐀔 Eres más gay que el filtro de corazones.',
+    '𐀔 Confirmado por la NASA y tu ex.',
+    '𐀔 Te escaneamos... y explotó el gayómetro.',
+    '𐀔 Modo diva activado sin retorno.',
+    '𐀔 Si fueras más gay, serías una bandera con patas.',
+    '𐀔 Esto ya no es sospecha, es evidencia científica.',
     // Puedes agregar más frases aquí para mayor variedad
   ];
 
