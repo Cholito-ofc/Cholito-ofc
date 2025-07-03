@@ -4124,10 +4124,12 @@ case 'menu': {
 > *⍴᥆ᥕᥱrᥱძ ᑲᥡ һᥒ ᥴһ᥆ᥣ᥆*`;
 
     await sock.sendMessage2(
+    await sock.sendMessage2(
       chatId,
       {
-        image: { url: "https://cdn.russellxz.click/c0c419e3.jpeg" },
+        video: { url: "https://cdn.russellxz.click/ada18622.mp4" },
         caption: captionText,
+        gifPlayback: true,
         mentions: [senderId, ownerMention]
       },
       msg
