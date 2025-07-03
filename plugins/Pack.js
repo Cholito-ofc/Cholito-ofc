@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-let cachePack = {}; // ID mensaje => { chatId, sender }
+let cachePornololi = {}; // ID mensaje => { chatId, data }
 let usosPorUsuario = {}; // usuario => cantidad
 
 const handler = async (msg, { conn }) => {
@@ -16,19 +16,13 @@ const handler = async (msg, { conn }) => {
       },
     });
 
-    // Petición a la API para imagen pack
     const res = await axios.get("https://delirius-apiofc.vercel.app/nsfw/girls");
-    const url = res.data?.url;
-
-    if (!url || typeof url !== "string") {
-      return await conn.sendMessage(chatId, {
-        text: "❌ La API no devolvió una URL válida.",
-      }, { quoted: msg });
-    }
+    const data = res.data;
+    const url = data[Math.floor(Math.random() * data.length)];
 
     const sentMsg = await conn.sendMessage(chatId, {
       image: { url },
-      caption: "🔥 Reacciona a esta imagen para ver otro pack.",
+      caption: "🥵 Reacciona a este mensaje para ver otra imagen.",
     }, { quoted: msg });
 
     // Reacción de "listo"
@@ -39,13 +33,17 @@ const handler = async (msg, { conn }) => {
       },
     });
 
-    cachePack[sentMsg.key.id] = {
+    // Guardar imagen enviada
+    cachePornololi[sentMsg.key.id] = {
       chatId,
-      sender,
+      data,
+      sender, // quien podrá reaccionar
     };
 
+    // Inicializar contador si no existe
     usosPorUsuario[sender] = usosPorUsuario[sender] || 0;
 
+    // ESCUCHAR REACCIONES ESTILO VS4
     conn.ev.on("messages.upsert", async ({ messages }) => {
       const m = messages[0];
       if (!m?.message?.reactionMessage) return;
@@ -54,61 +52,57 @@ const handler = async (msg, { conn }) => {
       const reactedMsgId = reaction.key?.id;
       const user = m.key.participant || m.key.remoteJid;
 
-      if (!cachePack[reactedMsgId]) return;
-      if (user !== cachePack[reactedMsgId].sender) return;
+      // Verifica si la reacción es válida
+      if (!cachePornololi[reactedMsgId]) return;
+      if (user !== cachePornololi[reactedMsgId].sender) return;
 
+      // Limite de 3 reacciones
       if ((usosPorUsuario[user] || 0) >= 3) {
-        return await conn.sendMessage(cachePack[reactedMsgId].chatId, {
-          text: `❌ Ya viste suficiente por ahora.\n🕒 Espera *5 minutos* para seguir viendo packs 🔥.`,
+        return await conn.sendMessage(cachePornololi[reactedMsgId].chatId, {
+          text: `❌ Ya viste suficiente por ahora.\n🕒 Espera *5 minutos* para seguir viendo contenido 😏.`,
           mentions: [user],
         });
       }
 
-      // Nueva petición para otra imagen
-      const newRes = await axios.get("https://delirius-apiofc.vercel.app/nsfw/girls");
-      const newUrl = newRes.data?.url;
+      const { chatId, data } = cachePornololi[reactedMsgId];
+      const newUrl = data[Math.floor(Math.random() * data.length)];
 
-      if (!newUrl || typeof newUrl !== "string") {
-        return await conn.sendMessage(cachePack[reactedMsgId].chatId, {
-          text: "❌ La API no devolvió una URL válida para la siguiente imagen.",
-          mentions: [user],
-        });
-      }
-
-      const newMsg = await conn.sendMessage(cachePack[reactedMsgId].chatId, {
+      const newMsg = await conn.sendMessage(chatId, {
         image: { url: newUrl },
-        caption: "🔥 Otro pack... Reacciona de nuevo para más.",
+        caption: "🥵 Otra más... Reacciona de nuevo.",
       });
 
-      await conn.sendMessage(cachePack[reactedMsgId].chatId, {
+      await conn.sendMessage(chatId, {
         react: {
           text: "✅",
           key: newMsg.key,
         },
       });
 
-      cachePack[newMsg.key.id] = {
-        chatId: cachePack[reactedMsgId].chatId,
-        sender: user,
+      // Guardar nuevo y eliminar anterior
+      cachePornololi[newMsg.key.id] = {
+        chatId,
+        data,
+        sender: user
       };
-      delete cachePack[reactedMsgId];
+      delete cachePornololi[reactedMsgId];
 
+      // Sumar reacción
       usosPorUsuario[user] = (usosPorUsuario[user] || 0) + 1;
 
+      // Reset después de 5 minutos
       setTimeout(() => {
         usosPorUsuario[user] = 0;
-      }, 5 * 60 * 1000); // 5 minutos
+      }, 5 * 60 * 1000); // 5 min
     });
 
   } catch (e) {
-    console.error("❌ Error en .pack:", e);
-    await conn.sendMessage(msg.key.remoteJid, {
-      text: "❌ No se pudo obtener el pack.",
-    }, { quoted: msg });
+    console.error("❌ Error en .pornololi:", e);
+    await msg.reply("❌ No se pudo obtener el contenido.");
   }
 };
 
-handler.command = ["pack"];
+handler.command = ["pornololi"];
 handler.tags = ["nsfw"];
-handler.help = ["pack"];
+handler.help = ["pornololi"];
 module.exports = handler;
