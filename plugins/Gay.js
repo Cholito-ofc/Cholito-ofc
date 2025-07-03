@@ -18,7 +18,7 @@ const handler = async (msg, { conn }) => {
     'https://cdn.russellxz.click/afd908e6.webp'
   ];
 
-  const audioURL = 'https://cdn.russellxz.click/e83de55c.mp3'; // 🎧 Tu audio personalizado
+  const audioURL = 'https://cdn.russellxz.click/96beb11b.mp3'; // 🎧 Tu audio personalizado
 
   // 🧠 Obtener JID mencionado o desde mensaje respondido
   let mentionedJid;
