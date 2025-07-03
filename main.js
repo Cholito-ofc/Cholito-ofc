@@ -4099,7 +4099,12 @@ case 'menu': {
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 ╭━━[ CONTENIDO 🔞 ]━⬣
-┃➜ ${global.prefix}videoxx
+┃➜ ${global.prefix}pack 
+┃➜ ${global.prefix}pack1
+┃➜ ${global.prefix}pack2 
+┃➜ ${global.prefix}pack3
+┃➜ ${global.prefix}videoxxx
+┃➜ ${global.prefix}videoxxxlesbi
 ┃➜ ${global.prefix}pornololi
 ┃➜ ${global.prefix}nsfwneko
 ┃➜ ${global.prefix}waifu
