@@ -3,8 +3,12 @@ const handler = async (msg, { conn }) => {
 
   // Soporte a minúsculas, espacios y mayúsculas
   const fullText = (msg.message?.conversation || msg.message?.extendedTextMessage?.text || '').trim();
-  const lowerText = fullText.toLowerCase();
-  const comando = lowerText.split(/\s+/)[0].replace(/^[!./#\s]+/, '');
+
+// Extraer comando aún con prefijo separado y mayúsculas
+let comando = fullText.match(/^[!./#\s]*([a-zA-Z]+)/);
+comando = comando ? comando[1].toLowerCase() : null;
+
+if (!comando || !comandosValidos.includes(comando)) return;
 
   const comandosValidos = [
     'puta', 'puto', 'peruano', 'peruana',
