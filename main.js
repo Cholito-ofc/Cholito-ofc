@@ -14470,25 +14470,50 @@ case "perfil": {
 }
 
 case 'owner':
-case 'creador':{
-    const ownerNumber = "50489513153@s.whatsapp.net"; // Número del dueño en formato WhatsApp
-    const ownerName = "𝘾𝙝𝙤𝙡𝙞𝙩𝙤 𝙭𝙮𝙯"; // Nombre del dueño
-    const messageText = "📞  *Contacto del Creador:*\n\nSi tienes dudas, preguntas o sugerencias sobre el bot, puedes contactar a mi creador.\n\n📌 *Nombre:* 𝗖𝗵𝗼𝗹𝗼\n📌 *Número:* +504 8951-3153\n💬 *Mensaje directo:* Pulsa sobre el contacto y chatea con él.";
+ase 'creador': {
+  // 1) DATOS BÁSICOS ------------------------------------
+  const ownerNumber = '50489513153';                 // sin @s.whatsapp.net
+  const ownerName   = 'ᥴһ᥆ᥣі𝗍᥆ ᥊ᥡz⚡';           // nombre que verá el usuario
+  const jid         = ownerNumber + '@s.whatsapp.net';
 
-    // Enviar mensaje con el contacto del dueño
-    await sock.sendMessage(msg.key.remoteJid, {
-        contacts: {
-            displayName: ownerName,
-            contacts: [{
-                vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:${ownerName}\nTEL;waid=${ownerNumber.split('@')[0]}:+${ownerNumber.split('@')[0]}\nEND:VCARD`
-            }]
-        }
-    });
+  // 2) vCARD CON INFO “HACKER ANGÉLICA” -----------------
+  const vcard = `
+BEGIN:VCARD
+VERSION:3.0
+N:${ownerName};;;;
+FN:${ownerName}
+ORG:🇭🇳 Honduras • ᥴһ᥆ᥣі𝗍᥆ ᥊ᥡz;                 # ← aparece como “empresa” debajo del nombre
+TITLE:Creador & Soporte Oficial
+TEL;type=CELL;type=VOICE;waid=${ownerNumber}:${ownerNumber}
+ADR;TYPE=WORK:;;Tegucigalpa;;;Honduras
+NOTE:⚡ No hacer SPAM • Respuesta casi divina 
+END:VCARD`.trim();
 
-    // Enviar mensaje adicional con información
-    await sock.sendMessage(msg.key.remoteJid, { text: messageText }, { quoted: msg });
+  // 3) TEXTO ADICIONAL (igual que antes, si quieres cambiarlo) ----
+  const messageText =
+`🗣️ *Contacto del Creador*
 
-    break;
+Si tienes dudas, bugs o sugerencias, habla directo con el guardián del bot.
+
+📌 *Nombre:* 𝗖𝗵𝗼𝗹𝗼
+📌 *Número:* +${ownerNumber}
+💬 *Chat inmediato:* pulsa la tarjeta y escribe.`;
+
+  // 4) ENVÍO DEL CONTACTO (la “tarjeta-botón”) ------------
+  await sock.sendMessage(msg.key.remoteJid, {
+      contacts: {
+        displayName: ownerName,          // texto grande del “botón”
+        contacts: [{ vcard }]
+      }
+  });
+
+  // 5) ENVÍO DEL MENSAJE EXPLICATIVO ----------------------
+  await sock.sendMessage(
+      msg.key.remoteJid,
+      { text: messageText },
+      { quoted: msg }                   // opcional: responde al mensaje que activó el comando
+  );
+  break;
 }
            
             
