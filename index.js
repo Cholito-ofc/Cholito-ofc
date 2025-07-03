@@ -812,7 +812,8 @@ try {
   const target = `${targetNumber}@s.whatsapp.net`;
   const mentionTag = [target];
 
-  const isGroup = chatId.endsWith('@g.us');
+  // ⚙️ Eliminamos la segunda declaración de isGroup, ya está arriba.
+  // const isGroup = chatId.endsWith('@g.us');
 
   const activos = fs.existsSync('./activos.json') ? JSON.parse(fs.readFileSync('./activos.json', 'utf-8')) : {};
   const activos2 = fs.existsSync('./activos2.json') ? JSON.parse(fs.readFileSync('./activos2.json', 'utf-8')) : {};
@@ -826,26 +827,27 @@ try {
   const data = JSON.parse(fs.readFileSync(filePath));
   const deletedData = data[deletedId];
   if (!deletedData) return;
-const protoMsg = msg.message?.protocolMessage?.key;
-const isGroup = chatId.endsWith('@g.us');
 
-let raw = protoMsg?.participant || protoMsg?.remoteJid || msg.key?.participant || msg.key?.remoteJid || "";
-const senderNumber = raw.replace(/[^0-9]/g, "");
-if (!senderNumber) return;
+  const protoMsg = msg.message?.protocolMessage?.key;
 
-const target = `${senderNumber}@s.whatsapp.net`;
-const mentionTag = [target];
+  let raw = protoMsg?.participant || protoMsg?.remoteJid || msg.key?.participant || msg.key?.remoteJid || "";
+  const senderNumberAgain = raw.replace(/[^0-9]/g, "");
+  if (!senderNumberAgain) return;
 
-// Verificación extra (solo si el que eliminó es el mismo que envió el mensaje original)
-const senderClean = (deletedData.sender || '').replace(/[^0-9]/g, '');
-if (senderClean !== senderNumber) return;
+  const targetAgain = `${senderNumberAgain}@s.whatsapp.net`;
+  const mentionTagAgain = [targetAgain];
 
-// Si es admin, no mostrar
-if (isGroup) {
-  const meta = await sock.groupMetadata(chatId);
-  const isAdmin = meta.participants.find(p => p.id === target)?.admin;
-  if (isAdmin) return;
-}
+  // Verificación extra (solo si el que eliminó es el mismo que envió el mensaje original)
+  const senderClean = (deletedData.sender || '').replace(/[^0-9]/g, '');
+  if (senderClean !== senderNumberAgain) return;
+
+  // Si es admin, no mostrar
+  if (isGroup) {
+    const meta = await sock.groupMetadata(chatId);
+    const isAdmin = meta.participants.find(p => p.id === targetAgain)?.admin;
+    if (isAdmin) return;
+  }
+
   if (deletedData.media) {
     const mimetype = deletedData.mimetype || 'application/octet-stream';
     const buffer = Buffer.from(deletedData.media, "base64");
@@ -858,26 +860,26 @@ if (isGroup) {
     if (type === "sticker") {
       const sent = await sock.sendMessage(chatId, sendOpts);
       await sock.sendMessage(chatId, {
-        text: `📌 El sticker fue eliminado\n│ 👤 Usuario: @${senderNumber}`,
-        mentions: mentionTag,
+        text: `📌 El sticker fue eliminado\n│ 👤 Usuario: @${senderNumberAgain}`,
+        mentions: mentionTagAgain,
         quoted: sent
       });
     } else if (type === "audio") {
       const sent = await sock.sendMessage(chatId, sendOpts);
       await sock.sendMessage(chatId, {
-        text: `🎧 El audio fue eliminado\n│ 👤 Usuario: @${senderNumber}`,
-        mentions: mentionTag,
+        text: `🎧 El audio fue eliminado\n│ 👤 Usuario: @${senderNumberAgain}`,
+        mentions: mentionTagAgain,
         quoted: sent
       });
     } else {
-      sendOpts.caption = `📦 Mensaje eliminado\n│ 👤 Usuario: @${senderNumber}`;
-      sendOpts.mentions = mentionTag;
+      sendOpts.caption = `📦 Mensaje eliminado\n│ 👤 Usuario: @${senderNumberAgain}`;
+      sendOpts.mentions = mentionTagAgain;
       await sock.sendMessage(chatId, sendOpts, { quoted: msg });
     }
   } else if (deletedData.text) {
     await sock.sendMessage(chatId, {
-      text: `📝 *Mensaje eliminado:* ${deletedData.text}\n│ 👤 Usuario: @${senderNumber}`,
-      mentions: mentionTag
+      text: `📝 *Mensaje eliminado:* ${deletedData.text}\n│ 👤 Usuario: @${senderNumberAgain}`,
+      mentions: mentionTagAgain
     }, { quoted: msg });
   }
 
