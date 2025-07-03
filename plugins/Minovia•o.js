@@ -6,7 +6,6 @@ const handler = async (msg, { conn }) => {
   const comandos = ['minovia', 'minovio'];
   if (!comandos.includes(command)) return;
 
-  // Obtener el usuario mencionado o respondido
   let mentionedJid = null;
   try {
     if (msg.message?.extendedTextMessage?.contextInfo?.mentionedJid?.length) {
@@ -29,35 +28,25 @@ const handler = async (msg, { conn }) => {
   }
 
   const numero = mentionedJid.split('@')[0];
-
-  // Protección del owner
   const isTaggedOwner = Array.isArray(global.owner) && global.owner.some(([id]) => id === numero);
   if (isTaggedOwner) {
     return await conn.sendMessage(chatId, {
-      text: `💥 *Error del universo*\n\nNo puedes reclamar como novio(a) a un *owner supremo*.\nEstá fuera de tu liga.`,
+      text: `💥 *Error del universo*\n\nNo puedes reclamar como novio(a) a un *owner supremo*.`,
       mentions: [mentionedJid]
     }, { quoted: msg });
   }
 
-  // Frases por comando
   const frases = {
     minovia: [
-      '💖 *Miren, ella es mi novia.*',
-      '✨ *Ella me roba suspiros todos los días.*',
-      '🥰 *La más hermosa, mi razón de sonreír.*',
-      '👸 *La reina de mi mundo está aquí.*',
+      '𝙀𝙎𝙏𝘼 𝙀𝙎 𝙈𝙄 𝙉𝙊𝙑𝙄𝘼, *¿𝙀𝙎 𝙃𝙀𝙍𝙈𝙊𝙎𝘼 𝙑𝙀𝙍𝘿𝘼𝘿*? 😍\n\n@{user} 𝙀𝙍𝙀𝙎 𝙇𝘼 𝙈𝙀𝙅𝙊𝙍 𝙉𝙊𝙑𝙄𝘼 𝘿𝙀𝙇 𝙈𝙐𝙉𝘿𝙊, 𝙏𝙀 𝙌𝙐𝙄𝙀𝙍𝙊 𝘽𝙀𝘽𝙀.🫶🏻♥️'
     ],
     minovio: [
-      '😍 *Miren, él es mi novio.*',
-      '💘 *Él me da paz y amor cada día.*',
-      '💞 *Mi compañero favorito, siempre él.*',
-      '🤴 *El rey de mi corazón está presente.*',
+      '✨ *ÉL ES MI NOVIO* ✨\n\n@{user} 𝙀𝙎 𝙀𝙇 𝘾𝙃𝙄𝙆𝙊 𝙌𝙐𝙀 𝙈𝙀 𝙃𝘼𝙍𝘼 𝙎𝙀𝙍 𝙁𝙀𝙇𝙄𝙕 𝙎𝙄𝙀𝙈𝙋𝙍𝙀. 💖'
     ]
   };
 
-  const frase = frases[command][Math.floor(Math.random() * frases[command].length)];
+  const frase = frases[command][Math.floor(Math.random() * frases[command].length)].replace('{user}', numero);
 
-  // Foto de perfil o imagen predeterminada
   let pfp;
   try {
     pfp = await conn.profilePictureUrl(mentionedJid, 'image');
@@ -65,12 +54,12 @@ const handler = async (msg, { conn }) => {
     pfp = null;
   }
 
-  const imagenDefault = 'https://cdn.russellxz.click/e6512a74.jpeg';
+  const imagenDefault = 'https://cdn.russellxz.click/a4d463cd.jpeg';
   const imagenFinal = pfp || imagenDefault;
 
   await conn.sendMessage(chatId, {
     image: { url: imagenFinal },
-    caption: `${frase}\n\n@${numero}`,
+    caption: frase,
     mentions: [mentionedJid]
   }, { quoted: msg });
 };
