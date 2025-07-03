@@ -18,7 +18,13 @@ const handler = async (msg, { conn }) => {
 
     // Petición a la API para imagen pack
     const res = await axios.get("https://delirius-apiofc.vercel.app/nsfw/girls");
-    const url = res.data.url;
+    const url = res.data?.url;
+
+    if (!url || typeof url !== "string") {
+      return await conn.sendMessage(chatId, {
+        text: "❌ La API no devolvió una URL válida.",
+      }, { quoted: msg });
+    }
 
     const sentMsg = await conn.sendMessage(chatId, {
       image: { url },
@@ -60,7 +66,14 @@ const handler = async (msg, { conn }) => {
 
       // Nueva petición para otra imagen
       const newRes = await axios.get("https://delirius-apiofc.vercel.app/nsfw/girls");
-      const newUrl = newRes.data.url;
+      const newUrl = newRes.data?.url;
+
+      if (!newUrl || typeof newUrl !== "string") {
+        return await conn.sendMessage(cachePack[reactedMsgId].chatId, {
+          text: "❌ La API no devolvió una URL válida para la siguiente imagen.",
+          mentions: [user],
+        });
+      }
 
       const newMsg = await conn.sendMessage(cachePack[reactedMsgId].chatId, {
         image: { url: newUrl },
@@ -89,7 +102,9 @@ const handler = async (msg, { conn }) => {
 
   } catch (e) {
     console.error("❌ Error en .pack:", e);
-    await msg.reply("❌ No se pudo obtener el pack.");
+    await conn.sendMessage(msg.key.remoteJid, {
+      text: "❌ No se pudo obtener el pack.",
+    }, { quoted: msg });
   }
 };
 
