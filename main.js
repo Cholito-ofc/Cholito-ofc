@@ -14472,46 +14472,45 @@ case "perfil": {
 case 'owner':
 case 'creador': {
   // 1) DATOS BÁSICOS ------------------------------------
-  const ownerNumber = '50489513153';                 // sin @s.whatsapp.net
-  const ownerName   = 'ᥴһ᥆ᥣі𝗍᥆ ᥊ᥡz⚡';           // nombre que verá el usuario
+  const ownerNumber = '50489513153';
+  const ownerName   = 'cholito xyz⚡'; // Nombre horizontal normal
   const jid         = ownerNumber + '@s.whatsapp.net';
 
-  // 2) vCARD CON INFO “HACKER ANGÉLICA” -----------------
+  // 2) vCARD CON INFO PERSONALIZADA ----------------------
   const vcard = `
 BEGIN:VCARD
 VERSION:3.0
 N:${ownerName};;;;
 FN:${ownerName}
-ORG:🇭🇳 Honduras • ᥴһ᥆ᥣі𝗍᥆ ᥊ᥡz;                 # ← aparece como “empresa” debajo del nombre
+ORG:ᥴһ᥆ᥣі𝗍᥆ ᥊ᥡz 🇭🇳
 TITLE:Creador & Soporte Oficial
-TEL;type=CELL;type=VOICE;waid=${ownerNumber}:${ownerNumber}
-ADR;TYPE=WORK:;;Tegucigalpa;;;Honduras
-NOTE:⚡ No hacer SPAM • Respuesta casi divina 
+TEL;type=CELULAR;waid=${ownerNumber}:${ownerNumber}
+NOTE:⚡ No hacer Spam • Respuesta casi divina 
 END:VCARD`.trim();
 
-  // 3) TEXTO ADICIONAL (igual que antes, si quieres cambiarlo) ----
+  // 3) TEXTO ADICIONAL ----------------------
   const messageText =
-`🗣️ *Contacto del Creador*
+`🗣️ *𝖢𝗈𝗇𝗍𝖺𝖼𝗍𝗈 𝖽𝖾𝗅 𝖢𝗋𝖾𝖺𝖽𝗈𝗋*
 
 Si tienes dudas, bugs o sugerencias, habla directo con el guardián del bot.
 
-📌 *Nombre:* 𝗖𝗵𝗼𝗹𝗼
-📌 *Número:* +${ownerNumber}
+📌 *Nombre:* 𝗖𝗵𝗼𝗹𝗶𝘁𝗼 𝘅𝟳
+📌 *Número:* +${ownerNumber}  
 💬 *Chat inmediato:* pulsa la tarjeta y escribe.`;
 
-  // 4) ENVÍO DEL CONTACTO (la “tarjeta-botón”) ------------
+  // 4) ENVÍO DEL CONTACTO ----------------------
   await sock.sendMessage(msg.key.remoteJid, {
-      contacts: {
-        displayName: ownerName,          // texto grande del “botón”
-        contacts: [{ vcard }]
-      }
+    contacts: {
+      displayName: ownerName, // botón con nombre horizontal
+      contacts: [{ vcard }]
+    }
   });
 
   // 5) ENVÍO DEL MENSAJE EXPLICATIVO ----------------------
   await sock.sendMessage(
-      msg.key.remoteJid,
-      { text: messageText },
-      { quoted: msg }                   // opcional: responde al mensaje que activó el comando
+    msg.key.remoteJid,
+    { text: messageText },
+    { quoted: msg }
   );
   break;
 }
