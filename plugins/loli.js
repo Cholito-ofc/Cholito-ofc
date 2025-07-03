@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-let cachePornololi = {}; // ID mensaje => { chatId, data, usos }
+let cachePornololi = {}; // ID mensaje => { chatId, data }
 let usosPorUsuario = {}; // usuario => cantidad
 
 const handler = async (msg, { conn }) => {
@@ -33,15 +33,17 @@ const handler = async (msg, { conn }) => {
       },
     });
 
+    // Guardar imagen enviada
     cachePornololi[sentMsg.key.id] = {
       chatId,
       data,
+      sender, // quien podrá reaccionar
     };
 
-    // Inicializar contador del usuario si no existe
-    usosPorUsuario[sender] = 0;
+    // Inicializar contador si no existe
+    usosPorUsuario[sender] = usosPorUsuario[sender] || 0;
 
-    // Escuchar reacciones como en .vs4
+    // ESCUCHAR SOLO UNA VEZ (como en .vs4)
     conn.ev.on("messages.upsert", async ({ messages }) => {
       const m = messages[0];
       if (!m?.message?.reactionMessage) return;
@@ -49,27 +51,26 @@ const handler = async (msg, { conn }) => {
       const reaction = m.message.reactionMessage;
       const reactedMsgId = reaction.key?.id;
       const user = m.key.participant || m.key.remoteJid;
-      const chatId = reaction.key?.remoteJid;
 
       if (!cachePornololi[reactedMsgId]) return;
+      if (user !== cachePornololi[reactedMsgId].sender) return; // Solo el mismo usuario puede seguir
 
-      // Si ya superó el límite
       if ((usosPorUsuario[user] || 0) >= 5) {
-        return await conn.sendMessage(chatId, {
-          text: `❌ Ya viste mucho contenido. Espera un rato antes de seguir disfrutando, degenerado 😏.`,
+        return await conn.sendMessage(cachePornololi[reactedMsgId].chatId, {
+          text: `❌ Ya viste mucho contenido. Espera un rato para seguir disfrutando 😏.`,
           mentions: [user],
         });
       }
 
-      const { data } = cachePornololi[reactedMsgId];
+      const { chatId, data } = cachePornololi[reactedMsgId];
       const newUrl = data[Math.floor(Math.random() * data.length)];
 
       const newMsg = await conn.sendMessage(chatId, {
         image: { url: newUrl },
-        caption: "🥵 Otra más... Reacciona de nuevo para seguir viendo.",
+        caption: "🥵 Otra más... Reacciona de nuevo.",
       });
 
-      // Reacción ✅ en la nueva imagen
+      // Reacción de "listo"
       await conn.sendMessage(chatId, {
         react: {
           text: "✅",
@@ -77,21 +78,21 @@ const handler = async (msg, { conn }) => {
         },
       });
 
-      // Actualizar cache
+      // Actualizar nuevo mensaje
       cachePornololi[newMsg.key.id] = {
         chatId,
         data,
+        sender: user
       };
-
       delete cachePornololi[reactedMsgId];
 
-      // Sumar reacción del usuario
+      // Aumentar contador
       usosPorUsuario[user] = (usosPorUsuario[user] || 0) + 1;
 
-      // Opción: resetear después de X minutos (5 mins)
+      // Reset después de 5 minutos
       setTimeout(() => {
         usosPorUsuario[user] = 0;
-      }, 5 * 60 * 1000); // 5 minutos
+      }, 5 * 60 * 1000);
     });
 
   } catch (e) {
