@@ -16,7 +16,7 @@ const handler = async (msg, { conn }) => {
       },
     });
 
-    const res = await axios.get("https://delirius-apiofc.vercel.app/nsfw/girls");
+    const res = await axios.get("https://delirius-apiofc.vercel.app/nsfw/girls.json");
     const data = res.data;
     const url = data[Math.floor(Math.random() * data.length)];
 
