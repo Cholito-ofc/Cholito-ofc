@@ -826,16 +826,26 @@ try {
   const data = JSON.parse(fs.readFileSync(filePath));
   const deletedData = data[deletedId];
   if (!deletedData) return;
+const protoMsg = msg.message?.protocolMessage?.key;
+const isGroup = chatId.endsWith('@g.us');
 
-  const senderClean = (deletedData.sender || '').replace(/[^0-9]/g, '');
-  if (senderClean !== senderNumber) return;
+let raw = protoMsg?.participant || protoMsg?.remoteJid || msg.key?.participant || msg.key?.remoteJid || "";
+const senderNumber = raw.replace(/[^0-9]/g, "");
+if (!senderNumber) return;
 
-  if (isGroup) {
-    const meta = await sock.groupMetadata(chatId);
-    const isAdmin = meta.participants.find(p => p.id === target)?.admin;
-    if (isAdmin) return;
-  }
+const target = `${senderNumber}@s.whatsapp.net`;
+const mentionTag = [target];
 
+// Verificación extra (solo si el que eliminó es el mismo que envió el mensaje original)
+const senderClean = (deletedData.sender || '').replace(/[^0-9]/g, '');
+if (senderClean !== senderNumber) return;
+
+// Si es admin, no mostrar
+if (isGroup) {
+  const meta = await sock.groupMetadata(chatId);
+  const isAdmin = meta.participants.find(p => p.id === target)?.admin;
+  if (isAdmin) return;
+}
   if (deletedData.media) {
     const mimetype = deletedData.mimetype || 'application/octet-stream';
     const buffer = Buffer.from(deletedData.media, "base64");
