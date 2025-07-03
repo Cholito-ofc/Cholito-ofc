@@ -745,15 +745,18 @@ if ((isGroup && isAntideleteGroup) || (!isGroup && isAntideletePriv)) {
     fs.writeFileSync(filePath, JSON.stringify({}, null, 2));
   }
 
-  const type = Object.keys(msg.message || {})[0];  
-  const content = msg.message[type];  
-  const idMsg = msg.key.id;  
+  const type = Object.keys(msg.message || {})[0];
+  if (!type) return; // ✅ Protección si el tipo no existe
 
-  const botNumber = sock.user.id.split(":")[0] + "@s.whatsapp.net";  
-  const senderId = msg.key.participant || (msg.key.fromMe ? botNumber : msg.key.remoteJid);  
+  const content = msg.message[type];
+  if (!content) return; // ✅ Protección si el contenido no existe
+
+  const idMsg = msg.key.id;
+  const botNumber = sock.user.id.split(":")[0] + "@s.whatsapp.net";
+  const senderId = msg.key.participant || (msg.key.fromMe ? botNumber : msg.key.remoteJid);
 
   if (
-    ['imageMessage','videoMessage','audioMessage','documentMessage','stickerMessage'].includes(type) &&
+    ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage'].includes(type) &&
     content.fileLength > 10 * 1024 * 1024
   ) return;
 
@@ -777,12 +780,16 @@ if ((isGroup && isAntideleteGroup) || (!isGroup && isAntideletePriv)) {
   if (msg.message?.viewOnceMessageV2) {
     const inner = msg.message.viewOnceMessageV2.message;
     const viewType = Object.keys(inner)[0];
+    if (!viewType) return; // ✅ Protección
+
     const viewData = inner[viewType];
+    if (!viewData) return; // ✅ Protección
+
     const mediaType = viewType.replace("Message", "");
     guardado.type = viewType;
     await saveBase64(mediaType, viewData);
 
-  } else if (['imageMessage','videoMessage','audioMessage','documentMessage','stickerMessage'].includes(type)) {
+  } else if (['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage'].includes(type)) {
     const mediaType = type.replace('Message', '');
     await saveBase64(mediaType, content);
 
@@ -805,15 +812,12 @@ if (msg.message?.protocolMessage?.type === 0) {
 try {
   const deletedId = msg.message.protocolMessage.key.id;
 
-  // ✅ Corrección robusta del número del que elimina
   let whoDeleted = msg.message?.protocolMessage?.key?.participant || msg.participant || msg.key?.participant || msg.key?.remoteJid || "";
   const senderNumber = typeof whoDeleted === "string" ? whoDeleted.replace(/[^0-9]/g, "") : "";
-  const targetNumber = senderNumber;
-  const target = `${targetNumber}@s.whatsapp.net`;
-  const mentionTag = [target];
+  if (!senderNumber) return;
 
-  // ⚙️ Eliminamos la segunda declaración de isGroup, ya está arriba.
-  // const isGroup = chatId.endsWith('@g.us');
+  const target = `${senderNumber}@s.whatsapp.net`;
+  const mentionTag = [target];
 
   const activos = fs.existsSync('./activos.json') ? JSON.parse(fs.readFileSync('./activos.json', 'utf-8')) : {};
   const activos2 = fs.existsSync('./activos2.json') ? JSON.parse(fs.readFileSync('./activos2.json', 'utf-8')) : {};
@@ -837,11 +841,9 @@ try {
   const targetAgain = `${senderNumberAgain}@s.whatsapp.net`;
   const mentionTagAgain = [targetAgain];
 
-  // Verificación extra (solo si el que eliminó es el mismo que envió el mensaje original)
   const senderClean = (deletedData.sender || '').replace(/[^0-9]/g, '');
   if (senderClean !== senderNumberAgain) return;
 
-  // Si es admin, no mostrar
   if (isGroup) {
     const meta = await sock.groupMetadata(chatId);
     const isAdmin = meta.participants.find(p => p.id === targetAgain)?.admin;
