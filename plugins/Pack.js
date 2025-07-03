@@ -16,7 +16,7 @@ const handler = async (msg, { conn }) => {
       },
     });
 
-    const res = await axios.get("https://delirius-apiofc.vercel.app/nsfw/girls.json");
+    const res = await axios.get("https://raw.githubusercontent.com/BrunoSobrino/TheMystic-Bot-MD/master/src/JSON/booty.json");
     const data = res.data;
     const url = data[Math.floor(Math.random() * data.length)];
 
