@@ -1,12 +1,14 @@
 const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
 
-  // Obtener texto completo y limpiar espacios
-  const fullText = (msg.message?.conversation || msg.message?.extendedTextMessage?.text || '').trim();
+  const textRaw = (
+    msg.message?.conversation ||
+    msg.message?.extendedTextMessage?.text ||
+    ''
+  ).trim();
 
-  // Extraer comando soportando prefijos y mayúsculas
-  let comando = fullText.match(/^[!./#\s]*([a-zA-Z]+)/);
-  comando = comando ? comando[1].toLowerCase() : null;
+  const match = textRaw.match(/^[!./#]?\s*([a-zA-Z]+)/);
+  const comando = match ? match[1].toLowerCase() : null;
 
   const comandosValidos = [
     'puta', 'puto', 'peruano', 'peruana',
@@ -18,7 +20,6 @@ const handler = async (msg, { conn }) => {
 
   if (!comando || !comandosValidos.includes(comando)) return;
 
-  // Obtener JID mencionado o respondido
   let mentionedJid = null;
   try {
     if (msg.message?.extendedTextMessage?.contextInfo?.mentionedJid?.length) {
@@ -29,31 +30,22 @@ const handler = async (msg, { conn }) => {
       mentionedJid = msg.message.extendedTextMessage.contextInfo.participant;
     } else if (msg.message?.contextInfo?.participant) {
       mentionedJid = msg.message.contextInfo.participant;
-    } else if (msg.key.participant && msg.key.participant !== conn.user?.id) {
-      mentionedJid = msg.key.participant;
     }
   } catch {
     mentionedJid = null;
   }
 
-  // Si no etiquetó ni respondió a nadie → Explicación de uso
   if (!mentionedJid) {
     return await conn.sendMessage(chatId, {
-      text: `❗ *Uso incorrecto del comando*
-
-Debes *responder al mensaje* de alguien o *etiquetar a un usuario* para poder escanear.
-
-📌 *Ejemplos correctos:*
-• .${comando} @usuario
-• .${comando} (respondiendo al mensaje de alguien)`,
+      text: `❗ *Uso incorrecto del comando.*\n\nDebes *etiquetar* a alguien o *responder su mensaje* para escanear.\n\n*Ejemplos válidos:*\n> .${comando} @usuario\n> .${comando} (respondiendo al mensaje de alguien)`,
     }, { quoted: msg });
   }
 
   const numero = mentionedJid.split('@')[0];
 
   const frasesOwner = [
-    '🛡️ Protección Suprema Activada\n@{user} es el alfa, el omega y el padre del comando. Intocable.',
-    '👑 Error de Sistema\nIntentaste escanear al Creador. Abortando misión.',
+    '🛡️ *Protección Suprema Activada*\n@{user} es el alfa, el omega y el padre del comando. Intocable.',
+    '👑 *Error de Sistema*\nIntentaste escanear al Creador. Abortando misión.',
     '🚫 Este usuario tiene inmunidad total ante el escáner.\nNo se toca al jefe.',
     '🔒 Modo Dios activado para @{user}. Mejor no intentes otra vez.',
     '⚠️ Escanear al Owner está prohibido por ley universal. Respeta jerarquías.'
@@ -69,25 +61,120 @@ Debes *responder al mensaje* de alguien o *etiquetar a un usuario* para poder es
   }
 
   const frasesPorComando = {
-    puta: [ '𐀔 Naciste para cobrar sin amor.', '𐀔 Ni en la esquina perdonas.', '𐀔 Tu vida es un Only sin cuenta.', '𐀔 El suelo te extraña cuando no estás encima.' ],
-    puto: [ '𐀔 Te sientas más que los muebles del INSS.', '𐀔 No te respetan ni en el FIFA.', '𐀔 Eres leyenda urbana en la zona roja.', '𐀔 Te tiembla hasta el WiFi de tantos bajones.' ],
-    peruano: [ '𐀔 Tu conexión es más inestable que tu economía.', '𐀔 Si fueras internet, serías Bitel.', '𐀔 Cada vez que hablas, un ceviche llora.', '𐀔 Ni Machu Picchu te reconoce como local.' ],
-    peruana: [ '𐀔 Tus audios deberían ir a patrimonio cultural.', '𐀔 Cada sticker tuyo vale un sol.', '𐀔 Eres el motivo de cada bug en el grupo.', '𐀔 Tu voz activa terremotos.' ],
-    negro: [ '𐀔 Eres más oscuro que mis ganas de vivir.', '𐀔 Ni la linterna del bot te encuentra.', '𐀔 Te camuflas en la sombra de la sombra.', '𐀔 Apareces en fotos con filtro negativo.' ],
-    negra: [ '𐀔 Apagas focos con solo pasar cerca.', '𐀔 Tu silueta asusta hasta en modo día.', '𐀔 El eclipse te pidió que te apartaras.', '𐀔 Brillas por tu opacidad.' ],
-    manca: [ '𐀔 Fallas más que mi ex en fidelidad.', '𐀔 No le das ni a una piñata amarrada.', '𐀔 Tu KD es un insulto a la puntería.', '𐀔 Disparas dudas, no balas.' ],
-    manco: [ '𐀔 Eres la razón por la que existen los bots.', '𐀔 Tus manos deberían venir con parche.', '𐀔 Te matan antes de cargar la partida.', '𐀔 Tu precisión ofende a los ciegos.' ],
-    fea: [ '𐀔 El espejo te evita.', '𐀔 Fuiste rechazada hasta por el filtro de belleza.', '𐀔 Eres el motivo por el que existe el modo oscuro.', '𐀔 Tu cara rompe más que los estados del bot.' ],
-    feo: [ '𐀔 Cuando naciste, el doctor se disculpó.', '𐀔 Eres el susto antes de dormir.', '𐀔 Ni el WiFi te quiere conectar.', '𐀔 Fuiste borrado del diccionario de estética.' ],
-    enana: [ '𐀔 Necesitas escalera hasta para los audios largos.', '𐀔 En el VS ni te ven llegar.', '𐀔 Te confunden con un sticker.', '𐀔 Eres mini pero molesta en tamaño real.' ],
-    enano: [ '𐀔 Saltas y aún así no das miedo.', '𐀔 Eres la versión demo de un jugador.', '𐀔 Te cargan más que a una laptop vieja.', '𐀔 Si fueras más bajo, serías emoji.' ],
-    cachudo: [ '𐀔 Tu frente ya no cabe en las selfies.', '𐀔 Eres el rey del cornómetro.', '𐀔 Te engañan hasta en los sueños.', '𐀔 La infidelidad te sigue como la sombra.' ],
-    cachuda: [ '𐀔 Tu pareja tiene más vueltas que un trompo.', '𐀔 Te ponen los cuernos hasta en Roblox.', '𐀔 Ni tu suegra lo oculta ya.', '𐀔 El grupo entero lo sabía menos tú.' ],
-    pajero: [ '𐀔 Tus datos se gastan en soledad.', '𐀔 Eres el MVP del incognito.', '𐀔 Ya saludas con la mano izquierda.', '𐀔 Tu historial da miedo al FBI.' ],
-    pajera: [ '𐀔 Tu vibrador necesita vacaciones.', '𐀔 Netflix y tú misma.', '𐀔 Nadie te quiere, pero tú te amas.', '𐀔 Te sabes todos los scripts de Brazzers.' ],
-    rata: [ '𐀔 No prestas ni los buenos días.', '𐀔 Te escondes cuando es tu turno de pagar.', '𐀔 Eres la causa de la inflación.', '𐀔 Más codo que luchador sin brazo.' ],
-    adoptado: [ '𐀔 Eres el DLC de la familia.', '𐀔 Ni el perro te reconoce.', '𐀔 Llegaste sin tutorial.', '𐀔 Eres un parche emocional.' ],
-    adoptada: [ '𐀔 Tus raíces son misterio nacional.', '𐀔 Fuiste agregada como sticker a la familia.', '𐀔 Ni la abuela te menciona en las fotos.', '𐀔 Tu existencia fue sorpresa para todos.' ]
+    puta: [
+      '𐀔 Naciste para cobrar sin amor.',
+      '𐀔 Ni en la esquina perdonas.',
+      '𐀔 Tu vida es un Only sin cuenta.',
+      '𐀔 El suelo te extraña cuando no estás encima.'
+    ],
+    puto: [
+      '𐀔 Te sientas más que los muebles del INSS.',
+      '𐀔 No te respetan ni en el FIFA.',
+      '𐀔 Eres leyenda urbana en la zona roja.',
+      '𐀔 Te tiembla hasta el WiFi de tantos bajones.'
+    ],
+    peruano: [
+      '𐀔 Tu conexión es más inestable que tu economía.',
+      '𐀔 Si fueras internet, serías Bitel.',
+      '𐀔 Cada vez que hablas, un ceviche llora.',
+      '𐀔 Ni Machu Picchu te reconoce como local.'
+    ],
+    peruana: [
+      '𐀔 Tus audios deberían ir a patrimonio cultural.',
+      '𐀔 Cada sticker tuyo vale un sol.',
+      '𐀔 Eres el motivo de cada bug en el grupo.',
+      '𐀔 Tu voz activa terremotos.'
+    ],
+    negro: [
+      '𐀔 Eres más oscuro que mis ganas de vivir.',
+      '𐀔 Ni la linterna del bot te encuentra.',
+      '𐀔 Te camuflas en la sombra de la sombra.',
+      '𐀔 Apareces en fotos con filtro negativo.'
+    ],
+    negra: [
+      '𐀔 Apagas focos con solo pasar cerca.',
+      '𐀔 Tu silueta asusta hasta en modo día.',
+      '𐀔 El eclipse te pidió que te apartaras.',
+      '𐀔 Brillas por tu opacidad.'
+    ],
+    manca: [
+      '𐀔 Fallas más que mi ex en fidelidad.',
+      '𐀔 No le das ni a una piñata amarrada.',
+      '𐀔 Tu KD es un insulto a la puntería.',
+      '𐀔 Disparas dudas, no balas.'
+    ],
+    manco: [
+      '𐀔 Eres la razón por la que existen los bots.',
+      '𐀔 Tus manos deberían venir con parche.',
+      '𐀔 Te matan antes de cargar la partida.',
+      '𐀔 Tu precisión ofende a los ciegos.'
+    ],
+    fea: [
+      '𐀔 El espejo te evita.',
+      '𐀔 Fuiste rechazada hasta por el filtro de belleza.',
+      '𐀔 Eres el motivo por el que existe el modo oscuro.',
+      '𐀔 Tu cara rompe más que los estados del bot.'
+    ],
+    feo: [
+      '𐀔 Cuando naciste, el doctor se disculpó.',
+      '𐀔 Eres el susto antes de dormir.',
+      '𐀔 Ni el WiFi te quiere conectar.',
+      '𐀔 Fuiste borrado del diccionario de estética.'
+    ],
+    enana: [
+      '𐀔 Necesitas escalera hasta para los audios largos.',
+      '𐀔 En el VS ni te ven llegar.',
+      '𐀔 Te confunden con un sticker.',
+      '𐀔 Eres mini pero molesta en tamaño real.'
+    ],
+    enano: [
+      '𐀔 Saltas y aún así no das miedo.',
+      '𐀔 Eres la versión demo de un jugador.',
+      '𐀔 Te cargan más que a una laptop vieja.',
+      '𐀔 Si fueras más bajo, serías emoji.'
+    ],
+    cachudo: [
+      '𐀔 Tu frente ya no cabe en las selfies.',
+      '𐀔 Eres el rey del cornómetro.',
+      '𐀔 Te engañan hasta en los sueños.',
+      '𐀔 La infidelidad te sigue como la sombra.'
+    ],
+    cachuda: [
+      '𐀔 Tu pareja tiene más vueltas que un trompo.',
+      '𐀔 Te ponen los cuernos hasta en Roblox.',
+      '𐀔 Ni tu suegra lo oculta ya.',
+      '𐀔 El grupo entero lo sabía menos tú.'
+    ],
+    pajero: [
+      '𐀔 Tus datos se gastan en soledad.',
+      '𐀔 Eres el MVP del incognito.',
+      '𐀔 Ya saludas con la mano izquierda.',
+      '𐀔 Tu historial da miedo al FBI.'
+    ],
+    pajera: [
+      '𐀔 Tu vibrador necesita vacaciones.',
+      '𐀔 Netflix y tú misma.',
+      '𐀔 Nadie te quiere, pero tú te amas.',
+      '𐀔 Te sabes todos los scripts de Brazzers.'
+    ],
+    rata: [
+      '𐀔 No prestas ni los buenos días.',
+      '𐀔 Te escondes cuando es tu turno de pagar.',
+      '𐀔 Eres la causa de la inflación.',
+      '𐀔 Más codo que luchador sin brazo.'
+    ],
+    adoptado: [
+      '𐀔 Eres el DLC de la familia.',
+      '𐀔 Ni el perro te reconoce.',
+      '𐀔 Llegaste sin tutorial.',
+      '𐀔 Eres un parche emocional.'
+    ],
+    adoptada: [
+      '𐀔 Tus raíces son misterio nacional.',
+      '𐀔 Fuiste agregada como sticker a la familia.',
+      '𐀔 Ni la abuela te menciona en las fotos.',
+      '𐀔 Tu existencia fue sorpresa para todos.'
+    ]
   };
 
   const cierres = [
@@ -102,13 +189,7 @@ Debes *responder al mensaje* de alguien o *etiquetar a un usuario* para poder es
   const cierre = cierres[Math.floor(Math.random() * cierres.length)];
   const porcentaje = Math.floor(Math.random() * 101);
 
-  const textoFinal = `💫 *ESCÁNER COMPLETO*
-
-*🔥 𝙻𝙾𝚂 𝙲𝙰́𝙻𝙲𝚄𝙻𝙾𝚂 𝙷𝙰𝙽 𝙰𝚁𝙾𝙹𝙰𝙳𝙾 𝚀𝚄𝙴* @${numero} *𝙴𝚂 『 ${porcentaje}% 』 ${comando.toUpperCase()}*
-
-> ${remate}
-
-${cierre}`;
+  const textoFinal = `💫 *ESCÁNER COMPLETO*\n\n*🔥 𝙻𝙾𝚂 𝙲𝙰́𝙻𝙲𝚄𝙻𝙾𝚂 𝙷𝙰𝙽 𝙰𝚁𝙾𝙹𝙰𝙳𝙾 𝚀𝚄𝙴* @${numero} *𝙴𝚂 『 ${porcentaje}% 』 ${comando.toUpperCase()}*\n\n> ${remate}\n\n${cierre}`;
 
   await conn.sendMessage(chatId, {
     text: textoFinal,
