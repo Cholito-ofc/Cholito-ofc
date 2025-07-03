@@ -29,7 +29,7 @@ const handler = async (msg, { conn, args }) => {
 
   if (!args[0] || !["on", "off"].includes(args[0].toLowerCase())) {
     await conn.sendMessage(chatId, {
-      text: `🎮 *Modo RPG Killua*\n\nUsa:\n*${prefix}rpgkillua on* 🔛 para activar\n*${prefix}rpgkillua off* 🔇 para desactivar`,
+      text: `🎮 *Modo RPG Killua*\n\nUsa:\n*${prefix}rpgkillua on*  para activar\n*${prefix}rpgkillua off*  para desactivar`,
     }, { quoted: msg });
     return;
   }
