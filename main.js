@@ -3988,12 +3988,12 @@ case 'menu': {
 
     const fechaActual = fechaBase.charAt(0).toUpperCase() + fechaBase.slice(1);
 
-    const captionText = `*👋🏻¡Hola!* *@${senderNumber}*
+    const captionText = `*¡Hola!👋🏻* *@${senderNumber}*
 \`\`\`${fechaActual}\`\`\`
 
 *╭━━━━━━⋆★⋆━━━━━━⬣*
-*┃* *🍃KILLUA-BOT PRO* 
-*┃* *🧑🏻‍💻CREADOR:* @${ownerTag}
+*┃* *🍃𝙺𝙸𝙻𝙻𝚄𝙰-𝙱𝙾𝚃 𝙿𝚁𝙾* 
+*┃* *🧑🏻‍💻𝙲𝚁𝙴𝙰𝙳𝙾𝚁:* @${ownerTag}
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 ╭━━[ MENÚ PRINCIPAL 📋 ]━⬣
@@ -4124,10 +4124,9 @@ case 'menu': {
 > *⍴᥆ᥕᥱrᥱძ ᑲᥡ һᥒ ᥴһ᥆ᥣ᥆*`;
 
     await sock.sendMessage2(
-    await sock.sendMessage2(
       chatId,
       {
-        video: { url: "https://cdn.russellxz.click/ada18622.mp4" },
+        video: { url: "https://cdn.russellxz.click/ada18622.mp4" }, // Puedes cambiar este enlace por tu propio GIF
         caption: captionText,
         gifPlayback: true,
         mentions: [senderId, ownerMention]
