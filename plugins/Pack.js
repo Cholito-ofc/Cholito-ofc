@@ -5,57 +5,9 @@ const packUrls = [
   "https://cdn.russellxz.click/556fa4bc.jpeg",
 ];
 
-let cachePack = {};          // Guarda mensajes activos { msgId: { chatId, sender } }
-let usosPackUsuario = {};    // Conteo reacciones por usuario
-
-// Esta función debe llamarse 1 sola vez al iniciar tu bot para registrar el evento global
-function registerPackListener(conn) {
-  conn.ev.on("messages.upsert", async ({ messages }) => {
-    const m = messages[0];
-    if (!m?.message?.reactionMessage) return;
-
-    const reaction = m.message.reactionMessage;
-    const reactedMsgId = reaction.key?.id;
-    const user = m.key.participant || m.key.remoteJid;
-
-    if (!cachePack[reactedMsgId]) return;
-    if (user !== cachePack[reactedMsgId].sender) return; // Sólo quien inició puede reaccionar
-
-    if ((usosPackUsuario[user] || 0) >= 3) {
-      return await conn.sendMessage(cachePack[reactedMsgId].chatId, {
-        text: "❌ Ya viste suficiente por ahora. Espera 5 minutos para seguir viendo 🔥.",
-        mentions: [user],
-      });
-    }
-
-    const { chatId } = cachePack[reactedMsgId];
-    const newUrl = packUrls[Math.floor(Math.random() * packUrls.length)];
-
-    const newMsg = await conn.sendMessage(chatId, {
-      image: { url: newUrl },
-      caption: "🔥 Otro pack más... Reacciona de nuevo si quieres otro.",
-    });
-
-    await conn.sendMessage(chatId, {
-      react: {
-        text: "✅",
-        key: newMsg.key,
-      },
-    });
-
-    cachePack[newMsg.key.id] = {
-      chatId,
-      sender: user,
-    };
-    delete cachePack[reactedMsgId];
-
-    usosPackUsuario[user] = (usosPackUsuario[user] || 0) + 1;
-
-    setTimeout(() => {
-      usosPackUsuario[user] = 0;
-    }, 5 * 60 * 1000); // 5 minutos
-  });
-}
+let cachePack = {};
+let usosPackUsuario = {};
+let listenerRegistrado = false;
 
 const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
@@ -68,8 +20,57 @@ const handler = async (msg, { conn }) => {
     }, { quoted: msg });
   }
 
+  // Registrar el listener UNA vez SOLO
+  if (!listenerRegistrado) {
+    listenerRegistrado = true;
+    conn.ev.on("messages.upsert", async ({ messages }) => {
+      const m = messages[0];
+      if (!m?.message?.reactionMessage) return;
+
+      const reaction = m.message.reactionMessage;
+      const reactedMsgId = reaction.key?.id;
+      const user = m.key.participant || m.key.remoteJid;
+
+      if (!cachePack[reactedMsgId]) return;
+      if (user !== cachePack[reactedMsgId].sender) return;
+
+      if ((usosPackUsuario[user] || 0) >= 3) {
+        return await conn.sendMessage(cachePack[reactedMsgId].chatId, {
+          text: "❌ Ya viste suficiente por ahora. Espera 5 minutos para seguir viendo 🔥.",
+          mentions: [user],
+        });
+      }
+
+      const { chatId } = cachePack[reactedMsgId];
+      const newUrl = packUrls[Math.floor(Math.random() * packUrls.length)];
+
+      const newMsg = await conn.sendMessage(chatId, {
+        image: { url: newUrl },
+        caption: "🔥 Otro pack más... Reacciona de nuevo si quieres otro.",
+      });
+
+      await conn.sendMessage(chatId, {
+        react: {
+          text: "✅",
+          key: newMsg.key,
+        },
+      });
+
+      cachePack[newMsg.key.id] = {
+        chatId,
+        sender: user,
+      };
+      delete cachePack[reactedMsgId];
+
+      usosPackUsuario[user] = (usosPackUsuario[user] || 0) + 1;
+
+      setTimeout(() => {
+        usosPackUsuario[user] = 0;
+      }, 5 * 60 * 1000); // 5 minutos
+    });
+  }
+
   try {
-    // Reacción de "procesando"
     await conn.sendMessage(chatId, {
       react: {
         text: "🕒",
@@ -84,7 +85,6 @@ const handler = async (msg, { conn }) => {
       caption: "🔥 Reacciona a esta imagen para ver otro pack.",
     }, { quoted: msg });
 
-    // Reacción de "listo"
     await conn.sendMessage(chatId, {
       react: {
         text: "✅",
@@ -109,7 +109,4 @@ handler.command = ["pack"];
 handler.tags = ["nsfw"];
 handler.help = ["pack"];
 
-module.exports = {
-  handler,
-  registerPackListener
-};
+module.exports = handler;
