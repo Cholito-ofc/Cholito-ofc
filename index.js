@@ -848,25 +848,25 @@ try {
     if (type === "sticker") {
       const sent = await sock.sendMessage(chatId, sendOpts);
       await sock.sendMessage(chatId, {
-        text: `📌 El sticker fue eliminado\n│ 👤 Usuario: @${targetNumber}`,
+        text: `📌 El sticker fue eliminado\n│ 👤 Usuario: @${senderNumber}`,
         mentions: mentionTag,
         quoted: sent
       });
     } else if (type === "audio") {
       const sent = await sock.sendMessage(chatId, sendOpts);
       await sock.sendMessage(chatId, {
-        text: `🎧 El audio fue eliminado\n│ 👤 Usuario: @${targetNumber}`,
+        text: `🎧 El audio fue eliminado\n│ 👤 Usuario: @${senderNumber}`,
         mentions: mentionTag,
         quoted: sent
       });
     } else {
-      sendOpts.caption = `📦 Mensaje eliminado\n│ 👤 Usuario: @${targetNumber}`;
+      sendOpts.caption = `📦 Mensaje eliminado\n│ 👤 Usuario: @${senderNumber}`;
       sendOpts.mentions = mentionTag;
       await sock.sendMessage(chatId, sendOpts, { quoted: msg });
     }
   } else if (deletedData.text) {
     await sock.sendMessage(chatId, {
-      text: `📝 *Mensaje eliminado:* ${deletedData.text}\n│ 👤 Usuario: @${targetNumber}`,
+      text: `📝 *Mensaje eliminado:* ${deletedData.text}\n│ 👤 Usuario: @${senderNumber}`,
       mentions: mentionTag
     }, { quoted: msg });
   }
