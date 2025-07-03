@@ -2,7 +2,7 @@ const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
   const fromUser = msg.key.participant || msg.key.remoteJid;
 
-  // 🔰 Frases nuevas de protección al Owner
+  // 🔰 Frases para protección al Owner
   const frasesOwner = [
     '🛡️ *Protección Suprema Activada*\n@{user} es el creador, el alfa y el omega de este bot. No se toca.',
     '👑 *Error de Sistema: Intento fallido de escaneo*\n@{user} tiene inmunidad absoluta ante el gayómetro.',
@@ -62,22 +62,6 @@ const handler = async (msg, { conn }) => {
     return;
   }
 
-  // 🌈 Función para smallcaps solo para el texto descriptivo
-  const smallcap = (text) =>
-    text.split('').map(c => {
-      const map = {
-        a: 'ᴀ', b: 'ʙ', c: 'ᴄ', d: 'ᴅ', e: 'ᴇ', f: 'ғ', g: 'ɢ', h: 'ʜ',
-        i: 'ɪ', j: 'ᴊ', k: 'ᴋ', l: 'ʟ', m: 'ᴍ', n: 'ɴ', o: 'ᴏ', p: 'ᴘ',
-        q: 'ǫ', r: 'ʀ', s: 's', t: 'ᴛ', u: 'ᴜ', v: 'ᴠ', w: 'ᴡ', x: 'x',
-        y: 'ʏ', z: 'ᴢ',
-        A: 'ᴀ', B: 'ʙ', C: 'ᴄ', D: 'ᴅ', E: 'ᴇ', F: 'ғ', G: 'ɢ', H: 'ʜ',
-        I: 'ɪ', J: 'ᴊ', K: 'ᴋ', L: 'ʟ', M: 'ᴍ', N: 'ɴ', O: 'ᴏ', P: 'ᴘ',
-        Q: 'ǫ', R: 'ʀ', S: 's', T: 'ᴛ', U: 'ᴜ', V: 'ᴠ', W: 'ᴡ', X: 'x',
-        Y: 'ʏ', Z: 'ᴢ'
-      };
-      return map[c] || c;
-    }).join('');
-
   // 🎯 Escaneo normal
   const porcentaje = Math.floor(Math.random() * 101);
   const barra = (valor) => {
@@ -101,31 +85,50 @@ const handler = async (msg, { conn }) => {
 
   await new Promise(resolve => setTimeout(resolve, 600));
 
-  // Mensajes finales según porcentaje, con descripción en smallcaps y sin emojis rojos
-  let mensajeFinal = '';
-  let descripcion = '';
+  // 📝 Mensajes personalizados por rango con varios textos para cada uno
 
-  if (porcentaje <= 20) {
-    mensajeFinal = `🔥 @${numero} es *${porcentaje}% Gay Confirmado* 🏳️‍🌈`;
-    descripcion = 'nivel muy bajo casi invisible';
-  } else if (porcentaje <= 50) {
-    mensajeFinal = `🌈 @${numero} es *${porcentaje}% Gay*`;
-    descripcion = 'sospechas presentes bromas con doble sentido';
-  } else if (porcentaje <= 80) {
-    mensajeFinal = `💅 @${numero} tiene *${porcentaje}% Gay*`;
-    descripcion = 'ya hay flow brillo y un poquito de escándalo';
-  } else {
-    mensajeFinal = `🔥 @${numero} es *${porcentaje}% Gay Confirmado* 🏳️‍🌈`;
-    descripcion = 'puro glamour orgullo y arcoíris en hd';
-  }
+  const mensajesBajo = [
+    `😎 CASI INVISIBLE, PERO EL ESTILO Y LA ACTITUD HABLAN POR TI.\n   SIGUES EN MODO SECRETO, PERO NO TE CONFÍES, EL ARCOÍRIS TE SIGUE.`,
+    `🔵 ERES EL MAESTRO DEL DISFRAZ, SUTIL Y ELEGANTE.\n   EL MUNDO NO TE VE, PERO TU BRILLO ESTÁ AHÍ.`,
+    `💧 UN TOQUE DE COLOR QUE APENAS SE DEJA VER.\n   EL SECRETO MEJOR GUARDADO DEL ARCOÍRIS.`
+  ];
 
-  const decorado =
-`╭┈┈┈≫[ 🎯 *ESCÁNER GAY* ]≪┈┈┈┈╮
+  const mensajesMedio = [
+    `⚠️ EL ARCOÍRIS ASOMA, ENTRE RISAS Y MIRADAS.\n   ERES UNA MEZCLA PERFECTA DE MISTERIO Y BRILLO, Y NADIE PUEDE QUITARTE ESA CHISPA QUE TE HACE ÚNICO/A.`,
+    `🟡 UNA ENERGÍA QUE NO PASA DESAPERCIBIDA.\n   TE GUSTA JUGAR ENTRE SOMBRAS Y LUCES.`,
+    `🌟 EL EQUILIBRIO PERFECTO ENTRE EL MISTERIO Y LA LUZ.\n   DEJAS UNA HUELLA QUE NADIE OLVIDA.`
+  ];
 
- ${mensajeFinal}
- ${smallcap(descripcion)}
+  const mensajesAlto = [
+    `🔥 EL BRILLO ES IRREFUTABLE, EL ESTILO INIGUALABLE.\n   NO PUEDES ESCONDER ESA ENERGÍA QUE IRRADIAS, Y TODOS SABEN QUE ERES LA ALMA DE LA FIESTA Y EL ARCOÍRIS.`,
+    `💃 EL FLOW Y LA ACTITUD QUE MARCAN LA DIFERENCIA.\n   TU PRESENCIA ILUMINA CUALQUIER LUGAR.`,
+    `🌈 EL ORGULLO QUE LLEVAS DENTRO SE SIENTE EN EL AMBIENTE.\n   NADIE SE RESISTE A TU CARISMA Y ENCANTO.`
+  ];
 
-╰┈┈┈┈≫ *${smallcap('El universo nunca falla')}*≪┈┈┈╯`;
+  const mensajesMuyAlto = [
+    `💥 REINA ABSOLUTA DEL ORGULLO, EL GLAMOUR Y LA DIVERSIDAD.\n   TU LUZ ES TAN FUERTE QUE ILUMINA TODO A TU ALREDEDOR, Y NADIE PUEDE NEGAR QUE ERES EL CORAZÓN DEL ARCOÍRIS.`,
+    `🔥 EL FARO QUE GUÍA EL CAMINO DEL ORGULLO.\n   UN REFERENTE DE VALENTÍA, LUZ Y ALEGRÍA.`,
+    `👑 EL SÍMBOLO VIVO DEL BRILLO Y LA DIVERSIDAD.\n   TU ENERGÍA TRANSFORMA TODO A TU PASO.`
+  ];
+
+  let mensajeFinalList = [];
+  if (porcentaje <= 20) mensajeFinalList = mensajesBajo;
+  else if (porcentaje <= 50) mensajeFinalList = mensajesMedio;
+  else if (porcentaje <= 80) mensajeFinalList = mensajesAlto;
+  else mensajeFinalList = mensajesMuyAlto;
+
+  // Seleccionar mensaje aleatorio del rango
+  const mensajeFinal = mensajeFinalList[Math.floor(Math.random() * mensajeFinalList.length)];
+
+  // Emojis de porcentaje según rango, sin rojo fuerte
+  const emojiPorcentaje = porcentaje <= 20 ? '🔥' :
+    porcentaje <= 50 ? '🌈' :
+      porcentaje <= 80 ? '💅' : '🔥';
+
+  let decorado = `╭┈┈┈≫[ 🎯 *ESCÁNER GAY* ]≪┈┈┈┈╮\n\n`;
+  decorado += `${emojiPorcentaje} @${numero} es *${porcentaje}% Gay Confirmado* 🏳️‍🌈\n`;
+  decorado += `${mensajeFinal}\n\n`;
+  decorado += `╰┈┈┈┈≫ *𝑬𝒍 𝒖𝒏𝒊𝒗𝒆𝒓𝒔𝒐 𝒏𝒖𝒏𝒄𝒂 𝒇𝒂𝒍𝒍𝒂*≪┈┈┈╯`;
 
   await conn.sendMessage(chatId, {
     text: decorado,
