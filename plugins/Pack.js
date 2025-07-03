@@ -3,11 +3,59 @@ const packUrls = [
   "https://cdn.russellxz.click/5b056ca3.jpeg",
   "https://cdn.russellxz.click/56b2e2b4.jpeg",
   "https://cdn.russellxz.click/556fa4bc.jpeg",
-  // Puedes agregar más URLs aquí
 ];
 
-let cachePack = {};
-let usosPackUsuario = {};
+let cachePack = {};          // Guarda mensajes activos { msgId: { chatId, sender } }
+let usosPackUsuario = {};    // Conteo reacciones por usuario
+
+// Esta función debe llamarse 1 sola vez al iniciar tu bot para registrar el evento global
+function registerPackListener(conn) {
+  conn.ev.on("messages.upsert", async ({ messages }) => {
+    const m = messages[0];
+    if (!m?.message?.reactionMessage) return;
+
+    const reaction = m.message.reactionMessage;
+    const reactedMsgId = reaction.key?.id;
+    const user = m.key.participant || m.key.remoteJid;
+
+    if (!cachePack[reactedMsgId]) return;
+    if (user !== cachePack[reactedMsgId].sender) return; // Sólo quien inició puede reaccionar
+
+    if ((usosPackUsuario[user] || 0) >= 3) {
+      return await conn.sendMessage(cachePack[reactedMsgId].chatId, {
+        text: "❌ Ya viste suficiente por ahora. Espera 5 minutos para seguir viendo 🔥.",
+        mentions: [user],
+      });
+    }
+
+    const { chatId } = cachePack[reactedMsgId];
+    const newUrl = packUrls[Math.floor(Math.random() * packUrls.length)];
+
+    const newMsg = await conn.sendMessage(chatId, {
+      image: { url: newUrl },
+      caption: "🔥 Otro pack más... Reacciona de nuevo si quieres otro.",
+    });
+
+    await conn.sendMessage(chatId, {
+      react: {
+        text: "✅",
+        key: newMsg.key,
+      },
+    });
+
+    cachePack[newMsg.key.id] = {
+      chatId,
+      sender: user,
+    };
+    delete cachePack[reactedMsgId];
+
+    usosPackUsuario[user] = (usosPackUsuario[user] || 0) + 1;
+
+    setTimeout(() => {
+      usosPackUsuario[user] = 0;
+    }, 5 * 60 * 1000); // 5 minutos
+  });
+}
 
 const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
@@ -51,51 +99,6 @@ const handler = async (msg, { conn }) => {
 
     usosPackUsuario[sender] = usosPackUsuario[sender] || 0;
 
-    conn.ev.on("messages.upsert", async ({ messages }) => {
-      const m = messages[0];
-      if (!m?.message?.reactionMessage) return;
-
-      const reaction = m.message.reactionMessage;
-      const reactedMsgId = reaction.key?.id;
-      const user = m.key.participant || m.key.remoteJid;
-
-      if (!cachePack[reactedMsgId]) return;
-      if (user !== cachePack[reactedMsgId].sender) return;
-
-      if ((usosPackUsuario[user] || 0) >= 3) {
-        return await conn.sendMessage(chatId, {
-          text: "❌ Ya viste suficiente por ahora. Espera 5 minutos para seguir viendo 🔥.",
-          mentions: [user],
-        });
-      }
-
-      const newUrl = packUrls[Math.floor(Math.random() * packUrls.length)];
-
-      const newMsg = await conn.sendMessage(chatId, {
-        image: { url: newUrl },
-        caption: "🔥 Otro pack más... Reacciona de nuevo si quieres otro.",
-      });
-
-      await conn.sendMessage(chatId, {
-        react: {
-          text: "✅",
-          key: newMsg.key,
-        },
-      });
-
-      cachePack[newMsg.key.id] = {
-        chatId,
-        sender: user,
-      };
-      delete cachePack[reactedMsgId];
-
-      usosPackUsuario[user] = (usosPackUsuario[user] || 0) + 1;
-
-      setTimeout(() => {
-        usosPackUsuario[user] = 0;
-      }, 5 * 60 * 1000); // 5 minutos
-    });
-
   } catch (e) {
     console.error("❌ Error en .pack:", e);
     await msg.reply("❌ No se pudo obtener el pack.");
@@ -105,4 +108,8 @@ const handler = async (msg, { conn }) => {
 handler.command = ["pack"];
 handler.tags = ["nsfw"];
 handler.help = ["pack"];
-module.exports = handler;
+
+module.exports = {
+  handler,
+  registerPackListener
+};
