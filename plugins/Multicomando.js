@@ -28,15 +28,21 @@ const textoFinal = `💫 ESCÁNER COMPLETO
 
 > ${remate}
 
-
-
 ${cierre}`;
 
 await conn.sendMessage(chatId, { text: textoFinal, mentions: [mentionedJid] }, { quoted: msg }); };
 
-handler.command = [ 'puta', 'puto', 'peruano', 'peruana', 'negro', 'negra', 'manca', 'manco', 'fea', 'feo', 'enano', 'enana', 'cachudo', 'cachuda', 'pajero', 'pajera', 'rata', 'adoptado', 'adoptada' ];
+handler.command = [
+  'puta', 'puto', 'peruano', 'peruana',
+  'negro', 'negra', 'manca', 'manco',
+  'fea', 'feo', 'enano', 'enana',
+  'cachudo', 'cachuda', 'pajero', 'pajera',
+  'rata', 'adoptado', 'adoptada',
+];
 
-handler.tags = ['diversión']; handler.help = handler.command.map(c => ${c} @usuario o responde); handler.group = true; handler.register = true;
+handler.tags = ['diversión'];
+handler.help = handler.command.map(c => `${c} @usuario o responde`);
+handler.group = true;
+handler.register = true;
 
 module.exports = handler;
-
