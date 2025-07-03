@@ -24,11 +24,11 @@ const cierres = [ '➢ Los científicos lo confirman.', '➢ El universo no se e
 
 const remate = frasesPorComando[comando][Math.floor(Math.random() * frasesPorComando[comando].length)]; const cierre = cierres[Math.floor(Math.random() * cierres.length)]; const porcentaje = Math.floor(Math.random() * 101);
 
-const textoFinal = `💫 ESCÁNER COMPLETO
+const textoFinal = `*💫 ESCÁNER COMPLETO*
 
 *🔥 𝙻𝙾𝚂 𝙲𝙰́𝙻𝙲𝚄𝙻𝙾𝚂 𝙷𝙰𝙽 𝙰𝚁𝙾𝙹𝙰𝙳𝙾 𝚀𝚄𝙴* @${numero} *𝙴𝚂 ${porcentaje}%* *${comando.toUpperCase()}*
 
-${remate}
+> ${remate}
 
 ${cierre}`;
 
