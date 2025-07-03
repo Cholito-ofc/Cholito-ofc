@@ -99,7 +99,7 @@ const handler = async (msg, { conn }) => {
     mensajeFinal = `🔥 @${numero} es *${porcentaje}% Gay Confirmado* 🏳️‍🌈\n🔴 Puro glamour, orgullo y arcoíris en HD 👑✨`;
   }
 
-  decorado += `┃ ${mensajeFinal}\n┃\n╰━━━━━━⊰ *𝑬𝒍 𝒈𝒂𝒚ó𝒎𝒆𝒕𝒓𝒐 𝒏𝒖𝒏𝒄𝒂 𝒇𝒂𝒍𝒍𝒂* ⊱━━━━⬣`;
+  decorado += `┃ ${mensajeFinal}\n┃\n╰━━━━━━⊰ *𝑬𝒍 𝒖𝒏𝒊𝒗𝒆𝒓𝒔𝒐 𝒏𝒖𝒏𝒄𝒂 𝒇𝒂𝒍𝒍𝒂* ⊱━━━━⬣`;
 
   await conn.sendMessage(chatId, {
     text: decorado,
