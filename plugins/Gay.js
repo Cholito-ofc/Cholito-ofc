@@ -2,16 +2,15 @@ const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
   const fromUser = msg.key.participant || msg.key.remoteJid;
 
-  // 📌 Frases aleatorias para proteger al owner
+  // 🔰 Frases nuevas de protección al Owner
   const frasesOwner = [
-    '⚠️ *Con el dueño no se juega.*\n👑 ¡@{user} está blindado contra el gayómetro!',
-    '🛡️ *Error 403:* Prohibido escanear a @{user}. Nivel de poder demasiado alto.',
-    '⛔ *Sistema bloqueado.*\n@{user} es inmune a esta clase de ataques 😂',
-    '🧠 *Ni lo intentes...*\n@{user} hackea el gayómetro con solo mirarlo.',
-    '🚨 *Protección activada.*\n@{user} es el fundador, respeten su arcoíris 🔥'
+    '🛡️ *Protección Suprema Activada*\n@{user} es el creador, el alfa y el omega de este bot. No se toca.',
+    '👑 *Error de Sistema: Intento fallido de escaneo*\n@{user} tiene inmunidad absoluta ante el gayómetro.',
+    '⚠️ *Advertencia Crítica*\nEscanear a @{user} puede causar una explosión del servidor. Operación cancelada.',
+    '🚨 *ALERTA: OBJETIVO RESTRINGIDO*\n@{user} tiene un sello celestial. Intocable por simples mortales.',
+    '🔒 *Modo Dios Activado*\nNo puedes medir lo que está más allá del arcoíris. @{user} está fuera del sistema.'
   ];
 
-  // Stickers aleatorios (puedes agregar más)
   const stickersOwner = [
     'https://cdn.russellxz.click/9087aa1c.webp',
     'https://cdn.russellxz.click/85a16aa5.webp',
@@ -19,28 +18,35 @@ const handler = async (msg, { conn }) => {
     'https://cdn.russellxz.click/afd908e6.webp'
   ];
 
-  // Obtener JID mencionado
+  const audioURL = 'https://cdn.russellxz.click/e83de55c.mp3'; // 🎧 Tu audio personalizado
+
+  // 🧠 Obtener JID mencionado o desde mensaje respondido
   let mentionedJid;
   try {
-    mentionedJid =
-      msg.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0] ||
-      msg.message?.contextInfo?.mentionedJid?.[0];
+    if (msg.message?.extendedTextMessage?.contextInfo?.mentionedJid?.length) {
+      mentionedJid = msg.message.extendedTextMessage.contextInfo.mentionedJid[0];
+    } else if (msg.message?.contextInfo?.mentionedJid?.length) {
+      mentionedJid = msg.message.contextInfo.mentionedJid[0];
+    } else if (msg.message?.extendedTextMessage?.contextInfo?.participant) {
+      mentionedJid = msg.message.extendedTextMessage.contextInfo.participant;
+    } else if (msg.message?.contextInfo?.participant) {
+      mentionedJid = msg.message.contextInfo.participant;
+    }
   } catch (e) {
     mentionedJid = null;
   }
 
   if (!mentionedJid) {
     return await conn.sendMessage(chatId, {
-      text: '🔍 *Etiqueta a alguien para calcular su porcentaje gay.*',
+      text: '🔍 *Etiqueta o responde a alguien para escanear su porcentaje gay.*',
     }, { quoted: msg });
   }
 
   const numero = mentionedJid.split('@')[0];
 
-  // 🧩 Verificar si están etiquetando al owner
+  // 🔒 Protección al owner
   const isTaggedOwner = Array.isArray(global.owner) && global.owner.some(([id]) => id === numero);
   if (isTaggedOwner) {
-    // Elegir frase y sticker aleatoriamente
     const fraseElegida = frasesOwner[Math.floor(Math.random() * frasesOwner.length)].replace('{user}', numero);
     const stickerElegido = stickersOwner[Math.floor(Math.random() * stickersOwner.length)];
 
@@ -56,7 +62,7 @@ const handler = async (msg, { conn }) => {
     return;
   }
 
-  // === Lógica normal del comando ===
+  // 🎯 Escaneo normal
   const porcentaje = Math.floor(Math.random() * 101);
   const barra = (valor) => {
     const total = 10;
@@ -65,45 +71,55 @@ const handler = async (msg, { conn }) => {
   };
 
   const mensajeInicial = await conn.sendMessage(chatId, {
-    text: `⏳ *Escaneando a @${numero}...*\n🌈 Calculando nivel gay...`,
+    text: `📡 *Escaneando a @${numero}...*\n🔬 Analizando el arcoíris interior...`,
     mentions: [mentionedJid]
   }, { quoted: msg });
 
   for (let i = 0; i <= porcentaje; i += 20) {
     await new Promise(resolve => setTimeout(resolve, 450));
     await conn.sendMessage(chatId, {
-      text: `📡 *Analizando...*\n${barra(i)} ${i}%`,
+      text: `🔎 *Procesando...*\n${barra(i)} ${i}%`,
       edit: mensajeInicial.key
     });
   }
 
   await new Promise(resolve => setTimeout(resolve, 600));
 
-  let decorado = `╭━━〔 *📊 RESULTADO FINAL* 〕━━⬣\n`;
+  // 🌈 Resultado final estilizado
+  let decorado = `╭━━🎯 *ESCÁNER GAY* ━━⬣\n┃\n`;
 
   let mensajeFinal = '';
   if (porcentaje <= 20) {
-    mensajeFinal = `💙 Los cálculos han arrojado que @${numero} es *${porcentaje}% Gay* 🧬\n◽ Nivel bajo... ¡Tú eres hetero con plot twist! 😂`;
+    mensajeFinal = `🧬 @${numero} tiene *${porcentaje}% Gay*\n🔵 Nivel muy bajo... casi invisible 👀`;
   } else if (porcentaje <= 50) {
-    mensajeFinal = `🧡 El escáner indica que @${numero} es *${porcentaje}% Gay* 🌈\n◽ Hay energía sospechosa... ¿Amix con derechos? 👀`;
+    mensajeFinal = `🌈 @${numero} es *${porcentaje}% Gay*\n🟡 Sospechas presentes... ¿bromas con doble sentido? 🤔`;
   } else if (porcentaje <= 80) {
-    mensajeFinal = `💖 ¡Advertencia!\n@${numero} tiene *${porcentaje}% de Gay* 🌈\n◽ La gayensia fluye con fuerza en ti... ¡Y se nota! 💅`;
+    mensajeFinal = `💅 @${numero} tiene *${porcentaje}% Gay*\n🟠 Ya hay flow, brillo, y un poquito de escándalo 💃`;
   } else {
-    mensajeFinal = `❤️‍🔥 ¡CONFIRMADO!\n@${numero} es *${porcentaje}% ultra mega Gay* 🏳️‍🌈\n◽ Eres el sol brillante del arcoíris, con brillo, flow y escándalo 🔥👑`;
+    mensajeFinal = `🔥 @${numero} es *${porcentaje}% Gay Confirmado* 🏳️‍🌈\n🔴 Puro glamour, orgullo y arcoíris en HD 👑✨`;
   }
 
-  decorado += `┃\n${mensajeFinal}\n┃\n╰━━━━━━⊰ *𝑬𝒍 𝒖𝒏𝒊𝒗𝒆𝒓𝒔𝒐 𝒏𝒐 𝒎𝒊𝒆𝒏𝒕𝒆* ⊱━━━━⬣`;
+  decorado += `┃ ${mensajeFinal}\n┃\n╰━━━━━━⊰ *𝑬𝒍 𝒈𝒂𝒚ó𝒎𝒆𝒕𝒓𝒐 𝒏𝒖𝒏𝒄𝒂 𝒇𝒂𝒍𝒍𝒂* ⊱━━━━⬣`;
 
   await conn.sendMessage(chatId, {
     text: decorado,
     mentions: [mentionedJid],
     edit: mensajeInicial.key
   });
+
+  // 🔊 Audio al final
+  if (audioURL) {
+    await conn.sendMessage(chatId, {
+      audio: { url: audioURL },
+      mimetype: 'audio/mp4',
+      ptt: true
+    }, { quoted: msg });
+  }
 };
 
 handler.command = ['gay'];
 handler.tags = ['diversión'];
-handler.help = ['gay @usuario'];
+handler.help = ['gay @usuario o responde'];
 handler.register = true;
 handler.group = true;
 
