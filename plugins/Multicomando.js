@@ -1,8 +1,10 @@
 const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
-  const fromUser = msg.key.participant || msg.key.remoteJid;
 
-  // Obtener JID mencionado
+  // Detectar comando usado
+  const comando = msg.body?.split(' ')[0]?.slice(1)?.toLowerCase();
+
+  // Obtener JID del usuario mencionado o respondido
   let mentionedJid;
   try {
     if (msg.message?.extendedTextMessage?.contextInfo?.mentionedJid?.length) {
@@ -20,15 +22,14 @@ const handler = async (msg, { conn }) => {
 
   if (!mentionedJid) {
     return await conn.sendMessage(chatId, {
-      text: '🔍 *Etiqueta o responde a alguien para usar este comando.*',
+      text: '🔍 *Etiqueta o responde al mensaje de alguien para usar este comando.*',
     }, { quoted: msg });
   }
 
   const numero = mentionedJid.split('@')[0];
-  const comando = msg.body?.split(' ')[0]?.slice(1)?.toLowerCase(); // comando sin punto
   const porcentaje = Math.floor(Math.random() * 101);
 
-  // 🔒 Protección al owner
+  // Protección owner
   const isTaggedOwner = Array.isArray(global.owner) && global.owner.some(([id]) => id === numero);
   if (isTaggedOwner) {
     return await conn.sendMessage(chatId, {
@@ -115,7 +116,6 @@ const handler = async (msg, { conn }) => {
   if (!Object.keys(frases).includes(comando)) return;
 
   const remate = frases[comando][Math.floor(Math.random() * frases[comando].length)];
-
   const cierreOpciones = [
     '➤ Los científicos lo confirman.',
     '➤ El universo no se equivoca.',
@@ -145,7 +145,7 @@ handler.command = [
   'fea', 'feo', 'enano', 'enana'
 ];
 handler.tags = ['diversión'];
-handler.help = handler.command.map(c => `${c} @usuario`);
+handler.help = handler.command.map(c => `${c} @usuario o responde`);
 handler.group = true;
 handler.register = true;
 
