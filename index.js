@@ -746,10 +746,10 @@ if ((isGroup && isAntideleteGroup) || (!isGroup && isAntideletePriv)) {
   }
 
   const type = Object.keys(msg.message || {})[0];
-  if (!type) return; // ✅ Protección si el tipo no existe
+  if (!type) return;
 
   const content = msg.message[type];
-  if (!content) return; // ✅ Protección si el contenido no existe
+  if (!content) return;
 
   const idMsg = msg.key.id;
   const botNumber = sock.user.id.split(":")[0] + "@s.whatsapp.net";
@@ -780,10 +780,10 @@ if ((isGroup && isAntideleteGroup) || (!isGroup && isAntideletePriv)) {
   if (msg.message?.viewOnceMessageV2) {
     const inner = msg.message.viewOnceMessageV2.message;
     const viewType = Object.keys(inner)[0];
-    if (!viewType) return; // ✅ Protección
+    if (!viewType) return;
 
     const viewData = inner[viewType];
-    if (!viewData) return; // ✅ Protección
+    if (!viewData) return;
 
     const mediaType = viewType.replace("Message", "");
     guardado.type = viewType;
@@ -862,26 +862,26 @@ try {
     if (type === "sticker") {
       const sent = await sock.sendMessage(chatId, sendOpts);
       await sock.sendMessage(chatId, {
-        text: `📌 El sticker fue eliminado\n│ 👤 Usuario: @${senderNumberAgain}`,
-        mentions: mentionTagAgain,
+        text: `📌 El sticker fue eliminado\n👤 Usuario: @${senderNumberAgain}`,
+        mentions: [`${senderNumberAgain}@s.whatsapp.net`], // ✅ Mención correcta
         quoted: sent
       });
     } else if (type === "audio") {
       const sent = await sock.sendMessage(chatId, sendOpts);
       await sock.sendMessage(chatId, {
-        text: `🎧 El audio fue eliminado\n│ 👤 Usuario: @${senderNumberAgain}`,
-        mentions: mentionTagAgain,
+        text: `🎧 El audio fue eliminado\n👤 Usuario: @${senderNumberAgain}`,
+        mentions: [`${senderNumberAgain}@s.whatsapp.net`], // ✅ Mención correcta
         quoted: sent
       });
     } else {
-      sendOpts.caption = `📦 Mensaje eliminado\n│ 👤 Usuario: @${senderNumberAgain}`;
-      sendOpts.mentions = mentionTagAgain;
+      sendOpts.caption = `📦 Mensaje eliminado\n👤 Usuario: @${senderNumberAgain}`;
+      sendOpts.mentions = [`${senderNumberAgain}@s.whatsapp.net`]; // ✅ Mención correcta
       await sock.sendMessage(chatId, sendOpts, { quoted: msg });
     }
   } else if (deletedData.text) {
     await sock.sendMessage(chatId, {
-      text: `📝 *Mensaje eliminado:* ${deletedData.text}\n│ 👤 Usuario: @${senderNumberAgain}`,
-      mentions: mentionTagAgain
+      text: `📝 *Mensaje eliminado:* ${deletedData.text}\n👤 Usuario: @${senderNumberAgain}`,
+      mentions: [`${senderNumberAgain}@s.whatsapp.net`] // ✅ Mención correcta
     }, { quoted: msg });
   }
 
@@ -889,8 +889,7 @@ try {
   console.error("❌ Error en lógica antidelete:", err);
 }
 }
-// === FIN DETECCIÓN DE MENSAJE ELIMINADO ===    
-    
+// === FIN DETECCIÓN DE MENSAJE ELIMINADO ===
 // === LÓGICA DE RESPUESTA AUTOMÁTICA CON PALABRA CLAVE ===
 try {
   const guarPath = path.resolve('./guar.json');
