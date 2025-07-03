@@ -1,7 +1,5 @@
 const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
-  // Desde dónde salió el mensaje
-  const fromUser = msg.key.participant || msg.key.remoteJid;
 
   // Frases protección Owner
   const frasesOwner = [
@@ -12,7 +10,7 @@ const handler = async (msg, { conn }) => {
     '⚠️ Escanear al Owner está prohibido por ley universal. Respeta jerarquías.'
   ];
 
-  // Intentar obtener JID mencionado o respondido
+  // Obtener JID mencionado o respondido
   let mentionedJid = null;
   try {
     if (msg.message?.extendedTextMessage?.contextInfo?.mentionedJid?.length) {
@@ -38,7 +36,24 @@ const handler = async (msg, { conn }) => {
 
   const numero = mentionedJid.split('@')[0];
 
-  // Protección owner igual que en gay
+  // Detectar texto y comando correctamente
+  const text = (msg.text ||
+    msg.message?.conversation ||
+    msg.message?.extendedTextMessage?.text ||
+    '').toLowerCase();
+
+  const comando = text.split(' ')[0].replace(/^[.!/#]/, '');
+
+  // Lista comandos válidos
+  const comandosValidos = [
+    'puta', 'puto', 'peruano', 'peruana',
+    'negro', 'negra', 'manca', 'manco',
+    'fea', 'feo', 'enano', 'enana'
+  ];
+
+  if (!comandosValidos.includes(comando)) return;
+
+  // Protección al owner
   const isTaggedOwner = Array.isArray(global.owner) && global.owner.some(([id]) => id === numero);
   if (isTaggedOwner) {
     const frase = frasesOwner[Math.floor(Math.random() * frasesOwner.length)].replace('{user}', numero);
@@ -48,10 +63,7 @@ const handler = async (msg, { conn }) => {
     }, { quoted: msg });
   }
 
-  // Obtener comando usado (quita prefijo)
-  const comando = msg.text ? msg.text.toLowerCase().split(' ')[0].replace(/^[.!/#]/, '') : '';
-
-  // Frases para cada comando
+  // Frases por comando
   const frasesPorComando = {
     puta: [
       '𐀔 Naciste para cobrar sin amor.',
@@ -126,11 +138,6 @@ const handler = async (msg, { conn }) => {
       '𐀔 Si fueras más bajo, serías emoji.'
     ]
   };
-
-  if (!frasesPorComando[comando]) {
-    // No es comando válido, no responde
-    return;
-  }
 
   const remate = frasesPorComando[comando][Math.floor(Math.random() * frasesPorComando[comando].length)];
 
