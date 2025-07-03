@@ -76,11 +76,11 @@ const handler = async (msg, { conn }) => {
   ];
 
   const frasesCierre = [
-    '➤ Los científicos lo confirman.',
-    '➤ El universo no se equivoca.',
-    '➤ Datos verificados por la comunidad.',
-    '➤ Esto es ciencia, no opinión.',
-    '➤ Registro oficial en el archivo del arcoíris.',
+    '➢ 𝑳𝒐𝒔 𝒔𝒊𝒆𝒏𝒕𝒊𝒇𝒊𝒄𝒐𝒔 𝒍𝒐 𝒄𝒐𝒏𝒇𝒊𝒓𝒎𝒂𝒏.',
+    '➢ 𝑬𝒍 𝒖𝒏𝒊𝒗𝒆𝒓𝒔𝒐 𝒏𝒐 𝒔𝒆 𝒆𝒒𝒖𝒊𝒗𝒐𝒄𝒂.',
+    '➢ 𝑫𝒂𝒕𝒐𝒔 𝒗𝒆𝒓𝒊𝒇𝒊𝒄𝒂𝒅𝒐𝒔 𝒑𝒐𝒓 𝒍𝒂 𝒄𝒐𝒎𝒖𝒏𝒊𝒅𝒂𝒅.',
+    '➢ 𝑬𝒔𝒕𝒐 𝒆𝒔 𝒄𝒊𝒆𝒏𝒄𝒊𝒂, 𝒏𝒐 𝒐𝒑𝒊𝒏𝒊𝒐́𝒏.',
+    '➢ 𝑹𝒆𝒈𝒊𝒔𝒕𝒓𝒐 𝒐𝒇𝒊𝒄𝒊𝒂𝒍 𝒆𝒏 𝒆𝒍 𝒂𝒓𝒄𝒉𝒊𝒗𝒐 𝒅𝒆𝒍 𝒂𝒓𝒄𝒐𝒊𝒓𝒊𝒔.',
     // Puedes agregar más cierres aquí si quieres
   ];
 
@@ -88,9 +88,9 @@ const handler = async (msg, { conn }) => {
   const cierre = frasesCierre[Math.floor(Math.random() * frasesCierre.length)];
 
   const resultado =
-`💫 *CALCULADORA*
+`💫 *ESCÁNER GAY*
 
-🖤 Los cálculos han arrojado que @${numero} es *${porcentaje}%* Gay 🏳️‍🌈
+🔥 𝙻𝙾𝚂 𝙲𝙰́𝙻𝙲𝚄𝙻𝙾𝚂 𝙰𝙽 𝙰𝚁𝙾𝙹𝙰𝙳𝙾 𝚀𝚄𝙴 @${numero} es *${porcentaje}%* 𝙶𝙰𝚈 🏳️‍🌈
 > ${remate}
 
 ${cierre}`;
