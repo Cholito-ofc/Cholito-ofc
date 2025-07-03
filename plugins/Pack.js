@@ -1,4 +1,5 @@
 const axios = require("axios");
+const fs = require("fs");
 
 let cachePack = {}; // ID mensaje => { chatId, data }
 let usosPorUsuario = {}; // usuario => cantidad
@@ -7,11 +8,16 @@ const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
 
-  const chat = global.db.data.chats[chatId] || {};
-  if (!chat.modocaliente) {
-    return await conn.sendMessage(chatId, {
-      text: "🔞 El *modo caliente* está desactivado en este grupo.\nActívalo con: *.modocaliente on*",
+  // Verifica si el modo caliente está activado
+  const activos = fs.existsSync('./activos.json')
+    ? JSON.parse(fs.readFileSync('./activos.json', 'utf-8'))
+    : {};
+
+  if (!activos.modocaliente || !activos.modocaliente[chatId]) {
+    await conn.sendMessage(chatId, {
+      text: "🔞 El *modo caliente* está desactivado en este grupo.\nActívalo con: *.modocaliente on*"
     }, { quoted: msg });
+    return;
   }
 
   try {
@@ -60,18 +66,18 @@ const handler = async (msg, { conn }) => {
       if (user !== cachePack[reactedMsgId].sender) return;
 
       if ((usosPorUsuario[user] || 0) >= 3) {
-        return await conn.sendMessage(cachePack[reactedMsgId].chatId, {
+        return await conn.sendMessage(chatId, {
           text: `❌ Ya viste suficiente por ahora.\n🕒 Espera *5 minutos* para seguir viendo contenido 🔥.`,
           mentions: [user],
         });
       }
 
-      const { chatId, data } = cachePack[reactedMsgId];
+      const { data } = cachePack[reactedMsgId];
       const newUrl = data[Math.floor(Math.random() * data.length)];
 
       const newMsg = await conn.sendMessage(chatId, {
         image: { url: newUrl },
-        caption: "🔥 Otro pack más... Reacciona de nuevo.",
+        caption: "🔥 Otro más... Reacciona de nuevo.",
       });
 
       await conn.sendMessage(chatId, {
@@ -98,7 +104,7 @@ const handler = async (msg, { conn }) => {
   } catch (e) {
     console.error("❌ Error en .pack:", e);
     await conn.sendMessage(chatId, {
-      text: "❌ No se pudo obtener el contenido.",
+      text: "❌ No se pudo obtener el contenido."
     }, { quoted: msg });
   }
 };
