@@ -85,21 +85,40 @@ const handler = async (msg, { conn }) => {
 
   await new Promise(resolve => setTimeout(resolve, 600));
 
-  // 🌈 Resultado final estilizado
-  let decorado = `╭━━🎯 *ESCÁNER GAY* ━━⬣\n┃\n`;
+  // 🌈 Función para convertir texto a smallcaps
+  const smallcap = (text) =>
+    text.split('').map(c => {
+      const map = {
+        a: 'ᴀ', b: 'ʙ', c: 'ᴄ', d: 'ᴅ', e: 'ᴇ', f: 'ғ', g: 'ɢ', h: 'ʜ',
+        i: 'ɪ', j: 'ᴊ', k: 'ᴋ', l: 'ʟ', m: 'ᴍ', n: 'ɴ', o: 'ᴏ', p: 'ᴘ',
+        q: 'ǫ', r: 'ʀ', s: 's', t: 'ᴛ', u: 'ᴜ', v: 'ᴠ', w: 'ᴡ', x: 'x',
+        y: 'ʏ', z: 'ᴢ',
+        A: 'ᴀ', B: 'ʙ', C: 'ᴄ', D: 'ᴅ', E: 'ᴇ', F: 'ғ', G: 'ɢ', H: 'ʜ',
+        I: 'ɪ', J: 'ᴊ', K: 'ᴋ', L: 'ʟ', M: 'ᴍ', N: 'ɴ', O: 'ᴏ', P: 'ᴘ',
+        Q: 'ǫ', R: 'ʀ', S: 's', T: 'ᴛ', U: 'ᴜ', V: 'ᴠ', W: 'ᴡ', X: 'x',
+        Y: 'ʏ', Z: 'ᴢ'
+      }
+      return map[c] || c;
+    }).join('');
 
+  // Mensajes finales según porcentaje
   let mensajeFinal = '';
   if (porcentaje <= 20) {
-    mensajeFinal = `🧬 @${numero} tiene *${porcentaje}% Gay*\n🔵 Nivel muy bajo... casi invisible 👀`;
+    mensajeFinal = `🔥 @${numero} es *${porcentaje}% Gay Confirmado* 🏳️‍🌈\n🔴 Puro glamour, orgullo y arcoíris en HD 👑✨`;
   } else if (porcentaje <= 50) {
-    mensajeFinal = `🌈 @${numero} es *${porcentaje}% Gay*\n🟡 Sospechas presentes... ¿bromas con doble sentido? 🤔`;
+    mensajeFinal = `🔥 @${numero} es *${porcentaje}% Gay Confirmado* 🏳️‍🌈\n🔴 Puro glamour, orgullo y arcoíris en HD 👑✨`;
   } else if (porcentaje <= 80) {
-    mensajeFinal = `💅 @${numero} tiene *${porcentaje}% Gay*\n🟠 Ya hay flow, brillo, y un poquito de escándalo 💃`;
+    mensajeFinal = `🔥 @${numero} es *${porcentaje}% Gay Confirmado* 🏳️‍🌈\n🔴 Puro glamour, orgullo y arcoíris en HD 👑✨`;
   } else {
     mensajeFinal = `🔥 @${numero} es *${porcentaje}% Gay Confirmado* 🏳️‍🌈\n🔴 Puro glamour, orgullo y arcoíris en HD 👑✨`;
   }
 
-  decorado += `┃ ${mensajeFinal}\n┃\n╰━━━━⊰ *𝑬𝒍 𝒖𝒏𝒊𝒗𝒆𝒓𝒔𝒐 𝒏𝒖𝒏𝒄𝒂 𝒇𝒂𝒍𝒍𝒂* ⊱━━⬣`;
+  const decorado =
+`╭┈┈┈≫[ 🎯 *ESCÁNER GAY* ]≪┈┈┈┈╮
+
+ ${mensajeFinal}
+
+╰┈┈┈┈≫ *${smallcap('El universo nunca falla')}*≪┈┈┈╯`;
 
   await conn.sendMessage(chatId, {
     text: decorado,
