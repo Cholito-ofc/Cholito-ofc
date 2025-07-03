@@ -1,10 +1,8 @@
 const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
-
-  // Detectar comando usado
   const comando = msg.body?.split(' ')[0]?.slice(1)?.toLowerCase();
 
-  // Obtener JID del usuario mencionado o respondido
+  // Obtener JID mencionado o desde mensaje respondido
   let mentionedJid;
   try {
     if (msg.message?.extendedTextMessage?.contextInfo?.mentionedJid?.length) {
@@ -29,11 +27,18 @@ const handler = async (msg, { conn }) => {
   const numero = mentionedJid.split('@')[0];
   const porcentaje = Math.floor(Math.random() * 101);
 
-  // Protección owner
+  // 🔒 Protección al owner
   const isTaggedOwner = Array.isArray(global.owner) && global.owner.some(([id]) => id === numero);
   if (isTaggedOwner) {
+    const frasesOwner = [
+      `🛡️ *Protección Suprema Activada*\n@${numero} es el creador del bot. Intocable.`,
+      `👑 *Error de Sistema*\nIntentaste escanear al Creador. Abortando misión.`,
+      `⚠️ *Advertencia Crítica*\nNo puedes medir a quien te creó. Respeta jerarquías.`,
+      `🔒 *Modo Dios Activo*\n@${numero} no puede ser escaneado por simples mortales.`,
+    ];
+    const respuestaOwner = frasesOwner[Math.floor(Math.random() * frasesOwner.length)];
     return await conn.sendMessage(chatId, {
-      text: `🛡️ @${numero} está protegido por el sistema supremo. Ni lo intentes.`,
+      text: respuestaOwner,
       mentions: [mentionedJid]
     }, { quoted: msg });
   }
@@ -121,7 +126,7 @@ const handler = async (msg, { conn }) => {
     '➤ El universo no se equivoca.',
     '➤ Esto es irrefutable.',
     '➤ Ya ni la NASA lo puede negar.',
-    '➤ El registro ha sido enviado al servidor supremo.',
+    '➤ Registro validado en la base del multiverso.',
   ];
   const cierre = cierreOpciones[Math.floor(Math.random() * cierreOpciones.length)];
 
