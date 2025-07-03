@@ -1,11 +1,6 @@
-const imagenesXXX = [
-  "https://cdn.russellxz.click/56b2e2b4.jpeg",
-  "https://cdn.russellxz.click/556fa4bc.jpeg",
-  "https://cdn.russellxz.click/5b056ca3.jpeg",
-  // más URLs aquí
-];
+const axios = require("axios");
 
-let cachePornololi = {}; // ID mensaje => { chatId, data }
+let cachePornololi = {}; // ID mensaje => { chatId, sender }
 let usosPorUsuario = {}; // usuario => cantidad
 
 const handler = async (msg, { conn }) => {
@@ -21,8 +16,9 @@ const handler = async (msg, { conn }) => {
       },
     });
 
-    // Elegir URL aleatoria de arreglo local
-    const url = imagenesXXX[Math.floor(Math.random() * imagenesXXX.length)];
+    // Hacer petición a la API
+    const res = await axios.get("https://delirius-apiofc.vercel.app/nsfw/girls");
+    const url = res.data.url; // suponiendo que el JSON responde con { url: "..." }
 
     const sentMsg = await conn.sendMessage(chatId, {
       image: { url },
@@ -37,16 +33,13 @@ const handler = async (msg, { conn }) => {
       },
     });
 
-    // Guardar imagen enviada y el arreglo (data) para reacciones
     cachePornololi[sentMsg.key.id] = {
       chatId,
-      data: imagenesXXX,
       sender,
     };
 
     usosPorUsuario[sender] = usosPorUsuario[sender] || 0;
 
-    // ESCUCHAR REACCIONES ESTILO VS4
     conn.ev.on("messages.upsert", async ({ messages }) => {
       const m = messages[0];
       if (!m?.message?.reactionMessage) return;
@@ -55,11 +48,9 @@ const handler = async (msg, { conn }) => {
       const reactedMsgId = reaction.key?.id;
       const user = m.key.participant || m.key.remoteJid;
 
-      // Verifica si la reacción es válida
       if (!cachePornololi[reactedMsgId]) return;
       if (user !== cachePornololi[reactedMsgId].sender) return;
 
-      // Limite de 3 reacciones
       if ((usosPorUsuario[user] || 0) >= 3) {
         return await conn.sendMessage(cachePornololi[reactedMsgId].chatId, {
           text: `❌ Ya viste suficiente por ahora.\n🕒 Espera *5 minutos* para seguir viendo contenido 😏.`,
@@ -67,36 +58,33 @@ const handler = async (msg, { conn }) => {
         });
       }
 
-      const { chatId, data } = cachePornololi[reactedMsgId];
-      const newUrl = data[Math.floor(Math.random() * data.length)];
+      // Nueva petición para otra imagen
+      const newRes = await axios.get("https://delirius-apiofc.vercel.app/nsfw/girls");
+      const newUrl = newRes.data.url;
 
-      const newMsg = await conn.sendMessage(chatId, {
+      const newMsg = await conn.sendMessage(cachePornololi[reactedMsgId].chatId, {
         image: { url: newUrl },
         caption: "🥵 Otra más... Reacciona de nuevo.",
       });
 
-      await conn.sendMessage(chatId, {
+      await conn.sendMessage(cachePornololi[reactedMsgId].chatId, {
         react: {
           text: "✅",
           key: newMsg.key,
         },
       });
 
-      // Guardar nuevo y eliminar anterior
       cachePornololi[newMsg.key.id] = {
-        chatId,
-        data,
-        sender: user
+        chatId: cachePornololi[reactedMsgId].chatId,
+        sender: user,
       };
       delete cachePornololi[reactedMsgId];
 
-      // Sumar reacción
       usosPorUsuario[user] = (usosPorUsuario[user] || 0) + 1;
 
-      // Reset después de 5 minutos
       setTimeout(() => {
         usosPorUsuario[user] = 0;
-      }, 5 * 60 * 1000); // 5 min
+      }, 5 * 60 * 1000); // 5 minutos
     });
 
   } catch (e) {
@@ -105,7 +93,7 @@ const handler = async (msg, { conn }) => {
   }
 };
 
-handler.command = ["loli"];
+handler.command = ["pack"];
 handler.tags = ["nsfw"];
 handler.help = ["pornololi"];
 module.exports = handler;
