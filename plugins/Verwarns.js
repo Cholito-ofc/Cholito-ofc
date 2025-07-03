@@ -44,5 +44,5 @@ const handler = async (msg, { conn }) => {
   }, { quoted: msg });
 };
 
-handler.command = ["advertenciasgrupo"];
+handler.command = ["verwarns"];
 module.exports = handler;
