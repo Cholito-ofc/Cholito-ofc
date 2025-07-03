@@ -7,11 +7,23 @@ const handler = async (msg, { conn }) => {
 
     await conn.sendMessage(msg.key.remoteJid, {
       image: { url },
-      caption: "🥵"
+      caption: "🥵 Aquí tienes una loli 🔞",
+      footer: "Presiona el botón para otra imagen",
+      buttons: [
+        {
+          buttonId: ".pornololi",
+          buttonText: { displayText: "🔁 Siguiente" },
+          type: 1
+        }
+      ],
+      headerType: 4
     }, { quoted: msg });
+
   } catch (e) {
     console.error("❌ Error en comando pornololi:", e);
-    await msg.reply("❌ No se pudo obtener el contenido.");
+    await conn.sendMessage(msg.key.remoteJid, {
+      text: "❌ No se pudo obtener el contenido."
+    }, { quoted: msg });
   }
 };
 
