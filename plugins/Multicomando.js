@@ -28,8 +28,6 @@ const textoFinal = `💫 ESCÁNER COMPLETO
 
 > ${remate}
 
-
-
 ${cierre}`;
 
 await conn.sendMessage(chatId, { text: textoFinal, mentions: [mentionedJid] }, { quoted: msg }); };
