@@ -9,7 +9,7 @@ const handler = async (msg, { conn, args }) => {
 
   if (!isGroup) {
     await conn.sendMessage(chatId, {
-      text: "❌ Este comando solo puede usarse en grupos."
+      text: "🚫 Este comando solo está disponible en *grupos*. Actívalo donde se necesite.",
     }, { quoted: msg });
     return;
   }
@@ -22,14 +22,14 @@ const handler = async (msg, { conn, args }) => {
 
   if (!isAdmin && !isOwner && !isFromMe) {
     await conn.sendMessage(chatId, {
-      text: "🚫 Solo los administradores del grupo, el owner o el bot pueden usar este comando."
+      text: "🛑 Solo *admins*, el *owner* o el *bot* pueden usar este comando.",
     }, { quoted: msg });
     return;
   }
 
   if (!args[0] || !["on", "off"].includes(args[0].toLowerCase())) {
     await conn.sendMessage(chatId, {
-      text: "⚙️ Usa: *rpgcortana on/off* para activar o desactivar los comandos RPG en este grupo."
+      text: `🎮 *Modo RPG Killua*\n\nUsa:\n*${prefix}rpgkillua on* 🔛 para activar\n*${prefix}rpgkillua off* 🔇 para desactivar`,
     }, { quoted: msg });
     return;
   }
@@ -45,22 +45,21 @@ const handler = async (msg, { conn, args }) => {
   if (args[0].toLowerCase() === "on") {
     activos.rpgazura[chatId] = true;
     await conn.sendMessage(chatId, {
-      text: "✅ *Comandos RPG activados* en este grupo."
+      text: "⚔️ *Modo RPG Killua ACTIVADO*\n\nPrepárense para la batalla, el juego comienza ahora.",
     }, { quoted: msg });
   } else {
     delete activos.rpgazura[chatId];
     await conn.sendMessage(chatId, {
-      text: "🛑 *Comandos RPG desactivados* en este grupo."
+      text: "💤 *Modo RPG Killua DESACTIVADO*\n\nEl mundo se ha silenciado... por ahora.",
     }, { quoted: msg });
   }
 
   fs.writeFileSync(activosPath, JSON.stringify(activos, null, 2));
 
-  // Reacción al comando
   await conn.sendMessage(chatId, {
-    react: { text: "✅", key: msg.key }
+    react: { text: "✅", key: msg.key },
   });
 };
 
-handler.command = ["rpgcortana"];
+handler.command = ["rpgkillua"];
 module.exports = handler;
