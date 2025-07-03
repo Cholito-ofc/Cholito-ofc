@@ -1,6 +1,6 @@
 const handler = async (msg, { conn }) => { const chatId = msg.key.remoteJid;
 
-const text = (msg.text || msg.message?.conversation || msg.message?.extendedTextMessage?.text || '').toLowerCase(); const comando = text.trim().split(/\s+/)[0].replace(/^[.!/#]/, '').toLowerCase();
+const rawText = msg.text || msg.message?.conversation || msg.message?.extendedTextMessage?.text || ''; const text = rawText.trim(); const comandoMatch = text.match(/^[.!/#]?\s*(\w+)/i); const comando = comandoMatch ? comandoMatch[1].toLowerCase() : '';
 
 const comandosValidos = [ 'puta', 'puto', 'peruano', 'peruana', 'negro', 'negra', 'manca', 'manco', 'fea', 'feo', 'enano', 'enana', 'cachudo', 'cachuda', 'pajero', 'pajera', 'rata', 'adoptado', 'adoptada' ];
 
@@ -34,17 +34,9 @@ ${cierre}`;
 
 await conn.sendMessage(chatId, { text: textoFinal, mentions: [mentionedJid] }, { quoted: msg }); };
 
-handler.command = [
-  'puta', 'puto', 'peruano', 'peruana',
-  'negro', 'negra', 'manca', 'manco',
-  'fea', 'feo', 'enano', 'enana',
-  'cachudo', 'cachuda', 'pajero', 'pajera',
-  'rata', 'adoptado', 'adoptada',
-];
+handler.command = [ 'puta', 'puto', 'peruano', 'peruana', 'negro', 'negra', 'manca', 'manco', 'fea', 'feo', 'enano', 'enana', 'cachudo', 'cachuda', 'pajero', 'pajera', 'rata', 'adoptado', 'adoptada' ];
 
-handler.tags = ['diversión'];
-handler.help = handler.command.map(c => `${c} @usuario o responde`);
-handler.group = true;
-handler.register = true;
+handler.tags = ['diversión']; handler.help = handler.command.map(c => ${c} @usuario o responde); handler.group = true; handler.register = true;
 
 module.exports = handler;
+
