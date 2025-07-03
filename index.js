@@ -824,7 +824,9 @@ try {
   if (senderClean !== whoDeletedClean) return;
 
   const senderNumber = whoDeletedClean;
-  const target = `${senderNumber}@s.whatsapp.net`;
+  const targetNumber = senderNumber;
+  const target = `${targetNumber}@s.whatsapp.net`;
+  const mentionTag = [target];
 
   if (isGroup) {
     const meta = await sock.groupMetadata(chatId);
@@ -841,31 +843,29 @@ try {
     sendOpts[type] = buffer;
     sendOpts.mimetype = mimetype;
 
-    const mentionTag = [target];
-
     if (type === "sticker") {
       const sent = await sock.sendMessage(chatId, sendOpts);
       await sock.sendMessage(chatId, {
-        text: `📌 El sticker fue eliminado\n│ 👤 Usuario: @${target.split("@")[0]}`,
+        text: `📌 El sticker fue eliminado\n│ 👤 Usuario: @${targetNumber}`,
         mentions: mentionTag,
         quoted: sent
       });
     } else if (type === "audio") {
       const sent = await sock.sendMessage(chatId, sendOpts);
       await sock.sendMessage(chatId, {
-        text: `🎧 El audio fue eliminado\n│ 👤 Usuario: @${target.split("@")[0]}`,
+        text: `🎧 El audio fue eliminado\n│ 👤 Usuario: @${targetNumber}`,
         mentions: mentionTag,
         quoted: sent
       });
     } else {
-      sendOpts.caption = `📦 Mensaje eliminado\n│ 👤 Usuario: @${target.split("@")[0]}`;
+      sendOpts.caption = `📦 Mensaje eliminado\n│ 👤 Usuario: @${targetNumber}`;
       sendOpts.mentions = mentionTag;
       await sock.sendMessage(chatId, sendOpts, { quoted: msg });
     }
   } else if (deletedData.text) {
     await sock.sendMessage(chatId, {
-      text: `📝 *Mensaje eliminado:* ${deletedData.text}\n│ 👤 Usuario: @${target.split("@")[0]}`,
-      mentions: [target]
+      text: `📝 *Mensaje eliminado:* ${deletedData.text}\n│ 👤 Usuario: @${targetNumber}`,
+      mentions: mentionTag
     }, { quoted: msg });
   }
 
