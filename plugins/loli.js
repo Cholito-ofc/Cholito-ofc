@@ -1,10 +1,9 @@
 const axios = require("axios");
 
-let cachePornololi = {}
+let cachePornololi = {};
 
 const handler = async (msg, { conn }) => {
-  const chatId = msg.key.remoteJid
-  const sender = msg.key.participant || msg.key.remoteJid
+  const chatId = msg.key.remoteJid;
 
   try {
     const res = await axios.get("https://raw.githubusercontent.com/BrunoSobrino/TheMystic-Bot-MD/master/src/JSON/nsfwloli.json");
@@ -16,11 +15,10 @@ const handler = async (msg, { conn }) => {
       caption: "🥵 Reacciona a este mensaje para ver otra imagen.",
     }, { quoted: msg });
 
-    // Guardamos el mensaje enviado para identificarlo cuando reaccionen
     cachePornololi[sentMsg.key.id] = {
       chatId,
       data,
-    }
+    };
 
   } catch (e) {
     console.error("❌ Error en comando pornololi:", e);
@@ -29,35 +27,36 @@ const handler = async (msg, { conn }) => {
 };
 
 // Escuchar reacciones
-handler.before = async function (msg, { conn }) {
-  if (!msg.message?.reactionMessage) return;
+const reactionHandler = async ({ messages }) => {
+  let m = messages[0];
+  if (!m?.message?.reactionMessage) return;
 
-  const reaction = msg.message.reactionMessage;
+  const reaction = m.message.reactionMessage;
   const key = reaction.key;
-  const emoji = reaction.text;
   const reactedMsgId = key?.id;
   const chatId = key?.remoteJid;
 
   if (!cachePornololi[reactedMsgId]) return;
 
   const { data } = cachePornololi[reactedMsgId];
-
-  const randomUrl = data[Math.floor(Math.random() * data.length)];
+  const newUrl = data[Math.floor(Math.random() * data.length)];
 
   const newMsg = await conn.sendMessage(chatId, {
-    image: { url: randomUrl },
+    image: { url: newUrl },
     caption: "🥵 Otra más... Reacciona de nuevo para seguir viendo.",
   });
 
-  // Guardar nuevo mensaje para seguir cadena
-  cachePornololi[newMsg.key.id] = {
-    chatId,
-    data,
-  };
-
-  // Borrar el anterior para evitar crecer la memoria
+  cachePornololi[newMsg.key.id] = { chatId, data };
   delete cachePornololi[reactedMsgId];
-}
+};
+
+// Activar listener una sola vez
+let listenerActivo = false;
+handler.register = (conn) => {
+  if (listenerActivo) return;
+  listenerActivo = true;
+  conn.ev.on("messages.upsert", reactionHandler);
+};
 
 handler.command = ["pornololi"];
 handler.tags = ["nsfw"];
