@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-let cachePornololi = {}; // ID mensaje => { chatId, sender }
+let cachePack = {}; // ID mensaje => { chatId, sender }
 let usosPorUsuario = {}; // usuario => cantidad
 
 const handler = async (msg, { conn }) => {
@@ -16,13 +16,13 @@ const handler = async (msg, { conn }) => {
       },
     });
 
-    // Hacer petición a la API
+    // Petición a la API para imagen pack
     const res = await axios.get("https://delirius-apiofc.vercel.app/nsfw/girls");
-    const url = res.data.url; // suponiendo que el JSON responde con { url: "..." }
+    const url = res.data.url;
 
     const sentMsg = await conn.sendMessage(chatId, {
       image: { url },
-      caption: "🥵 Reacciona a este mensaje para ver otra imagen.",
+      caption: "🔥 Reacciona a esta imagen para ver otro pack.",
     }, { quoted: msg });
 
     // Reacción de "listo"
@@ -33,7 +33,7 @@ const handler = async (msg, { conn }) => {
       },
     });
 
-    cachePornololi[sentMsg.key.id] = {
+    cachePack[sentMsg.key.id] = {
       chatId,
       sender,
     };
@@ -48,12 +48,12 @@ const handler = async (msg, { conn }) => {
       const reactedMsgId = reaction.key?.id;
       const user = m.key.participant || m.key.remoteJid;
 
-      if (!cachePornololi[reactedMsgId]) return;
-      if (user !== cachePornololi[reactedMsgId].sender) return;
+      if (!cachePack[reactedMsgId]) return;
+      if (user !== cachePack[reactedMsgId].sender) return;
 
       if ((usosPorUsuario[user] || 0) >= 3) {
-        return await conn.sendMessage(cachePornololi[reactedMsgId].chatId, {
-          text: `❌ Ya viste suficiente por ahora.\n🕒 Espera *5 minutos* para seguir viendo contenido 😏.`,
+        return await conn.sendMessage(cachePack[reactedMsgId].chatId, {
+          text: `❌ Ya viste suficiente por ahora.\n🕒 Espera *5 minutos* para seguir viendo packs 🔥.`,
           mentions: [user],
         });
       }
@@ -62,23 +62,23 @@ const handler = async (msg, { conn }) => {
       const newRes = await axios.get("https://delirius-apiofc.vercel.app/nsfw/girls");
       const newUrl = newRes.data.url;
 
-      const newMsg = await conn.sendMessage(cachePornololi[reactedMsgId].chatId, {
+      const newMsg = await conn.sendMessage(cachePack[reactedMsgId].chatId, {
         image: { url: newUrl },
-        caption: "🥵 Otra más... Reacciona de nuevo.",
+        caption: "🔥 Otro pack... Reacciona de nuevo para más.",
       });
 
-      await conn.sendMessage(cachePornololi[reactedMsgId].chatId, {
+      await conn.sendMessage(cachePack[reactedMsgId].chatId, {
         react: {
           text: "✅",
           key: newMsg.key,
         },
       });
 
-      cachePornololi[newMsg.key.id] = {
-        chatId: cachePornololi[reactedMsgId].chatId,
+      cachePack[newMsg.key.id] = {
+        chatId: cachePack[reactedMsgId].chatId,
         sender: user,
       };
-      delete cachePornololi[reactedMsgId];
+      delete cachePack[reactedMsgId];
 
       usosPorUsuario[user] = (usosPorUsuario[user] || 0) + 1;
 
@@ -88,12 +88,12 @@ const handler = async (msg, { conn }) => {
     });
 
   } catch (e) {
-    console.error("❌ Error en .pornololi:", e);
-    await msg.reply("❌ No se pudo obtener el contenido.");
+    console.error("❌ Error en .pack:", e);
+    await msg.reply("❌ No se pudo obtener el pack.");
   }
 };
 
 handler.command = ["pack"];
 handler.tags = ["nsfw"];
-handler.help = ["pornololi"];
+handler.help = ["pack"];
 module.exports = handler;
