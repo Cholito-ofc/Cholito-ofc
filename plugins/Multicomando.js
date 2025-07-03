@@ -26,7 +26,7 @@ const remate = frasesPorComando[comando][Math.floor(Math.random() * frasesPorCom
 
 const textoFinal = `*💫 ESCÁNER COMPLETO*
 
-*🔥 𝙻𝙾𝚂 𝙲𝙰́𝙻𝙲𝚄𝙻𝙾𝚂 𝙷𝙰𝙽 𝙰𝚁𝙾𝙹𝙰𝙳𝙾 𝚀𝚄𝙴* @${numero} *𝙴𝚂 [${porcentaje}%]* *${comando.toUpperCase()}*
+*🔥 𝙻𝙾𝚂 𝙲𝙰́𝙻𝙲𝚄𝙻𝙾𝚂 𝙷𝙰𝙽 𝙰𝚁𝙾𝙹𝙰𝙳𝙾 𝚀𝚄𝙴* @${numero} *𝙴𝚂 『 ${porcentaje}% 』* *${comando.toUpperCase()}*
 
 > ${remate}
 
