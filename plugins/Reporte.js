@@ -68,5 +68,5 @@ Tu mensaje ha sido enviado con éxito al dueño del bot.
   }, { quoted: msg });
 };
 
-handler.command = ['report'];
+handler.command = ['reporte'];
 module.exports = handler;
