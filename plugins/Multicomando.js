@@ -1,6 +1,6 @@
 const handler = async (msg, { conn }) => { const chatId = msg.key.remoteJid;
 
-const text = (msg.text || msg.message?.conversation || msg.message?.extendedTextMessage?.text || '').toLowerCase(); const comando = text.split(' ')[0].replace(/^[.!/#\s]+/, '');
+const text = (msg.text || msg.message?.conversation || msg.message?.extendedTextMessage?.text || '').toLowerCase(); const comando = text.trim().split(/\s+/)[0].replace(/^[.!/#]/, '').toLowerCase();
 
 const comandosValidos = [ 'puta', 'puto', 'peruano', 'peruana', 'negro', 'negra', 'manca', 'manco', 'fea', 'feo', 'enano', 'enana', 'cachudo', 'cachuda', 'pajero', 'pajera', 'rata', 'adoptado', 'adoptada' ];
 
