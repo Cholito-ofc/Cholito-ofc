@@ -20,6 +20,16 @@ const handler = async (msg, { conn }) => {
 
   const audioURL = 'https://cdn.russellxz.click/96beb11b.mp3'; // 🎧 Tu audio personalizado
 
+  // Función para convertir texto a monospace estilizado
+  function toMonoSpace(text) {
+    const normal = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const mono = "𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿";
+    return text.split('').map(c => {
+      const idx = normal.indexOf(c);
+      return idx !== -1 ? mono[idx] : c;
+    }).join('');
+  }
+
   // 🧠 Obtener JID mencionado o desde mensaje respondido
   let mentionedJid;
   try {
@@ -88,27 +98,27 @@ const handler = async (msg, { conn }) => {
   // 📝 Mensajes personalizados por rango con varios textos para cada uno
 
   const mensajesBajo = [
-    `😎 CASI INVISIBLE, PERO EL ESTILO Y LA ACTITUD HABLAN POR TI.\n   SIGUES EN MODO SECRETO, PERO NO TE CONFÍES, EL ARCOÍRIS TE SIGUE.`,
-    `🔵 ERES EL MAESTRO DEL DISFRAZ, SUTIL Y ELEGANTE.\n   EL MUNDO NO TE VE, PERO TU BRILLO ESTÁ AHÍ.`,
-    `💧 UN TOQUE DE COLOR QUE APENAS SE DEJA VER.\n   EL SECRETO MEJOR GUARDADO DEL ARCOÍRIS.`
+    `😎 CASI INVISIBLE, PERO EL ESTILO Y LA ACTITUD HABLAN POR TI.\nSIGUES EN MODO SECRETO, PERO NO TE CONFÍES, EL ARCOÍRIS TE SIGUE.`,
+    `🔵 ERES EL MAESTRO DEL DISFRAZ, SUTIL Y ELEGANTE.\nEL MUNDO NO TE VE, PERO TU BRILLO ESTÁ AHÍ.`,
+    `💧 UN TOQUE DE COLOR QUE APENAS SE DEJA VER.\nEL SECRETO MEJOR GUARDADO DEL ARCOÍRIS.`
   ];
 
   const mensajesMedio = [
-    `⚠️ EL ARCOÍRIS ASOMA, ENTRE RISAS Y MIRADAS.\n   ERES UNA MEZCLA PERFECTA DE MISTERIO Y BRILLO, Y NADIE PUEDE QUITARTE ESA CHISPA QUE TE HACE ÚNICO/A.`,
-    `🟡 UNA ENERGÍA QUE NO PASA DESAPERCIBIDA.\n   TE GUSTA JUGAR ENTRE SOMBRAS Y LUCES.`,
-    `🌟 EL EQUILIBRIO PERFECTO ENTRE EL MISTERIO Y LA LUZ.\n   DEJAS UNA HUELLA QUE NADIE OLVIDA.`
+    `⚠️ EL ARCOÍRIS ASOMA, ENTRE RISAS Y MIRADAS.\nERES UNA MEZCLA PERFECTA DE MISTERIO Y BRILLO, Y NADIE PUEDE QUITARTE ESA CHISPA QUE TE HACE ÚNICO/A.`,
+    `🟡 UNA ENERGÍA QUE NO PASA DESAPERCIBIDA.\nTE GUSTA JUGAR ENTRE SOMBRAS Y LUCES.`,
+    `🌟 EL EQUILIBRIO PERFECTO ENTRE EL MISTERIO Y LA LUZ.\nDEJAS UNA HUELLA QUE NADIE OLVIDA.`
   ];
 
   const mensajesAlto = [
-    `🔥 EL BRILLO ES IRREFUTABLE, EL ESTILO INIGUALABLE.\n   NO PUEDES ESCONDER ESA ENERGÍA QUE IRRADIAS, Y TODOS SABEN QUE ERES LA ALMA DE LA FIESTA Y EL ARCOÍRIS.`,
-    `💃 EL FLOW Y LA ACTITUD QUE MARCAN LA DIFERENCIA.\n   TU PRESENCIA ILUMINA CUALQUIER LUGAR.`,
-    `🌈 EL ORGULLO QUE LLEVAS DENTRO SE SIENTE EN EL AMBIENTE.\n   NADIE SE RESISTE A TU CARISMA Y ENCANTO.`
+    `🔥 EL BRILLO ES IRREFUTABLE, EL ESTILO INIGUALABLE.\nNO PUEDES ESCONDER ESA ENERGÍA QUE IRRADIAS, Y TODOS SABEN QUE ERES LA ALMA DE LA FIESTA Y EL ARCOÍRIS.`,
+    `💃 EL FLOW Y LA ACTITUD QUE MARCAN LA DIFERENCIA.\nTU PRESENCIA ILUMINA CUALQUIER LUGAR.`,
+    `🌈 EL ORGULLO QUE LLEVAS DENTRO SE SIENTE EN EL AMBIENTE.\nNADIE SE RESISTE A TU CARISMA Y ENCANTO.`
   ];
 
   const mensajesMuyAlto = [
-    `💥 REINA ABSOLUTA DEL ORGULLO, EL GLAMOUR Y LA DIVERSIDAD.\n   TU LUZ ES TAN FUERTE QUE ILUMINA TODO A TU ALREDEDOR, Y NADIE PUEDE NEGAR QUE ERES EL CORAZÓN DEL ARCOÍRIS.`,
-    `🔥 EL FARO QUE GUÍA EL CAMINO DEL ORGULLO.\n   UN REFERENTE DE VALENTÍA, LUZ Y ALEGRÍA.`,
-    `👑 EL SÍMBOLO VIVO DEL BRILLO Y LA DIVERSIDAD.\n   TU ENERGÍA TRANSFORMA TODO A TU PASO.`
+    `💥 REINA ABSOLUTA DEL ORGULLO, EL GLAMOUR Y LA DIVERSIDAD.\nTU LUZ ES TAN FUERTE QUE ILUMINA TODO A TU ALREDEDOR, Y NADIE PUEDE NEGAR QUE ERES EL CORAZÓN DEL ARCOÍRIS.`,
+    `🔥 EL FARO QUE GUÍA EL CAMINO DEL ORGULLO.\nUN REFERENTE DE VALENTÍA, LUZ Y ALEGRÍA.`,
+    `👑 EL SÍMBOLO VIVO DEL BRILLO Y LA DIVERSIDAD.\nTU ENERGÍA TRANSFORMA TODO A TU PASO.`
   ];
 
   let mensajeFinalList = [];
@@ -125,13 +135,14 @@ const handler = async (msg, { conn }) => {
     porcentaje <= 50 ? '🌈' :
       porcentaje <= 80 ? '💅' : '🔥';
 
-  let decorado = `╭┈┈┈≫[ 🎯 *ESCÁNER GAY* ]≪┈┈┈┈╮\n\n`;
-  decorado += `${emojiPorcentaje} @${numero} es *${porcentaje}% Gay Confirmado* 🏳️‍🌈\n`;
-  decorado += `${mensajeFinal}\n\n`;
-  decorado += `╰┈┈┈┈≫ *𝑬𝒍 𝒖𝒏𝒊𝒗𝒆𝒓𝒔𝒐 𝒏𝒖𝒏𝒄𝒂 𝒇𝒂𝒍𝒍𝒂*≪┈┈┈╯`;
+  // Construir mensaje final con estilo monospace y línea extra
+  const textoFinal = 
+    `${toMonoSpace(`${emojiPorcentaje} @${numero} es ${porcentaje}% Gay Confirmado 🏳️‍🌈`)}\n\n` +
+    `${toMonoSpace(mensajeFinal)}\n\n` +
+    `${toMonoSpace('El universo lo confirma')}`;
 
   await conn.sendMessage(chatId, {
-    text: decorado,
+    text: textoFinal,
     mentions: [mentionedJid],
     edit: mensajeInicial.key
   });
