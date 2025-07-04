@@ -15,10 +15,11 @@ const handler = async (msg, { conn, args }) => {
 
   // Validación de acceso
   if (!owners.includes(senderNum) && !isBotMessage) {
-    return conn.sendMessage(chatId, {
-      text: '❌ Solo los OWNER autorizados pueden usar este comando.'
-    }, { quoted: msg })
-  }
+  console.log('[DEBUG] Bloqueado por seguridad, senderNum:', senderNum)
+  return conn.sendMessage(chatId, {
+    text: '❌ Solo los OWNER autorizados pueden usar este comando.'
+  }, { quoted: msg })
+}
 
   // Verificar que haya argumento
   if (!args[0]) {
