@@ -2,6 +2,8 @@
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=150&section=header&text=Bienvenido%20a%20mi%20perfil&fontSize=30&fontColor=FFFFFF&animation=fadeIn" width="100%"/>
 <div style="border: 10px solid; border-image: linear-gradient(to bottom, #FF7F50, #FF4500); border-image-slice: 1;">
 
+[![Botoncito🥵](https://img.shields.io/badge/REPOSITORIO_OFICIAL_DE_CROWBOT💛-333522?style=for-the-badge&logo=github&logoColor=yellow)](https://github.com/WillZek/CrowBot-ST)
+
 <a href="https://whatsapp.com/channel/0029VakfOZfHFxP7rNrUQk2d?text=.menu"><img alt="Canal Oficial 💛" src="https://img.shields.io/badge/Canal - Oficial-00FFFF?style=for-the-badge&logo=whatsapp&logoColor=white"/></a>
 
 ### BIENVENIDO A MI PERFIL 👋
