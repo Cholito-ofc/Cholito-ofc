@@ -2,20 +2,18 @@ const fs = require('fs')
 const path = require('path')
 
 const handler = async (msg, { conn, args, isOwner }) => {
-  const chatId = msg.chat
+  const chatId = msg.key.remoteJid  // <-- usa remoteJid aquí
 
   if (!isOwner) return conn.sendMessage(chatId, { text: '❌ Solo el OWNER puede usar este comando.' }, { quoted: msg })
   if (!args[0]) return conn.sendMessage(chatId, { text: '✍️ Uso: .git2 nombre_del_plugin (sin .js)' }, { quoted: msg })
 
-  // Limpia argumento para evitar rutas inseguras
   let inputPath = args.join(' ').trim()
-  inputPath = inputPath.replace(/(\.\.(\/|\\))/g, '') // evita subir carpetas fuera de plugins
+  inputPath = inputPath.replace(/(\.\.(\/|\\))/g, '') // evitar subir fuera
 
-  // Construye ruta absoluta dentro de /plugins
-  const filePath = path.join(__dirname, 'plugins', inputPath + '.js')
+  const basePath = path.join(__dirname, 'plugins')
+  const filePath = path.join(basePath, inputPath + '.js')
 
-  // Verifica que el archivo esté dentro de /plugins
-  if (!filePath.startsWith(path.join(__dirname, 'plugins'))) {
+  if (!filePath.startsWith(basePath)) {
     return conn.sendMessage(chatId, { text: '❌ Ruta inválida o fuera de la carpeta plugins.' }, { quoted: msg })
   }
 
@@ -26,7 +24,6 @@ const handler = async (msg, { conn, args, isOwner }) => {
   try {
     const code = fs.readFileSync(filePath, 'utf-8')
 
-    // Limitar tamaño para no saturar WhatsApp
     if (code.length > 4000) {
       return conn.sendMessage(chatId, { text: '⚠️ Archivo muy grande para enviar completo.' }, { quoted: msg })
     }
