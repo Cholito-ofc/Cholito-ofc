@@ -145,7 +145,7 @@ const handler = async (msg, { conn, args }) => {
 
   // ... (todo tu código igual que lo mandaste arriba, hasta aquí)
 
-  const logo = await loadImage('https://cdn.russellxz.click/b3143c2d.png');
+  const logo = await loadImage('https://cdn.russellxz.click/6ee56f81.jpeg');
 const logoWidth = 140;
 const logoHeight = 140;
 const x = canvas.width - logoWidth - 40;
@@ -160,7 +160,7 @@ draw.drawImage(logo, x, y, logoWidth, logoHeight);
   out.on('finish', async () => {
     await conn.sendMessage(chatId, {
       image: { url: fileName },
-      caption: `🖼 Generado por Azura ultra`
+      caption: `🖼 Generado por KilluaBot ⚡`
     }, { quoted: msg });
     fs.unlinkSync(fileName);
   });
