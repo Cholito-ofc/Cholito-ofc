@@ -406,45 +406,35 @@ if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
-
-    const axios = require("axios");
-    let profilePicBuffer;
-
+    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
     try {
-      const profilePicUrl = await sock.profilePictureUrl(participant, "image");
-      const res = await axios.get(profilePicUrl, { responseType: "arraybuffer" });
-      profilePicBuffer = res.data;
-    } catch (err) {
-      console.log("⚠️ No se pudo obtener la imagen de perfil, usando imagen por defecto");
-      const res = await axios.get("https://cdn.russellxz.click/d9d547b6.jpeg", { responseType: "arraybuffer" });
-      profilePicBuffer = res.data;
-    }
+      profilePicUrl = await sock.profilePictureUrl(participant, "image");
+    } catch (err) {}
 
     let textoFinal = "";
     if (customMessage) {
+      // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio, siempre con manito y salto de línea
       if (/(@user)/gi.test(customMessage)) {
         textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${customMessage.replace(/@user/gi, mention)}`;
       } else {
         textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${customMessage}`;
       }
     } else {
+      // Si no hay mensaje personalizado, solo manda la descripción del grupo
       let groupDesc = "";
       try {
         const metadata = await sock.groupMetadata(update.id);
-        groupDesc = metadata.desc
-          ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}`
-          : "\n\n📜 *Este grupo no tiene descripción.*";
-      } catch {
+        groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
+      } catch (err) {
         groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
       }
       textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
     }
 
-    console.log("✅ Enviando bienvenida a:", participant);
     await sock.sendMessage(update.id, {
-      image: { jpegThumbnail: profilePicBuffer },
+      image: { url: profilePicUrl },
       caption: textoFinal,
-      mentions: [participant]
+      mentions: [participant] // SIEMPRE etiqueta al usuario
     });
   }
 }
