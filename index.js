@@ -407,20 +407,36 @@ if (update.action === "add" && welcomeActivo) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
     let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
+
     try {
       profilePicUrl = await sock.profilePictureUrl(participant, "image");
-    } catch (err) {}
+    } catch (err) {
+      // Usa imagen por defecto si falla
+    }
+
+    let groupName = "";
+    try {
+      const metadata = await sock.groupMetadata(update.id);
+      groupName = metadata.subject || "Grupo desconocido";
+    } catch (err) {
+      groupName = "Grupo desconocido";
+    }
 
     let textoFinal = "";
+
     if (customMessage) {
-      // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio, siempre con manito y salto de línea
       if (/(@user)/gi.test(customMessage)) {
-        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${customMessage.replace(/@user/gi, mention)}`;
+        textoFinal = `*╭━─━──────━─━╮*\n*╰╮»* 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔\n*╭━─━──────━─━╯*\n` +
+                     `*┊»* 👤𝑼𝒔𝒖𝒂𝒓𝒊𝒐: ${customMessage.replace(/@user/gi, mention)}\n` +
+                     `*┊»* 👥𝑮𝒓𝒖𝒑𝒐: ${groupName}\n` +
+                     `*╰┈┈┈┈┈┈┈┈┈┈┈┈≫*`;
       } else {
-        textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${customMessage}`;
+        textoFinal = `*╭━─━──────━─━╮*\n*╰╮»* 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔\n*╭━─━──────━─━╯*\n` +
+                     `*┊»* 👤𝑼𝒔𝒖𝒂𝒓𝒊𝒐: ${mention}\n` +
+                     `*┊»* 👥𝑮𝒓𝒖𝒑𝒐: ${groupName}\n` +
+                     `*╰┈┈┈┈┈┈┈┈┈┈┈┈≫*\n\n${customMessage}`;
       }
     } else {
-      // Si no hay mensaje personalizado, solo manda la descripción del grupo
       let groupDesc = "";
       try {
         const metadata = await sock.groupMetadata(update.id);
@@ -428,13 +444,17 @@ if (update.action === "add" && welcomeActivo) {
       } catch (err) {
         groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
       }
-      textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
+
+      textoFinal = `*╭━─━──────━─━╮*\n*╰╮»* 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔\n*╭━─━──────━─━╯*\n` +
+                   `*┊»* 👤𝑼𝒔𝒖𝒂𝒓𝒊𝒐: ${mention}\n` +
+                   `*┊»* 👥𝑮𝒓𝒖𝒑𝒐: ${groupName}\n` +
+                   `*╰┈┈┈┈┈┈┈┈┈┈┈┈≫*` + groupDesc;
     }
 
     await sock.sendMessage(update.id, {
       image: { url: profilePicUrl },
       caption: textoFinal,
-      mentions: [participant] // SIEMPRE etiqueta al usuario
+      mentions: [participant]
     });
   }
 }
