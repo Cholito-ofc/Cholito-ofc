@@ -5,7 +5,6 @@
 ## ⚡ **`KILLUA BOT`**    
 
 ![Menú Principal](https://cdn.russellxz.click/3c840854.jpeg)
- href="https://whatsapp.com/channel/0029VbABQOU77qVUUPiUek2W=.menu"><img alt="Canal Oficial 💛" src="https://img.shields.io/badge/Canal - Oficial-00FFFF?style=for-the-badge&logo=whatsapp&logoColor=white"/></a>
 
 ### BIENVENIDO A MI PERFIL 👋
 <a href="https://wa.me/50489513153" target="_blank"><img src="https://img.shields.io/badge/Whatsapp-%808080.svg?&style=flat-square&logo=Whatsapp&logoColor=white" alt="WhatsApp"></a>
