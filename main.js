@@ -3786,50 +3786,43 @@ case 'menuowner': {
 ╭━─━──────────────━─━╮
 ╰╮ » 𝗣𝗔𝗡𝗘𝗟 𝗗𝗘𝗟 𝗦𝗜𝗦𝗧𝗘𝗠𝗔 🛠️
 ╭━─━──────────────━─━╯
-┊» ${global.prefix}bc
-┊» ${global.prefix}rest
-┊» ${global.prefix}carga
-┊» ${global.prefix}fix
-┊» ${global.prefix}deltmp
-┊» ${global.prefix}modoprivado on/off
-╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
-
-╭━─━──────────────━─━╮
-╰╮ » 𝗣𝗘𝗥𝗦𝗢𝗡𝗔𝗟𝗜𝗭𝗔𝗖𝗜𝗢́𝗡 🕵🏼‍♂️
-╭━─━──────────────━─━╯
-┊» ${global.prefix}botname
-┊» ${global.prefix}botfoto
-┊» ${global.prefix}setprefix
-┊» ${global.prefix}git
+┊» ${global.prefix}ʙᴄ
+┊» ${global.prefix}ʀᴇsᴛ
+┊» ${global.prefix}ᴄᴀʀɢᴀ
+┊» ${global.prefix}ғɪx
+┊» ${global.prefix}ɢɪᴛ
+┊» ${global.prefix}ᴅᴇʟᴛᴍᴘ
+┊» ${global.prefix}ᴍᴏᴅᴏᴘʀɪᴠᴀᴅᴏ ᴏɴ/ᴏғғ
 ╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
 
 ╭━─━──────────────━─━╮
 ╰╮ » 𝗖𝗢𝗡𝗦𝗢𝗟𝗔 𝗧𝗘́𝗖𝗡𝗜𝗖𝗔 🧑🏻‍💻
 ╭━─━──────────────━─━╯
-┊» ${global.prefix}listgrupo
-┊» ${global.prefix}aviso
-┊» ${global.prefix}cmd
-┊» ${global.prefix}salir
-┊» ${global.prefix}re
-┊» ${global.prefix}unre
-┊» ${global.prefix}antideletepri on/off
-┊» ${global.prefix}apagar
-┊» ${global.prefix}prender
+┊» ${global.prefix}ʟɪsᴛɢʀᴜᴘᴏs
+┊» ${global.prefix}ᴀᴠɪsᴏ
+┊» ${global.prefix}ᴄᴍᴅ
+┊» ${global.prefix}sᴀʟɪʀ
+┊» ${global.prefix}ʀᴇ
+┊» ${global.prefix}ᴜɴʀᴇ
+┊» ${global.prefix}ᴀɴᴛɪᴅᴇʟᴇᴛᴇᴘʀɪ ᴏɴ/ᴏғғ
+┊» ${global.prefix}ᴀᴘᴀɢᴀʀ
+┊» ${global.prefix}ᴘʀᴇɴᴅᴇʀ
+┊» ${global.prefix}sᴇᴛᴘʀᴇғɪx
 ╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
 
 ╭━─━──────────────━─━╮
 ╰╮ » 𝗖𝗢𝗡𝗧𝗘𝗡𝗜𝗗𝗢 𝗘𝗗𝗜𝗧𝗔𝗕𝗟𝗘 ✍🏼
 ╭━─━──────────────━─━╯
 ┊» ${global.prefix}addper
-┊» ${global.prefix}addmascota
-┊» ${global.prefix}dar
-┊» ${global.prefix}dame
-┊» ${global.prefix}addlista
-┊» ${global.prefix}deletelista
+┊» ${global.prefix}ᴀᴅᴅᴍᴀsᴄᴏᴛᴀ
+┊» ${global.prefix}ʙᴏᴛғᴏᴛᴏ
+┊» ${global.prefix}ʙᴏᴛɴᴀᴍᴇ
+┊» ${global.prefix}ᴅᴀʀ
+┊» ${global.prefix}ᴅᴀᴍᴇ
+┊» ${global.prefix}ᴀᴅᴅʟɪsᴛᴀ
+┊» ${global.prefix}ᴅᴇʟᴇᴛᴇʟɪsᴛᴀ
 ╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
-
-🔐 Solo administradores autorizados.
-👨‍💻 Dueño: 𝐂𝐡𝐨𝐥𝐨 𝐡𝐧`;
+> 𝙿𝙰𝙽𝙴𝙻 𝙿𝙰𝚁𝙰 𝙲𝚁𝙴𝙰𝙳𝙾𝚁: 𝙲𝙷𝙾𝙻𝙸𝚃𝙾 𝙷𝙽 📈`;
 
     await sock.sendMessage2(
       chatId,
@@ -3848,8 +3841,8 @@ case 'menuowner': {
       msg
     );
   }
-  break;
-}
+  break;  
+   
         
 case 'menurpg': {
   try {
