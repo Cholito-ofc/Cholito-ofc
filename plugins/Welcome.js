@@ -2,32 +2,31 @@ const fs = require('fs');
 const path = require('path');
 const fetch = require('node-fetch');
 
-export async function before(m, { conn, participants, groupMetadata }) {
+module.exports = async function before(m, { conn, participants, groupMetadata }) {
   if (!m.messageStubType || !m.isGroup) return;
 
   const chatId = m.chat;
   const userId = m.messageStubParameters?.[0];
-
   if (!userId) return;
 
-  // Leer archivo de funciones activas por grupo
+  // Leer configuración de activos.json
   const activosPath = path.resolve('./activos.json');
   const activos = fs.existsSync(activosPath)
     ? JSON.parse(fs.readFileSync(activosPath))
     : {};
-
   const bienvenidaActiva = activos.bienvenida?.[chatId];
   if (!bienvenidaActiva) return;
 
-  // Obtener imagen de perfil o usar default
+  // Obtener imagen de perfil o usar una por defecto
   const pp = await conn.profilePictureUrl(userId, 'image').catch(_ => 'https://qu.ax/jYQH.jpg');
   const buffer = await (await fetch(pp)).buffer();
+
   const userTag = `@${userId.split('@')[0]}`;
   const groupName = groupMetadata.subject;
   const desc = groupMetadata.desc || 'sin descripción';
   const chat = global.db.data.chats[chatId] || {};
 
-  // Mensaje de bienvenida (agregado)
+  // Bienvenida
   if (m.messageStubType === 27) {
     let text = chat.sWelcome
       ? chat.sWelcome
@@ -43,7 +42,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
     });
   }
 
-  // Mensaje de despedida (salió)
+  // Salida voluntaria
   if (m.messageStubType === 28) {
     let text = chat.sBye
       ? chat.sBye
@@ -59,7 +58,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
     });
   }
 
-  // Mensaje cuando es expulsado
+  // Expulsado
   if (m.messageStubType === 32) {
     let text = chat.sBye
       ? chat.sBye
@@ -74,4 +73,4 @@ export async function before(m, { conn, participants, groupMetadata }) {
       mentions: [userId]
     });
   }
-}
+};
