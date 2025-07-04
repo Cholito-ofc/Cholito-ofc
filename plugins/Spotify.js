@@ -65,7 +65,7 @@ const handler = async (msg, { conn, args, command, usedPrefix }) => {
   }
 };
 
-handler.help = ['spotify <nombre>'];
+handler.help = ['spotify2 <nombre>'];
 handler.tags = ['descargas'];
 handler.command = /^spotify$/i;
 handler.register = true;
