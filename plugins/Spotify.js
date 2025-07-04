@@ -1,16 +1,19 @@
 const fetch = require('node-fetch');
 
-const handler = async (msg, { conn, args, command, usedPrefix }) => {
-  const text = args.join(" ");
-  const emoji = '🎧';
+const handler = async (msg, { conn, args }) => {
+  const chatId = msg.key.remoteJid;
+  const text = args.join(" ").trim();
+
+  // Reaccionar al comando
+  await conn.sendMessage(chatId, { react: { text: '🎵', key: msg.key } });
 
   if (!text) {
-    return conn.sendMessage(msg.chat, {
-      text: `╭─⬣「 *KilluaBot Spotify* 」⬣
-│ ≡◦ ${emoji} *Uso correcto:*
-│ ≡◦ ${usedPrefix + command} <nombre de canción>
-│ ≡◦ Ejemplo: *${usedPrefix + command} shakira - waka waka*
-╰─⬣`,
+    return conn.sendMessage(chatId, {
+      text:
+        `╭─⬣「 *KilluaBot* 」⬣\n` +
+        `│ ≡◦ 🎧 *Uso correcto del comando:*\n` +
+        `│ ≡◦ .play Anuel perfecto\n` +
+        `╰─⬣\n> © ⍴᥆ᥕᥱrᥱძ ᑲᥡ һᥒ ᥴһ᥆ᥣі𝗍᥆`
     }, { quoted: msg });
   }
 
@@ -19,55 +22,49 @@ const handler = async (msg, { conn, args, command, usedPrefix }) => {
     const json = await res.json();
 
     if (!json.status || !json.result?.downloadUrl) {
-      return conn.sendMessage(msg.chat, {
-        text: `╭─⬣「 *KilluaBot Spotify* 」⬣
-│ ≡◦ ❌ *No se encontró ningún resultado para:* ${text}
-╰─⬣`,
+      return conn.sendMessage(chatId, {
+        text:
+          `╭─⬣「 *Barboza AI* 」⬣\n` +
+          `│ ≡◦ ❌ *No se encontró resultado para:* ${text}\n` +
+          `╰─⬣`
       }, { quoted: msg });
     }
 
-    const { title, artist, duration, cover, url } = json.result.metadata || {};
+    const { title, artist, duration, cover, url } = json.result.metadata;
     const audio = json.result.downloadUrl;
 
-    if (!title || !audio) {
-      return conn.sendMessage(msg.chat, {
-        text: `❌ *Error inesperado: datos incompletos recibidos.*`,
-      }, { quoted: msg });
-    }
-
-    // Enviar portada con información
-    await conn.sendMessage(msg.chat, {
-      image: { url: cover },
-      caption: `╭─⬣「 *MÚSICA ENCONTRADA* 」⬣
-│ ≡◦ 🎵 *Título:* ${title}
-│ ≡◦ 👤 *Artista:* ${artist}
-│ ≡◦ ⏱️ *Duración:* ${duration}
-│ ≡◦ 🌐 *Spotify:* ${url}
-╰─⬣`,
+    // Enviar imagen con detalles y la portada ORIGINAL
+    await conn.sendMessage(chatId, {
+      image: { url: cover }, // ← AQUÍ VA LA PORTADA ORIGINAL
+      caption:
+        `╭─⬣「 *KILLUA-BOT SPOTIFY* 」⬣\n` +
+        `│ ≡◦ 🎵 *Título:* ${title}\n` +
+        `│ ≡◦ 👤 *Artista:* ${artist}\n` +
+        `│ ≡◦ ⏱️ *Duración:* ${duration}\n` +
+        `╰─⬣`
     }, { quoted: msg });
 
-    // Enviar audio
-    await conn.sendMessage(msg.chat, {
+    // Enviar el archivo de audio
+    await conn.sendMessage(chatId, {
       audio: { url: audio },
       mimetype: 'audio/mp4',
-      fileName: `${title}.mp3`,
-      ptt: false
+      ptt: false,
+      fileName: `${title}.mp3`
     }, { quoted: msg });
 
   } catch (e) {
-    console.error('[❌ ERROR SPOTIFY]', e);
-    return conn.sendMessage(msg.chat, {
-      text: `╭─⬣「 *KilluaBot Spotify* 」⬣
-│ ≡◦ ⚠️ *Error al procesar tu solicitud.*
-│ ≡◦ Verifica el nombre de la canción o intenta más tarde.
-╰─⬣`,
+    console.error(e);
+    return conn.sendMessage(chatId, {
+      text:
+        `╭─⬣「 *KilluaBot* 」⬣\n` +
+        `│ ≡◦ ⚠️ *Error al procesar la solicitud.*\n` +
+        `│ ≡◦ Intenta nuevamente más tarde.\n` +
+        `╰─⬣`
     }, { quoted: msg });
   }
 };
 
-handler.help = ['spotify2 <nombre>'];
-handler.tags = ['descargas'];
-handler.command = /^spotify$/i;
-handler.register = true;
-
+handler.command = ["rolita"];
+handler.tags = ["descargas"];
+handler.help = ["spotify <nombre>"];
 module.exports = handler;
