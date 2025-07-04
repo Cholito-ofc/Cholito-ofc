@@ -145,7 +145,7 @@ const handler = async (msg, { conn, args }) => {
 
   // ... (todo tu código igual que lo mandaste arriba, hasta aquí)
 
-  const logo = await loadImage('https://cdn.russellxz.click/6ee56f81.jpeg');
+  const logo = await loadImage('https://cdn.russellxz.click/a806b10a.png');
 const logoWidth = 140;
 const logoHeight = 140;
 const x = canvas.width - logoWidth - 40;
