@@ -1,8 +1,6 @@
 <!-- Borde superior animado -->
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=150&section=header&text=Bienvenido%20a%20mi%20perfil&fontSize=30&fontColor=FFFFFF&animation=fadeIn" width="100%"/>
-
 <div style="border: 10px solid; border-image: linear-gradient(to bottom, #FF7F50, #FF4500); border-image-slice: 1;">
-<!-- Borde inferior animado -->
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=150&section=footer" width="100%"/>
 
 ### BIENVENIDO A MI PERFIL 👋
