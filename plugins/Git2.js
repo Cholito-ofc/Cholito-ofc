@@ -4,7 +4,7 @@ const path = require('path')
 // Lista de números owners permitidos (agrega los que quieras)
 const owners = [
   '50489513153', // Owner 1
-  '31375424024748', // Owner 2
+  '50489115621', // Owner 2
 ]
 
 const handler = async (msg, { conn, args }) => {
