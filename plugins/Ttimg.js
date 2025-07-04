@@ -7,7 +7,7 @@ const handler = async (m, { conn, text, command }) => {
     const fake = { quoted: m };
 
     if (!text) {
-        return await conn.reply(m.chat, `${emoji} Ingresa el enlace del TikTok que contiene imágenes.`, m);
+        return await conn.sendMessage(m.chat, { text: `${emoji} Ingresa el enlace del TikTok que contiene imágenes.` }, { quoted: m });
     }
 
     const creator = 'KilluaBot';
@@ -31,7 +31,7 @@ const handler = async (m, { conn, text, command }) => {
     };
 
     try {
-        await m.react?.('🔍');
+        if (typeof m.react === 'function') await m.react('🔍');
 
         let imagenes = await obtenerImagenes(mainUrl);
         if (imagenes.length === 0) {
@@ -39,23 +39,24 @@ const handler = async (m, { conn, text, command }) => {
         }
 
         if (imagenes.length === 0) {
-            return await conn.reply(m.chat, `${emoji2} No se encontraron imágenes en el enlace proporcionado.`, m);
+            return await conn.sendMessage(m.chat, { text: `${emoji2} No se encontraron imágenes en el enlace proporcionado.` }, { quoted: m });
         }
 
-        await m.react?.('🕓');
+        if (typeof m.react === 'function') await m.react('🕓');
+
         for (let img of imagenes) {
             try {
                 await conn.sendFile(m.chat, img, '', `🖼️ Imagen descargada por *${creator}*.`, m, null, fake);
-                await m.react?.('✅');
+                if (typeof m.react === 'function') await m.react('✅');
             } catch (err) {
                 console.error('Error enviando imagen:', err);
-                await m.react?.('✖️');
+                if (typeof m.react === 'function') await m.react('✖️');
             }
         }
     } catch (err) {
         console.error('Error general:', err);
-        await conn.reply(m.chat, `${emoji2} Ocurrió un error al intentar procesar el enlace.`, m);
-        await m.react?.('✖️');
+        await conn.sendMessage(m.chat, { text: `${emoji2} Ocurrió un error al intentar procesar el enlace.` }, { quoted: m });
+        if (typeof m.react === 'function') await m.react('✖️');
     }
 };
 
