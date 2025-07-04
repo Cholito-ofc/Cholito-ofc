@@ -407,21 +407,21 @@ if (update.action === "add" && welcomeActivo) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
 
+    const axios = require("axios");
     let profilePicBuffer;
+
     try {
       const profilePicUrl = await sock.profilePictureUrl(participant, "image");
-      const axios = require("axios");
       const res = await axios.get(profilePicUrl, { responseType: "arraybuffer" });
       profilePicBuffer = res.data;
     } catch (err) {
-      const axios = require("axios");
+      console.log("⚠️ No se pudo obtener la imagen de perfil, usando imagen por defecto");
       const res = await axios.get("https://cdn.russellxz.click/d9d547b6.jpeg", { responseType: "arraybuffer" });
       profilePicBuffer = res.data;
     }
 
     let textoFinal = "";
     if (customMessage) {
-      // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio
       if (/(@user)/gi.test(customMessage)) {
         textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${customMessage.replace(/@user/gi, mention)}`;
       } else {
@@ -431,13 +431,16 @@ if (update.action === "add" && welcomeActivo) {
       let groupDesc = "";
       try {
         const metadata = await sock.groupMetadata(update.id);
-        groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
-      } catch (err) {
+        groupDesc = metadata.desc
+          ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}`
+          : "\n\n📜 *Este grupo no tiene descripción.*";
+      } catch {
         groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
       }
       textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}${groupDesc}`;
     }
 
+    console.log("✅ Enviando bienvenida a:", participant);
     await sock.sendMessage(update.id, {
       image: { jpegThumbnail: profilePicBuffer },
       caption: textoFinal,
