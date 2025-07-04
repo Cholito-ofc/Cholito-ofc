@@ -26,10 +26,16 @@ const handler = async (msg, { conn, args, command, usedPrefix }) => {
       }, { quoted: msg });
     }
 
-    const { title, artist, duration, cover, url } = json.result.metadata;
+    const { title, artist, duration, cover, url } = json.result.metadata || {};
     const audio = json.result.downloadUrl;
 
-    // Enviar portada con detalles
+    if (!title || !audio) {
+      return conn.sendMessage(msg.chat, {
+        text: `❌ *Error inesperado: datos incompletos recibidos.*`,
+      }, { quoted: msg });
+    }
+
+    // Enviar portada con información
     await conn.sendMessage(msg.chat, {
       image: { url: cover },
       caption: `╭─⬣「 *MÚSICA ENCONTRADA* 」⬣
@@ -44,22 +50,22 @@ const handler = async (msg, { conn, args, command, usedPrefix }) => {
     await conn.sendMessage(msg.chat, {
       audio: { url: audio },
       mimetype: 'audio/mp4',
-      ptt: false,
-      fileName: `${title}.mp3`
+      fileName: `${title}.mp3`,
+      ptt: false
     }, { quoted: msg });
 
   } catch (e) {
-    console.error(e);
+    console.error('[❌ ERROR SPOTIFY]', e);
     return conn.sendMessage(msg.chat, {
       text: `╭─⬣「 *KilluaBot Spotify* 」⬣
 │ ≡◦ ⚠️ *Error al procesar tu solicitud.*
-│ ≡◦ Intenta nuevamente más tarde.
+│ ≡◦ Verifica el nombre de la canción o intenta más tarde.
 ╰─⬣`,
     }, { quoted: msg });
   }
 };
 
-handler.help = ['rolita <nombre>'];
+handler.help = ['spotify <nombre>'];
 handler.tags = ['descargas'];
 handler.command = /^spotify$/i;
 handler.register = true;
