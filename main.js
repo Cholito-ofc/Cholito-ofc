@@ -14094,7 +14094,7 @@ case 'info':
 │ 📌 Usa *${global.prefix}menu* para comandos principales
 │ 📌 Usa *${global.prefix}allmenu* para todos los comandos
 │ 📌 Usa *${global.prefix}menuaudio* para multimedia y guardado
-╰───────────────────────────╯`;
+╰────────────────────────╯`;
 
     await sock.sendMessage(msg.key.remoteJid,
       {
@@ -14116,7 +14116,7 @@ case 'info':
         
 case "ping":
     try {
-        const start = Date.now();
+        const start = Date.now(); // Marca de inicio para calcular el ping
         const now = new Date();
         const options = { 
             weekday: "long", 
@@ -14135,7 +14135,7 @@ case "ping":
         const uptimeHours = Math.floor((uptime % 86400) / 3600);
         const uptimeMinutes = Math.floor((uptime % 3600) / 60);
         const uptimeSeconds = Math.floor(uptime % 60);
-        const uptimeFormatted = `${uptimeDays}d ${uptimeHours}h ${uptimeMinutes}m ${uptimeSeconds}s`;
+        const uptimeFormatted = `${uptimeDays} días, ${uptimeHours}h ${uptimeMinutes}m ${uptimeSeconds}s`;
 
         const freeMem = os.freemem();
         const totalMem = os.totalmem();
@@ -14149,41 +14149,32 @@ case "ping":
         const loadAvg = os.loadavg()[0].toFixed(2);
         const diskUsage = execSync("df -h / | awk 'NR==2 {print $3 \" / \" $2}'").toString().trim();
 
-        // React con emoji para mostrar que está activo
         await sock.sendMessage(msg.key.remoteJid, {
             react: {
-                text: "✅",
+                text: "⚙️",
                 key: msg.key
             }
         });
 
-        const ping = Date.now() - start;
+        const ping = Date.now() - start; // Cálculo de ping real
 
-        const captionText = 
-`*𝖪𝖨𝖫𝖫𝖴𝖠 𝖡𝖮𝖳 𝖠𝖢𝖳𝖨𝖵𝖮 ⚡*
-
-📡 Ping: ${ping} ms  
-📅 Fecha actual: \`\`\`${fechaActual}\`\`\`
-
-⏳ Tiempo encendido: ${uptimeFormatted}
-
-💻 Servidor:  
-CPU: ${cpuModel} (${numCores} cores)  
-Load avg: ${loadAvg}
-
-💾 RAM:  
-Usada: ${usedMemGB} GB  
-Libre: ${freeMemGB} GB  
-Total: ${totalMemGB} GB
-
-💽 Disco: ${diskUsage}
-
-🌐 Sky Ultra Plus`;
-
-        // Envío de la imagen con el texto formateado
         await sock.sendMessage(msg.key.remoteJid, {
             image: { url: "https://cdn.russellxz.click/38ab049d.jpeg" }, 
-            caption: captionText,
+            caption: `✅ *𝖪𝖨𝖫𝖫𝖴𝖠 𝖡𝖮𝖳 𝖠𝖢𝖳𝖨𝖵𝖮 ⚡*\n\n` +
+                     `📡 *𝖯𝖨𝖭𝖦:* ${ping} ms\n` +
+                     `📅 *𝖥𝖤𝖢𝖧𝖠:* \`\`\`${fechaActual}\`\`\`\n\n` +
+                     `🕒 *𝖳𝖨𝖤𝖬𝖯𝖮 𝖠𝖢𝖳𝖨𝖵𝖮:* ${uptimeFormatted}\n\n` +
+                     `💻 *𝑰𝑵𝑭𝑶𝑹𝑴𝑨𝑪𝑰𝑶́𝑵 𝑫𝑬𝑳 𝑺𝑬𝑹𝑽𝑰𝑫𝑶𝑹:*\n` +
+                     `•  *𝖢𝖯𝖴:* ${cpuModel}\n` +
+                     `•  *𝖭𝖴𝖢𝖫𝖤𝖮𝖲:* ${numCores}\n` +
+                     `•  *𝖢𝖠𝖱𝖦𝖠 𝖣𝖤𝖫 𝖲𝖨𝖲𝖳𝖤𝖬𝖠:* ${loadAvg}\n\n` +
+                     `🖥️ *𝖬𝖤𝖬𝖮𝖱𝖨𝖠 𝖱𝖠𝖬:*\n` +
+                     `•  *𝖴𝖲𝖠𝖣𝖠:* ${usedMemGB}GB\n` +
+                     `•  *𝖫𝖨𝖡𝖱𝖤:* ${freeMemGB}GB\n` +
+                     `•  *𝖳𝖮𝖳𝖠𝖫:* ${totalMemGB}GB\n\n` +
+                     `💽 *𝖣𝖨𝖲𝖢𝖮:* ${diskUsage}\n\n` +
+                     `🌐 *𝖠𝖫𝖮𝖩𝖠𝖣𝖮 𝖤𝖭:* *Sky Ultra Plus* 🚀\n` +
+                     `📌 *𝖯𝗋𝗈𝗏𝖾𝖾𝖽𝗈𝗋𝖾 𝖽𝖾 𝖧𝗈𝗌𝗍𝗂𝗇𝗀 𝖽𝖾 𝖢𝗈𝗇𝖿𝗂́𝖺𝗇𝗓𝖺*`,
             quoted: msg
         });
 
@@ -14194,7 +14185,7 @@ Total: ${totalMemGB} GB
             quoted: msg
         });
     }
-    break;
+    break;    
             
 case "get": {
     try {
