@@ -406,21 +406,28 @@ if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
     const customMessage = customWelcomes[update.id];
-    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
+
+    let profilePicBuffer;
     try {
-      profilePicUrl = await sock.profilePictureUrl(participant, "image");
-    } catch (err) {}
+      const profilePicUrl = await sock.profilePictureUrl(participant, "image");
+      const axios = require("axios");
+      const res = await axios.get(profilePicUrl, { responseType: "arraybuffer" });
+      profilePicBuffer = res.data;
+    } catch (err) {
+      const axios = require("axios");
+      const res = await axios.get("https://cdn.russellxz.click/d9d547b6.jpeg", { responseType: "arraybuffer" });
+      profilePicBuffer = res.data;
+    }
 
     let textoFinal = "";
     if (customMessage) {
-      // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio, siempre con manito y salto de línea
+      // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio
       if (/(@user)/gi.test(customMessage)) {
         textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${customMessage.replace(/@user/gi, mention)}`;
       } else {
         textoFinal = `𝑩𝒊𝒆𝒏𝒗𝒆𝒏𝒊𝒅𝒐/𝒂 👋🏻 ${mention}\n\n${customMessage}`;
       }
     } else {
-      // Si no hay mensaje personalizado, solo manda la descripción del grupo
       let groupDesc = "";
       try {
         const metadata = await sock.groupMetadata(update.id);
@@ -432,9 +439,9 @@ if (update.action === "add" && welcomeActivo) {
     }
 
     await sock.sendMessage(update.id, {
-      image: { url: profilePicUrl },
+      image: { jpegThumbnail: profilePicBuffer },
       caption: textoFinal,
-      mentions: [participant] // SIEMPRE etiqueta al usuario
+      mentions: [participant]
     });
   }
 }
