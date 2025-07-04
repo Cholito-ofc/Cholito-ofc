@@ -3930,8 +3930,9 @@ case 'menurpg': {
 case 'menú': 
 case 'menu': {
   try {
+    // 🔄 Reacción al iniciar el comando
     await sock.sendMessage(msg.key.remoteJid, {
-      react: { text: "📜", key: msg.key }
+      react: { text: "📈", key: msg.key }
     });
 
     const chatId = msg.key.remoteJid;
@@ -4105,6 +4106,7 @@ case 'menu': {
 ┃➜ ${global.prefix}pack3
 ┃➜ ${global.prefix}videoxxx
 ┃➜ ${global.prefix}videoxxxlesbi
+┃➜ ${global.prefix}porno
 ┃➜ ${global.prefix}pornololi
 ┃➜ ${global.prefix}nsfwneko
 ┃➜ ${global.prefix}waifu
@@ -4117,13 +4119,18 @@ case 'menu': {
     await sock.sendMessage2(
       chatId,
       {
-        video: { url: "https://cdn.russellxz.click/ada18622.mp4" }, // Puedes cambiar este enlace por tu propio GIF
+        video: { url: "https://cdn.russellxz.click/ada18622.mp4" },
         caption: captionText,
         gifPlayback: true,
         mentions: [senderId, ownerMention]
       },
       msg
     );
+
+    // ✅ Reacción al finalizar
+    await sock.sendMessage(msg.key.remoteJid, {
+      react: { text: "✅", key: msg.key }
+    });
 
   } catch (error) {
     console.error("❌ Error en comando menu:", error);
@@ -4139,7 +4146,7 @@ case 'menu': {
 case 'menugrupo': {
   try {
     await sock.sendMessage(msg.key.remoteJid, {
-      react: { text: "📜", key: msg.key }
+      react: { text: "⚡", key: msg.key }
     });
 
     const chatId = msg.key.remoteJid;
@@ -4201,11 +4208,7 @@ case 'menugrupo': {
 ┃➣ ${global.prefix}𝘢𝘥𝘥
 ┗━━━━━━━✦━━━━━━━━☪︎
 
-📌 𝐌Á𝐒 𝐂𝐎𝐌𝐀𝐍𝐃𝐎𝐒 𝐏𝐑Ó𝐗𝐈𝐌𝐀𝐌𝐄𝐍𝐓𝐄...
-
-╭─❍ 𝐊𝐈𝐋𝐋𝐔𝐀-𝐁𝐎𝐓 𝟐.𝟎 ❍─╮  
-│ 𝗕𝗼𝘁 𝗮𝗱𝗮𝗽𝘁𝗮𝗱𝗼 𝗽𝗮𝗿𝗮 𝘁𝘂́ 𝗴𝗿𝘂𝗽𝗼.
-╰──────────────────╯`;
+> *𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 𝚆𝙷𝙰𝚃𝚂𝙰𝙿𝙿 📈*`;
 
     await sock.sendMessage2(
       chatId,
@@ -5091,7 +5094,7 @@ case 'todos': {
     finalMsg += `*╰━━━━━━━⋆★⋆━━━━━━━⬣*\n\n`;
     finalMsg += `📲 *Etiquetando a todos los miembros...*\n\n`;
     finalMsg += mentionList;
-    finalMsg += `\n╰─[ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖶𝗁𝖺𝗍𝗌𝖠𝗉𝗉 ⚡]─`;
+    finalMsg += `\n\n╰─[ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖶𝗁𝖺𝗍𝗌𝖠𝗉𝗉 ⚡]─`;
 
     const mentionIds = participants.map(p => p.id);
 
