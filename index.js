@@ -1433,8 +1433,8 @@ try {
     console.error("❌ Error en messages.upsert:", error);
   }
 });
-            
-            
+
+
             sock.ev.on("connection.update", async (update) => {
     const { connection } = update;
 
