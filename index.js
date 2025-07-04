@@ -875,7 +875,8 @@ if (msg.message?.protocolMessage?.type === 0) {
     console.error("❌ Error en lógica antidelete:", err);
   }
 }
-// === FIN DETECCIÓN DE MENSAJE ELIMINADO ===    
+// === FIN DETECCIÓN DE MENSAJE ELIMINADO ===  
+  
 // === LÓGICA DE RESPUESTA AUTOMÁTICA CON PALABRA CLAVE ===
 try {
   const guarPath = path.resolve('./guar.json');
