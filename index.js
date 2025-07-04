@@ -463,6 +463,7 @@ if (update.action === "add" && welcomeActivo) {
 if (update.action === "remove" && despedidasActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
+
     // Carga el mensaje personalizado desde el archivo byemsgs.json
     let customBye = "";
     try {
@@ -477,18 +478,34 @@ if (update.action === "remove" && despedidasActivo) {
       profilePicUrl = await sock.profilePictureUrl(participant, "image");
     } catch (err) {}
 
-    // Mensaje predeterminado con cuadritos
-    const defaultBye = `╔═══════════════════\n║  👋  Hasta pronto, ${mention}!\n║  Esperamos verte de nuevo en el grupo.\n╚═══════════════════`;
+    let groupName = "";
+    try {
+      const metadata = await sock.groupMetadata(update.id);
+      groupName = metadata.subject || "Grupo desconocido";
+    } catch (err) {
+      groupName = "Grupo desconocido";
+    }
 
-    // Usa el personalizado si existe, si no el predeterminado
-    let byeText;
+    let byeText = "";
+
     if (customBye) {
-      // Si el mensaje personalizado tiene @user, lo reemplaza; si no, añade la mención al inicio
-      byeText = /@user/gi.test(customBye)
-        ? customBye.replace(/@user/gi, mention)
-        : `${mention} ${customBye}`;
+      if (/(@user)/gi.test(customBye)) {
+        byeText = `*╭━─━──────━─━╮*\n*╰╮»* 𝗛𝗔𝗦𝗧𝗔 𝗟𝗨𝗘𝗚𝗢\n*╭━─━──────━─━╯*\n` +
+                  `*┊»* 👤𝑼𝒔𝒖𝒂𝒓𝒊𝒐: ${customBye.replace(/@user/gi, mention)}\n` +
+                  `*┊»* 👥𝑮𝒓𝒖𝒑𝒐: ${groupName}\n` +
+                  `*╰┈┈┈┈┈┈┈┈┈┈┈┈≫*`;
+      } else {
+        byeText = `*╭━─━──────━─━╮*\n*╰╮»* 𝗛𝗔𝗦𝗧𝗔 𝗟𝗨𝗘𝗚𝗢\n*╭━─━──────━─━╯*\n` +
+                  `*┊»* 👤𝑼𝒔𝒖𝒂𝒓𝒊𝒐: ${mention}\n` +
+                  `*┊»* 👥𝑮𝒓𝒖𝒑𝒐: ${groupName}\n` +
+                  `*╰┈┈┈┈┈┈┈┈┈┈┈┈≫*\n\n${customBye}`;
+      }
     } else {
-      byeText = defaultBye;
+      byeText = `*╭━─━──────━─━╮*\n*╰╮»* 𝗦𝗘 𝗙𝗨𝗘 👋🏻\n*╭━─━──────━─━╯*\n` +
+                `*┊»* 👤𝑼𝒔𝒖𝒂𝒓𝒊𝒐: ${mention}\n` +
+                `*┊»* 👥𝑮𝒓𝒖𝒑𝒐: ${groupName}\n` +
+                `*╰┈┈┈┈┈┈┈┈┈┈┈┈≫*\n` +
+                `👋 ¡ᴇsᴘᴇʀᴀᴍᴏs ǫᴜᴇ́ ɴᴏ ᴠᴜᴇʟᴠᴀs ɴᴜɴᴄᴀ!`;
     }
 
     await sock.sendMessage(update.id, {
