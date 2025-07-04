@@ -1,71 +1,61 @@
 const fs = require('fs')
 const path = require('path')
 
-// Lista de números owners permitidos
-const owners = [
-  '50489513153', // Owner 1
-  '50489115621', // Owner 2
-]
+// Lista de owners válidos
+const owners = ['50489513153', '50489115621']
 
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid
   const sender = msg.key.participant || msg.key.remoteJid || ''
   const senderNum = sender.replace(/[^0-9]/g, '')
-  const isBotMessage = sender.startsWith('lid_') // detecta si es el bot
+  const isBotMessage = sender.startsWith('lid_')
 
-  // Validación de acceso
+  // Validar permisos
   if (!owners.includes(senderNum) && !isBotMessage) {
-  console.log('[DEBUG] Bloqueado por seguridad, senderNum:', senderNum)
-  return conn.sendMessage(chatId, {
-    text: '❌ Solo los OWNER autorizados pueden usar este comando.'
-  }, { quoted: msg })
-}
+    return conn.sendMessage(chatId, {
+      text: '❌ Solo el OWNER puede usar este comando.'
+    }, { quoted: msg })
+  }
 
-  // Verificar que haya argumento
+  // Validar argumento
   if (!args[0]) {
     return conn.sendMessage(chatId, {
-      text: '✍️ Uso correcto: .git2 nombre_del_plugin (sin .js)\nEjemplo: .git2 play'
+      text: '⚠️ Debes especificar el nombre de un comando.\nEjemplo: .gitcase rest'
     }, { quoted: msg })
   }
 
-  // Ruta segura
-  let inputPath = args.join(' ').trim()
-  inputPath = inputPath.replace(/(\.\.(\/|\\))/g, '') // evita ../ inyecciones
+  const commandName = args[0].toLowerCase()
+  const mainFilePath = path.join(__dirname, '..', 'main.js') // Ruta relativa al main.js
 
-  const basePath = path.join(__dirname, 'plugins')
-  const filePath = path.join(basePath, inputPath + '.js')
-
-  if (!filePath.startsWith(basePath)) {
+  if (!fs.existsSync(mainFilePath)) {
     return conn.sendMessage(chatId, {
-      text: '❌ Ruta inválida o fuera de la carpeta plugins.'
-    }, { quoted: msg })
-  }
-
-  if (!fs.existsSync(filePath)) {
-    return conn.sendMessage(chatId, {
-      text: `❌ No se encontró el archivo: plugins/${inputPath}.js`
+      text: '❌ No se encontró el archivo *main.js*'
     }, { quoted: msg })
   }
 
   try {
-    const code = fs.readFileSync(filePath, 'utf-8')
+    const content = fs.readFileSync(mainFilePath, 'utf-8')
+    const regex = new RegExp(`case\\s+['"\`]${commandName}['"\`]\\s*:\\s*([\\s\\S]*?)\\bbreak;`)
+    const match = content.match(regex)
 
-    if (code.length > 4000) {
+    if (!match) {
       return conn.sendMessage(chatId, {
-        text: '⚠️ Archivo muy grande para enviar completo.'
+        text: `❌ No se encontró el comando *${commandName}* dentro de main.js`
       }, { quoted: msg })
     }
 
-    await conn.sendMessage(chatId, {
-      text: `📂 Código del plugin: plugins/${inputPath}.js\n\n\`\`\`js\n${code}\n\`\`\`\n✅ Fin del archivo.`
+    const result = `📂 *Código del comando "${commandName}":*\n\n\`\`\`js\ncase '${commandName}': {\n${match[1].trim()}\n  break;\n}\n\`\`\``
+
+    return conn.sendMessage(chatId, {
+      text: result.length > 4000 ? '⚠️ El bloque es demasiado largo para mostrarlo completo.' : result
     }, { quoted: msg })
 
   } catch (e) {
-    conn.sendMessage(chatId, {
-      text: `❌ Error al leer archivo:\n${e.message}`
+    return conn.sendMessage(chatId, {
+      text: `❌ Error al leer el archivo:\n${e.message}`
     }, { quoted: msg })
   }
 }
 
-handler.command = ['git2']
+handler.command = ['gitcase']
 module.exports = handler
