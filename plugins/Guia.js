@@ -51,7 +51,7 @@ const handler = async (msg, { conn }) => {
 🔗 Elimina tu mensaje de despedida personalizado.
 ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 
-⚙️${global.prefix}𝙍𝙚𝙥𝙤𝙧𝙩
+⚙️${global.prefix}𝙍𝙚𝙥𝙤𝙧𝙩𝙚
 🔗 Reporta errores o problemas al creador.
 ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 
