@@ -1,10 +1,22 @@
 const fs = require('fs')
 const path = require('path')
 
-const handler = async (msg, { conn, args, isOwner }) => {
-  const chatId = msg.key.remoteJid  // <-- usa remoteJid aquí
+// Lista de números owners permitidos (agrega los que quieras)
+const owners = [
+  '50489513153', // Owner 1
+  '31375424024748', // Owner 2
+]
 
-  if (!isOwner) return conn.sendMessage(chatId, { text: '❌ Solo el OWNER puede usar este comando.' }, { quoted: msg })
+const handler = async (msg, { conn, args }) => {
+  const chatId = msg.key.remoteJid
+  const sender = msg.key.participant || msg.key.remoteJid || ''
+  // Extraemos solo números para comparar
+  const senderNum = sender.replace(/[^0-9]/g, '')
+
+  if (!owners.includes(senderNum)) {
+    return conn.sendMessage(chatId, { text: '❌ Solo los OWNER autorizados pueden usar este comando.' }, { quoted: msg })
+  }
+
   if (!args[0]) return conn.sendMessage(chatId, { text: '✍️ Uso: .git2 nombre_del_plugin (sin .js)' }, { quoted: msg })
 
   let inputPath = args.join(' ').trim()
@@ -38,6 +50,5 @@ const handler = async (msg, { conn, args, isOwner }) => {
 }
 
 handler.command = ['git2']
-handler.owner = true
 
 module.exports = handler
