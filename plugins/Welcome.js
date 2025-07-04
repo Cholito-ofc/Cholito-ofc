@@ -2,32 +2,43 @@ const fs = require('fs');
 const path = require('path');
 const fetch = require('node-fetch');
 
-module.exports = async function before(m, { conn, participants, groupMetadata }) {
-  if (!m.messageStubType || !m.isGroup) return;
+module.exports = {
+  name: ['bienvenida'],
+  alias: [],
+  tags: ['group'],
+  command: ['bienvenida'],
+  group: true,
+  admin: true,
+  botAdmin: false,
 
-  const chatId = m.chat;
-  const userId = m.messageStubParameters?.[0];
-  if (!userId) return;
+  run: async (msg, { conn, args, participants, groupMetadata }) => {
+    const chatId = msg.chat;
 
-  // Leer configuración de activos.json
-  const activosPath = path.resolve('./activos.json');
-  const activos = fs.existsSync(activosPath)
-    ? JSON.parse(fs.readFileSync(activosPath))
-    : {};
-  const bienvenidaActiva = activos.bienvenida?.[chatId];
-  if (!bienvenidaActiva) return;
+    // Leer activos.json
+    const activosPath = path.resolve('./activos.json');
+    const activos = fs.existsSync(activosPath)
+      ? JSON.parse(fs.readFileSync(activosPath))
+      : {};
 
-  // Obtener imagen de perfil o usar una por defecto
-  const pp = await conn.profilePictureUrl(userId, 'image').catch(_ => 'https://qu.ax/jYQH.jpg');
-  const buffer = await (await fetch(pp)).buffer();
+    const bienvenidaActiva = activos.bienvenida?.[chatId];
+    if (!bienvenidaActiva) {
+      return await conn.sendMessage(chatId, {
+        text: '❌ La bienvenida está desactivada. Usa *.enable bienvenida* para activarla.'
+      }, { quoted: msg });
+    }
 
-  const userTag = `@${userId.split('@')[0]}`;
-  const groupName = groupMetadata.subject;
-  const desc = groupMetadata.desc || 'sin descripción';
-  const chat = global.db.data.chats[chatId] || {};
+    // Elegir usuario simulado (quien ejecutó el comando)
+    const userId = msg.participant || msg.key.participant || msg.key.remoteJid;
+    const userTag = `@${userId.split('@')[0]}`;
+    const groupName = groupMetadata.subject;
+    const desc = groupMetadata.desc || 'sin descripción';
+    const chat = global.db.data.chats[chatId] || {};
 
-  // Bienvenida
-  if (m.messageStubType === 27) {
+    // Obtener imagen del usuario
+    const pp = await conn.profilePictureUrl(userId, 'image').catch(() => 'https://qu.ax/jYQH.jpg');
+    const buffer = await (await fetch(pp)).buffer();
+
+    // Construir mensaje
     let text = chat.sWelcome
       ? chat.sWelcome
           .replace(/@user/g, userTag)
@@ -39,38 +50,6 @@ module.exports = async function before(m, { conn, participants, groupMetadata })
       image: buffer,
       caption: text,
       mentions: [userId]
-    });
-  }
-
-  // Salida voluntaria
-  if (m.messageStubType === 28) {
-    let text = chat.sBye
-      ? chat.sBye
-          .replace(/@user/g, userTag)
-          .replace(/@group/g, groupName)
-          .replace(/@desc/g, desc)
-      : `┌─★ 𝑺𝑶𝑭𝑰 - 𝑩𝑶𝑻\n│「 BAYY 👋 」\n└┬★ 「 ${userTag} 」\n   │✑  Lárgate\n   │✑  Jamás te quisimos aquí\n   └───────────────┈ ⳹`;
-
-    await conn.sendMessage(chatId, {
-      image: buffer,
-      caption: text,
-      mentions: [userId]
-    });
-  }
-
-  // Expulsado
-  if (m.messageStubType === 32) {
-    let text = chat.sBye
-      ? chat.sBye
-          .replace(/@user/g, userTag)
-          .replace(/@group/g, groupName)
-          .replace(/@desc/g, desc)
-      : `┌─★ 𝑺𝑶𝑭𝑰 - 𝑩𝑶𝑻\n│「 BAYY 👋 」\n└┬★ 「 ${userTag} 」\n   │✑  Fuiste expulsado\n   │✑  Mejor así 🙄\n   └───────────────┈ ⳹`;
-
-    await conn.sendMessage(chatId, {
-      image: buffer,
-      caption: text,
-      mentions: [userId]
-    });
+    }, { quoted: msg });
   }
 };
