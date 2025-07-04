@@ -1,35 +1,31 @@
 const fs = require('fs')
 const path = require('path')
 
-// Agrega aquí tus números OWNER en formato internacional sin +
-const owners = [
-  '50489513153', // Tu número real
-  '50489115621'  // Otro owner si quieres
-]
-
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid
   const sender = msg.key.participant || msg.key.remoteJid || ''
   const senderNum = sender.replace(/[^0-9]/g, '')
   const isBotMessage = sender.startsWith('lid_')
 
-  // ✅ Verificación Owner o Bot
-  if (!owners.includes(senderNum) && !isBotMessage) {
+  // Validar owner con la función y estructura global.owner
+  function isOwner(num) {
+    return global.owner.some(([number, , active]) => number === num && active)
+  }
+
+  if (!isOwner(senderNum) && !isBotMessage) {
     return conn.sendMessage(chatId, {
       text: '❌ Solo los OWNER autorizados pueden usar este comando.'
     }, { quoted: msg })
   }
 
-  // ✅ Validación de nombre de plugin
   if (!args[0]) {
     return conn.sendMessage(chatId, {
       text: '⚠️ Uso correcto:\n.git2 nombre_del_plugin\nEjemplo: .git2 play'
     }, { quoted: msg })
   }
 
-  // ✅ Seguridad: limpiar y generar ruta del plugin
   let pluginName = args.join(' ').trim()
-  pluginName = pluginName.replace(/[^a-zA-Z0-9/_-]/g, '') // solo nombre válido
+  pluginName = pluginName.replace(/[^a-zA-Z0-9/_-]/g, '') // limpiar nombre válido
   const filePath = path.join(__dirname, pluginName + '.js')
 
   if (!filePath.startsWith(__dirname)) {
