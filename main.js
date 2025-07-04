@@ -4377,11 +4377,14 @@ case 'link': {
     const link = "https://chat.whatsapp.com/" + code;
     const metadata = await sock.groupMetadata(chatId);
 
-    let profilePicUrl;
+    let profilePic;
     try {
-      profilePicUrl = await sock.profilePictureUrl(chatId, 'image');
+      const url = await sock.profilePictureUrl(chatId, 'image');
+      const res = await require("axios").get(url, { responseType: 'arraybuffer' });
+      profilePic = res.data;
     } catch {
-      profilePicUrl = 'https://i.imgur.com/5Qn9vRC.png';
+      const res = await require("axios").get('https://i.imgur.com/5Qn9vRC.png', { responseType: 'arraybuffer' });
+      profilePic = res.data;
     }
 
     await sock.sendMessage(
@@ -4392,7 +4395,7 @@ case 'link': {
           externalAdReply: {
             title: metadata.subject,
             body: "Presiona aquí para unirte",
-            thumbnailUrl: profilePicUrl,
+            thumbnail: profilePic,
             mediaType: 1,
             renderLargerThumbnail: true,
             previewType: "PHOTO",
@@ -4411,6 +4414,7 @@ case 'link': {
   }
   break;
 }
+  
 
 case 'add': {
   try {
