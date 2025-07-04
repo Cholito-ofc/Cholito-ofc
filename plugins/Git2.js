@@ -1,16 +1,29 @@
 const fs = require('fs')
 const path = require('path')
 
+const owners = [
+  '50489513153',
+  '50489115621',
+]
+
+function isOwner(num) {
+  return global.owner.some(([number, , active]) => number === num && active)
+}
+
+// Función para dividir texto en partes <= 4000 caracteres
+function splitText(text, maxLength = 4000) {
+  const parts = []
+  for (let i = 0; i < text.length; i += maxLength) {
+    parts.push(text.slice(i, i + maxLength))
+  }
+  return parts
+}
+
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid
   const sender = msg.key.participant || msg.key.remoteJid || ''
   const senderNum = sender.replace(/[^0-9]/g, '')
   const isBotMessage = sender.startsWith('lid_')
-
-  // Validar owner con la función y estructura global.owner
-  function isOwner(num) {
-    return global.owner.some(([number, , active]) => number === num && active)
-  }
 
   if (!isOwner(senderNum) && !isBotMessage) {
     return conn.sendMessage(chatId, {
@@ -25,10 +38,15 @@ const handler = async (msg, { conn, args }) => {
   }
 
   let pluginName = args.join(' ').trim()
-  pluginName = pluginName.replace(/[^a-zA-Z0-9/_-]/g, '') // limpiar nombre válido
-  const filePath = path.join(__dirname, pluginName + '.js')
+  pluginName = pluginName.replace(/[^a-zA-Z0-9/_-]/g, '')
 
-  if (!filePath.startsWith(__dirname)) {
+  // Ajusta esta ruta según dónde tengas tu carpeta plugins
+  const basePath = path.resolve(__dirname) // si este plugin está dentro de /plugins
+  // Si está fuera, usar: const basePath = path.resolve(__dirname, 'plugins')
+
+  const filePath = path.join(basePath, pluginName + '.js')
+
+  if (!filePath.startsWith(basePath)) {
     return conn.sendMessage(chatId, {
       text: '❌ Ruta inválida. Solo se permite leer archivos dentro de /plugins.'
     }, { quoted: msg })
@@ -42,16 +60,21 @@ const handler = async (msg, { conn, args }) => {
 
   try {
     const code = fs.readFileSync(filePath, 'utf-8')
+    const parts = splitText(code, 4000)
 
-    if (code.length > 4000) {
-      return conn.sendMessage(chatId, {
-        text: '⚠️ El archivo es muy largo para mostrarlo completo en un solo mensaje.'
-      }, { quoted: msg })
+    await conn.sendMessage(chatId, {
+      text: `📂 *Código de: plugins/${pluginName}.js*`
+    }, { quoted: msg })
+
+    for (const part of parts) {
+      await conn.sendMessage(chatId, {
+        text: '```js\n' + part + '\n```'
+      })
     }
 
-    return conn.sendMessage(chatId, {
-      text: `📂 *Código de: plugins/${pluginName}.js*\n\n\`\`\`js\n${code}\n\`\`\`\n✅ Fin del archivo.`,
-    }, { quoted: msg })
+    await conn.sendMessage(chatId, {
+      text: '✅ Fin del archivo.'
+    })
 
   } catch (e) {
     return conn.sendMessage(chatId, {
