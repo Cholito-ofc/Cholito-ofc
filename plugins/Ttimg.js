@@ -6,7 +6,9 @@ const handler = async (m, { conn, text, command }) => {
     const emoji2 = '❌';
     const fake = { quoted: m };
 
-    if (!text) return m.reply(`${emoji} Ingresa el enlace del TikTok que contiene imágenes.`);
+    if (!text) {
+        return await conn.reply(m.chat, `${emoji} Ingresa el enlace del TikTok que contiene imágenes.`, m);
+    }
 
     const creator = 'KilluaBot';
     const mainUrl = `https://dlpanda.com/id?url=${text}&token=G7eRpMaa`;
@@ -29,7 +31,7 @@ const handler = async (m, { conn, text, command }) => {
     };
 
     try {
-        await m.react('🔍');
+        await m.react?.('🔍');
 
         let imagenes = await obtenerImagenes(mainUrl);
         if (imagenes.length === 0) {
@@ -37,23 +39,23 @@ const handler = async (m, { conn, text, command }) => {
         }
 
         if (imagenes.length === 0) {
-            return m.reply(`${emoji2} No se encontraron imágenes en el enlace proporcionado.`);
+            return await conn.reply(m.chat, `${emoji2} No se encontraron imágenes en el enlace proporcionado.`, m);
         }
 
-        await m.react('🕓');
+        await m.react?.('🕓');
         for (let img of imagenes) {
             try {
                 await conn.sendFile(m.chat, img, '', `🖼️ Imagen descargada por *${creator}*.`, m, null, fake);
-                await m.react('✅');
+                await m.react?.('✅');
             } catch (err) {
                 console.error('Error enviando imagen:', err);
-                await m.react('✖️');
+                await m.react?.('✖️');
             }
         }
     } catch (err) {
         console.error('Error general:', err);
-        await m.reply(`${emoji2} Ocurrió un error al intentar procesar el enlace.`);
-        await m.react('✖️');
+        await conn.reply(m.chat, `${emoji2} Ocurrió un error al intentar procesar el enlace.`, m);
+        await m.react?.('✖️');
     }
 };
 
