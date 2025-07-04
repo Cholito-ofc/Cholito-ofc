@@ -3772,7 +3772,7 @@ case 'allmenu': {
 
   break;
                                            }  
-        
+
 case 'menuowner': {
   try {
     await sock.sendMessage(msg.key.remoteJid, {
