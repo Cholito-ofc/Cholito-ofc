@@ -410,9 +410,7 @@ if (update.action === "add" && welcomeActivo) {
 
     try {
       profilePicUrl = await sock.profilePictureUrl(participant, "image");
-    } catch (err) {
-      // Usa imagen por defecto si falla
-    }
+    } catch (err) {}
 
     let groupName = "";
     try {
@@ -451,10 +449,19 @@ if (update.action === "add" && welcomeActivo) {
                    `*╰┈┈┈┈┈┈┈┈┈┈┈┈≫*` + groupDesc;
     }
 
+    // Mensaje de bienvenida con imagen
     await sock.sendMessage(update.id, {
       image: { url: profilePicUrl },
       caption: textoFinal,
       mentions: [participant]
+    });
+
+    // Enviar audio desde URL (ajusta tu URL abajo)
+    const audioUrl = 'https://cdn.russellxz.click/0e4d4b6c.mp3'; // <- pon aquí tu enlace
+    await sock.sendMessage(update.id, {
+      audio: { url: audioUrl },
+      mimetype: 'audio/mp4',
+      ptt: true
     });
   }
 }
