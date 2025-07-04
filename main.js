@@ -13732,7 +13732,7 @@ case "s":
     try {
         let quoted = msg.message.extendedTextMessage?.contextInfo?.quotedMessage;
         if (!quoted) {
-        const xds = `*╭┈〔 ⚠️ USO INCORRECTO* 〕┈╮*
+        const xds = `*╭┈〔 ⚠️ USO INCORRECTO* 〕┈╮
 *┊*
 *┊*📥 *Ejemplo:*
 *┊* 𝘗𝘳𝘪𝘮𝘦𝘳𝘰 𝘮𝘢𝘯𝘥𝘢 𝘶𝘯 𝘷𝘪𝘥𝘦𝘰 𝘰 𝘪𝘮𝘢𝘨𝘦𝘯 𝘺 𝘳𝘦𝘴𝘱𝘰𝘯𝘥𝘦 𝘤𝘰𝘯『${global.prefix}s』𝘱𝘢𝘳𝘢 𝘤𝘰𝘯𝘷𝘦𝘳𝘵𝘪𝘳𝘭𝘰 𝘦𝘯 𝘚𝘵𝘪𝘤𝘬𝘦𝘳
@@ -14056,7 +14056,7 @@ case "setprefix":
 
         // Confirmación del cambio
         await sock.sendMessage(msg.key.remoteJid, { 
-            text: `✅ *Prefijo cambiado extexitosamente a: [${newPrefix}]` 
+            text: `✅ *Prefijo cambiado extexitosamente a:* [ ${newPrefix} ]` 
         }, { quoted: msg });
 
         console.log(`🔄 Prefijo cambiado a: ${newPrefix}`);
@@ -14078,48 +14078,45 @@ case 'info':
       react: { text: "ℹ️", key: msg.key }
     });
 
-    const infoMessage = `╭─ *🤖 𝗞𝗜𝗟𝗟𝗨𝗔 𝗕𝗢𝗧 𝟮.𝟬* ─╮
-│ 🔹 *Prefijo actual:* ${global.prefix}
+    const infoMessage = `╭─ *🤖 𝗞𝗜𝗟𝗟𝗨𝗔 𝗕𝗢𝗧 ⚡* ─╮
+│ 🚩 *Prefijo actual:* ${global.prefix}
 │ 👑 *Dueño:* Cholito hn
-│ 🛠️ *Bot desarrollado desde cero* con la ayuda de Chatgpt.
+│ 🛠️ *Desarrollado con ayuda de ChatGPT*
 │ 🚀 *Creado por:* Cholito
-│  
-├─〔 📥 *Descargas Redes* 〕─
-│ 📌 *IG, TikTok y FB*  
-│    - 👤 *Colaboró:* DIEGO-OFC
-│  
-│ 📌 *Descargas youtube*
-│     (.play, .play2, .ytmp3, .ytmp4)  
-│    - 👤 *Colaboró:* Eliasar54 
-│  
+│
+├─〔 📥 *Redes Sociales* 〕─
+│ 📌 Instagram, TikTok, Facebook
+│
+├─〔 🎵 *Descargas YouTube* 〕─
+│ 📌 Comandos: .play, .play2, .ytmp3, .ytmp4
+│
 ├─〔 📜 *Menús y Comandos* 〕─
-│ 📌 Usa *${global.prefix}menu* para ver los comandos principales.  
-│ 📌 Usa *${global.prefix}allmenu* para ver todos los comandos disponibles.  
-│ 📌 Usa *${global.prefix}menuaudio* para ver los comandos de multimedia y guardado.  
-╰──────────────────╯`;
+│ 📌 Usa *${global.prefix}menu* para comandos principales
+│ 📌 Usa *${global.prefix}allmenu* para todos los comandos
+│ 📌 Usa *${global.prefix}menuaudio* para multimedia y guardado
+╰───────────────────────────╯`;
 
-    await sock.sendMessage2(msg.key.remoteJid,
-  {
-    image: { url: "https://cdn.russellxz.click/fcf5ecd1.jpeg" }, 
-    caption: infoMessage 
-  },
-  msg 
-);
-    
+    await sock.sendMessage(msg.key.remoteJid,
+      {
+        image: { url: "https://cdn.russellxz.click/fcf5ecd1.jpeg" }, 
+        caption: infoMessage
+      },
+      { quoted: msg }
+    );
 
   } catch (error) {
     console.error("Error en comando info:", error);
-    await sock.sendMessage2(
+    await sock.sendMessage(
       msg.key.remoteJid,
       "❌ *Ocurrió un error al mostrar la información. Inténtalo de nuevo.*",
-      msg
+      { quoted: msg }
     );
   }
   break;
         
 case "ping":
     try {
-        const start = Date.now(); // Marca de inicio para calcular el ping
+        const start = Date.now();
         const now = new Date();
         const options = { 
             weekday: "long", 
@@ -14138,7 +14135,7 @@ case "ping":
         const uptimeHours = Math.floor((uptime % 86400) / 3600);
         const uptimeMinutes = Math.floor((uptime % 3600) / 60);
         const uptimeSeconds = Math.floor(uptime % 60);
-        const uptimeFormatted = `${uptimeDays} días, ${uptimeHours}h ${uptimeMinutes}m ${uptimeSeconds}s`;
+        const uptimeFormatted = `${uptimeDays}d ${uptimeHours}h ${uptimeMinutes}m ${uptimeSeconds}s`;
 
         const freeMem = os.freemem();
         const totalMem = os.totalmem();
@@ -14152,32 +14149,41 @@ case "ping":
         const loadAvg = os.loadavg()[0].toFixed(2);
         const diskUsage = execSync("df -h / | awk 'NR==2 {print $3 \" / \" $2}'").toString().trim();
 
+        // React con emoji para mostrar que está activo
         await sock.sendMessage(msg.key.remoteJid, {
             react: {
-                text: "🏓",
+                text: "✅",
                 key: msg.key
             }
         });
 
-        const ping = Date.now() - start; // Cálculo de ping real
+        const ping = Date.now() - start;
 
+        const captionText = 
+`*𝖪𝖨𝖫𝖫𝖴𝖠 𝖡𝖮𝖳 𝖠𝖢𝖳𝖨𝖵𝖮 ⚡*
+
+📡 Ping: ${ping} ms  
+📅 Fecha actual: \`\`\`${fechaActual}\`\`\`
+
+⏳ Tiempo encendido: ${uptimeFormatted}
+
+💻 Servidor:  
+CPU: ${cpuModel} (${numCores} cores)  
+Load avg: ${loadAvg}
+
+💾 RAM:  
+Usada: ${usedMemGB} GB  
+Libre: ${freeMemGB} GB  
+Total: ${totalMemGB} GB
+
+💽 Disco: ${diskUsage}
+
+🌐 Sky Ultra Plus`;
+
+        // Envío de la imagen con el texto formateado
         await sock.sendMessage(msg.key.remoteJid, {
-            image: { url: "https://cdn.russellxz.click/97dd9288.jpeg" }, 
-            caption: `🏓 *Pong! El bot está activo.*\n\n` +
-                     `📶 *Ping Real:* ${ping} ms\n` +
-                     `📅 *Fecha y hora actual:* ${formattedDate}\n\n` +
-                     `🕒 *Tiempo Activo:* ${uptimeFormatted}\n\n` +
-                     `💻 *Información del Servidor:*\n` +
-                     `🔹 *CPU:* ${cpuModel}\n` +
-                     `🔹 *Núcleos:* ${numCores}\n` +
-                     `🔹 *Carga del sistema:* ${loadAvg}\n\n` +
-                     `🖥️ *Memoria RAM:*\n` +
-                     `🔹 *Usada:* ${usedMemGB}GB\n` +
-                     `🔹 *Libre:* ${freeMemGB}GB\n` +
-                     `🔹 *Total:* ${totalMemGB}GB\n\n` +
-                     `💾 *Disco:* ${diskUsage}\n\n` +
-                     `🌐 *Alojado en:* *Sky Ultra Plus* 🚀\n` +
-                     `📌 *Proveedor de Hosting de Confianza*`,
+            image: { url: "https://cdn.russellxz.click/38ab049d.jpeg" }, 
+            caption: captionText,
             quoted: msg
         });
 
@@ -14473,7 +14479,7 @@ case 'owner':
 case 'creador': {
   // 1) DATOS BÁSICOS ------------------------------------
   const ownerNumber = '50489513153';
-  const ownerName   = 'cholito xyz⚡'; // Nombre horizontal normal
+  const ownerName   = 'cholito ᥊ᥡz⚡'; // Nombre horizontal normal
   const jid         = ownerNumber + '@s.whatsapp.net';
 
   // 2) vCARD CON INFO PERSONALIZADA ----------------------
@@ -14484,7 +14490,7 @@ N:${ownerName};;;;
 FN:${ownerName}
 ORG:ᥴһ᥆ᥣі𝗍᥆ ᥊ᥡz 🇭🇳
 TITLE:Creador & Soporte Oficial
-TEL;type=CELULAR;waid=${ownerNumber}:${ownerNumber}
+TEL;type=𝖭𝖮 𝖧𝖠𝖢𝖤𝖱 𝖲𝖯𝖠𝖬;waid=${ownerNumber}:${ownerNumber}
 NOTE:⚡ No hacer Spam • Respuesta casi divina 
 END:VCARD`.trim();
 
@@ -14928,7 +14934,7 @@ case "kick": {
     await sock.groupParticipantsUpdate(chatId, [userToKick], "remove");
 
     await sock.sendMessage(chatId, {
-      text: `*_El usuario @${userToKick.split("@")[0]} ha sido eliminado${isTargetAdmin ? ' (era administrador)' : ''} por inútil_*`,
+      text: `*_El usuario @${userToKick.split("@")[0]} ha sido eliminado${isTargetAdmin ? ' (era administrador)' : ''} por inútil ☠️_*`,
       mentions: [userToKick]
     }, { quoted: msg });
 
@@ -14976,8 +14982,7 @@ case "ig":
 🔊 Listo para compartir con tu grupo o guardar
 
 ━━━━━━━━━━━━━━  
-🚀 *API:* api.dorratz.com  
-🤖 *killua 2.0 Bot*`;
+> *𝖪𝗂𝗅𝗅𝗎𝖺 𝖡𝗈𝗍-𝖬𝖣 ⚡*`;
 
         // Asegurar carpeta tmp
         const tmpDir = path.resolve('./tmp');
@@ -15093,17 +15098,13 @@ case "tt":
         // 📜 Mensaje con la información del video
         let mensaje = `╭「 🎬 𝗧𝗶𝗸𝗧𝗼𝗸 𝗗𝗲𝘀𝗰𝗮𝗿𝗴𝗮𝗱𝗼 」╮
 │
-│ 📌 *Título:* ${videoTitle}
 │ 👤 *Autor:* ${videoAuthor}
 │ ⏱️ *Duración:* ${videoDuration}
 │ ❤️ *Likes:* ${videoLikes}
-│ 💬 *Comentarios:* ${videoComments}
-│
 ╰─────────────╯
 
-📥 *Video descargado con éxito*
-🌐 *API:* https://api.dorratz.com
-🤖 *killua 2.0 Bot*`;
+📥 *𝖵𝗂́𝖽𝖾𝗈 𝖽𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝖽𝗈 𝖼𝗈𝗇 𝖾́𝗑𝗂𝗍𝗈*
+> *𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 𝙼𝙳 🎬*`;
 
         // 📩 Enviar video
         await sock.sendMessage(msg.key.remoteJid, {
