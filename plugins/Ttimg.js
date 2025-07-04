@@ -34,7 +34,7 @@ handler.help = ['ttimg <enlace>'];
 handler.tags = ['downloader'];
 handler.command = /^ttimg$/i;
 
-export default handler;
+module.exports = handler;
 
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
