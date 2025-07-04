@@ -1,8 +1,11 @@
 const fs = require('fs')
 const path = require('path')
 
-// Lista de owners válidos
-const owners = ['50489513153', '50489115621']
+// Agrega aquí tus números OWNER en formato internacional sin +
+const owners = [
+  '50489513153', // Tu número real
+  '50489115621'  // Otro owner si quieres
+]
 
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid
@@ -10,52 +13,56 @@ const handler = async (msg, { conn, args }) => {
   const senderNum = sender.replace(/[^0-9]/g, '')
   const isBotMessage = sender.startsWith('lid_')
 
-  // Validar permisos
+  // ✅ Verificación Owner o Bot
   if (!owners.includes(senderNum) && !isBotMessage) {
     return conn.sendMessage(chatId, {
-      text: '❌ Solo el OWNER puede usar este comando.'
+      text: '❌ Solo los OWNER autorizados pueden usar este comando.'
     }, { quoted: msg })
   }
 
-  // Validar argumento
+  // ✅ Validación de nombre de plugin
   if (!args[0]) {
     return conn.sendMessage(chatId, {
-      text: '⚠️ Debes especificar el nombre de un comando.\nEjemplo: .gitcase rest'
+      text: '⚠️ Uso correcto:\n.git2 nombre_del_plugin\nEjemplo: .git2 play'
     }, { quoted: msg })
   }
 
-  const commandName = args[0].toLowerCase()
-  const mainFilePath = path.join(__dirname, '..', 'main.js') // Ruta relativa al main.js
+  // ✅ Seguridad: limpiar y generar ruta del plugin
+  let pluginName = args.join(' ').trim()
+  pluginName = pluginName.replace(/[^a-zA-Z0-9/_-]/g, '') // solo nombre válido
+  const filePath = path.join(__dirname, pluginName + '.js')
 
-  if (!fs.existsSync(mainFilePath)) {
+  if (!filePath.startsWith(__dirname)) {
     return conn.sendMessage(chatId, {
-      text: '❌ No se encontró el archivo *main.js*'
+      text: '❌ Ruta inválida. Solo se permite leer archivos dentro de /plugins.'
+    }, { quoted: msg })
+  }
+
+  if (!fs.existsSync(filePath)) {
+    return conn.sendMessage(chatId, {
+      text: `❌ El plugin "${pluginName}" no existe en /plugins.`
     }, { quoted: msg })
   }
 
   try {
-    const content = fs.readFileSync(mainFilePath, 'utf-8')
-    const regex = new RegExp(`case\\s+['"\`]${commandName}['"\`]\\s*:\\s*([\\s\\S]*?)\\bbreak;`)
-    const match = content.match(regex)
+    const code = fs.readFileSync(filePath, 'utf-8')
 
-    if (!match) {
+    if (code.length > 4000) {
       return conn.sendMessage(chatId, {
-        text: `❌ No se encontró el comando *${commandName}* dentro de main.js`
+        text: '⚠️ El archivo es muy largo para mostrarlo completo en un solo mensaje.'
       }, { quoted: msg })
     }
 
-    const result = `📂 *Código del comando "${commandName}":*\n\n\`\`\`js\ncase '${commandName}': {\n${match[1].trim()}\n  break;\n}\n\`\`\``
-
     return conn.sendMessage(chatId, {
-      text: result.length > 4000 ? '⚠️ El bloque es demasiado largo para mostrarlo completo.' : result
+      text: `📂 *Código de: plugins/${pluginName}.js*\n\n\`\`\`js\n${code}\n\`\`\`\n✅ Fin del archivo.`,
     }, { quoted: msg })
 
   } catch (e) {
     return conn.sendMessage(chatId, {
-      text: `❌ Error al leer el archivo:\n${e.message}`
+      text: `❌ Error al leer el plugin:\n${e.message}`
     }, { quoted: msg })
   }
 }
 
-handler.command = ['gitcase']
+handler.command = ['git2']
 module.exports = handler
