@@ -1,5 +1,5 @@
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-  if (!text) return m.reply(`✳️ Uso correcto:\n${usedPrefix + command} <enlace TikTok carrusel>`);
+  if (!text) return m.reply(`✳️ Uso correcto:\n${usedPrefix}${command || 'ttimg'} <enlace TikTok carrusel>`);
 
   try {
     // API que proporcionaste
