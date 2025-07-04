@@ -1,13 +1,13 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
-const handler = async (m, { conn, text, command }) => {
+const handler = async (m, { conn, text }) => {
     const emoji = '📸';
     const emoji2 = '❌';
     const fake = { quoted: m };
 
     if (!text) {
-        return await conn.sendMessage(m.chat, { text: `${emoji} Ingresa el enlace del TikTok que contiene imágenes.` }, { quoted: m });
+        return conn.sendMessage(m.chat, { text: `${emoji} Ingresa el enlace del TikTok que contiene imágenes.` }, fake);
     }
 
     const creator = 'KilluaBot';
@@ -15,31 +15,28 @@ const handler = async (m, { conn, text, command }) => {
     const backupUrl = `https://dlpanda.com/id?url=${text}&token51=G32254GLM09MN89Maa`;
 
     const obtenerImagenes = async (url) => {
-        const res = await axios.get(url, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0',
-                'Accept': 'text/html',
-            }
-        });
-        const $ = cheerio.load(res.data);
-        let imagenes = [];
-        $('div.col-md-12 > img').each((_, el) => {
-            const src = $(el).attr('src');
-            if (src) imagenes.push(src);
-        });
-        return imagenes;
+        try {
+            const res = await axios.get(url, {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0',
+                    'Accept': 'text/html',
+                }
+            });
+            const $ = cheerio.load(res.data);
+            return $('div.col-md-12 > img').map((_, el) => $(el).attr('src')).get().filter(Boolean);
+        } catch (e) {
+            return [];
+        }
     };
 
     try {
         if (typeof m.react === 'function') await m.react('🔍');
 
         let imagenes = await obtenerImagenes(mainUrl);
-        if (imagenes.length === 0) {
-            imagenes = await obtenerImagenes(backupUrl);
-        }
+        if (imagenes.length === 0) imagenes = await obtenerImagenes(backupUrl);
 
         if (imagenes.length === 0) {
-            return await conn.sendMessage(m.chat, { text: `${emoji2} No se encontraron imágenes en el enlace proporcionado.` }, { quoted: m });
+            return conn.sendMessage(m.chat, { text: `${emoji2} No se encontraron imágenes en el enlace proporcionado.` }, fake);
         }
 
         if (typeof m.react === 'function') await m.react('🕓');
@@ -55,7 +52,7 @@ const handler = async (m, { conn, text, command }) => {
         }
     } catch (err) {
         console.error('Error general:', err);
-        await conn.sendMessage(m.chat, { text: `${emoji2} Ocurrió un error al intentar procesar el enlace.` }, { quoted: m });
+        await conn.sendMessage(m.chat, { text: `${emoji2} Ocurrió un error al intentar procesar el enlace.` }, fake);
         if (typeof m.react === 'function') await m.react('✖️');
     }
 };
