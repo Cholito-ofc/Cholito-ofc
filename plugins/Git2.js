@@ -10,7 +10,6 @@ function isOwner(num) {
   return global.owner.some(([number, , active]) => number === num && active)
 }
 
-// Función para dividir texto en partes <= 4000 caracteres
 function splitText(text, maxLength = 4000) {
   const parts = []
   for (let i = 0; i < text.length; i += maxLength) {
@@ -40,11 +39,17 @@ const handler = async (msg, { conn, args }) => {
   let pluginName = args.join(' ').trim()
   pluginName = pluginName.replace(/[^a-zA-Z0-9/_-]/g, '')
 
-  // Ajusta esta ruta según dónde tengas tu carpeta plugins
-  const basePath = path.resolve(__dirname) // si este plugin está dentro de /plugins
-  // Si está fuera, usar: const basePath = path.resolve(__dirname, 'plugins')
+  // AJUSTA ESTA RUTA SEGÚN TU ESTRUCTURA
+  // Ejemplo 1: Si git2.js está en plugins y plugins está en la raíz
+  // const basePath = path.resolve(__dirname)
+  // Ejemplo 2: Si git2.js está en handlers y plugins está en la raíz
+  // const basePath = path.resolve(__dirname, '../plugins')
+
+  const basePath = path.resolve(__dirname, '../plugins') // Prueba con esta ruta primero
 
   const filePath = path.join(basePath, pluginName + '.js')
+
+  console.log('[DEBUG] Buscando archivo en ruta:', filePath)
 
   if (!filePath.startsWith(basePath)) {
     return conn.sendMessage(chatId, {
