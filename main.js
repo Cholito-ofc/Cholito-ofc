@@ -1440,13 +1440,11 @@ case 'n': {
     const senderNum = senderJid.replace(/[^0-9]/g, "");
     const botNumber = sock.user?.id.split(":")[0].replace(/[^0-9]/g, "");
 
-    // Verificar que se use en un grupo
     if (!chatId.endsWith("@g.us")) {
       await sock.sendMessage(chatId, { text: "⚠️ Este comando solo se puede usar en grupos." }, { quoted: msg });
       return;
     }
 
-    // Verificar si es admin o el mismo bot
     const metadata = await sock.groupMetadata(chatId);
     const participant = metadata.participants.find(p => p.id.includes(senderNum));
     const isAdmin = participant?.admin === "admin" || participant?.admin === "superadmin";
@@ -1461,21 +1459,22 @@ case 'n': {
     const allMentions = metadata.participants.map(p => p.id);
     let messageToForward = null;
     let hasMedia = false;
+    const watermark = `\n\n> 𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 ⚡`;
 
     if (msg.message?.extendedTextMessage?.contextInfo?.quotedMessage) {
       const quoted = msg.message.extendedTextMessage.contextInfo.quotedMessage;
 
       if (quoted.conversation) {
-        messageToForward = { text: quoted.conversation };
+        messageToForward = { text: quoted.conversation + watermark };
       } else if (quoted.extendedTextMessage?.text) {
-        messageToForward = { text: quoted.extendedTextMessage.text };
+        messageToForward = { text: quoted.extendedTextMessage.text + watermark };
       } else if (quoted.imageMessage) {
         const stream = await downloadContentFromMessage(quoted.imageMessage, "image");
         let buffer = Buffer.alloc(0);
         for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
         const mimetype = quoted.imageMessage.mimetype || "image/jpeg";
         const caption = quoted.imageMessage.caption || "";
-        messageToForward = { image: buffer, mimetype, caption };
+        messageToForward = { image: buffer, mimetype, caption: caption + watermark };
         hasMedia = true;
       } else if (quoted.videoMessage) {
         const stream = await downloadContentFromMessage(quoted.videoMessage, "video");
@@ -1483,14 +1482,14 @@ case 'n': {
         for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
         const mimetype = quoted.videoMessage.mimetype || "video/mp4";
         const caption = quoted.videoMessage.caption || "";
-        messageToForward = { video: buffer, mimetype, caption };
+        messageToForward = { video: buffer, mimetype, caption: caption + watermark };
         hasMedia = true;
       } else if (quoted.audioMessage) {
         const stream = await downloadContentFromMessage(quoted.audioMessage, "audio");
         let buffer = Buffer.alloc(0);
         for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
         const mimetype = quoted.audioMessage.mimetype || "audio/mp3";
-        messageToForward = { audio: buffer, mimetype };
+        messageToForward = { audio: buffer, mimetype, ptt: true };
         hasMedia = true;
       } else if (quoted.stickerMessage) {
         const stream = await downloadContentFromMessage(quoted.stickerMessage, "sticker");
@@ -1504,13 +1503,14 @@ case 'n': {
         for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
         const mimetype = quoted.documentMessage.mimetype || "application/pdf";
         const caption = quoted.documentMessage.caption || "";
-        messageToForward = { document: buffer, mimetype, caption };
+        messageToForward = { document: buffer, mimetype, caption: caption + watermark };
         hasMedia = true;
       }
     }
 
+    // Si no hay media pero sí texto en el comando
     if (!hasMedia && args.join(" ").trim().length > 0) {
-      messageToForward = { text: args.join(" ") };
+      messageToForward = { text: args.join(" ").trim() + watermark };
     }
 
     if (!messageToForward) {
@@ -1524,13 +1524,13 @@ case 'n': {
     }, { quoted: msg });
 
   } catch (error) {
-    console.error("❌ Error en el comando tag:", error);
+    console.error("❌ Error en el comando n:", error);
     await sock.sendMessage(msg.key.remoteJid, {
-      text: "❌ Ocurrió un error al ejecutar el comando tag."
+      text: "❌ Ocurrió un error al ejecutar el comando."
     }, { quoted: msg });
   }
   break;
-}      
+}  
 
 
 
