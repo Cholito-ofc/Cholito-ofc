@@ -2,8 +2,16 @@ const { createCanvas, loadImage } = require('canvas');
 const fs = require('fs');
 const path = require('path');
 
-const flagMap = [ /* ... igual que antes ... */ ];
-const colores = { /* ... igual que antes ... */ };
+const flagMap = [
+  ['598', '🇺🇾'], ['595', '🇵🇾'], ['593', '🇪🇨'], ['591', '🇧🇴'],
+  ['590', '🇧🇶'], ['509', '🇭🇹'], ['507', '🇵🇦'], ['506', '🇨🇷'],
+  ['505', '🇳🇮'], ['504', '🇭🇳'], ['503', '🇸🇻'], ['502', '🇬🇹'],
+  ['501', '🇧🇿'], ['599', '🇨🇼'], ['597', '🇸🇷'], ['596', '🇬🇫'],
+  ['594', '🇬🇫'], ['592', '🇬🇾'], ['590', '🇬🇵'], ['549', '🇦🇷'],
+  ['58', '🇻🇪'], ['57', '🇨🇴'], ['56', '🇨🇱'], ['55', '🇧🇷'],
+  ['54', '🇦🇷'], ['53', '🇨🇺'], ['52', '🇲🇽'], ['51', '🇵🇪'],
+  ['34', '🇪🇸'], ['1', '🇺🇸']
+];
 
 function numberWithFlag(num) {
   const clean = num.replace(/[^0-9]/g, '');
@@ -16,8 +24,37 @@ function numberWithFlag(num) {
 const quotedPush = q => (q?.pushName || q?.sender?.pushName || '');
 
 async function niceName(jid, conn, chatId, qPush, fallback = '') {
-  // igual que tu versión actual
+  if (qPush && qPush.trim() && !/^\d+$/.test(qPush)) return qPush;
+  if (chatId.endsWith('@g.us')) {
+    try {
+      const meta = await conn.groupMetadata(chatId);
+      const p = meta.participants.find(p => p.id === jid);
+      const n = p?.notify || p?.name;
+      if (n && n.trim() && !/^\d+$/.test(n)) return n;
+    } catch {}
+  }
+  try {
+    const g = await conn.getName(jid);
+    if (g && g.trim() && !/^\d+$/.test(g) && !g.includes('@')) return g;
+  } catch {}
+  const c = conn.contacts?.[jid];
+  if (c?.notify && !/^\d+$/.test(c.notify)) return c.notify;
+  if (c?.name && !/^\d+$/.test(c.name)) return c.name;
+  if (fallback && fallback.trim() && !/^\d+$/.test(fallback)) return fallback;
+  return numberWithFlag(jid.split('@')[0]);
 }
+
+const colores = {
+  rojo: ['#F44336', '#FFCDD2'],
+  azul: ['#00B4DB', '#0083B0'],
+  verde: ['#4CAF50', '#C8E6C9'],
+  rosa: ['#E91E63', '#F8BBD0'],
+  morado: ['#9C27B0', '#E1BEE7'],
+  negro: ['#212121', '#9E9E9E'],
+  naranja: ['#FF9800', '#FFE0B2'],
+  gris: ['#607D8B', '#CFD8DC'],
+  celeste: ['#00FFFF', '#E0FFFF']
+};
 
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
@@ -42,7 +79,8 @@ const handler = async (msg, { conn, args }) => {
 
   let content = '';
   if (colores[firstWord]) {
-    content = contentFull.split(' ').slice(1).join(' ').trim() || quotedText || '';
+    const afterColor = contentFull.split(' ').slice(1).join(' ').trim();
+    content = afterColor || quotedText || '';
   } else {
     content = contentFull || quotedText || '';
   }
@@ -54,54 +92,44 @@ const handler = async (msg, { conn, args }) => {
   }
 
   const displayName = await niceName(targetJid, conn, chatId, quotedName, fallbackPN);
-  let avatarUrl = 'https://telegra.ph/file/24fa902ead26340f3df2c.png';
-  try { avatarUrl = await conn.profilePictureUrl(targetJid, 'image'); } catch {}
 
-  await conn.sendMessage(chatId, { react: { text: '🎨', key: msg.key } });
+  let avatarUrl = 'https://telegra.ph/file/24fa902ead26340f3df2c.png';
+  try {
+    avatarUrl = await conn.profilePictureUrl(targetJid, 'image');
+  } catch {}
+
+  await conn.sendMessage(chatId, { react: { text: '🖼️', key: msg.key } });
 
   const canvas = createCanvas(1080, 1080);
   const draw = canvas.getContext('2d');
 
-  // Fondo degradado
-  const grad = draw.createLinearGradient(0, 0, 0, 1080);
+  const grad = draw.createLinearGradient(0, 0, 1080, 1080);
   grad.addColorStop(0, gradColors[0]);
   grad.addColorStop(1, gradColors[1]);
   draw.fillStyle = grad;
   draw.fillRect(0, 0, 1080, 1080);
 
-  // Avatar circular con sombra y borde
   const avatar = await loadImage(avatarUrl);
-  const avatarX = 80, avatarY = 80, avatarSize = 180;
   draw.save();
   draw.beginPath();
-  draw.arc(avatarX + avatarSize / 2, avatarY + avatarSize / 2, avatarSize / 2, 0, Math.PI * 2);
-  draw.shadowColor = "rgba(0,0,0,0.3)";
-  draw.shadowBlur = 10;
-  draw.fillStyle = "#fff";
-  draw.fill();
+  draw.arc(100, 100, 80, 0, Math.PI * 2);
   draw.clip();
-  draw.drawImage(avatar, avatarX, avatarY, avatarSize, avatarSize);
+  draw.drawImage(avatar, 20, 20, 160, 160);
   draw.restore();
 
-  // Nombre del usuario
-  draw.font = 'bold 42px Sans-serif';
+  draw.font = 'bold 40px Sans-serif';
   draw.fillStyle = '#ffffff';
-  draw.shadowColor = 'black';
-  draw.shadowBlur = 3;
-  draw.fillText(displayName, avatarX + avatarSize + 40, avatarY + 110);
+  draw.fillText(displayName, 220, 100);
 
-  // Texto del mensaje
-  draw.shadowBlur = 0;
   draw.font = 'bold 60px Sans-serif';
   draw.fillStyle = '#ffffff';
   draw.textAlign = 'center';
 
-  const maxWidth = 900;
   const words = content.split(' ');
   let line = '', lines = [];
   for (const word of words) {
     const testLine = line + word + ' ';
-    if (draw.measureText(testLine).width > maxWidth) {
+    if (draw.measureText(testLine).width > 900) {
       lines.push(line.trim());
       line = word + ' ';
     } else {
@@ -110,16 +138,20 @@ const handler = async (msg, { conn, args }) => {
   }
   if (line.trim()) lines.push(line.trim());
 
-  const startY = 600 - (lines.length * 40);
+  const startY = 550 - (lines.length * 35);
   lines.forEach((l, i) => {
     draw.fillText(l, 540, startY + (i * 80));
   });
 
-  // Logo KilluaBot
-  const logo = await loadImage('https://cdn.russellxz.click/a806b10a.png');
-  draw.drawImage(logo, 900, 900, 140, 140);
+  // ... (todo tu código igual que lo mandaste arriba, hasta aquí)
 
-  // Exportar
+  const logo = await loadImage('https://cdn.russellxz.click/a806b10a.png');
+const logoWidth = 140;
+const logoHeight = 140;
+const x = canvas.width - logoWidth - 40;
+const y = canvas.height - logoHeight - 40;
+draw.drawImage(logo, x, y, logoWidth, logoHeight);
+
   const fileName = `./tmp/texto-${Date.now()}.png`;
   const out = fs.createWriteStream(fileName);
   const stream = canvas.createPNGStream();
