@@ -3841,9 +3841,9 @@ case 'menuowner': {
       msg
     );
   }
-  break;  
-   
-        
+  break;
+}
+
 case 'menurpg': {
   try {
     await sock.sendMessage(msg.key.remoteJid, {
