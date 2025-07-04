@@ -4390,19 +4390,18 @@ case 'link': {
     await sock.sendMessage(
       chatId,
       {
-        templateButtons: [
-          {
-            index: 1,
-            urlButton: {
-              displayText: '🌐 Unirme al grupo',
-              url: link
-            }
+        text: `🎉 *Enlace de invitación al grupo:*\n\n👥 *Nombre:* ${metadata.subject}\n\n🔗 *Únete aquí:* ${link}`,
+        contextInfo: {
+          externalAdReply: {
+            title: metadata.subject,
+            body: "Presiona aquí para unirte",
+            thumbnail: profilePic,
+            mediaType: 1,
+            renderLargerThumbnail: true,
+            previewType: "PHOTO",
+            sourceUrl: link
           }
-        ],
-        image: { jpegThumbnail: profilePic },
-        caption: `🎉 *Enlace de invitación al grupo:*\n\n👥 *Nombre:* ${metadata.subject}\n\n🔗 *Haz clic en el botón de abajo para unirte al grupo.*`,
-        footer: 'KilluaBot 💠',
-        headerType: 4
+        }
       },
       { quoted: msg }
     );
@@ -4414,7 +4413,7 @@ case 'link': {
     await sock.sendMessage(chatId, { text: "❌ *Ocurrió un error al generar el enlace del grupo.*" }, { quoted: msg });
   }
   break;
-}   
+}  
 
 case 'add': {
   try {
