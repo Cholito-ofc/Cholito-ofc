@@ -1,7 +1,10 @@
 const handler = async (msg, { conn, args, participants, isBotAdmin, isAdmin, command }) => {
   const chatId = msg.key.remoteJid;
 
-  if (!msg.isGroup) return conn.sendMessage(chatId, { text: '❌ Este comando solo funciona en grupos.' }, { quoted: msg });
+  if (!chatId.endsWith('@g.us')) {
+    return conn.sendMessage(chatId, { text: '❌ Este comando solo funciona en grupos.' }, { quoted: msg });
+  }
+
   if (!isAdmin) return conn.sendMessage(chatId, { text: '⚠️ Solo los admins pueden usar este comando.' }, { quoted: msg });
   if (!isBotAdmin) return conn.sendMessage(chatId, { text: '🚫 No soy admin. No puedo expulsar a nadie.' }, { quoted: msg });
 
