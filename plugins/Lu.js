@@ -4,7 +4,8 @@ const fetch = require('node-fetch');
 const handler = async (msg, { conn, args, usedPrefix, command }) => {
     const text = args.join(' ');
     const chatId = msg.key.remoteJid;
-    
+    const sender = msg.key.participant || msg.key.remoteJid;
+
     if (!text) {
         return conn.sendMessage(chatId, { 
             text: `✳️ Ingresa tu pregunta\nEjemplo: *${usedPrefix + command}* ¿quién inventó WhatsApp?` 
@@ -31,9 +32,11 @@ const handler = async (msg, { conn, args, usedPrefix, command }) => {
             }
         }
 
+        const userTag = '@' + sender.split('@')[0];
+
         const responseMsg = `╭━〔 *RESPUESTA IA* 〕━⬣
 │  ✦ *Pregunta:* ${text}
-│  ✦ *Usuario:* ${name}
+│  ✦ *Usuario:* ${userTag}
 ╰━━━━━━━━━━━━⬣
 
 ${result}
@@ -43,7 +46,8 @@ ${result}
 ╰━━━━━━━━━━━━⬣`;
 
         await conn.sendMessage(chatId, { 
-            text: responseMsg 
+            text: responseMsg,
+            mentions: [sender]
         }, { quoted: msg });
         
         await conn.sendMessage(chatId, { react: { text: '✅', key: msg.key } });
