@@ -17,7 +17,7 @@ const handler = async (msg, { conn, args, command, usedPrefix }) => {
   await conn.sendMessage(msg.chat, { react: { text: reaccion, key: msg.key }});
 
   try {
-    const res = await axios.get(`https://aemt.me/tiktoksearch?query=${encodeURIComponent(texto)}`);
+    const res = await axios.get(`https://api.dorratz.com/v2/tiktok-s?q=${encodeURIComponent(texto)}`);
     const resultados = res.data.result || [];
 
     if (resultados.length === 0) {
