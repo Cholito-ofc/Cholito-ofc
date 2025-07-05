@@ -7,48 +7,55 @@ const handler = async (msg, { conn, args }) => {
 
   if (!args.length) {
     return await conn.sendMessage(chatId, {
-      text: `⚠️ *Uso incorrecto*\n📌 Ejemplo: ${global.prefix}tik https://www.tiktok.com/@usuario/video/1234567890`,
+      text: `⚠️ *Uso incorrecto.*\n📌 Ejemplo: ${global.prefix}tik <palabra clave>`,
       mentions: [sender]
     }, { quoted: msg });
   }
 
-  const urlTikTok = args[0];
-  if (!urlTikTok.startsWith("https://www.tiktok.com")) {
-    return await conn.sendMessage(chatId, {
-      text: "❌ *La URL debe ser un enlace válido de TikTok.*",
-      mentions: [sender]
-    }, { quoted: msg });
-  }
-
-  const apiKey = "rusellxyz"; // Tu apikey de la API
-  const apiUrl = `https://api.neoxr.eu/api/tiktok?url=${encodeURIComponent(urlTikTok)}&apikey=${apiKey}`;
+  const query = args.join(" ");
 
   await conn.sendMessage(chatId, {
     react: { text: "⏳", key: msg.key }
   });
 
   try {
+    // Usamos la API pública de dorratz para búsqueda por texto
+    const apiUrl = `https://api.dorratz.com/v2/tiktok-s?q=${encodeURIComponent(query)}`;
+
     const response = await axios.get(apiUrl);
 
-    if (!response.data || !response.data.result || !response.data.result.video_url) {
-      throw new Error("No se pudo obtener el video de TikTok.");
+    if (response.data.status !== 200 || !response.data.data || response.data.data.length === 0) {
+      return await conn.sendMessage(chatId, {
+        text: `❌ No se encontraron resultados para: "${query}"`,
+        mentions: [sender]
+      }, { quoted: msg });
     }
 
-    const videoUrl = response.data.result.video_url;
+    const videos = response.data.data.slice(0, 5);
 
     await conn.sendMessage(chatId, {
-      video: { url: videoUrl },
-      caption: `🎬 *Video descargado de TikTok*`,
+      text: `🔍 *Enviando los primeros ${videos.length} videos para:* "${query}"`,
+      mentions: [sender]
     }, { quoted: msg });
+
+    for (const video of videos) {
+      const videoUrl = video.video.no_watermark; // video sin marca de agua
+      const caption = `🎬 *${video.title}*\n👤 @${video.author.username}\n❤️ ${video.like.toLocaleString()} | 💬 ${video.coment.toLocaleString()}`;
+
+      await conn.sendMessage(chatId, {
+        video: { url: videoUrl },
+        caption,
+      }, { quoted: msg });
+    }
 
     await conn.sendMessage(chatId, {
       react: { text: "✅", key: msg.key }
     });
 
   } catch (error) {
-    console.error("❌ Error en comando tik:", error.message || error);
+    console.error("❌ Error en comando tik:", error);
     await conn.sendMessage(chatId, {
-      text: `❌ *Error al descargar video:* ${error.message || error}`,
+      text: `❌ *Error al buscar videos:* ${error.message || error}`,
       mentions: [sender]
     }, { quoted: msg });
 
