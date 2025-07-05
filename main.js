@@ -1897,7 +1897,7 @@ case 'tiktoksearch': {
     });
 
   } catch (error) {
-    console.error("❌ Error en tiktoksearch:", error);
+    console.error("❌ Error en tiktoksearch:", error?.response?.data || error.message || error);
     await sock.sendMessage(msg.key.remoteJid, {
       text: "❌ *Ocurrió un error al obtener los videos.*"
     }, { quoted: msg });
