@@ -92,14 +92,24 @@ const handler = async (msg, { conn, text }) => {
     // Descargar tu logo para miniatura
     const logoBuffer = (await axios.get('https://cdn.russellxz.click/652f01f6.jpeg', { responseType: 'arraybuffer' })).data;
 
-    // Enviar como documento (se ve con miniatura tipo MediaHub)
-    await conn.sendMessage(chatId, {
-      document: fs.readFileSync(finalPath),
-      mimetype: 'audio/mpeg',
-      fileName: `${title}.mp3`,
-      jpegThumbnail: logoBuffer,
-      caption: `🎧 *${title}*\nKilluaBot Music`
-    }, { quoted: msg });
+// Enviar como audio con vista estilo MediaHub
+await conn.sendMessage(chatId, {
+  audio: fs.readFileSync(finalPath),
+  mimetype: 'audio/mp4',
+  ptt: false,
+  fileName: `${title}.mp3`,
+  jpegThumbnail: logoBuffer,
+  contextInfo: {
+    externalAdReply: {
+      title: title,
+      body: 'KilluaBot Music',
+      mediaType: 2,
+      thumbnail: logoBuffer,
+      showAdAttribution: true,
+      sourceUrl: videoUrl
+    }
+  }
+}, { quoted: msg });
 
     // Limpiar archivos temporales
     fs.unlinkSync(rawPath);
