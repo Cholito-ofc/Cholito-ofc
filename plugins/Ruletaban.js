@@ -17,17 +17,15 @@ const handler = async (msg, { conn, args }) => {
   const participants = metadata.participants;
 
   const senderId = msg.key.participant || msg.key.remoteJid;
-  const botNumber = conn.user?.jid?.split(':')[0]; // '1234567890@s.whatsapp.net'
-
-  // Verificar si el remitente es admin
-  const senderIsAdmin = participants.find(p => p.id === senderId)?.admin !== undefined;
-  if (!senderIsAdmin) {
+  const sender = participants.find(p => p.id === senderId);
+  if (!sender || !sender.admin) {
     return conn.sendMessage(chatId, { text: '⚠️ Solo los admins pueden usar este comando.' }, { quoted: msg });
   }
 
-  // Verificar si el bot es admin
-  const botIsAdmin = participants.find(p => p.id === botNumber)?.admin !== undefined;
-  if (!botIsAdmin) {
+  // Buscar si el bot es admin (comparando por includes en vez de igualdad exacta)
+  const botNumber = conn.user?.jid?.split('@')[0]; // '123456'
+  const botParticipant = participants.find(p => p.id.includes(botNumber));
+  if (!botParticipant || !botParticipant.admin) {
     return conn.sendMessage(chatId, { text: '🚫 No soy admin. No puedo expulsar a nadie.' }, { quoted: msg });
   }
 
@@ -47,18 +45,18 @@ const handler = async (msg, { conn, args }) => {
   await new Promise(resolve => setTimeout(resolve, 2 * 60 * 1000));
 
   // Intentar expulsar
-  await conn.groupParticipantsUpdate(chatId, [mentionedJid], 'remove').catch(() => {
-    return conn.sendMessage(chatId, {
+  try {
+    await conn.groupParticipantsUpdate(chatId, [mentionedJid], 'remove');
+    await conn.sendMessage(chatId, {
+      text: `🪦 *@${mentionedJid.split('@')[0]} ha sido ejecutado con éxito.*`,
+      mentions: [mentionedJid]
+    });
+  } catch (e) {
+    await conn.sendMessage(chatId, {
       text: `❌ No pude eliminar a @${mentionedJid.split('@')[0]}.`,
       mentions: [mentionedJid]
     }, { quoted: msg });
-  });
-
-  // Mensaje final
-  await conn.sendMessage(chatId, {
-    text: `🪦 *@${mentionedJid.split('@')[0]} ha sido ejecutado con éxito.*`,
-    mentions: [mentionedJid]
-  });
+  }
 };
 
 handler.command = ['autokill', 'rouletteaban'];
