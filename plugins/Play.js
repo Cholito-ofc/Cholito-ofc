@@ -79,7 +79,7 @@ const handler = async (msg, { conn, text }) => {
     const thumbRes = await axios.get(thumbnail, { responseType: 'arraybuffer' });
     fs.writeFileSync(thumbPath, Buffer.from(thumbRes.data));
 
-    // Convertir audio a mp3
+    // Convertir audio
     await new Promise((resolve, reject) => {
       ffmpeg(rawPath)
         .audioCodec('libmp3lame')
@@ -95,8 +95,8 @@ const handler = async (msg, { conn, text }) => {
       audio: fs.readFileSync(finalPath),
       mimetype: 'audio/mpeg',
       fileName: `${title}.mp3`,
-      ptt: false,
-      jpegThumbnail: fs.readFileSync(thumbPath)
+      jpegThumbnail: fs.readFileSync(thumbPath),
+      ptt: false
     }, { quoted: msg });
 
     fs.unlinkSync(rawPath);
