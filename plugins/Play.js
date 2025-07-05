@@ -42,18 +42,20 @@ const handler = async (msg, { conn, text }) => {
     const views = video.views.toLocaleString();
     const channel = video.author.name || 'Desconocido';
 
-    const infoMessage = `╭━━〔 𝙆𝙞𝙡𝙡𝙪𝙖𝘽𝙤𝙩 𝙈𝙪𝙨𝙞𝙘 ⚡ 〕━━⬣
-┃🎼 *Titulo:* ${title}
-┃⏱️ *Duración:* ${fduration}
-┃👤 *Autor:* ${channel}
-┃👀 *Vistas:* ${views}
-╰━━━━━━━━━━━━⬣
+    const infoMessage = `*╭┈┈≫* *「 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼 ⚡ 」≪┈┈╮*
+*┊*
+*┊»* 🎼 𝗧𝗶́𝘁𝘂𝗹𝗼: ${title}
+*┊»* ⏱️ 𝗗𝘂𝗿𝗮𝗰𝗶𝗼́𝗻: ${fduration}
+*┊»* 👤 𝗔𝘂𝘁𝗼𝗿: ${channel}
+*┊»* 👀 𝗩𝗶𝘀𝘁𝗮𝘀: ${views}
+*╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫*
+*» 𝘌𝘕𝘝𝘐𝘈𝘕𝘋𝘖 𝘈𝘜𝘋𝘐𝘖  🎧*
+*» 𝘈𝘎𝘜𝘈𝘙𝘋𝘌 𝘜𝘕 𝘗𝘖𝘊𝘖...*
 
-🎧 *Enviando audio... aguarde un poco.*`;
+*⇆‌ ㅤ◁ㅤㅤ❚❚ㅤㅤ▷ㅤ↻*`;
 
     await conn.sendMessage(chatId, {
-      image: { url: thumbnail },
-      caption: infoMessage
+      text: infoMessage
     }, { quoted: msg });
 
     const apiURL = `https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(videoUrl)}&type=audio&quality=128kbps&apikey=russellxz`;
@@ -67,10 +69,17 @@ const handler = async (msg, { conn, text }) => {
 
     const rawPath = path.join(tmpDir, `${Date.now()}_raw.m4a`);
     const finalPath = path.join(tmpDir, `${Date.now()}_final.mp3`);
+    const thumbPath = path.join(tmpDir, `${Date.now()}_thumb.jpg`);
 
+    // Descargar audio
     const audioRes = await axios.get(json.data.url, { responseType: 'stream' });
     await streamPipeline(audioRes.data, fs.createWriteStream(rawPath));
 
+    // Descargar miniatura
+    const thumbRes = await axios.get(thumbnail, { responseType: 'arraybuffer' });
+    fs.writeFileSync(thumbPath, Buffer.from(thumbRes.data));
+
+    // Convertir audio a mp3
     await new Promise((resolve, reject) => {
       ffmpeg(rawPath)
         .audioCodec('libmp3lame')
@@ -81,46 +90,31 @@ const handler = async (msg, { conn, text }) => {
         .on('error', reject);
     });
 
-    const thumbBuffer = (await axios.get(thumbnail, { responseType: 'arraybuffer' })).data;
-
-    const stats = fs.statSync(finalPath);
-    const sizeMB = stats.size / 1024 / 1024;
-    console.log(`📦 Archivo final: ${sizeMB.toFixed(2)} MB`);
-
+    // Enviar audio con miniatura
     await conn.sendMessage(chatId, {
       audio: fs.readFileSync(finalPath),
       mimetype: 'audio/mpeg',
       fileName: `${title}.mp3`,
       ptt: false,
-      contextInfo: {
-        externalAdReply: {
-          title: title,
-          body: '🎧 KilluaBot Music',
-          mediaType: 2,
-          thumbnail: thumbBuffer,
-          mediaUrl: videoUrl,
-          sourceUrl: videoUrl,
-          showAdAttribution: true,
-          renderLargerThumbnail: false // ✅ Miniatura pequeña
-        }
-      }
+      jpegThumbnail: fs.readFileSync(thumbPath)
     }, { quoted: msg });
 
     fs.unlinkSync(rawPath);
     fs.unlinkSync(finalPath);
+    fs.unlinkSync(thumbPath);
 
     await conn.sendMessage(chatId, {
       react: { text: '✅', key: msg.key }
     });
 
   } catch (error) {
-    console.error("❌ Error en .play:", error);
+    console.error(error);
     return conn.sendMessage(chatId, {
       text: `➤ \`UPS, ERROR\` ❌
 
-Pruebe usar *.playpro* *.spotify* o *.rolita*
-".reporte no funciona .play"
-> El equipo lo revisará pronto. 🚔`
+𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗉𝗅𝖺𝗒𝗉𝗋𝗈* *.𝗌𝗉𝗈𝗍𝗂𝖿𝗒* 𝗈 *.𝗋𝗈𝗅𝗂𝗍𝖺*
+".𝗋𝖾𝗉𝗈𝗋𝗍𝖾 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
+> 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
     }, { quoted: msg });
   }
 };
