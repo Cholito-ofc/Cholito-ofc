@@ -1849,12 +1849,12 @@ case 'ytmp4': {
 
 
 
-      case 'tiktoksearch': {
+case 'tiktoksearch': {
     const axios = require('axios');
 
     if (!args.length) {
         await sock.sendMessage(msg.key.remoteJid, { 
-            text: `⚠️ *Uso incorrecto.*\n📌 Ejemplo: \`${global.prefix}tiktoksearch <query>\`` 
+            text: `⚠️ *Uso incorrecto.*\n📌 Ejemplo: \`${global.prefix}tiktoksearch <consulta>\`` 
         }, { quoted: msg });
         return;
     }
@@ -1871,25 +1871,29 @@ case 'ytmp4': {
 
         if (response.data.status !== 200 || !response.data.data || response.data.data.length === 0) {
             return await sock.sendMessage(msg.key.remoteJid, { 
-                text: "No se encontraron resultados para tu consulta." 
+                text: "❌ No se encontraron resultados para tu consulta." 
             }, { quoted: msg });
         }
 
         const results = response.data.data.slice(0, 5);
 
-        const resultText = results.map((video, index) => `
-📌 *Resultado ${index + 1}:*
-📹 *Título:* ${video.title}
+        for (let i = 0; i < results.length; i++) {
+            const video = results[i];
+
+            const caption = `
+📌 *Resultado ${i + 1}*
 👤 *Autor:* ${video.author.nickname} (@${video.author.username})
 👀 *Reproducciones:* ${video.play.toLocaleString()}
 ❤️ *Me gusta:* ${video.like.toLocaleString()}
 💬 *Comentarios:* ${video.coment.toLocaleString()}
 🔗 *Enlace:* ${video.url}
-        `).join('\n');
+            `.trim();
 
-        await sock.sendMessage(msg.key.remoteJid, { 
-            text: `🔍 *Resultados de búsqueda en TikTok para "${query}":*\n\n${resultText}` 
-        }, { quoted: msg });
+            await sock.sendMessage(msg.key.remoteJid, {
+                image: { url: video.cover }, // Portada del video
+                caption
+            }, { quoted: msg });
+        }
 
         await sock.sendMessage(msg.key.remoteJid, { 
             react: { text: "✅", key: msg.key } 
