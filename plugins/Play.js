@@ -53,30 +53,31 @@ const handler = async (msg, { conn, text }) => {
 
 🎧 *Enviando audio... aguarde un poco.*`;
 
+    // Mostrar info con miniatura del video
     await conn.sendMessage(chatId, {
       image: { url: thumbnail },
       caption: infoMessage
     }, { quoted: msg });
 
-    // Descargar audio desde API externa
+    // Descargar desde API externa
     const apiURL = `https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(videoUrl)}&type=audio&quality=128kbps&apikey=russellxz`;
     const res = await axios.get(apiURL);
     const json = res.data;
 
     if (!json.status || !json.data?.url) throw new Error("No se pudo obtener el audio");
 
-    // Carpeta temporal
+    // Crear carpeta temporal
     const tmpDir = path.join(__dirname, '../tmp');
     if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
 
     const rawPath = path.join(tmpDir, `${Date.now()}_raw.m4a`);
     const finalPath = path.join(tmpDir, `${Date.now()}_final.mp3`);
 
-    // Descargar audio
+    // Descargar el audio crudo
     const audioRes = await axios.get(json.data.url, { responseType: 'stream' });
     await streamPipeline(audioRes.data, fs.createWriteStream(rawPath));
 
-    // Convertir a MP3
+    // Convertir a mp3
     await new Promise((resolve, reject) => {
       ffmpeg(rawPath)
         .audioCodec('libmp3lame')
@@ -87,29 +88,26 @@ const handler = async (msg, { conn, text }) => {
         .on('error', reject);
     });
 
-    // Descargar imagen para miniatura (o usar thumbnail)
-    const logoBuffer = (await axios.get('https://cdn.russellxz.click/652f01f6.jpeg', { responseType: 'arraybuffer' })).data;
+    // Miniatura (logo)
+    const logoBuffer = (await axios.get('https://cdn.russellxz.click/652f01f6.jpeg', {
+      responseType: 'arraybuffer'
+    })).data;
 
-    // Enviar como audio estilo MediaHub
+    // Verificar tamaño del archivo
+    const stats = fs.statSync(finalPath);
+    const sizeMB = stats.size / 1024 / 1024;
+    console.log(`📦 Archivo final: ${sizeMB.toFixed(2)} MB`);
+
+    // Enviar como documento de audio (compatible con miniatura)
     await conn.sendMessage(chatId, {
-      audio: fs.readFileSync(finalPath),
+      document: fs.readFileSync(finalPath),
       mimetype: 'audio/mpeg',
-      ptt: false,
       fileName: `${title}.mp3`,
       jpegThumbnail: logoBuffer,
-      contextInfo: {
-        externalAdReply: {
-          title: title,
-          body: 'KilluaBot Music',
-          mediaType: 2,
-          thumbnail: logoBuffer,
-          showAdAttribution: true,
-          sourceUrl: videoUrl
-        }
-      }
+      caption: `🎧 *${title}*\nKilluaBot Music`,
     }, { quoted: msg });
 
-    // Eliminar archivos temporales
+    // Limpiar
     fs.unlinkSync(rawPath);
     fs.unlinkSync(finalPath);
 
