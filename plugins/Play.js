@@ -13,14 +13,13 @@ const handler = async (msg, { conn, text }) => {
 
   const chatId = msg.key.remoteJid;
 
-  // Cargar prefijo personalizado
   const prefixPath = path.resolve("prefixes.json");
   let prefixes = {};
   if (fs.existsSync(prefixPath)) {
     prefixes = JSON.parse(fs.readFileSync(prefixPath, "utf-8"));
   }
 
-  const usedPrefix = prefixes[subbotID] || "."; // Por defecto .
+  const usedPrefix = prefixes[subbotID] || ".";
 
   if (!text) {
     return await conn.sendMessage(chatId, {
@@ -44,23 +43,22 @@ const handler = async (msg, { conn, text }) => {
     const views = video.views.toLocaleString();
     const channel = video.author.name || 'Desconocido';
 
-    const infoMessage = `*╭┈┈≫* *「 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼 ⚡ 」≪┈┈╮*
-*┊*
-*┊»* 🎼 𝗧𝗶́𝘁𝘂𝗹𝗼: ${title}
-*┊»* ⏱️ 𝗗𝘂𝗿𝗮𝗰𝗶𝗼́𝗻: ${fduration}
-*┊»* 👤 𝗔𝘂𝘁𝗼𝗿: ${channel}
-*┊»* 👀 𝗩𝗶𝘀𝘁𝗮𝘀: ${views}
-*╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫*
-*» 𝘌𝘕𝘝𝘐𝘈𝘕𝘋𝘖 𝘈𝘜𝘋𝘐𝘖  🎧*
-*» 𝘈𝘎𝘜𝘈𝘙𝘋𝘌 𝘜𝘕 𝘗𝘖𝘊𝘖...*
+    const infoMessage = `╭━━〔 𝙆𝙞𝙡𝙡𝙪𝙖𝘽𝙤𝙩 𝙈𝙪𝙨𝙞𝙘 ⚡ 〕━━⬣
+┃🎼 *Titulo:* ${title}
+┃⏱️ *Duración:* ${fduration}
+┃👤 *Autor:* ${channel}
+┃👀 *Vistas:* ${views}
+╰━━━━━━━━━━━━⬣
 
-*⇆‌ ㅤ◁ㅤㅤ❚❚ㅤㅤ▷ㅤ↻*`;
+🎧 *Enviando audio... aguarde un poco.*`;
 
+    // Envía la imagen con info primero
     await conn.sendMessage(chatId, {
       image: { url: thumbnail },
       caption: infoMessage
     }, { quoted: msg });
 
+    // Descarga el audio de tu API
     const apiURL = `https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(videoUrl)}&type=audio&quality=128kbps&apikey=russellxz`;
     const res = await axios.get(apiURL);
     const json = res.data;
@@ -76,6 +74,7 @@ const handler = async (msg, { conn, text }) => {
     const audioRes = await axios.get(json.data.url, { responseType: 'stream' });
     await streamPipeline(audioRes.data, fs.createWriteStream(rawPath));
 
+    // Convierte a MP3
     await new Promise((resolve, reject) => {
       ffmpeg(rawPath)
         .audioCodec('libmp3lame')
@@ -86,13 +85,19 @@ const handler = async (msg, { conn, text }) => {
         .on('error', reject);
     });
 
+    // Descarga tu logo para usarlo como thumbnail
+    const logoBuffer = (await axios.get('https://cdn.russellxz.click/652f01f6.jpeg', { responseType: 'arraybuffer' })).data;
+
+    // Envía el audio con tu logo como miniatura
     await conn.sendMessage(chatId, {
       audio: fs.readFileSync(finalPath),
       mimetype: 'audio/mpeg',
       fileName: `${title}.mp3`,
-      ptt: false
+      ptt: false,
+      jpegThumbnail: logoBuffer
     }, { quoted: msg });
 
+    // Limpieza
     fs.unlinkSync(rawPath);
     fs.unlinkSync(finalPath);
 
@@ -101,12 +106,13 @@ const handler = async (msg, { conn, text }) => {
     });
 
   } catch (error) {
+    console.error(error);
     return conn.sendMessage(chatId, {
       text: `➤ \`UPS, ERROR\` ❌
 
-𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗉𝗅𝖺𝗒𝗉𝗋𝗈* *.𝗌𝗉𝗈𝗍𝗂𝖿𝗒* 𝗈 *.𝗋𝗈𝗅𝗂𝗍𝖺*
-".𝗋𝖾𝗉𝗈𝗋𝗍𝖾 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
-> 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
+Pruebe usar *.playpro* *.spotify* o *.rolita*
+".reporte no funciona .play"
+> El equipo lo revisará pronto. 🚔`
     }, { quoted: msg });
   }
 };
