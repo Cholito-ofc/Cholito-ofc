@@ -90,15 +90,16 @@ const handler = async (msg, { conn, text }) => {
         .on('error', reject);
     });
 
-    // Enviar audio con miniatura
+    // Enviar audio con miniatura (se ve pero no se puede abrir)
     await conn.sendMessage(chatId, {
       audio: fs.readFileSync(finalPath),
       mimetype: 'audio/mpeg',
       fileName: `${title}.mp3`,
-      jpegThumbnail: fs.readFileSync(thumbPath),
+      jpegThumbnail: fs.readFileSync(thumbPath), // esto lo muestra como miniatura
       ptt: false
     }, { quoted: msg });
 
+    // Limpiar
     fs.unlinkSync(rawPath);
     fs.unlinkSync(finalPath);
     fs.unlinkSync(thumbPath);
