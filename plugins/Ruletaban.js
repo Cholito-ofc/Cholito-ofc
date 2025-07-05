@@ -12,21 +12,21 @@ const handler = async (msg, { conn, args }) => {
     return conn.sendMessage(chatId, { text: '🔖 Menciona a alguien para ejecutarlo.' }, { quoted: msg });
   }
 
-  // Obtener participantes del grupo manualmente
+  // Obtener metadatos del grupo (y participantes)
   const metadata = await conn.groupMetadata(chatId);
-  const participants = metadata.participants || [];
+  const participants = metadata.participants;
 
   const senderId = msg.key.participant || msg.key.remoteJid;
-  const botId = conn.user?.id?.split(':')[0] + '@s.whatsapp.net'; // NORMALIZADO
+  const botNumber = conn.user?.jid?.split(':')[0]; // '1234567890@s.whatsapp.net'
 
   // Verificar si el remitente es admin
-  const senderIsAdmin = participants.find(p => p.id === senderId)?.admin;
+  const senderIsAdmin = participants.find(p => p.id === senderId)?.admin !== undefined;
   if (!senderIsAdmin) {
     return conn.sendMessage(chatId, { text: '⚠️ Solo los admins pueden usar este comando.' }, { quoted: msg });
   }
 
-  // Verificar si el bot es admin (esta era la parte que fallaba)
-  const botIsAdmin = participants.find(p => p.id === botId)?.admin;
+  // Verificar si el bot es admin
+  const botIsAdmin = participants.find(p => p.id === botNumber)?.admin !== undefined;
   if (!botIsAdmin) {
     return conn.sendMessage(chatId, { text: '🚫 No soy admin. No puedo expulsar a nadie.' }, { quoted: msg });
   }
