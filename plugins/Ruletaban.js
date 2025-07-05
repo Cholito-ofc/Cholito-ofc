@@ -1,15 +1,25 @@
-const handler = async (msg, { conn, args, participants, isBotAdmin, isAdmin, command }) => {
+const handler = async (msg, { conn, args, participants, isBotAdmin, command }) => {
   const chatId = msg.key.remoteJid;
 
   if (!chatId.endsWith('@g.us')) {
     return conn.sendMessage(chatId, { text: '❌ Este comando solo funciona en grupos.' }, { quoted: msg });
   }
 
-  if (!isAdmin) return conn.sendMessage(chatId, { text: '⚠️ Solo los admins pueden usar este comando.' }, { quoted: msg });
-  if (!isBotAdmin) return conn.sendMessage(chatId, { text: '🚫 No soy admin. No puedo expulsar a nadie.' }, { quoted: msg });
+  const senderId = msg.key.participant || msg.key.remoteJid;
+  const isSenderAdmin = participants?.find(p => p.id === senderId)?.admin;
+
+  if (!isSenderAdmin) {
+    return conn.sendMessage(chatId, { text: '⚠️ Solo los admins pueden usar este comando.' }, { quoted: msg });
+  }
+
+  if (!isBotAdmin) {
+    return conn.sendMessage(chatId, { text: '🚫 No soy admin. No puedo expulsar a nadie.' }, { quoted: msg });
+  }
 
   const mentionedJid = msg.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0];
-  if (!mentionedJid) return conn.sendMessage(chatId, { text: '🔖 Menciona a alguien para ejecutarlo.' }, { quoted: msg });
+  if (!mentionedJid) {
+    return conn.sendMessage(chatId, { text: '🔖 Menciona a alguien para ejecutarlo.' }, { quoted: msg });
+  }
 
   if (!participants.some(p => p.id === mentionedJid)) {
     return conn.sendMessage(chatId, { text: '👤 El usuario no está en este grupo.' }, { quoted: msg });
@@ -25,6 +35,11 @@ const handler = async (msg, { conn, args, participants, isBotAdmin, isAdmin, com
 
   await conn.groupParticipantsUpdate(chatId, [mentionedJid], 'remove').catch(() => {
     return conn.sendMessage(chatId, { text: `❌ No pude eliminar a @${mentionedJid.split('@')[0]}.`, mentions: [mentionedJid] }, { quoted: msg });
+  });
+
+  await conn.sendMessage(chatId, {
+    text: `🪦 *@${mentionedJid.split('@')[0]} ha sido ejecutado con éxito.*`,
+    mentions: [mentionedJid]
   });
 };
 
