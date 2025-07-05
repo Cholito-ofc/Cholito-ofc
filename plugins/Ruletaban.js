@@ -17,7 +17,7 @@ const handler = async (msg, { conn, args }) => {
   const participants = metadata.participants || [];
 
   const senderId = msg.key.participant || msg.key.remoteJid;
-  const botId = conn.user.jid;
+  const botId = conn.user?.id?.split(':')[0] + '@s.whatsapp.net'; // NORMALIZADO
 
   // Verificar si el remitente es admin
   const senderIsAdmin = participants.find(p => p.id === senderId)?.admin;
@@ -25,7 +25,7 @@ const handler = async (msg, { conn, args }) => {
     return conn.sendMessage(chatId, { text: '⚠️ Solo los admins pueden usar este comando.' }, { quoted: msg });
   }
 
-  // Verificar si el bot es admin
+  // Verificar si el bot es admin (esta era la parte que fallaba)
   const botIsAdmin = participants.find(p => p.id === botId)?.admin;
   if (!botIsAdmin) {
     return conn.sendMessage(chatId, { text: '🚫 No soy admin. No puedo expulsar a nadie.' }, { quoted: msg });
