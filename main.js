@@ -4406,7 +4406,7 @@ case 'link': {
     await sock.sendMessage(chatId, { text: "❌ *Ocurrió un error al generar el enlace del grupo.*" }, { quoted: msg });
   }
   break;
-}  
+}
 
 case 'add': {
   try {
@@ -4552,7 +4552,8 @@ case 'add': {
       { quoted: msg }
     );
   }
-  break;  
+  break;
+}
         
 case 'autoadmins':
 case 'autoadmin': {
