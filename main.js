@@ -1849,110 +1849,114 @@ case 'ytmp4': {
 
 
 
-      case 'tiktoksearch': {
-    const axios = require('axios');
+case 'tiktoksearch': {
+  const axios = require('axios');
 
-    if (!args.length) {
-        await sock.sendMessage(msg.key.remoteJid, {
-            text: `⚠️ *Uso incorrecto.*\n📌 Ejemplo: \`${global.prefix}tiktoksearch <nombre o tema>\``
-        }, { quoted: msg });
-        return;
+  if (!args.length) {
+    await sock.sendMessage(msg.key.remoteJid, {
+      text: `⚠️ *Uso incorrecto.*\n📌 Ejemplo: \`${global.prefix}tiktoksearch <nombre o tema>\``
+    }, { quoted: msg });
+    return;
+  }
+
+  const query = args.join(' ');
+  const apiUrl = `https://api.dorratz.com/v2/tiktok-s?q=${encodeURIComponent(query)}`;
+
+  await sock.sendMessage(msg.key.remoteJid, {
+    react: { text: "⏳", key: msg.key }
+  });
+
+  try {
+    const response = await axios.get(apiUrl);
+
+    if (response.data.status !== 200 || !response.data.data || response.data.data.length === 0) {
+      await sock.sendMessage(msg.key.remoteJid, {
+        text: "❌ No se encontraron resultados para tu búsqueda."
+      }, { quoted: msg });
+      return;
     }
 
-    const query = args.join(' ');
-    const apiUrl = `https://api.dorratz.com/v2/tiktok-s?q=${encodeURIComponent(query)}`;
+    const videos = response.data.data.slice(0, 5);
 
     await sock.sendMessage(msg.key.remoteJid, {
-        react: { text: "⏳", key: msg.key }
-    });
+      text: `🔍 *Enviando los primeros ${videos.length} resultados de TikTok para:* "${query}"`,
+    }, { quoted: msg });
 
-    try {
-        const response = await axios.get(apiUrl);
+    for (let i = 0; i < videos.length; i++) {
+      const video = videos[i];
+      const downloadUrl = video.video.no_watermark;
 
-        if (response.data.status !== 200 || !response.data.data || response.data.data.length === 0) {
-            return await sock.sendMessage(msg.key.remoteJid, {
-                text: "❌ No se encontraron resultados para tu búsqueda."
-            }, { quoted: msg });
-        }
-
-        const videos = response.data.data.slice(0, 5);
-
-        await sock.sendMessage(msg.key.remoteJid, {
-            text: `🔍 *Enviando los primeros ${videos.length} resultados de TikTok para:* "${query}"`,
-        }, { quoted: msg });
-
-        for (let i = 0; i < videos.length; i++) {
-            const video = videos[i];
-            const downloadUrl = video.video.no_watermark; // enlace directo al video sin marca de agua
-
-            await sock.sendMessage(msg.key.remoteJid, {
-                video: { url: downloadUrl },
-                caption: `🎬 *${video.title}*\n👤 @${video.author.username}\n❤️ ${video.like.toLocaleString()} | 💬 ${video.coment.toLocaleString()}`,
-            }, { quoted: msg });
-        }
-
-        await sock.sendMessage(msg.key.remoteJid, {
-            react: { text: "✅", key: msg.key }
-        });
-
-    } catch (error) {
-        console.error("❌ Error en tiktoksearch:", error);
-        await sock.sendMessage(msg.key.remoteJid, {
-            text: "❌ *Ocurrió un error al obtener los videos.*"
-        }, { quoted: msg });
-
-        await sock.sendMessage(msg.key.remoteJid, {
-            react: { text: "❌", key: msg.key }
-        });
-    break;
-      
-        case 'dalle': {
-    const axios = require('axios');
-
-    if (!args.length) {
-        await sock.sendMessage(msg.key.remoteJid, { 
-            text: `⚠️ *Uso incorrecto.*\n📌 Ejemplo: \`${global.prefix}dalle Gato en la luna\`` 
-        }, { quoted: msg });
-        return;
+      await sock.sendMessage(msg.key.remoteJid, {
+        video: { url: downloadUrl },
+        caption: `🎬 *${video.title}*\n👤 @${video.author.username}\n❤️ ${video.like.toLocaleString()} | 💬 ${video.coment.toLocaleString()}`
+      }, { quoted: msg });
     }
 
-    const text = args.join(' ');
-    const apiUrl = `https://api.hiuraa.my.id/ai-img/imagen?text=${encodeURIComponent(text)}`;
+    await sock.sendMessage(msg.key.remoteJid, {
+      react: { text: "✅", key: msg.key }
+    });
+
+  } catch (error) {
+    console.error("❌ Error en tiktoksearch:", error);
+    await sock.sendMessage(msg.key.remoteJid, {
+      text: "❌ *Ocurrió un error al obtener los videos.*"
+    }, { quoted: msg });
+
+    await sock.sendMessage(msg.key.remoteJid, {
+      react: { text: "❌", key: msg.key }
+    });
+  }
+  break; // <- CIERRA EL CASE correctamente
+}
+
+
+case 'dalle': {
+  const axios = require('axios');
+
+  if (!args.length) {
+    await sock.sendMessage(msg.key.remoteJid, { 
+      text: `⚠️ *Uso incorrecto.*\n📌 Ejemplo: \`${global.prefix}dalle Gato en la luna\`` 
+    }, { quoted: msg });
+    return;
+  }
+
+  const text = args.join(' ');
+  const apiUrl = `https://api.hiuraa.my.id/ai-img/imagen?text=${encodeURIComponent(text)}`;
+
+  await sock.sendMessage(msg.key.remoteJid, { 
+    react: { text: "⏳", key: msg.key } 
+  });
+
+  try {
+    const response = await axios.get(apiUrl, { responseType: 'arraybuffer' });
+
+    if (!response.data) {
+      throw new Error('No se pudo generar la imagen.');
+    }
+
+    const imageBuffer = Buffer.from(response.data, 'binary');
 
     await sock.sendMessage(msg.key.remoteJid, { 
-        react: { text: "⏳", key: msg.key } 
+      image: imageBuffer,
+      caption: `🖼️ *Imagen generada para:* ${text}`,
+      mimetype: 'image/jpeg'
+    }, { quoted: msg });
+
+    await sock.sendMessage(msg.key.remoteJid, { 
+      react: { text: "✅", key: msg.key } 
     });
 
-    try {
-        const response = await axios.get(apiUrl, { responseType: 'arraybuffer' });
+  } catch (error) {
+    console.error("❌ Error en el comando .dalle:", error.message);
+    await sock.sendMessage(msg.key.remoteJid, { 
+      text: `❌ *Error al generar la imagen:*\n_${error.message}_` 
+    }, { quoted: msg });
 
-        if (!response.data) {
-            throw new Error('No se pudo generar la imagen.');
-        }
-
-        const imageBuffer = Buffer.from(response.data, 'binary');
-
-        await sock.sendMessage(msg.key.remoteJid, { 
-            image: imageBuffer,
-            caption: `🖼️ *Imagen generada para:* ${text}`,
-            mimetype: 'image/jpeg'
-        }, { quoted: msg });
-
-        await sock.sendMessage(msg.key.remoteJid, { 
-            react: { text: "✅", key: msg.key } 
-        });
-
-    } catch (error) {
-        console.error("❌ Error en el comando .dalle:", error.message);
-        await sock.sendMessage(msg.key.remoteJid, { 
-            text: `❌ *Error al generar la imagen:*\n_${error.message}_` 
-        }, { quoted: msg });
-
-        await sock.sendMessage(msg.key.remoteJid, { 
-            react: { text: "❌", key: msg.key } 
-        });
-    }
-    break;
+    await sock.sendMessage(msg.key.remoteJid, { 
+      react: { text: "❌", key: msg.key } 
+    });
+  }
+  break;
 }
         
 case 'ytmp3': {
