@@ -29,7 +29,7 @@ const handler = async (msg, { conn, text }) => {
   }
 
   await conn.sendMessage(chatId, {
-    react: { text: '🕗', key: msg.key }
+    react: { text: '⏱️', key: msg.key }
   });
 
   try {
