@@ -10,15 +10,17 @@ const streamPipeline = promisify(pipeline);
 const handler = async (msg, { conn, text }) => {
   const rawID = conn.user?.id || "";
   const subbotID = rawID.split(":")[0] + "@s.whatsapp.net";
+
   const chatId = msg.key.remoteJid;
 
+  // Cargar prefijo personalizado
   const prefixPath = path.resolve("prefixes.json");
   let prefixes = {};
   if (fs.existsSync(prefixPath)) {
     prefixes = JSON.parse(fs.readFileSync(prefixPath, "utf-8"));
   }
 
-  const usedPrefix = prefixes[subbotID] || ".";
+  const usedPrefix = prefixes[subbotID] || "."; // Por defecto .
 
   if (!text) {
     return await conn.sendMessage(chatId, {
@@ -55,7 +57,8 @@ const handler = async (msg, { conn, text }) => {
 *⇆‌ ㅤ◁ㅤㅤ❚❚ㅤㅤ▷ㅤ↻*`;
 
     await conn.sendMessage(chatId, {
-      text: infoMessage
+      image: { url: thumbnail },
+      caption: infoMessage
     }, { quoted: msg });
 
     const apiURL = `https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(videoUrl)}&type=audio&quality=128kbps&apikey=russellxz`;
@@ -69,17 +72,10 @@ const handler = async (msg, { conn, text }) => {
 
     const rawPath = path.join(tmpDir, `${Date.now()}_raw.m4a`);
     const finalPath = path.join(tmpDir, `${Date.now()}_final.mp3`);
-    const thumbPath = path.join(tmpDir, `${Date.now()}_thumb.jpg`);
 
-    // Descargar audio
     const audioRes = await axios.get(json.data.url, { responseType: 'stream' });
     await streamPipeline(audioRes.data, fs.createWriteStream(rawPath));
 
-    // Descargar miniatura
-    const thumbRes = await axios.get(thumbnail, { responseType: 'arraybuffer' });
-    fs.writeFileSync(thumbPath, Buffer.from(thumbRes.data));
-
-    // Convertir audio
     await new Promise((resolve, reject) => {
       ffmpeg(rawPath)
         .audioCodec('libmp3lame')
@@ -90,26 +86,21 @@ const handler = async (msg, { conn, text }) => {
         .on('error', reject);
     });
 
-    // Enviar audio con miniatura (se ve pero no se puede abrir)
     await conn.sendMessage(chatId, {
       audio: fs.readFileSync(finalPath),
       mimetype: 'audio/mpeg',
       fileName: `${title}.mp3`,
-      jpegThumbnail: fs.readFileSync(thumbPath), // esto lo muestra como miniatura
       ptt: false
     }, { quoted: msg });
 
-    // Limpiar
     fs.unlinkSync(rawPath);
     fs.unlinkSync(finalPath);
-    fs.unlinkSync(thumbPath);
 
     await conn.sendMessage(chatId, {
       react: { text: '✅', key: msg.key }
     });
 
   } catch (error) {
-    console.error(error);
     return conn.sendMessage(chatId, {
       text: `➤ \`UPS, ERROR\` ❌
 
