@@ -1649,7 +1649,7 @@ case 'linia': {
             video: fs.readFileSync(finalPath),
             mimetype: 'video/mp4',
             fileName: `video_optimo.mp4`,
-            caption: `✅ *Video optimizado para WhatsApp*\n⏱️ *Conversión:* ${endTime}s\n\n© Azura Ultra 2.0`
+            caption: `✅ *Video optimizado para WhatsApp*\n⏱️ *Conversión:* ${endTime}s\n\n© *KilluaBot*`
         }, { quoted: msg });
 
         fs.unlinkSync(rawPath);
@@ -1849,67 +1849,64 @@ case 'ytmp4': {
 
 
 
-case 'tiktoksearch': {
-  const axios = require('axios');
+      case 'tiktoksearch': {
+    const axios = require('axios');
 
-  if (!args.length) {
-    await sock.sendMessage(msg.key.remoteJid, {
-      text: `⚠️ *Uso incorrecto.*\n📌 Ejemplo: \`${global.prefix}tiktoksearch <nombre o tema>\``
-    }, { quoted: msg });
-    return;
-  }
-
-  const query = args.join(' ');
-  const apiUrl = `https://api.dorratz.com/v2/tiktok-s?q=${encodeURIComponent(query)}`;
-
-  await sock.sendMessage(msg.key.remoteJid, {
-    react: { text: "⏳", key: msg.key }
-  });
-
-  try {
-    const response = await axios.get(apiUrl);
-
-    if (response.data.status !== 200 || !response.data.data || response.data.data.length === 0) {
-      await sock.sendMessage(msg.key.remoteJid, {
-        text: "❌ No se encontraron resultados para tu búsqueda."
-      }, { quoted: msg });
-      return;
+    if (!args.length) {
+        await sock.sendMessage(msg.key.remoteJid, { 
+            text: `⚠️ *Uso incorrecto.*\n📌 Ejemplo: \`${global.prefix}tiktoksearch <query>\`` 
+        }, { quoted: msg });
+        return;
     }
 
-    const videos = response.data.data.slice(0, 5);
+    const query = args.join(' ');
+    const apiUrl = `https://api.dorratz.com/v2/tiktok-s?q=${encodeURIComponent(query)}`;
 
-    await sock.sendMessage(msg.key.remoteJid, {
-      text: `🔍 *Enviando los primeros ${videos.length} resultados de TikTok para:* "${query}"`,
-    }, { quoted: msg });
+    await sock.sendMessage(msg.key.remoteJid, { 
+        react: { text: "⏳", key: msg.key } 
+    });
 
-    for (let i = 0; i < videos.length; i++) {
-      const video = videos[i];
-      const downloadUrl = video.video.no_watermark;
+    try {
+        const response = await axios.get(apiUrl);
 
-      await sock.sendMessage(msg.key.remoteJid, {
-        video: { url: downloadUrl },
-        caption: `🎬 *${video.title}*\n👤 @${video.author.username}\n❤️ ${video.like.toLocaleString()} | 💬 ${video.coment.toLocaleString()}`
-      }, { quoted: msg });
+        if (response.data.status !== 200 || !response.data.data || response.data.data.length === 0) {
+            return await sock.sendMessage(msg.key.remoteJid, { 
+                text: "No se encontraron resultados para tu consulta." 
+            }, { quoted: msg });
+        }
+
+        const results = response.data.data.slice(0, 5);
+
+        const resultText = results.map((video, index) => `
+📌 *Resultado ${index + 1}:*
+📹 *Título:* ${video.title}
+👤 *Autor:* ${video.author.nickname} (@${video.author.username})
+👀 *Reproducciones:* ${video.play.toLocaleString()}
+❤️ *Me gusta:* ${video.like.toLocaleString()}
+💬 *Comentarios:* ${video.coment.toLocaleString()}
+🔗 *Enlace:* ${video.url}
+        `).join('\n');
+
+        await sock.sendMessage(msg.key.remoteJid, { 
+            text: `🔍 *Resultados de búsqueda en TikTok para "${query}":*\n\n${resultText}` 
+        }, { quoted: msg });
+
+        await sock.sendMessage(msg.key.remoteJid, { 
+            react: { text: "✅", key: msg.key } 
+        });
+
+    } catch (error) {
+        console.error("❌ Error en el comando .tiktoksearch:", error);
+        await sock.sendMessage(msg.key.remoteJid, { 
+            text: "❌ *Ocurrió un error al procesar tu solicitud.*" 
+        }, { quoted: msg });
+
+        await sock.sendMessage(msg.key.remoteJid, { 
+            react: { text: "❌", key: msg.key } 
+        });
     }
-
-    await sock.sendMessage(msg.key.remoteJid, {
-      react: { text: "✅", key: msg.key }
-    });
-
-  } catch (error) {
-    console.error("❌ Error en tiktoksearch:", error?.response?.data || error.message || error);
-    await sock.sendMessage(msg.key.remoteJid, {
-      text: "❌ *Ocurrió un error al obtener los videos.*"
-    }, { quoted: msg });
-
-    await sock.sendMessage(msg.key.remoteJid, {
-      react: { text: "❌", key: msg.key }
-    });
-  }
-  break; // <- CIERRA EL CASE correctamente
+    break;
 }
-
-
 case 'dalle': {
   const axios = require('axios');
 
