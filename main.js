@@ -4448,7 +4448,8 @@ case 'add': {
 
     // 🔧 Intentar agregar y analizar la respuesta
     const res = await sock.groupParticipantsUpdate(chatId, [targetId], "add");
-    const result = res?.[0];
+console.log("🔍 Resultado de agregar:", JSON.stringify(res, null, 2));
+const result = res?.[0];
 
     if (result?.status === 200) {
       // ✅ Se agregó correctamente
