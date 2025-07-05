@@ -12,7 +12,6 @@ const handler = async (msg, { conn, text }) => {
   const subbotID = rawID.split(":")[0] + "@s.whatsapp.net";
   const chatId = msg.key.remoteJid;
 
-  // Prefijo personalizado
   const prefixPath = path.resolve("prefixes.json");
   let prefixes = {};
   if (fs.existsSync(prefixPath)) {
@@ -32,7 +31,6 @@ const handler = async (msg, { conn, text }) => {
   });
 
   try {
-    // Buscar video en YouTube
     const search = await yts(text);
     const video = search.videos[0];
     if (!video) throw new Error('No se encontraron resultados');
@@ -53,31 +51,26 @@ const handler = async (msg, { conn, text }) => {
 
 🎧 *Enviando audio... aguarde un poco.*`;
 
-    // Mostrar info con miniatura del video
     await conn.sendMessage(chatId, {
       image: { url: thumbnail },
       caption: infoMessage
     }, { quoted: msg });
 
-    // Descargar desde API externa
     const apiURL = `https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(videoUrl)}&type=audio&quality=128kbps&apikey=russellxz`;
     const res = await axios.get(apiURL);
     const json = res.data;
 
     if (!json.status || !json.data?.url) throw new Error("No se pudo obtener el audio");
 
-    // Crear carpeta temporal
     const tmpDir = path.join(__dirname, '../tmp');
     if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
 
     const rawPath = path.join(tmpDir, `${Date.now()}_raw.m4a`);
     const finalPath = path.join(tmpDir, `${Date.now()}_final.mp3`);
 
-    // Descargar el audio crudo
     const audioRes = await axios.get(json.data.url, { responseType: 'stream' });
     await streamPipeline(audioRes.data, fs.createWriteStream(rawPath));
 
-    // Convertir a mp3
     await new Promise((resolve, reject) => {
       ffmpeg(rawPath)
         .audioCodec('libmp3lame')
@@ -88,26 +81,31 @@ const handler = async (msg, { conn, text }) => {
         .on('error', reject);
     });
 
-    // Miniatura (logo)
-    const logoBuffer = (await axios.get('https://cdn.russellxz.click/652f01f6.jpeg', {
-      responseType: 'arraybuffer'
-    })).data;
+    const thumbBuffer = (await axios.get(thumbnail, { responseType: 'arraybuffer' })).data;
 
-    // Verificar tamaño del archivo
     const stats = fs.statSync(finalPath);
     const sizeMB = stats.size / 1024 / 1024;
     console.log(`📦 Archivo final: ${sizeMB.toFixed(2)} MB`);
 
-    // Enviar como documento de audio (compatible con miniatura)
     await conn.sendMessage(chatId, {
-      document: fs.readFileSync(finalPath),
+      audio: fs.readFileSync(finalPath),
       mimetype: 'audio/mpeg',
       fileName: `${title}.mp3`,
-      jpegThumbnail: logoBuffer,
-      caption: `🎧 *${title}*\nKilluaBot Music`,
+      ptt: false,
+      contextInfo: {
+        externalAdReply: {
+          title: title,
+          body: '🎧 KilluaBot Music',
+          mediaType: 2,
+          thumbnail: thumbBuffer,
+          mediaUrl: videoUrl,
+          sourceUrl: videoUrl,
+          showAdAttribution: true,
+          renderLargerThumbnail: false // ✅ Miniatura pequeña
+        }
+      }
     }, { quoted: msg });
 
-    // Limpiar
     fs.unlinkSync(rawPath);
     fs.unlinkSync(finalPath);
 
