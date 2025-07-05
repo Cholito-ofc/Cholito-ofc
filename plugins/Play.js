@@ -10,10 +10,9 @@ const streamPipeline = promisify(pipeline);
 const handler = async (msg, { conn, text }) => {
   const rawID = conn.user?.id || "";
   const subbotID = rawID.split(":")[0] + "@s.whatsapp.net";
-
   const chatId = msg.key.remoteJid;
 
-  // Cargar prefijo personalizado
+  // Prefijo personalizado
   const prefixPath = path.resolve("prefixes.json");
   let prefixes = {};
   if (fs.existsSync(prefixPath)) {
@@ -54,31 +53,30 @@ const handler = async (msg, { conn, text }) => {
 
 🎧 *Enviando audio... aguarde un poco.*`;
 
-    // Envía la imagen de preview con info
     await conn.sendMessage(chatId, {
       image: { url: thumbnail },
       caption: infoMessage
     }, { quoted: msg });
 
-    // Obtener audio desde tu API
+    // Descargar audio desde API externa
     const apiURL = `https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(videoUrl)}&type=audio&quality=128kbps&apikey=russellxz`;
     const res = await axios.get(apiURL);
     const json = res.data;
 
     if (!json.status || !json.data?.url) throw new Error("No se pudo obtener el audio");
 
-    // Preparar carpetas temporales
+    // Carpeta temporal
     const tmpDir = path.join(__dirname, '../tmp');
     if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
 
     const rawPath = path.join(tmpDir, `${Date.now()}_raw.m4a`);
     const finalPath = path.join(tmpDir, `${Date.now()}_final.mp3`);
 
-    // Descargar audio crudo
+    // Descargar audio
     const audioRes = await axios.get(json.data.url, { responseType: 'stream' });
     await streamPipeline(audioRes.data, fs.createWriteStream(rawPath));
 
-    // Convertir a mp3
+    // Convertir a MP3
     await new Promise((resolve, reject) => {
       ffmpeg(rawPath)
         .audioCodec('libmp3lame')
@@ -89,29 +87,29 @@ const handler = async (msg, { conn, text }) => {
         .on('error', reject);
     });
 
-    // Descargar tu logo para miniatura
+    // Descargar imagen para miniatura (o usar thumbnail)
     const logoBuffer = (await axios.get('https://cdn.russellxz.click/652f01f6.jpeg', { responseType: 'arraybuffer' })).data;
 
-// Enviar como audio con vista estilo MediaHub
-await conn.sendMessage(chatId, {
-  audio: fs.readFileSync(finalPath),
-  mimetype: 'audio/mp4',
-  ptt: false,
-  fileName: `${title}.mp3`,
-  jpegThumbnail: logoBuffer,
-  contextInfo: {
-    externalAdReply: {
-      title: title,
-      body: 'KilluaBot Music',
-      mediaType: 2,
-      thumbnail: logoBuffer,
-      showAdAttribution: true,
-      sourceUrl: videoUrl
-    }
-  }
-}, { quoted: msg });
+    // Enviar como audio estilo MediaHub
+    await conn.sendMessage(chatId, {
+      audio: fs.readFileSync(finalPath),
+      mimetype: 'audio/mpeg',
+      ptt: false,
+      fileName: `${title}.mp3`,
+      jpegThumbnail: logoBuffer,
+      contextInfo: {
+        externalAdReply: {
+          title: title,
+          body: 'KilluaBot Music',
+          mediaType: 2,
+          thumbnail: logoBuffer,
+          showAdAttribution: true,
+          sourceUrl: videoUrl
+        }
+      }
+    }, { quoted: msg });
 
-    // Limpiar archivos temporales
+    // Eliminar archivos temporales
     fs.unlinkSync(rawPath);
     fs.unlinkSync(finalPath);
 
@@ -120,7 +118,7 @@ await conn.sendMessage(chatId, {
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error en .play:", error);
     return conn.sendMessage(chatId, {
       text: `➤ \`UPS, ERROR\` ❌
 
