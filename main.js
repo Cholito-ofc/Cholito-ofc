@@ -12,6 +12,7 @@ const { imageToWebp, videoToWebp, writeExifImg, writeExifVid, writeExif, toAudio
 const activeSessions = new Set();
 const stickersDir = "./stickers";
 const stickersFile = "./stickers.json";
+
 function isUrl(string) {
   const regex = /^(https?:\/\/[^\s]+)/g;
   return regex.test(string);
@@ -210,7 +211,8 @@ function loadPlugins() {
 const plugins = loadPlugins();
 
 async function handleCommand(sock, msg, command, args, sender) {
-    const lowerCommand = command.toLowerCase();
+    // Aquí modificamos para ignorar espacios y mayúsculas
+    const lowerCommand = command.trim().toLowerCase();
     const text = args.join(" ");
     global.viewonce = true;
 
