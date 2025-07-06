@@ -7,17 +7,17 @@ const { pipeline } = require('stream');
 const { promisify } = require('util');
 const streamPipeline = promisify(pipeline);
 
-// 🔹 Obtener miniatura personalizada estilo Killua
+// 🔹 Miniatura estilo Killua
 const getThumbnail = async () => {
   const imageUrl = "https://cdn.russellxz.click/c87a5d88.jpeg";
   const res = await axios.get(imageUrl, { responseType: 'arraybuffer' });
   return Buffer.from(res.data);
 };
 
-// 🔹 Limpiar caracteres prohibidos en el título
+// 🔹 Limpia el título
 const sanitize = (text) => text.replace(/[\/\\?%*:|"<>]/g, '');
 
-// 🔹 Enviar audio con miniatura estilo Killua
+// 🔹 Enviar audio con diseño Killua
 const sendAudioKillua = async (conn, chat, filePath, title, msg) => {
   try {
     const buffer = fs.readFileSync(filePath);
@@ -61,25 +61,25 @@ const handler = async (msg, { conn, text }) => {
 
   const usedPrefix = prefixes[subbotID] || ".";
 
-  const commandUsed = text?.trim().toLowerCase(); // normaliza texto
-const query = commandUsed.replace(/^play/i, '').trim(); // quita 'play' del inicio si es lo único que puso
+  const rawText = text || '';
+  const isOnlyCommand = /^play$/i.test(rawText.trim());
 
-if (!query) {
-  return await conn.sendMessage2(chatId, {
-    text: `*╭┈〔 ⚠️❌ USO INCORRECTO ❌⚠️ 〕┈╮*
+  if (isOnlyCommand || rawText.trim() === '') {
+    return await conn.sendMessage2(chatId, {
+      text: `*╭┈〔 ⚠️❌ USO INCORRECTO ❌⚠️ 〕┈╮*
 *┊*
 *┊* 🎧 𝖴𝗌𝖺: *${usedPrefix}𝗉𝗅𝖺𝗒 𝖠𝗋𝗍𝗂𝗌𝗍𝖺 / 𝖢𝖺𝗇𝖼𝗂𝗈́𝗇*
 *┊* 📌 𝖤𝗃𝖾𝗆𝗉𝗅𝗈: *${usedPrefix}𝗉𝗅𝖺𝗒 Anuel AA - McGregor*
 *╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫*`
-  }, msg);
-}
+    }, msg);
+  }
 
   await conn.sendMessage(chatId, {
     react: { text: '⏱️', key: msg.key }
   });
 
   try {
-    const search = await yts(query);
+    const search = await yts(rawText.trim());
     const video = search.videos[0];
     if (!video) throw new Error('No se encontraron resultados');
 
@@ -142,6 +142,7 @@ if (!query) {
     });
 
   } catch (error) {
+    console.error(error);
     return conn.sendMessage(chatId, {
       text: `➤ \`UPS, ERROR\` ❌
 
@@ -152,5 +153,5 @@ if (!query) {
   }
 };
 
-handler.command = ['play', 'Play', 'PLAY'];
+handler.command = ['play'];
 module.exports = handler;
