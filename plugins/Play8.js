@@ -4,7 +4,10 @@ const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const text = args.join(" ").trim();
 
-  // Definir el contacto personalizado
+  // Detectar el remitente de forma segura (para usar en vCard)
+  const sender = (msg.key.participant || msg.participant || msg.key.remoteJid).split('@')[0];
+
+  // Definir el contacto personalizado (fkontak)
   const fkontak = {
     key: {
       remoteJid: "status@broadcast",
@@ -14,13 +17,13 @@ const handler = async (msg, { conn, args }) => {
     message: {
       contactMessage: {
         displayName: "MediaHub-Bot",
-        vcard: `BEGIN:VCARD\nVERSION:3.0\nN:MediaHub;Bot;;;\nFN:MediaHub Oficial\nORG:Mediahub Team;\nTEL;waid=${msg.sender.split('@')[0]}:${msg.sender.split('@')[0]}\nEMAIL;type=INTERNET:soporte@mediahub.net\nEND:VCARD`
+        vcard: `BEGIN:VCARD\nVERSION:3.0\nN:MediaHub;Bot;;;\nFN:MediaHub Oficial\nORG:Mediahub Team;\nTEL;waid=${sender}:${sender}\nEMAIL;type=INTERNET:soporte@mediahub.net\nEND:VCARD`
       }
     },
     participant: "0@s.whatsapp.net"
   };
 
-  // Reaccionar al comando
+  // Reacción al comando
   await conn.sendMessage(chatId, { react: { text: '🎵', key: msg.key } });
 
   if (!text) {
