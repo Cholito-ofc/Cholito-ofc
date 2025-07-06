@@ -5052,7 +5052,7 @@ case 'toemoji':
 case 'toemojis': {
   try {
     const chatId = msg.key.remoteJid;
-    const sender = (msg.key.participant || msg.key.remoteJid).replace(/[^0-9]/g, "");
+    const sender = (msg.key.participant || chatId).replace(/[^0-9]/g, "");
     const isGroup = chatId.endsWith("@g.us");
     const isBotMessage = msg.key.fromMe;
 
@@ -5074,54 +5074,55 @@ case 'toemojis': {
       return;
     }
 
+    global.emojiConfig = global.emojiConfig || {};
+    const texto = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
+    const args = texto.trim().split(" ");
+    const comando = args[0].slice(1);
+    const input = args.slice(1).join(" ").trim();
+
+    if (comando === 'toemoji') {
+      if (!input) {
+        await sock.sendMessage(chatId, { text: "⚠️ *Debes escribir un emoji después del comando.*" }, { quoted: msg });
+        return;
+      }
+      global.emojiConfig[chatId] = { modo: "único", valor: input };
+      await sock.sendMessage(chatId, { text: `✅ *Emoji actualizado:* ${input}` }, { quoted: msg });
+      return;
+    }
+
+    if (comando === 'toemojis') {
+      const randomSet = ['😂','🔥','😈','😎','🤖','👻','😬','🥶','💀','🐉'];
+      const mezclados = randomSet.sort(() => 0.5 - Math.random()).slice(0, 4);
+      global.emojiConfig[chatId] = { modo: "varios", valor: mezclados };
+      await sock.sendMessage(chatId, { text: `✅ *Emojis aleatorios activados:* ${mezclados.join(" ")}` }, { quoted: msg });
+      return;
+    }
+
+    // .todos
     const participants = metadata.participants;
     const totalParticipants = participants.length;
-    const messageText = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
-    const args = messageText.trim().split(" ").slice(1);
-    const extraMsg = args.join(" ");
+    const extraMsg = args.slice(1).join(" ");
 
-    let mode = command; // 'todos', 'toemoji', 'toemojis'
-    let emojiList = [];
-    let emojiText = "➜";
-
-    if (mode === 'toemoji') {
-      if (!args[0]) {
-        await sock.sendMessage(chatId, { text: "⚠️ *Debes proporcionar un emoji después del comando.*" }, { quoted: msg });
-        return;
-      }
-      emojiText = args[0];
-    }
-
-    if (mode === 'toemojis') {
-      if (!args[0]) {
-        await sock.sendMessage(chatId, { text: "⚠️ *Debes proporcionar al menos un emoji separado por |.*" }, { quoted: msg });
-        return;
-      }
-      emojiList = args[0].split("|");
-    }
-
-    // Construcción del mensaje
     let finalMsg = `*╭━[* *INVOCACIÓN MASIVA* *]━⬣*\n`;
     finalMsg += `┃🔹 *KILLUA-BOT ⚡*\n`;
     finalMsg += `┃👤 *Invocado por:* @${sender}\n`;
     finalMsg += `┃👥 *Miembros del grupo:* ${totalParticipants}\n`;
-    if (extraMsg.trim().length > 0) {
-      finalMsg += `┃💬 *Mensaje:* ${extraMsg.replace(emojiList.length ? args[0] : "", "").trim()}\n`;
+    if (extraMsg.length > 0) {
+      finalMsg += `┃💬 *Mensaje:* ${extraMsg}\n`;
     }
     finalMsg += `*╰━━━━━━━⋆★⋆━━━━━━━⬣*\n\n`;
     finalMsg += `📲 *Etiquetando a todos los miembros...*\n\n`;
 
-    let mentionLines = [];
+    const config = global.emojiConfig[chatId];
+    const mentionLines = [];
+
     for (let i = 0; i < participants.length; i++) {
       const id = participants[i].id;
       let emoji = "➜";
-
-      if (mode === 'toemoji') {
-        emoji = emojiText;
-      } else if (mode === 'toemojis') {
-        emoji = emojiList[i % emojiList.length];
+      if (config) {
+        if (config.modo === "único") emoji = config.valor;
+        if (config.modo === "varios") emoji = config.valor[i % config.valor.length];
       }
-
       mentionLines.push(`│${emoji} @${id.split("@")[0]}`);
     }
 
@@ -5137,13 +5138,13 @@ case 'toemojis': {
     }, { quoted: msg });
 
   } catch (error) {
-    console.error("❌ Error en el comando:", error);
+    console.error("❌ Error en .todos/toemoji/toemojis:", error);
     await sock.sendMessage(msg.key.remoteJid, {
       text: "❌ *Ocurrió un error al ejecutar el comando.*"
     }, { quoted: msg });
   }
   break;
-  }
+}
         
 case 'antiarabe': {
   try {
