@@ -10,17 +10,15 @@ const streamPipeline = promisify(pipeline);
 const handler = async (msg, { conn, text }) => {
   const rawID = conn.user?.id || "";
   const subbotID = rawID.split(":")[0] + "@s.whatsapp.net";
-
   const chatId = msg.key.remoteJid;
 
-  // Cargar prefijo personalizado
   const prefixPath = path.resolve("prefixes.json");
   let prefixes = {};
   if (fs.existsSync(prefixPath)) {
     prefixes = JSON.parse(fs.readFileSync(prefixPath, "utf-8"));
   }
 
-  const usedPrefix = prefixes[subbotID] || "."; // Por defecto .
+  const usedPrefix = prefixes[subbotID] || ".";
 
   if (!text) {
     return await conn.sendMessage(chatId, {
@@ -99,6 +97,16 @@ const handler = async (msg, { conn, text }) => {
     await conn.sendMessage(chatId, {
       react: { text: '✅', key: msg.key }
     });
+
+    // ➕ Enviar canal de WhatsApp oficial
+    const canalText = `📢 *𝗖𝗔𝗡𝗔𝗟 𝗢𝗙𝗜𝗖𝗜𝗔𝗟 𝗗𝗘 𝗞𝗜𝗟𝗟𝗨𝗔𝗕𝗢𝗧:*
+https://whatsapp.com/channel/0029VbABQOU77qVUUPiUek2W
+
+🔔 *Síguelo para estar al tanto de actualizaciones, sorteos y funciones nuevas.*`;
+
+    await conn.sendMessage(chatId, {
+      text: canalText
+    }, { quoted: msg });
 
   } catch (error) {
     return conn.sendMessage(chatId, {
