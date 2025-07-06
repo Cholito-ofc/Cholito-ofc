@@ -7,6 +7,20 @@ const { pipeline } = require('stream');
 const { promisify } = require('util');
 const streamPipeline = promisify(pipeline);
 
+// 🔗 Info del canal para mostrar botón
+const canalInfo = {
+  forwardingScore: 999,
+  isForwarded: true,
+  externalAdReply: {
+    title: "KilluaBot Oficial",
+    body: "Canal de actualizaciones, sorteos y más",
+    mediaType: 1,
+    renderLargerThumbnail: true,
+    mediaUrl: "https://whatsapp.com/channel/0029VbABQOU77qVUUPiUek2W",
+    sourceUrl: "https://whatsapp.com/channel/0029VbABQOU77qVUUPiUek2W"
+  }
+};
+
 const handler = async (msg, { conn, text }) => {
   const rawID = conn.user?.id || "";
   const subbotID = rawID.split(":")[0] + "@s.whatsapp.net";
@@ -22,7 +36,11 @@ const handler = async (msg, { conn, text }) => {
 
   if (!text) {
     return await conn.sendMessage(chatId, {
-      text: `✳️ Usa el comando correctamente:\n\n📌 Ejemplo: *${usedPrefix}play* bad bunny diles`
+      text: `🎵 *Uso del comando .play:*
+
+📌 Escribe el nombre de una canción o artista.
+🔍 Ejemplo: *${usedPrefix}play Coldplay Yellow*`,
+      contextInfo: canalInfo
     }, { quoted: msg });
   }
 
@@ -56,7 +74,8 @@ const handler = async (msg, { conn, text }) => {
 
     await conn.sendMessage(chatId, {
       image: { url: thumbnail },
-      caption: infoMessage
+      caption: infoMessage,
+      contextInfo: canalInfo
     }, { quoted: msg });
 
     const apiURL = `https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(videoUrl)}&type=audio&quality=128kbps&apikey=russellxz`;
@@ -88,7 +107,8 @@ const handler = async (msg, { conn, text }) => {
       audio: fs.readFileSync(finalPath),
       mimetype: 'audio/mpeg',
       fileName: `${title}.mp3`,
-      ptt: false
+      ptt: false,
+      contextInfo: canalInfo
     }, { quoted: msg });
 
     fs.unlinkSync(rawPath);
@@ -98,23 +118,14 @@ const handler = async (msg, { conn, text }) => {
       react: { text: '✅', key: msg.key }
     });
 
-    // ➕ Enviar canal de WhatsApp oficial
-    const canalText = `📢 *𝗖𝗔𝗡𝗔𝗟 𝗢𝗙𝗜𝗖𝗜𝗔𝗟 𝗗𝗘 𝗞𝗜𝗟𝗟𝗨𝗔𝗕𝗢𝗧:*
-https://whatsapp.com/channel/0029VbABQOU77qVUUPiUek2W
-
-🔔 *Síguelo para estar al tanto de actualizaciones, sorteos y funciones nuevas.*`;
-
-    await conn.sendMessage(chatId, {
-      text: canalText
-    }, { quoted: msg });
-
   } catch (error) {
     return conn.sendMessage(chatId, {
       text: `➤ \`UPS, ERROR\` ❌
 
 𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗉𝗅𝖺𝗒𝗉𝗋𝗈* *.𝗌𝗉𝗈𝗍𝗂𝖿𝗒* 𝗈 *.𝗋𝗈𝗅𝗂𝗍𝖺*
 ".𝗋𝖾𝗉𝗈𝗋𝗍𝖾 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
-> 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
+> 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`,
+      contextInfo: canalInfo
     }, { quoted: msg });
   }
 };
