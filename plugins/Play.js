@@ -31,7 +31,7 @@ const sendAudioKillua = async (conn, chat, filePath, title) => {
       contextInfo: {
         externalAdReply: {
           title: title.slice(0, 100),
-          body: '🎧 Audio enviado por KilluaBot',
+          body: '𝗞𝗶𝗹𝗹𝘂𝗮𝗕𝗼𝘁 𝗠𝘂́𝘀𝗶𝗰 ⚡',
           previewType: 'PHOTO',
           thumbnail: thumb,
           mediaType: 2,
