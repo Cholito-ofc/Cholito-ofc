@@ -5087,7 +5087,9 @@ case 'resetemoji': {
         return;
       }
       global.emojiConfig[chatId] = { modo: "único", valor: input };
-      await sock.sendMessage(chatId, { text: `✅ *Emoji actualizado:* ${input}` }, { quoted: msg });
+      await sock.sendMessage(chatId, {
+        text: `⚡ *Configuración mental cargada.*\n⚙️ Cada víctima será marcada con: ${input}\n💀 *KilluaBot no tiene compasión...*`
+      }, { quoted: msg });
       return;
     }
 
@@ -5113,9 +5115,8 @@ case 'resetemoji': {
       const final = mezclados.slice(0, total);
       global.emojiConfig[chatId] = { modo: "varios", valor: final };
 
-      const preview = final.slice(0, 40).map((e, i) => `${i + 1}. ${e}`).join("\n");
       await sock.sendMessage(chatId, {
-        text: `✅ *Emojis aleatorios activados para ${total} miembros del grupo.*\n\n📦 *Vista previa de los primeros 40 emojis:*\n${preview}`
+        text: `✅ *Emojis aleatorios actualizados exitosamente.*\n🎯 *Serán usados en las menciones de .todos*\n⚡ *KILLUA-BOT listo para el caos...*`
       }, { quoted: msg });
 
       return;
@@ -5134,7 +5135,7 @@ case 'resetemoji': {
       finalMsg += `┃💬 *Mensaje:* ${extraMsg}\n`;
     }
     finalMsg += `*╰━━━━━━━⋆★⋆━━━━━━━⬣*\n\n`;
-    finalMsg += `┌──⭓ *Listado de miembros:*\n`;
+    finalMsg += `┌──⭓ *Mencionando a todos...*\n`;
 
     const config = global.emojiConfig[chatId];
     const mentionLines = [];
@@ -5167,7 +5168,8 @@ case 'resetemoji': {
     }, { quoted: msg });
   }
   break;
-}
+      }
+
         
 case 'antiarabe': {
   try {
