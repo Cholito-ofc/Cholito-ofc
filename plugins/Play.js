@@ -17,8 +17,8 @@ const getThumbnail = async () => {
 // 🔹 Limpiar el título para que no tenga caracteres prohibidos
 const sanitize = (text) => text.replace(/[\/\\?%*:|"<>]/g, '');
 
-// 🔹 Función personalizada para enviar audio con miniatura estilo Killua
-const sendAudioKillua = async (conn, chat, filePath, title, msg) => {
+// 🔹 Enviar audio Killua sin responder al mensaje
+const sendAudioKillua = async (conn, chat, filePath, title) => {
   try {
     const buffer = fs.readFileSync(filePath);
     const thumb = await getThumbnail();
@@ -38,7 +38,7 @@ const sendAudioKillua = async (conn, chat, filePath, title, msg) => {
           sourceUrl: 'https://whatsapp.com/channel/0029VbABQOU77qVUUPiUek2W'
         }
       }
-    }, { quoted: msg });
+    });
 
     return true;
   } catch (e) {
@@ -61,7 +61,6 @@ const handler = async (msg, { conn, text }) => {
   const usedPrefix = prefixes[subbotID] || ".";
 
   if (!text) {
-    // ✅ Mensaje de ayuda con botón "Ver canal"
     return await conn.sendMessage2(chatId, {
       text: `*╭┈〔 ⚠️ USO INCORRECTO ⚠️ 〕┈╮*
 *┊*
@@ -71,7 +70,6 @@ const handler = async (msg, { conn, text }) => {
     }, msg);
   }
 
-  // ⏱️ Reacción de espera
   await conn.sendMessage(chatId, {
     react: { text: '⏱️', key: msg.key }
   });
@@ -100,12 +98,12 @@ const handler = async (msg, { conn, text }) => {
 
 *⇆‌ ㅤ◁ㅤㅤ❚❚ㅤㅤ▷ㅤ↻*`;
 
+    // ✅ Imagen CON respuesta al mensaje
     await conn.sendMessage(chatId, {
       image: { url: thumbnail },
       caption: infoMessage
     }, { quoted: msg });
 
-    // 🔗 Descargar audio desde API externa
     const apiURL = `https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(videoUrl)}&type=audio&quality=128kbps&apikey=russellxz`;
     const res = await axios.get(apiURL);
     const json = res.data;
@@ -131,10 +129,9 @@ const handler = async (msg, { conn, text }) => {
         .on('error', reject);
     });
 
-    // ✅ Enviar audio con miniatura Killua
-    await sendAudioKillua(conn, chatId, finalPath, title, msg);
+    // ❌ Audio SIN respuesta al mensaje
+    await sendAudioKillua(conn, chatId, finalPath, title);
 
-    // 🧹 Limpiar archivos temporales
     fs.unlinkSync(rawPath);
     fs.unlinkSync(finalPath);
 
@@ -146,7 +143,7 @@ const handler = async (msg, { conn, text }) => {
     return conn.sendMessage(chatId, {
       text: `➤ \`UPS, ERROR\` ❌
 
-𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗉𝗅𝖺𝗒𝗉𝗋𝗈* *.𝗌𝗉𝗈𝗍𝗂𝖿𝗒* 𝗈 *.𝗋𝗈𝗅𝗂𝗍𝖺*
+𝖯𝗋𝗎𝖾𝗁𝖾 𝗎𝗌𝖺𝗋 *.𝗉𝗅𝖺𝗒𝗉𝗋𝗈* *.𝗌𝗉𝗈𝗍𝗂𝖿𝗒* 𝗈 *.𝗋𝗈𝗅𝗂𝗍𝖺*
 ".𝗋𝖾𝗉𝗈𝗋𝗍𝖾 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
 > 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
     }, { quoted: msg });
