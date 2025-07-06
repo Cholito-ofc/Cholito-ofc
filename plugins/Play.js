@@ -7,20 +7,6 @@ const { pipeline } = require('stream');
 const { promisify } = require('util');
 const streamPipeline = promisify(pipeline);
 
-// 🔗 Info del canal para mostrar botón
-const canalInfo = {
-  forwardingScore: 999,
-  isForwarded: true,
-  externalAdReply: {
-    title: "KilluaBot Oficial",
-    body: "Canal de actualizaciones, sorteos y más",
-    mediaType: 1,
-    renderLargerThumbnail: true,
-    mediaUrl: "https://whatsapp.com/channel/0029VbABQOU77qVUUPiUek2W",
-    sourceUrl: "https://whatsapp.com/channel/0029VbABQOU77qVUUPiUek2W"
-  }
-};
-
 const handler = async (msg, { conn, text }) => {
   const rawID = conn.user?.id || "";
   const subbotID = rawID.split(":")[0] + "@s.whatsapp.net";
@@ -35,13 +21,12 @@ const handler = async (msg, { conn, text }) => {
   const usedPrefix = prefixes[subbotID] || ".";
 
   if (!text) {
-    return await conn.sendMessage(chatId, {
+    return await conn.sendMessage2(chatId, {
       text: `🎵 *Uso del comando .play:*
 
 📌 Escribe el nombre de una canción o artista.
-🔍 Ejemplo: *${usedPrefix}play Coldplay Yellow*`,
-      contextInfo: canalInfo
-    }, { quoted: msg });
+🔍 Ejemplo: *${usedPrefix}play Coldplay Yellow*`
+    }, msg);
   }
 
   await conn.sendMessage(chatId, {
@@ -72,11 +57,10 @@ const handler = async (msg, { conn, text }) => {
 
 *⇆‌ ㅤ◁ㅤㅤ❚❚ㅤㅤ▷ㅤ↻*`;
 
-    await conn.sendMessage(chatId, {
+    await conn.sendMessage2(chatId, {
       image: { url: thumbnail },
-      caption: infoMessage,
-      contextInfo: canalInfo
-    }, { quoted: msg });
+      caption: infoMessage
+    }, msg);
 
     const apiURL = `https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(videoUrl)}&type=audio&quality=128kbps&apikey=russellxz`;
     const res = await axios.get(apiURL);
@@ -103,13 +87,12 @@ const handler = async (msg, { conn, text }) => {
         .on('error', reject);
     });
 
-    await conn.sendMessage(chatId, {
+    await conn.sendMessage2(chatId, {
       audio: fs.readFileSync(finalPath),
       mimetype: 'audio/mpeg',
       fileName: `${title}.mp3`,
-      ptt: false,
-      contextInfo: canalInfo
-    }, { quoted: msg });
+      ptt: false
+    }, msg);
 
     fs.unlinkSync(rawPath);
     fs.unlinkSync(finalPath);
@@ -119,14 +102,13 @@ const handler = async (msg, { conn, text }) => {
     });
 
   } catch (error) {
-    return conn.sendMessage(chatId, {
+    return conn.sendMessage2(chatId, {
       text: `➤ \`UPS, ERROR\` ❌
 
 𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗉𝗅𝖺𝗒𝗉𝗋𝗈* *.𝗌𝗉𝗈𝗍𝗂𝖿𝗒* 𝗈 *.𝗋𝗈𝗅𝗂𝗍𝖺*
 ".𝗋𝖾𝗉𝗈𝗋𝗍𝖾 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
-> 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`,
-      contextInfo: canalInfo
-    }, { quoted: msg });
+> 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
+    }, msg);
   }
 };
 
