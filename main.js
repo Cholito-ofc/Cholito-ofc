@@ -1019,6 +1019,7 @@ case 'tourl': {
               }
 
 case 'fix':
+case 'update':        
 case 'carga': {
   if (!isOwner) {
     await sock.sendMessage(msg.key.remoteJid, {
@@ -3954,11 +3955,11 @@ case 'menu': {
 *┃* *🧑🏻‍💻𝙲𝚁𝙴𝙰𝙳𝙾𝚁:* @${ownerTag}
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
-╭━━[ MENÚ PRINCIPAL 📋 ]━⬣
-┃➜ 🚩 Prefijo Actual:『${global.prefix}』
-┃➜ 🚩 Usa el prefijo antes de cada comando.
+╭━━[ *MENÚ PRINCIPAL 📋* ]━⬣
+┃➜ 🚩 ᴘʀᴇғɪᴊᴏ ᴀᴄᴛᴜᴀʟ:『${global.prefix}』
+┃➜ 🚩 ᴜsᴀ ᴇʟ ᴘʀᴇғɪᴊᴏ ᴀɴᴛᴇs ᴅᴇ ᴄᴀᴅᴀ ᴄᴏᴍᴀɴᴅᴏ.
 
-╭━━[ INFORMACIÓN 💻 ]━⬣
+╭━━[ *INFORMACIÓN 💻* ]━⬣
 ┃➜ ${global.prefix}guia
 ┃➜ ${global.prefix}reporte
 ┃➜ ${global.prefix}info
@@ -3968,7 +3969,7 @@ case 'menu': {
 ┃➜ ${global.prefix}𝗁𝗈𝗋𝖺𝗋𝗂𝗈
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
-╭━━[ MENÚS DISPONIBLES 🗂️ ]━⬣
+╭━━[ *MENÚS DISPONIBLES 🗂️* ]━⬣
 ┃➜ ${global.prefix}allmenu
 ┃➜ ${global.prefix}menugrupo
 ┃➜ ${global.prefix}menuaudio
@@ -3978,7 +3979,7 @@ case 'menu': {
 ┃➜ ${global.prefix}menuff
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
-╭━━[ SISTEMA DE VENTAS 🛍️ ]━⬣
+╭━━[ *SISTEMA DE VENTAS 🛍️* ]━⬣
 ┃➜ ${global.prefix}setstock
 ┃➜ ${global.prefix}stock
 ┃➜ ${global.prefix}setnetflix
@@ -3992,7 +3993,7 @@ case 'menu': {
 ┃➜ ${global.prefix}sorteo
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
-╭━━[ IA & CHATBOTS 👨‍💻 ]━⬣
+╭━━[ *IA & CHATBOTS 👨‍💻* ]━⬣
 ┃➜ ${global.prefix}gemini
 ┃➜ ${global.prefix}chatgpt
 ┃➜ ${global.prefix}dalle
@@ -4004,7 +4005,7 @@ case 'menu': {
 ┃➜ ${global.prefix}luminai
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
-╭━━[ DESCARGAS 📥 ]━⬣
+╭━━[ *DESCARGAS 📥* ]━⬣
 ┃➜ ${global.prefix}play
 ┃➜ ${global.prefix}𝗉𝗅𝖺𝗒𝗉𝗋𝗈
 ┃➜ ${global.prefix}play1
@@ -4022,14 +4023,14 @@ case 'menu': {
 ┃➜ ${global.prefix}ig
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
-╭━━[ BUSCADORES 🔍 ]━⬣
+╭━━[ *BUSCADORES 🔍* ]━⬣
 ┃➜ ${global.prefix}pixai
 ┃➜ ${global.prefix}yts
 ┃➜ ${global.prefix}tiktoksearch
 ┃➜ ${global.prefix}tiktokstalk
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
-╭━━[ CONVERTIDORES 🧰 ]━⬣
+╭━━[ *CONVERTIDORES 🧰* ]━⬣
 ┃➜ ${global.prefix}tomp3
 ┃➜ ${global.prefix}tovideo
 ┃➜ ${global.prefix}toimg
@@ -4039,7 +4040,7 @@ case 'menu': {
 ┃➜ ${global.prefix}ff2
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
-╭━━[ STICKERS 🧩 ]━⬣
+╭━━[ *STICKERS 🧩* ]━⬣
 ┃➜ ${global.prefix}s
 ┃➜ ${global.prefix}newpack
 ┃➜ ${global.prefix}addsticker
@@ -4050,7 +4051,7 @@ case 'menu': {
 ┃➜ ${global.prefix}qc2
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
-╭━━[ HERRAMIENTAS 🛠️ ]━⬣
+╭━━[ *HERRAMIENTAS 🛠️* ]━⬣
 ┃➜ ${global.prefix}ver
 ┃➜ ${global.prefix}tourl
 ┃➜ ${global.prefix}whatmusic
@@ -4061,7 +4062,7 @@ case 'menu': {
 ┃➜ ${global.prefix}delco
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
-╭━━[ MINI JUEGOS 🎮 ]━⬣
+╭━━[ *MINI JUEGOS 🎮* ]━⬣
 ┃➜ ${global.prefix}minovia
 ┃➜ ${global.prefix}minovio
 ┃➜ ${global.prefix}puto
@@ -4093,7 +4094,7 @@ case 'menu': {
 ┃➜ ${global.prefix}menurpg
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
-╭━━[ CONTENIDO 🔞 ]━⬣
+╭━━[ *CONTENIDO 🔞* ]━⬣
 ┃➜ ${global.prefix}pack 
 ┃➜ ${global.prefix}pack1
 ┃➜ ${global.prefix}pack2 
