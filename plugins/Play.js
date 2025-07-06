@@ -63,10 +63,11 @@ const handler = async (msg, { conn, text }) => {
   if (!text) {
     // ✅ Mensaje de ayuda con botón "Ver canal"
     return await conn.sendMessage2(chatId, {
-      text: `🎵 *Uso del comando .play:*
-
-📌 Escribe el nombre de una canción o artista.
-🔍 Ejemplo: *${usedPrefix}play Coldplay Yellow*`
+      text: `*╭┈〔 ⚠️ USO INCORRECTO ⚠️ 〕┈╮*
+*┊*
+*┊* 🎧 𝖴𝗌𝖺: 𝗉𝗅𝖺𝗒 *${usedPrefix}𝖠𝗋𝗍𝗂𝗌𝗍𝖺/𝖢𝖺𝗇𝖼𝗂𝗈́𝗇* 🎵
+*┊* 📌 𝖤𝗃𝖾𝗆𝗉𝗅𝗈: *${usedPrefix}𝗉𝗅𝖺𝗒 𝖡𝖺𝖽 𝖡𝗎𝗇𝗇𝗒 𝖣𝗂𝗅𝖾𝗌* 🔥
+*╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫*`
     }, msg);
   }
 
