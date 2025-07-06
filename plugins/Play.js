@@ -7,27 +7,70 @@ const { pipeline } = require('stream');
 const { promisify } = require('util');
 const streamPipeline = promisify(pipeline);
 
+// 🔹 Obtener miniatura personalizada
+const getThumbnail = async () => {
+  const imageUrl = "https://cdn.russellxz.click/c87a5d88.jpeg";
+  const res = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+  return Buffer.from(res.data);
+};
+
+// 🔹 Limpiar el título para que no tenga caracteres prohibidos
+const sanitize = (text) => text.replace(/[\/\\?%*:|"<>]/g, '');
+
+// 🔹 Función personalizada para enviar audio con miniatura estilo Killua
+const sendAudioKillua = async (conn, chat, filePath, title, msg) => {
+  try {
+    const buffer = fs.readFileSync(filePath);
+    const thumb = await getThumbnail();
+
+    await conn.sendMessage(chat, {
+      audio: buffer,
+      mimetype: 'audio/mpeg',
+      fileName: `${sanitize(title)}.mp3`,
+      ptt: false,
+      contextInfo: {
+        externalAdReply: {
+          title: title.slice(0, 100),
+          body: '🎧 Audio enviado por KilluaBot',
+          previewType: 'PHOTO',
+          thumbnail: thumb,
+          mediaType: 2,
+          sourceUrl: 'https://whatsapp.com/channel/0029VbABQOU77qVUUPiUek2W'
+        }
+      }
+    }, { quoted: msg });
+
+    return true;
+  } catch (e) {
+    console.error('Error enviando audio:', e);
+    return false;
+  }
+};
+
 const handler = async (msg, { conn, text }) => {
   const rawID = conn.user?.id || "";
   const subbotID = rawID.split(":")[0] + "@s.whatsapp.net";
-
   const chatId = msg.key.remoteJid;
 
-  // Cargar prefijo personalizado
   const prefixPath = path.resolve("prefixes.json");
   let prefixes = {};
   if (fs.existsSync(prefixPath)) {
     prefixes = JSON.parse(fs.readFileSync(prefixPath, "utf-8"));
   }
 
-  const usedPrefix = prefixes[subbotID] || "."; // Por defecto .
+  const usedPrefix = prefixes[subbotID] || ".";
 
   if (!text) {
-    return await conn.sendMessage(chatId, {
-      text: `✳️ Usa el comando correctamente:\n\n📌 Ejemplo: *${usedPrefix}play* bad bunny diles`
-    }, { quoted: msg });
+    // ✅ Mensaje de ayuda con botón "Ver canal"
+    return await conn.sendMessage2(chatId, {
+      text: `🎵 *Uso del comando .play:*
+
+📌 Escribe el nombre de una canción o artista.
+🔍 Ejemplo: *${usedPrefix}play Coldplay Yellow*`
+    }, msg);
   }
 
+  // ⏱️ Reacción de espera
   await conn.sendMessage(chatId, {
     react: { text: '⏱️', key: msg.key }
   });
@@ -61,6 +104,7 @@ const handler = async (msg, { conn, text }) => {
       caption: infoMessage
     }, { quoted: msg });
 
+    // 🔗 Descargar audio desde API externa
     const apiURL = `https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(videoUrl)}&type=audio&quality=128kbps&apikey=russellxz`;
     const res = await axios.get(apiURL);
     const json = res.data;
@@ -86,13 +130,10 @@ const handler = async (msg, { conn, text }) => {
         .on('error', reject);
     });
 
-    await conn.sendMessage(chatId, {
-      audio: fs.readFileSync(finalPath),
-      mimetype: 'audio/mpeg',
-      fileName: `${title}.mp3`,
-      ptt: false
-    }, { quoted: msg });
+    // ✅ Enviar audio con miniatura Killua
+    await sendAudioKillua(conn, chatId, finalPath, title, msg);
 
+    // 🧹 Limpiar archivos temporales
     fs.unlinkSync(rawPath);
     fs.unlinkSync(finalPath);
 
