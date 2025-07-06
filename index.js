@@ -129,7 +129,7 @@ function guardarModos(data) {
 let modos = cargarModos();
     
     // Configuración de consola
-    console.log(chalk.cyan(figlet.textSync("lag enviado a \n+1 (829) 793-8151", { font: "Standard" })));    
+    console.log(chalk.cyan(figlet.textSync("lag enviado", { font: "Standard" })));    
     console.log(chalk.green("\n✅ Iniciando conexión...\n"));
     
     // ✅ Mostrar opciones de conexión bien presentadas
