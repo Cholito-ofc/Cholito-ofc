@@ -13798,7 +13798,7 @@ case "s":
 *┊*📥 *Ejemplo:*
 *┊* 𝘗𝘳𝘪𝘮𝘦𝘳𝘰 𝘮𝘢𝘯𝘥𝘢 𝘶𝘯 𝘷𝘪𝘥𝘦𝘰 𝘰 𝘪𝘮𝘢𝘨𝘦𝘯 𝘺 𝘳𝘦𝘴𝘱𝘰𝘯𝘥𝘦 𝘤𝘰𝘯『${global.prefix}s』𝘱𝘢𝘳𝘢 𝘤𝘰𝘯𝘷𝘦𝘳𝘵𝘪𝘳𝘭𝘰 𝘦𝘯 𝘚𝘵𝘪𝘤𝘬𝘦𝘳
 *╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫*`
-            await sock.sendMessage(msg.key.remoteJid, {  // <- Mensaje directo normal
+            await sock.sendMessage(msg.key.remoteJid, {  
                 text: xds
             }, { quoted: msg });
             return;
@@ -13806,7 +13806,7 @@ case "s":
          
         let mediaType = quoted.imageMessage ? "image" : quoted.videoMessage ? "video" : null;
         if (!mediaType) {
-            await sock.sendMessage2(  // <- Cambiado a sendMessage2
+            await sock.sendMessage2(
                 msg.key.remoteJid,
                 "⚠️ *Solo puedes convertir imágenes o videos en stickers.*",
                 msg
@@ -13814,12 +13814,8 @@ case "s":
             return;
         }
 
-        // Obtener el nombre del usuario
+        // Obtener nombre del usuario
         let senderName = msg.pushName || "Usuario Desconocido";
-
-        // Obtener la fecha exacta de creación 📅
-        let now = new Date();
-        let fechaCreacion = `📅 Fecha de Creación de Stickerz: ${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()} 🕒 ${now.getHours()}:${now.getMinutes()}`;
 
         // Mensaje de reacción mientras se crea el sticker ⚙️
         await sock.sendMessage(msg.key.remoteJid, { 
@@ -13836,10 +13832,10 @@ case "s":
             throw new Error("❌ Error: No se pudo descargar el archivo.");
         }
 
-        // 🌟 Formato llamativo para la metadata del sticker 🌟
+        // 🌟 NUEVO metadata simplificado y personalizado
         let metadata = {
-            packname: `✨ Lo Mandó Hacer: ${senderName} ✨`,
-            author: `🤖 Bot Creador: KilluaBot 2.0\n🛠️ Desarrollado por: 𝘾𝙝𝙤𝙡𝙞𝙩𝙤 𝙭𝙯💻\n${fechaCreacion}`
+            packname: "𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝗑 𝖢𝗁𝗈𝗅𝗂𝗍𝗈 ✅",
+            author: ""
         };
 
         let stickerBuffer;
@@ -13853,14 +13849,13 @@ case "s":
             sticker: { url: stickerBuffer } 
         }, { quoted: msg });
 
-        // Confirmación final con reacción ✅
         await sock.sendMessage(msg.key.remoteJid, { 
             react: { text: "✅", key: msg.key } 
         });
 
     } catch (error) {
         console.error("❌ Error en el comando .ss:", error);
-        await sock.sendMessage2(  // <- Cambiado a sendMessage2
+        await sock.sendMessage2(
             msg.key.remoteJid,
             "❌ *Hubo un error al procesar el sticker. Inténtalo de nuevo.*",
             msg
