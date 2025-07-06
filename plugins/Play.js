@@ -58,7 +58,7 @@ const handler = async (msg, { conn, text }) => {
     prefixes = JSON.parse(fs.readFileSync(prefixPath, "utf-8"));
   }
 
-  const usedPrefix = prefixes[subbotID] || " . ";
+  const usedPrefix = prefixes[subbotID] || ".";
 
   if (!text) {
     // ✅ Mensaje de ayuda con botón "Ver canal"
