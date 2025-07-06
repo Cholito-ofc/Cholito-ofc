@@ -150,5 +150,5 @@ const handler = async (msg, { conn, text }) => {
   }
 };
 
-handler.command = ['play'];
+handler.command = ['play', 'Play', 'PLAY'];
 module.exports = handler;
