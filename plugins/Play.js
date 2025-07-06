@@ -20,6 +20,7 @@ const handler = async (msg, { conn, text }) => {
 
   const usedPrefix = prefixes[subbotID] || ".";
 
+  // 🔘 Mostrar botón de canal SOLO en el mensaje de ayuda (cuando no hay texto)
   if (!text) {
     return await conn.sendMessage2(chatId, {
       text: `🎵 *Uso del comando .play:*
@@ -29,6 +30,7 @@ const handler = async (msg, { conn, text }) => {
     }, msg);
   }
 
+  // ⏱️ Reacción
   await conn.sendMessage(chatId, {
     react: { text: '⏱️', key: msg.key }
   });
@@ -57,10 +59,10 @@ const handler = async (msg, { conn, text }) => {
 
 *⇆‌ ㅤ◁ㅤㅤ❚❚ㅤㅤ▷ㅤ↻*`;
 
-    await conn.sendMessage2(chatId, {
+    await conn.sendMessage(chatId, {
       image: { url: thumbnail },
       caption: infoMessage
-    }, msg);
+    }, { quoted: msg });
 
     const apiURL = `https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(videoUrl)}&type=audio&quality=128kbps&apikey=russellxz`;
     const res = await axios.get(apiURL);
@@ -87,12 +89,12 @@ const handler = async (msg, { conn, text }) => {
         .on('error', reject);
     });
 
-    await conn.sendMessage2(chatId, {
+    await conn.sendMessage(chatId, {
       audio: fs.readFileSync(finalPath),
       mimetype: 'audio/mpeg',
       fileName: `${title}.mp3`,
       ptt: false
-    }, msg);
+    }, { quoted: msg });
 
     fs.unlinkSync(rawPath);
     fs.unlinkSync(finalPath);
@@ -102,13 +104,13 @@ const handler = async (msg, { conn, text }) => {
     });
 
   } catch (error) {
-    return conn.sendMessage2(chatId, {
+    return conn.sendMessage(chatId, {
       text: `➤ \`UPS, ERROR\` ❌
 
 𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗉𝗅𝖺𝗒𝗉𝗋𝗈* *.𝗌𝗉𝗈𝗍𝗂𝖿𝗒* 𝗈 *.𝗋𝗈𝗅𝗂𝗍𝖺*
 ".𝗋𝖾𝗉𝗈𝗋𝗍𝖾 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
 > 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
-    }, msg);
+    }, { quoted: msg });
   }
 };
 
