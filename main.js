@@ -1540,17 +1540,11 @@ case 'linia': {
   const fs = require("fs");
   const path = require("path");
 
-  // Obtenemos número limpio sin el @s.whatsapp.net
-  let numero = msg.sender ? msg.sender.split("@")[0] : "";
-
-  // Verificamos si el número coincide con alguno de los dueños autorizados
-  let esOwner = numero === global.ownerPrincipal || numero === global.ownerSecundario;
-
-  if (!esOwner) {
+  if (!isOwner) {
     await sock.sendMessage(msg.key.remoteJid, {
-      text: "⚠️ Este comando es exclusivamente para mi creador."
+      text: "⛔ Este comando es solo para el *Owner*."
     }, { quoted: msg });
-    return;
+    break;
   }
 
   const buscar = args[0];
@@ -1558,7 +1552,7 @@ case 'linia': {
     await sock.sendMessage(msg.key.remoteJid, {
       text: "📍 Especifica el comando que deseas buscar.\n\nEjemplo: *.linia play*"
     }, { quoted: msg });
-    return;
+    break;
   }
 
   const archivoMain = path.join(__dirname, "main.js");
@@ -1567,7 +1561,7 @@ case 'linia': {
     await sock.sendMessage(msg.key.remoteJid, {
       text: "❌ No se encontró el archivo *main.js*."
     }, { quoted: msg });
-    return;
+    break;
   }
 
   const contenido = fs.readFileSync(archivoMain, "utf-8");
@@ -1578,23 +1572,10 @@ case 'linia': {
     const linea = lineas[i].trim();
     const regex = new RegExp(`^case ['"\`]${buscar}['"\`]:`);
     if (regex.test(linea)) {
-      lineaEncontrada = i + 1;
+      lineaEncontrada = i + 1; // porque queremos número de línea 1-based
       break;
     }
   }
-
-  if (lineaEncontrada !== -1) {
-    await sock.sendMessage(msg.key.remoteJid, {
-      text: `✅ El comando *${buscar}* se encuentra en la línea *${lineaEncontrada}* del archivo *main.js*.`
-    }, { quoted: msg });
-  } else {
-    await sock.sendMessage(msg.key.remoteJid, {
-      text: `❌ No se encontró el comando *${buscar}* en el archivo *main.js*.`
-    }, { quoted: msg });
-  }
-
-  return;
-}  
         
   case 'ff': {
     const fs = require('fs');
