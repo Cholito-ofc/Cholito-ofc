@@ -1542,7 +1542,7 @@ case 'linia': {
 
   if (!isOwner) {
     await sock.sendMessage(msg.key.remoteJid, {
-      text: "⛔ Este comando es solo para el *Owner*."
+      text: "⚠️ Este comando es exclusivamente para mi creador"
     }, { quoted: msg });
     break;
   }
@@ -1572,18 +1572,18 @@ case 'linia': {
     const linea = lineas[i].trim();
     const regex = new RegExp(`^case ['"\`]${buscar}['"\`]:`);
     if (regex.test(linea)) {
-      lineaEncontrada = i + 1; // porque queremos número de línea 1-based
+      lineaEncontrada = i + 1; // número de línea 1-based
       break;
     }
   }
 
   if (lineaEncontrada !== -1) {
     await sock.sendMessage(msg.key.remoteJid, {
-      text: `✅ El comando *${buscar}* fue encontrado en la línea *${lineaEncontrada}* de *main.js*.`
+      text: `✅ El comando *${buscar}* se encuentra en la línea *${lineaEncontrada}* del archivo *main.js*.`
     }, { quoted: msg });
   } else {
     await sock.sendMessage(msg.key.remoteJid, {
-      text: `❌ El comando *${buscar}* no se encontró en *main.js*.`
+      text: `❌ No se encontró el comando *${buscar}* en el archivo *main.js*.`
     }, { quoted: msg });
   }
 
