@@ -1537,22 +1537,22 @@ case 'n': {
 
 
 case 'linia': {
-  const fs = require("fs");
-  const path = require("path");
-
   if (!isOwner) {
     await sock.sendMessage(msg.key.remoteJid, {
-      text: "⚠️ Este comando es exclusivamente para mi creador"
+      text: "_⚠️ Este comando es exclusivamente para mi creador_"
     }, { quoted: msg });
-    break;
+    return;
   }
+
+  const fs = require("fs");
+  const path = require("path");
 
   const buscar = args[0];
   if (!buscar) {
     await sock.sendMessage(msg.key.remoteJid, {
       text: "📍 Especifica el comando que deseas buscar.\n\nEjemplo: *.linia play*"
     }, { quoted: msg });
-    break;
+    return;
   }
 
   const archivoMain = path.join(__dirname, "main.js");
@@ -1561,7 +1561,7 @@ case 'linia': {
     await sock.sendMessage(msg.key.remoteJid, {
       text: "❌ No se encontró el archivo *main.js*."
     }, { quoted: msg });
-    break;
+    return;
   }
 
   const contenido = fs.readFileSync(archivoMain, "utf-8");
@@ -1572,7 +1572,7 @@ case 'linia': {
     const linea = lineas[i].trim();
     const regex = new RegExp(`^case ['"\`]${buscar}['"\`]:`);
     if (regex.test(linea)) {
-      lineaEncontrada = i + 1; // número de línea 1-based
+      lineaEncontrada = i + 1;
       break;
     }
   }
@@ -1588,7 +1588,7 @@ case 'linia': {
   }
 
   break;
-}
+}  
         
   case 'ff': {
     const fs = require('fs');
