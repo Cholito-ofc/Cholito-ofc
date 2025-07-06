@@ -19,7 +19,7 @@ module.exports = async (msg, { conn, text }) => {
   // Buscar videos
   let res;
   try {
-    res = await axios.get(`https://api.siputzx.my.id/api/search/tiktok?query=${encodeURIComponent(text)}`);
+    res = await axios.get(`https://api.siputzx.my.id/api/s/tiktok?query=sadencodeURIComponent(text)}`);
   } catch (e) {
     return conn.sendMessage(jid, {
       text: `❌ Error al buscar: ${e.message}`
