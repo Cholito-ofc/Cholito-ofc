@@ -530,7 +530,7 @@ if (update.action === "remove" && despedidasActivo) {
   }
 });
            
-// 🟢 Consola de mensajes entrantes con diseño
+            // 🟢 Consola de mensajes entrantes con diseño
 
 sock.ev.on("messages.upsert", async (messageUpsert) => {
   try {
@@ -544,34 +544,13 @@ sock.ev.on("messages.upsert", async (messageUpsert) => {
       : msg.key.remoteJid.replace(/[^0-9]/g, "");
     const botNumber = sock.user.id.split(":")[0];
     const fromMe = msg.key.fromMe || sender === botNumber;
-    
-    // Extraer texto del mensaje
     let messageText = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
+    let messageType = Object.keys(msg.message || {})[0];
 
-    // ✅ FUNCIÓN PARA EXTRAER COMANDO IGNORANDO MAYÚSCULAS Y ESPACIOS
-    function extractCommand(msgBody, prefix) {
-      if (!msgBody) return { command: "", args: [] };
-      let text = msgBody.trimStart(); // elimina espacios antes del prefijo
-      if (!text.startsWith(prefix)) return { command: "", args: [] };
-      let withoutPrefix = text.slice(prefix.length).trim();
-      let parts = withoutPrefix.split(/\s+/); // separa por espacios múltiples
-      let command = parts.shift()?.toLowerCase() || "";
-      let args = parts;
-      return { command, args };
-    }
-
-    const { command, args } = extractCommand(messageText, global.prefix);
-    if (command) {
-      const senderFull = msg.key.participant || msg.key.remoteJid;
-      handleCommand(sock, msg, command, args, senderFull);
-    }
-
-    const messageType = Object.keys(msg.message || {})[0];
     const activos = fs.existsSync("./activos.json") ? JSON.parse(fs.readFileSync("./activos.json")) : {};
     const lista = fs.existsSync("./lista.json") ? JSON.parse(fs.readFileSync("./lista.json")) : [];
     const isAllowedUser = (num) => lista.includes(num);
 
-    // Mostrar en consola
     console.log(chalk.yellow(`\n📩 Nuevo mensaje recibido`));
     console.log(chalk.green(`📨 De: ${fromMe ? "[Tú]" : "[Usuario]"} ${chalk.bold(sender)}`));
     console.log(chalk.cyan(`💬 Tipo: ${messageType}`));
