@@ -1,10 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 
-module.exports = async function handler(msg, conn) {
+let handler = async function (msg, { conn }) {
   const m = msg;
   const isGroup = m.key.remoteJid.endsWith('@g.us');
-  if (!isGroup) return;
+  if (!isGroup) return false;
 
   try {
     const grupoPath = path.resolve('./grupo.json');
@@ -13,7 +13,6 @@ module.exports = async function handler(msg, conn) {
     const rawID = conn.user?.id || '';
     const subbotID = rawID.split(':')[0] + '@s.whatsapp.net';
 
-    // Obtener el texto completo del mensaje
     const messageText =
       m.message?.conversation ||
       m.message?.extendedTextMessage?.text ||
@@ -21,7 +20,6 @@ module.exports = async function handler(msg, conn) {
       m.message?.videoMessage?.caption ||
       '';
 
-    // Leer el prefijo personalizado
     let dataPrefijos = {};
     if (fs.existsSync(prefixPath)) {
       dataPrefijos = JSON.parse(fs.readFileSync(prefixPath, 'utf-8'));
@@ -30,12 +28,12 @@ module.exports = async function handler(msg, conn) {
     const customPrefix = dataPrefijos[subbotID];
     const allowedPrefixes = customPrefix ? [customPrefix] : ['.', '#'];
     const usedPrefix = allowedPrefixes.find(p => messageText.startsWith(p));
-    if (!usedPrefix) return;
+    if (!usedPrefix) return false; // No tiene prefijo válido
 
     const body = messageText.slice(usedPrefix.length).trim();
     const command = body.split(' ')[0].toLowerCase();
 
-    const allowedCommands = ['addgrupo'];
+    const allowedCommands = ['addgrupo']; // Solo este se permite sin estar autorizado
 
     let dataGrupos = {};
     if (fs.existsSync(grupoPath)) {
@@ -45,11 +43,15 @@ module.exports = async function handler(msg, conn) {
     const gruposPermitidos = Array.isArray(dataGrupos[subbotID]) ? dataGrupos[subbotID] : [];
 
     if (!gruposPermitidos.includes(m.key.remoteJid) && !allowedCommands.includes(command)) {
-      return !0; // ⚠️ Previene la ejecución de otros plugins
+      return true; // Bloquea el comando
     }
 
+    return false; // Todo OK, no bloquear
   } catch (err) {
-    console.error('❌ Error en plugin de grupo autorizado:', err);
-    return;
+    console.error('❌ Error en verificación de grupo autorizado:', err);
+    return false;
   }
 };
+
+handler.before = true;
+module.exports = handler;
