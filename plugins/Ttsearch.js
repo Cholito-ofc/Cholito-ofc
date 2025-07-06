@@ -7,7 +7,7 @@ module.exports = async (msg, { conn, text }) => {
 
   if (!text) {
     return conn.sendMessage(jid, {
-      text: `✳️ Usa:\n.ttsearch <búsqueda>\nEj: *ttsearch* edits messi`,
+      text: `✳️ Escribe:\n.ttsearch <búsqueda>\nEj: *ttsearch* edits messi`,
     }, { quoted: msg });
   }
 
