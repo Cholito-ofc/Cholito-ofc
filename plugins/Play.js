@@ -99,9 +99,23 @@ const handler = async (msg, { conn, text }) => {
 
 *⇆‌ ㅤ◁ㅤㅤ❚❚ㅤㅤ▷ㅤ↻*`;
 
+    // 🖼️ Obtener la miniatura como búfer para mostrar como portada no expandible
+    const imageBuffer = await axios.get(thumbnail, { responseType: 'arraybuffer' }).then(res => Buffer.from(res.data));
+
+    // 📩 Enviar mensaje con miniatura oculta
     await conn.sendMessage(chatId, {
-      image: { url: thumbnail },
-      caption: infoMessage
+      text: infoMessage,
+      contextInfo: {
+        externalAdReply: {
+          title: title.slice(0, 100),
+          body: '🎧 Audio enviado por KilluaBot',
+          mediaType: 1,
+          previewType: 0,
+          thumbnail: imageBuffer,
+          sourceUrl: videoUrl,
+          renderLargerThumbnail: true
+        }
+      }
     }, { quoted: msg });
 
     // 🔗 Descargar audio desde API externa
