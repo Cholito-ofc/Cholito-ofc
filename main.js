@@ -1537,15 +1537,15 @@ case 'n': {
 
 
 case 'linia': {
-  if (!isOwner) {
+  if (!msg.key.fromMe && msg.sender !== global.owner + '@s.whatsapp.net') {
     await sock.sendMessage(msg.key.remoteJid, {
-      text: "_⚠️ Este comando es exclusivamente para mi creador_"
+      text: '⚠️ Este comando es exclusivamente para mi creador'
     }, { quoted: msg });
     return;
   }
 
-  const fs = require("fs");
-  const path = require("path");
+  const fs = require('fs');
+  const path = require('path');
 
   const buscar = args[0];
   if (!buscar) {
@@ -1555,8 +1555,7 @@ case 'linia': {
     return;
   }
 
-  const archivoMain = path.join(__dirname, "main.js");
-
+  const archivoMain = path.join(__dirname, 'main.js');
   if (!fs.existsSync(archivoMain)) {
     await sock.sendMessage(msg.key.remoteJid, {
       text: "❌ No se encontró el archivo *main.js*."
@@ -1564,8 +1563,8 @@ case 'linia': {
     return;
   }
 
-  const contenido = fs.readFileSync(archivoMain, "utf-8");
-  const lineas = contenido.split("\n");
+  const contenido = fs.readFileSync(archivoMain, 'utf-8');
+  const lineas = contenido.split('\n');
   let lineaEncontrada = -1;
 
   for (let i = 0; i < lineas.length; i++) {
@@ -1587,8 +1586,8 @@ case 'linia': {
     }, { quoted: msg });
   }
 
-  break;
-}  
+  return;
+}    
         
   case 'ff': {
     const fs = require('fs');
