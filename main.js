@@ -5047,9 +5047,14 @@ case 'personalidad': {
   break;
 }
         
+const fs = require('fs');
+const emojiFile = './emoji.json';
+let emojiConfig = fs.existsSync(emojiFile) ? JSON.parse(fs.readFileSync(emojiFile)) : {};
+
 case 'todos':
 case 'toemoji':
-case 'toemojis': {
+case 'toemojis':
+case 'resetemoji': {
   try {
     const chatId = msg.key.remoteJid;
     const sender = (msg.key.participant || chatId).replace(/[^0-9]/g, "");
@@ -5074,7 +5079,6 @@ case 'toemojis': {
       return;
     }
 
-    global.emojiConfig = global.emojiConfig || {};
     const texto = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
     const args = texto.trim().split(" ");
     const comando = args[0].slice(1);
@@ -5085,16 +5089,39 @@ case 'toemojis': {
         await sock.sendMessage(chatId, { text: "⚠️ *Debes escribir un emoji después del comando.*" }, { quoted: msg });
         return;
       }
-      global.emojiConfig[chatId] = { modo: "único", valor: input };
+      emojiConfig[chatId] = { modo: "único", valor: input };
+      fs.writeFileSync(emojiFile, JSON.stringify(emojiConfig, null, 2));
       await sock.sendMessage(chatId, { text: `✅ *Emoji actualizado:* ${input}` }, { quoted: msg });
       return;
     }
 
+    if (comando === 'resetemoji') {
+      delete emojiConfig[chatId];
+      fs.writeFileSync(emojiFile, JSON.stringify(emojiConfig, null, 2));
+      await sock.sendMessage(chatId, { text: `✅ *Emoji reiniciado. Se usará ➜ por defecto.*` }, { quoted: msg });
+      return;
+    }
+
     if (comando === 'toemojis') {
-      const randomSet = ['😂','🔥','😈','😎','🤖','👻','😬','🥶','💀','🐉'];
-      const mezclados = randomSet.sort(() => 0.5 - Math.random()).slice(0, 4);
-      global.emojiConfig[chatId] = { modo: "varios", valor: mezclados };
-      await sock.sendMessage(chatId, { text: `✅ *Emojis aleatorios activados:* ${mezclados.join(" ")}` }, { quoted: msg });
+      const emojiUnicode = Array.from(new Set(
+        Array.from({ length: 0x1F9FF - 0x1F300 }, (_, i) => String.fromCodePoint(i + 0x1F300))
+          .filter(e => /\p{Emoji}/u.test(e))
+      ));
+
+      const total = metadata.participants.length;
+      let mezclados = emojiUnicode.sort(() => 0.5 - Math.random());
+
+      // Si no alcanza, duplicamos aleatoriamente hasta llegar
+      while (mezclados.length < total) {
+        mezclados = mezclados.concat(emojiUnicode.sort(() => 0.5 - Math.random()));
+      }
+
+      const final = mezclados.slice(0, total);
+      emojiConfig[chatId] = { modo: "varios", valor: final };
+      fs.writeFileSync(emojiFile, JSON.stringify(emojiConfig, null, 2));
+      await sock.sendMessage(chatId, {
+        text: `✅ *Emojis aleatorios activados para ${total} miembros del grupo.*`
+      }, { quoted: msg });
       return;
     }
 
@@ -5111,9 +5138,9 @@ case 'toemojis': {
       finalMsg += `┃💬 *Mensaje:* ${extraMsg}\n`;
     }
     finalMsg += `*╰━━━━━━━⋆★⋆━━━━━━━⬣*\n\n`;
-    finalMsg += `📲 *Etiquetando a todos los miembros...*\n\n`;
+    finalMsg += `┌──⭓ *Listado de miembros:*\n`;
 
-    const config = global.emojiConfig[chatId];
+    const config = emojiConfig[chatId];
     const mentionLines = [];
 
     for (let i = 0; i < participants.length; i++) {
@@ -5121,13 +5148,13 @@ case 'toemojis': {
       let emoji = "➜";
       if (config) {
         if (config.modo === "único") emoji = config.valor;
-        if (config.modo === "varios") emoji = config.valor[i % config.valor.length];
+        if (config.modo === "varios") emoji = config.valor[i];
       }
-      mentionLines.push(`│${emoji} @${id.split("@")[0]}`);
+      mentionLines.push(`${emoji} @${id.split("@")[0]}`);
     }
 
     finalMsg += mentionLines.join("\n");
-    finalMsg += `\n╰─[ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖶𝗁𝖺𝗍𝗌𝖠𝗉𝗉 ⚡]─`;
+    finalMsg += `\n└───────⭓`;
 
     const mentionIds = participants.map(p => p.id);
 
@@ -5138,13 +5165,13 @@ case 'toemojis': {
     }, { quoted: msg });
 
   } catch (error) {
-    console.error("❌ Error en .todos/toemoji/toemojis:", error);
+    console.error("❌ Error en todos/toemoji/toemojis/resetemoji:", error);
     await sock.sendMessage(msg.key.remoteJid, {
       text: "❌ *Ocurrió un error al ejecutar el comando.*"
     }, { quoted: msg });
   }
   break;
-}
+          }
         
 case 'antiarabe': {
   try {
