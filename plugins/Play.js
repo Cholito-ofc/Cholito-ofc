@@ -26,7 +26,7 @@ const handler = async (msg, { conn, text }) => {
       text: `🎵 *Uso del comando .play:*
 
 📌 Escribe el nombre de una canción o artista.
-🔍 Ejemplo: *${usedPrefix}play Coldplay Yellow*`
+🔍 Ejemplo: *${usedPrefix}play Bad Bunny diles*`
     }, msg);
   }
 
