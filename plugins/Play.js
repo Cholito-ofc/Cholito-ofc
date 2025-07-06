@@ -14,11 +14,11 @@ const getThumbnail = async () => {
   return Buffer.from(res.data);
 };
 
-// 🔹 Limpiar el título
+// 🔹 Limpiar el título para que no tenga caracteres prohibidos
 const sanitize = (text) => text.replace(/[\/\\?%*:|"<>]/g, '');
 
 // 🔹 Función personalizada para enviar audio con miniatura estilo Killua
-const sendAudioKillua = async (conn, chat, filePath, title, fkontak) => {
+const sendAudioKillua = async (conn, chat, filePath, title, msg) => {
   try {
     const buffer = fs.readFileSync(filePath);
     const thumb = await getThumbnail();
@@ -38,7 +38,7 @@ const sendAudioKillua = async (conn, chat, filePath, title, fkontak) => {
           sourceUrl: 'https://whatsapp.com/channel/0029VbABQOU77qVUUPiUek2W'
         }
       }
-    }, { quoted: fkontak });
+    }, { quoted: msg });
 
     return true;
   } catch (e) {
@@ -48,29 +48,10 @@ const sendAudioKillua = async (conn, chat, filePath, title, fkontak) => {
 };
 
 const handler = async (msg, { conn, text }) => {
-  const chatId = msg.key.remoteJid;
-
-  // ✅ Obtener número de forma segura
-  const sender = (msg.key.participant || msg.participant || msg.key.remoteJid).split('@')[0];
-
-  // ✅ Contacto tipo fkontak
-  const fkontak = {
-    key: {
-      remoteJid: "status@broadcast",
-      fromMe: false,
-      id: "kirito-bot"
-    },
-    message: {
-      contactMessage: {
-        displayName: "MediaHub-Bot",
-        vcard: `BEGIN:VCARD\nVERSION:3.0\nN:MediaHub;Bot;;;\nFN:MediaHub Oficial\nORG:Mediahub Team;\nTEL;waid=${sender}:${sender}\nEMAIL;type=INTERNET:soporte@mediahub.net\nEND:VCARD`
-      }
-    },
-    participant: "0@s.whatsapp.net"
-  };
-
   const rawID = conn.user?.id || "";
   const subbotID = rawID.split(":")[0] + "@s.whatsapp.net";
+  const chatId = msg.key.remoteJid;
+
   const prefixPath = path.resolve("prefixes.json");
   let prefixes = {};
   if (fs.existsSync(prefixPath)) {
@@ -80,14 +61,16 @@ const handler = async (msg, { conn, text }) => {
   const usedPrefix = prefixes[subbotID] || ".";
 
   if (!text) {
+    // ✅ Mensaje de ayuda con botón "Ver canal"
     return await conn.sendMessage2(chatId, {
       text: `🎵 *Uso del comando .play:*
 
 📌 Escribe el nombre de una canción o artista.
 🔍 Ejemplo: *${usedPrefix}play Coldplay Yellow*`
-    }, fkontak);
+    }, msg);
   }
 
+  // ⏱️ Reacción de espera
   await conn.sendMessage(chatId, {
     react: { text: '⏱️', key: msg.key }
   });
@@ -116,8 +99,10 @@ const handler = async (msg, { conn, text }) => {
 
 *⇆‌ ㅤ◁ㅤㅤ❚❚ㅤㅤ▷ㅤ↻*`;
 
+    // 🖼️ Obtener la miniatura como búfer para mostrar como portada no expandible
     const imageBuffer = await axios.get(thumbnail, { responseType: 'arraybuffer' }).then(res => Buffer.from(res.data));
 
+    // 📩 Enviar mensaje con miniatura oculta
     await conn.sendMessage(chatId, {
       text: infoMessage,
       contextInfo: {
@@ -131,8 +116,9 @@ const handler = async (msg, { conn, text }) => {
           renderLargerThumbnail: true
         }
       }
-    }, { quoted: fkontak });
+    }, { quoted: msg });
 
+    // 🔗 Descargar audio desde API externa
     const apiURL = `https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(videoUrl)}&type=audio&quality=128kbps&apikey=russellxz`;
     const res = await axios.get(apiURL);
     const json = res.data;
@@ -158,8 +144,10 @@ const handler = async (msg, { conn, text }) => {
         .on('error', reject);
     });
 
-    await sendAudioKillua(conn, chatId, finalPath, title, fkontak);
+    // ✅ Enviar audio con miniatura Killua
+    await sendAudioKillua(conn, chatId, finalPath, title, msg);
 
+    // 🧹 Limpiar archivos temporales
     fs.unlinkSync(rawPath);
     fs.unlinkSync(finalPath);
 
@@ -172,11 +160,11 @@ const handler = async (msg, { conn, text }) => {
       text: `➤ \`UPS, ERROR\` ❌
 
 𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗉𝗅𝖺𝗒𝗉𝗋𝗈* *.𝗌𝗉𝗈𝗍𝗂𝖿𝗒* 𝗈 *.𝗋𝗈𝗅𝗂𝗍𝖺*
-".𝗋𝖾𝗉𝗈𝗋𝗍𝖾 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝖾𝗇𝖽𝗈 .play"
+".𝗋𝖾𝗉𝗈𝗋𝗍𝖾 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
 > 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
-    }, { quoted: fkontak });
+    }, { quoted: msg });
   }
 };
 
-handler.command = ['play7'];
+handler.command = ['play'];
 module.exports = handler;
