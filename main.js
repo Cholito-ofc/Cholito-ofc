@@ -5049,7 +5049,6 @@ case 'personalidad': {
         
 const fs = require('fs');
 const emojiFile = './emoji.json';
-let emojiConfig = fs.existsSync(emojiFile) ? JSON.parse(fs.readFileSync(emojiFile)) : {};
 
 case 'todos':
 case 'toemoji':
@@ -5084,6 +5083,9 @@ case 'resetemoji': {
     const comando = args[0].slice(1);
     const input = args.slice(1).join(" ").trim();
 
+    // Cargar configuración actual desde archivo (SIEMPRE)
+    const emojiConfig = fs.existsSync(emojiFile) ? JSON.parse(fs.readFileSync(emojiFile)) : {};
+
     if (comando === 'toemoji') {
       if (!input) {
         await sock.sendMessage(chatId, { text: "⚠️ *Debes escribir un emoji después del comando.*" }, { quoted: msg });
@@ -5104,14 +5106,13 @@ case 'resetemoji': {
 
     if (comando === 'toemojis') {
       const emojiUnicode = Array.from(new Set(
-        Array.from({ length: 0x1F9FF - 0x1F300 }, (_, i) => String.fromCodePoint(i + 0x1F300))
+        Array.from({ length: 0x1FAFF - 0x1F300 }, (_, i) => String.fromCodePoint(i + 0x1F300))
           .filter(e => /\p{Emoji}/u.test(e))
       ));
 
       const total = metadata.participants.length;
       let mezclados = emojiUnicode.sort(() => 0.5 - Math.random());
 
-      // Si no alcanza, duplicamos aleatoriamente hasta llegar
       while (mezclados.length < total) {
         mezclados = mezclados.concat(emojiUnicode.sort(() => 0.5 - Math.random()));
       }
@@ -5119,9 +5120,12 @@ case 'resetemoji': {
       const final = mezclados.slice(0, total);
       emojiConfig[chatId] = { modo: "varios", valor: final };
       fs.writeFileSync(emojiFile, JSON.stringify(emojiConfig, null, 2));
+
+      const preview = final.slice(0, 40).map((e, i) => `${i + 1}. ${e}`).join("\n");
       await sock.sendMessage(chatId, {
-        text: `✅ *Emojis aleatorios activados para ${total} miembros del grupo.*`
+        text: `✅ *Emojis aleatorios activados para ${total} miembros del grupo.*\n\n📦 *Vista previa de los primeros 40 emojis:*\n${preview}`
       }, { quoted: msg });
+
       return;
     }
 
@@ -5140,15 +5144,15 @@ case 'resetemoji': {
     finalMsg += `*╰━━━━━━━⋆★⋆━━━━━━━⬣*\n\n`;
     finalMsg += `┌──⭓ *Listado de miembros:*\n`;
 
-    const config = emojiConfig[chatId];
+    const configActualizada = fs.existsSync(emojiFile) ? JSON.parse(fs.readFileSync(emojiFile))[chatId] : null;
     const mentionLines = [];
 
     for (let i = 0; i < participants.length; i++) {
       const id = participants[i].id;
       let emoji = "➜";
-      if (config) {
-        if (config.modo === "único") emoji = config.valor;
-        if (config.modo === "varios") emoji = config.valor[i];
+      if (configActualizada) {
+        if (configActualizada.modo === "único") emoji = configActualizada.valor;
+        if (configActualizada.modo === "varios") emoji = configActualizada.valor[i];
       }
       mentionLines.push(`${emoji} @${id.split("@")[0]}`);
     }
@@ -5171,7 +5175,7 @@ case 'resetemoji': {
     }, { quoted: msg });
   }
   break;
-          }
+}
         
 case 'antiarabe': {
   try {
