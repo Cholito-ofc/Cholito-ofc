@@ -1576,6 +1576,19 @@ case 'linia': {
       break;
     }
   }
+
+  if (lineaEncontrada !== -1) {
+    await sock.sendMessage(msg.key.remoteJid, {
+      text: `『🔨』 El comando *${buscar}* fue encontrado en la línea *${lineaEncontrada}* de *main.js*.`
+    }, { quoted: msg });
+  } else {
+    await sock.sendMessage(msg.key.remoteJid, {
+      text: `❌ El comando *${buscar}* no se encontró en *main.js*.`
+    }, { quoted: msg });
+  }
+
+  break;
+}
         
   case 'ff': {
     const fs = require('fs');
