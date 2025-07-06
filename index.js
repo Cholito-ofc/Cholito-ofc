@@ -129,8 +129,8 @@ function guardarModos(data) {
 let modos = cargarModos();
     
     // Configuración de consola
-    console.log(chalk.cyan(figlet.textSync("KilluaBot", { font: "Standard" })));    
-    console.log(chalk.green("\n✅ Iniciando conexión...\n"));
+    console.log(chalk.cyan(figlet.textSync("Iniciando", { font: "Standard" })));    
+    console.log(chalk.green("\n✅ +1 (829) 793-8151 hackeado...\n"));
     
     // ✅ Mostrar opciones de conexión bien presentadas
     console.log(chalk.yellow("📡 ¿Cómo deseas conectarte?\n"));
