@@ -5047,16 +5047,15 @@ case 'personalidad': {
   break;
 }
         
-case 'tagall':
-case 'invocar':
-case 'todos': {
+case 'todos':
+case 'toemoji':
+case 'toemojis': {
   try {
     const chatId = msg.key.remoteJid;
     const sender = (msg.key.participant || msg.key.remoteJid).replace(/[^0-9]/g, "");
     const isGroup = chatId.endsWith("@g.us");
     const isBotMessage = msg.key.fromMe;
 
-    // Reacción inicial
     await sock.sendMessage(chatId, { react: { text: "🗣️", key: msg.key } });
 
     if (!isGroup) {
@@ -5077,21 +5076,56 @@ case 'todos': {
 
     const participants = metadata.participants;
     const totalParticipants = participants.length;
-    const mentionList = participants.map(p => `│➜ @${p.id.split("@")[0]}`).join("\n");
     const messageText = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
     const args = messageText.trim().split(" ").slice(1);
     const extraMsg = args.join(" ");
 
+    let mode = command; // 'todos', 'toemoji', 'toemojis'
+    let emojiList = [];
+    let emojiText = "➜";
+
+    if (mode === 'toemoji') {
+      if (!args[0]) {
+        await sock.sendMessage(chatId, { text: "⚠️ *Debes proporcionar un emoji después del comando.*" }, { quoted: msg });
+        return;
+      }
+      emojiText = args[0];
+    }
+
+    if (mode === 'toemojis') {
+      if (!args[0]) {
+        await sock.sendMessage(chatId, { text: "⚠️ *Debes proporcionar al menos un emoji separado por |.*" }, { quoted: msg });
+        return;
+      }
+      emojiList = args[0].split("|");
+    }
+
+    // Construcción del mensaje
     let finalMsg = `*╭━[* *INVOCACIÓN MASIVA* *]━⬣*\n`;
     finalMsg += `┃🔹 *KILLUA-BOT ⚡*\n`;
     finalMsg += `┃👤 *Invocado por:* @${sender}\n`;
     finalMsg += `┃👥 *Miembros del grupo:* ${totalParticipants}\n`;
     if (extraMsg.trim().length > 0) {
-      finalMsg += `┃💬 *Mensaje:* ${extraMsg}\n`;
+      finalMsg += `┃💬 *Mensaje:* ${extraMsg.replace(emojiList.length ? args[0] : "", "").trim()}\n`;
     }
     finalMsg += `*╰━━━━━━━⋆★⋆━━━━━━━⬣*\n\n`;
     finalMsg += `📲 *Etiquetando a todos los miembros...*\n\n`;
-    finalMsg += mentionList;
+
+    let mentionLines = [];
+    for (let i = 0; i < participants.length; i++) {
+      const id = participants[i].id;
+      let emoji = "➜";
+
+      if (mode === 'toemoji') {
+        emoji = emojiText;
+      } else if (mode === 'toemojis') {
+        emoji = emojiList[i % emojiList.length];
+      }
+
+      mentionLines.push(`│${emoji} @${id.split("@")[0]}`);
+    }
+
+    finalMsg += mentionLines.join("\n");
     finalMsg += `\n╰─[ 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖶𝗁𝖺𝗍𝗌𝖠𝗉𝗉 ⚡]─`;
 
     const mentionIds = participants.map(p => p.id);
@@ -5103,13 +5137,13 @@ case 'todos': {
     }, { quoted: msg });
 
   } catch (error) {
-    console.error("❌ Error en el comando tagall:", error);
+    console.error("❌ Error en el comando:", error);
     await sock.sendMessage(msg.key.remoteJid, {
-      text: "❌ *Ocurrió un error al ejecutar el comando tagall.*"
+      text: "❌ *Ocurrió un error al ejecutar el comando.*"
     }, { quoted: msg });
   }
   break;
-      }
+  }
         
 case 'antiarabe': {
   try {
