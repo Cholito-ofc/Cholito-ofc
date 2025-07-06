@@ -5047,9 +5047,6 @@ case 'personalidad': {
   break;
 }
         
-const fs = require('fs');
-const emojiFile = './emoji.json';
-
 case 'todos':
 case 'toemoji':
 case 'toemojis':
@@ -5078,29 +5075,25 @@ case 'resetemoji': {
       return;
     }
 
+    global.emojiConfig = global.emojiConfig || {};
     const texto = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
     const args = texto.trim().split(" ");
     const comando = args[0].slice(1);
     const input = args.slice(1).join(" ").trim();
-
-    // Cargar configuración actual desde archivo (SIEMPRE)
-    const emojiConfig = fs.existsSync(emojiFile) ? JSON.parse(fs.readFileSync(emojiFile)) : {};
 
     if (comando === 'toemoji') {
       if (!input) {
         await sock.sendMessage(chatId, { text: "⚠️ *Debes escribir un emoji después del comando.*" }, { quoted: msg });
         return;
       }
-      emojiConfig[chatId] = { modo: "único", valor: input };
-      fs.writeFileSync(emojiFile, JSON.stringify(emojiConfig, null, 2));
+      global.emojiConfig[chatId] = { modo: "único", valor: input };
       await sock.sendMessage(chatId, { text: `✅ *Emoji actualizado:* ${input}` }, { quoted: msg });
       return;
     }
 
     if (comando === 'resetemoji') {
-      delete emojiConfig[chatId];
-      fs.writeFileSync(emojiFile, JSON.stringify(emojiConfig, null, 2));
-      await sock.sendMessage(chatId, { text: `✅ *Emoji reiniciado. Se usará ➜ por defecto.*` }, { quoted: msg });
+      delete global.emojiConfig[chatId];
+      await sock.sendMessage(chatId, { text: "✅ *Emoji reiniciado. Se usará ➜ por defecto.*" }, { quoted: msg });
       return;
     }
 
@@ -5118,8 +5111,7 @@ case 'resetemoji': {
       }
 
       const final = mezclados.slice(0, total);
-      emojiConfig[chatId] = { modo: "varios", valor: final };
-      fs.writeFileSync(emojiFile, JSON.stringify(emojiConfig, null, 2));
+      global.emojiConfig[chatId] = { modo: "varios", valor: final };
 
       const preview = final.slice(0, 40).map((e, i) => `${i + 1}. ${e}`).join("\n");
       await sock.sendMessage(chatId, {
@@ -5144,15 +5136,15 @@ case 'resetemoji': {
     finalMsg += `*╰━━━━━━━⋆★⋆━━━━━━━⬣*\n\n`;
     finalMsg += `┌──⭓ *Listado de miembros:*\n`;
 
-    const configActualizada = fs.existsSync(emojiFile) ? JSON.parse(fs.readFileSync(emojiFile))[chatId] : null;
+    const config = global.emojiConfig[chatId];
     const mentionLines = [];
 
     for (let i = 0; i < participants.length; i++) {
       const id = participants[i].id;
       let emoji = "➜";
-      if (configActualizada) {
-        if (configActualizada.modo === "único") emoji = configActualizada.valor;
-        if (configActualizada.modo === "varios") emoji = configActualizada.valor[i];
+      if (config) {
+        if (config.modo === "único") emoji = config.valor;
+        if (config.modo === "varios") emoji = config.valor[i];
       }
       mentionLines.push(`${emoji} @${id.split("@")[0]}`);
     }
