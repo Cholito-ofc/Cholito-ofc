@@ -1,6 +1,6 @@
 (async () => {
 let canalId = ["120363400979242290@newsletter"];  
-let canalNombre = ["𝗞𝗜𝗟𝗟𝗨𝗔-𝗕𝗢𝗧 👑"]
+let canalNombre = ["kіᥣᥣᥙᥲ ᑲ᥆𝗍 ᥴһᥲᥒᥱᥣ ⚡"]
   function setupConnection(conn) {
   conn.sendMessage2 = async (chat, content, m, options = {}) => {
     const firstChannel = { 
