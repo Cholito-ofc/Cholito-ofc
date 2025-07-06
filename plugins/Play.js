@@ -61,16 +61,18 @@ const handler = async (msg, { conn, text }) => {
 
   const usedPrefix = prefixes[subbotID] || ".";
 
-  const query = text?.trim();
-  if (!query) {
-    return await conn.sendMessage2(chatId, {
-      text: `*╭┈〔 ⚠️ USO INCORRECTO ⚠️ 〕┈╮*
+  const commandUsed = text?.trim().toLowerCase(); // normaliza texto
+const query = commandUsed.replace(/^play/i, '').trim(); // quita 'play' del inicio si es lo único que puso
+
+if (!query) {
+  return await conn.sendMessage2(chatId, {
+    text: `*╭┈〔 ⚠️❌ USO INCORRECTO ❌⚠️ 〕┈╮*
 *┊*
-*┊* 🎧 𝖤𝗌𝖼𝗋𝗂𝖻𝖾: *${usedPrefix}𝗉𝗅𝖺𝗒 𝖠𝗋𝗍𝗂𝗌𝗍𝖺 / 𝖢𝖺𝗇𝖼𝗂𝗈́𝗇*
-*┊* 📌 𝖤𝗃𝖾𝗆𝗉𝗅𝗈: *${usedPrefix}𝗉𝗅𝖺𝗒 𝖡𝖺𝖽 𝖡𝗎𝗇𝗇𝗒 𝖣𝗂𝗅𝖾𝗌*
+*┊* 🎧 𝖴𝗌𝖺: *${usedPrefix}𝗉𝗅𝖺𝗒 𝖠𝗋𝗍𝗂𝗌𝗍𝖺 / 𝖢𝖺𝗇𝖼𝗂𝗈́𝗇*
+*┊* 📌 𝖤𝗃𝖾𝗆𝗉𝗅𝗈: *${usedPrefix}𝗉𝗅𝖺𝗒 Anuel AA - McGregor*
 *╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫*`
-    }, msg);
-  }
+  }, msg);
+}
 
   await conn.sendMessage(chatId, {
     react: { text: '⏱️', key: msg.key }
