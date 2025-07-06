@@ -9,7 +9,7 @@ const streamPipeline = promisify(pipeline);
 
 // 🔹 Obtener miniatura personalizada
 const getThumbnail = async () => {
-  const imageUrl = "https://cdn.russellxz.click/62c36f79.jpeg";
+  const imageUrl = "https://cdn.russellxz.click/c87a5d88.jpeg";
   const res = await axios.get(imageUrl, { responseType: 'arraybuffer' });
   return Buffer.from(res.data);
 };
