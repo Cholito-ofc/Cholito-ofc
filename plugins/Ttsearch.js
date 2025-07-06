@@ -1,87 +1,93 @@
-const axios = require('axios')
-const fetch = require('node-fetch')
+const axios = require("axios");
 
-let handler = async (msg, { conn, text, usedPrefix, command }) => {
-  let chatId = msg.chat
+const temporales = {}; // Para almacenar búsquedas por chat
+
+module.exports = async (msg, { conn, text }) => {
+  const jid = msg.key.remoteJid;
 
   if (!text) {
-    return await conn.sendMessage(chatId, { text: `✳️ Ejemplo de uso:\n${usedPrefix + command} edits messi` }, { quoted: msg })
+    return conn.sendMessage(jid, {
+      text: `✳️ Usa:\n.ttsearch <búsqueda>\nEj: *ttsearch* edits messi`,
+    }, { quoted: msg });
   }
 
-  let res
+  // Reacción de carga
+  await conn.sendMessage(jid, {
+    react: { text: "🔍", key: msg.key }
+  });
+
+  // Buscar videos
+  let res;
   try {
-    res = await axios.get(`https://api.siputzx.my.id/api/search/tiktok?query=${encodeURIComponent(text)}`)
+    res = await axios.get(`https://api.siputzx.my.id/api/search/tiktok?query=${encodeURIComponent(text)}`);
   } catch (e) {
-    return await conn.sendMessage(chatId, { text: `❌ Error al buscar: ${e.message}` }, { quoted: msg })
+    return conn.sendMessage(jid, {
+      text: `❌ Error al buscar: ${e.message}`
+    }, { quoted: msg });
   }
 
-  let resultados = res.data?.result || []
+  const resultados = res.data?.result || [];
   if (!resultados.length) {
-    return await conn.sendMessage(chatId, { text: '❌ No se encontraron resultados.' }, { quoted: msg })
+    return conn.sendMessage(jid, {
+      text: "❌ No se encontraron resultados.",
+    }, { quoted: msg });
   }
 
-  let lista = resultados.slice(0, 10).map((v, i) => `*${i + 1}.* ${v.title || 'Sin título'}`).join('\n\n')
+  const lista = resultados.slice(0, 10).map((v, i) => `*${i + 1}.* ${v.title || 'Sin título'}`).join("\n\n");
 
-  await conn.sendMessage(chatId, {
-    text: `🔍 *Resultados encontrados:*\n\n${lista}\n\n📌 Responde con un número del *1 al ${Math.min(10, resultados.length)}* para descargar esa cantidad de videos.`,
-    contextInfo: {
-      externalAdReply: {
-        title: 'Resultado TikTok',
-        body: 'Pulsa para ver',
-        thumbnailUrl: resultados[0]?.thumbnail,
-        mediaType: 1,
-        renderLargerThumbnail: true,
-        showAdAttribution: true,
-        sourceUrl: resultados[0]?.url
-      }
-    }
-  }, { quoted: msg })
-
-  conn.ttsearch = conn.ttsearch || {}
-  conn.ttsearch[chatId] = {
+  temporales[jid] = {
     resultados,
-    quien: msg.sender,
+    usuario: msg.key.participant || msg.key.remoteJid,
     tiempo: Date.now()
-  }
-}
+  };
 
-handler.before = async function (msg, { conn }) {
-  const chatId = msg.chat
-  const entrada = conn.ttsearch?.[chatId]
-  if (!entrada) return
-  if (msg.sender !== entrada.quien) return
+  await conn.sendMessage(jid, {
+    text: `🔍 *Resultados encontrados:*\n\n${lista}\n\n📌 *Responde con un número del 1 al 10* para descargar esa cantidad de videos.`,
+  }, { quoted: msg });
+};
 
-  const num = parseInt(msg.text)
+module.exports.before = async function (msg, { conn }) {
+  const jid = msg.key.remoteJid;
+  const entrada = temporales[jid];
+
+  if (!entrada) return;
+  if ((msg.key.participant || msg.key.remoteJid) !== entrada.usuario) return;
+
+  const num = parseInt(msg.message?.conversation || "");
   if (!num || num < 1 || num > 10) {
-    await conn.sendMessage(chatId, { text: '❗ Ingresa un número válido entre 1 y 10.' }, { quoted: msg })
-    return true
+    return conn.sendMessage(jid, {
+      text: "❗ Ingresa un número válido entre *1 y 10*."
+    }, { quoted: msg });
   }
 
-  delete conn.ttsearch[chatId]
-  const seleccion = entrada.resultados.slice(0, num)
+  delete temporales[jid];
 
-  await conn.sendMessage(chatId, { text: `⏳ Descargando ${num} video(s)...` }, { quoted: msg })
+  const seleccionados = entrada.resultados.slice(0, num);
+  await conn.sendMessage(jid, {
+    text: `⏳ Descargando ${num} video(s)...`
+  }, { quoted: msg });
 
-  for (let v of seleccion) {
+  for (let video of seleccionados) {
     try {
-      let res = await fetch(`https://api.siputzx.my.id/api/download/tiktok?url=${encodeURIComponent(v.url)}`)
-      let json = await res.json()
-      let video = json?.result?.video || json?.result?.url
-      if (!video) continue
+      const link = `https://api.siputzx.my.id/api/download/tiktok?url=${encodeURIComponent(video.url)}`;
+      const r = await axios.get(link);
+      const urlVideo = r.data?.result?.video || r.data?.result?.url;
 
-      await conn.sendMessage(chatId, { video: { url: video }, caption: v.title || 'Video TikTok' }, { quoted: msg })
+      if (!urlVideo) continue;
+
+      await conn.sendMessage(jid, {
+        video: { url: urlVideo },
+        caption: video.title || "🎬 Video TikTok"
+      }, { quoted: msg });
+
     } catch (e) {
-      await conn.sendMessage(chatId, { text: `❌ Error al enviar: ${v.title}` }, { quoted: msg })
+      await conn.sendMessage(jid, {
+        text: `❌ Error con el video:\n${video.title || "sin título"}`
+      }, { quoted: msg });
     }
   }
 
-  return true
-}
+  return true;
+};
 
-handler.command = ['ttsearch']
-handler.register = true
-handler.limit = false
-handler.tags = ['downloader']
-handler.help = ['ttsearch <texto>']
-
-module.exports = handler
+module.exports.command = ["ttsearch"];
