@@ -8,7 +8,7 @@ const handler = async (msg, { conn, args }) => {
   const senderClean = senderId.replace(/[^0-9]/g, "");
   const isGroup = chatId.endsWith("@g.us");
 
-  // Contacto personalizado con miniatura e información tipo empresa
+  // Contacto decorativo estilo Izumi
   const fkontak = {
     key: {
       participants: "0@s.whatsapp.net",
@@ -18,7 +18,7 @@ const handler = async (msg, { conn, args }) => {
     },
     message: {
       locationMessage: {
-        name: "Unlimited", // Nombre que se muestra arriba de la miniatura
+        name: "𝙈𝙤𝙙𝙤 𝘾𝙖𝙡𝙞𝙚𝙣𝙩𝙚",
         jpegThumbnail: await (await fetch('https://iili.io/FCJSFix.jpg')).buffer(),
         vcard:
           "BEGIN:VCARD\n" +
@@ -75,12 +75,12 @@ const handler = async (msg, { conn, args }) => {
   if (args[0].toLowerCase() === "on") {
     activos.modocaliente[chatId] = true;
     await conn.sendMessage(chatId, {
-      text: "✅ *Modo caliente activado* en este grupo."
+      text: `🔥 *MODO CALIENTE ACTIVADO* 🔥\n\nDesde ahora este grupo tiene acceso a los comandos +18 😈\n\nDisfruten con responsabilidad, degenerados.`
     }, { quoted: fkontak });
   } else {
     delete activos.modocaliente[chatId];
     await conn.sendMessage(chatId, {
-      text: "🛑 *Modo caliente desactivado* en este grupo."
+      text: `🧯 *MODO CALIENTE DESACTIVADO* 🧯\n\nLos comandos +18 ya no están disponibles en este grupo.\n\nModo fresas activado 🍓`
     }, { quoted: fkontak });
   }
 
