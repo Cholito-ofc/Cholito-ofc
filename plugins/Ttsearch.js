@@ -28,25 +28,26 @@ const handler = async (msg, { conn, text }) => {
       }, { quoted: msg });
     }
 
-    // Reordenar aleatoriamente
     results.sort(() => Math.random() - 0.5);
-
-    const topResults = results.slice(0, 5); // Solo 5 para no saturar
+    const topResults = results.slice(0, 5);
 
     for (let i = 0; i < topResults.length; i++) {
-      const { nowm, title, author } = topResults[i];
+      const { nowm, title, author, duration, likes } = topResults[i];
+
+      const caption = 
+`╭「 🎬 𝗧𝗶𝗸𝗧𝗼𝗸 𝗗𝗲𝘀𝗰𝗮𝗿𝗴𝗮𝗱𝗼 」╮
+│
+│ 👤 *Autor:* ${author || 'Desconocido'}
+│ ⏱️ *Duración:* ${duration || 'Desconocida'}
+│ ❤️ *Likes:* ${likes || '0'}
+╰─────────────╯
+
+📥 *𝖵𝗂́𝖽𝖾𝗈 𝖽𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝖽𝗈 𝖼𝗈𝗇 𝖾́𝗑𝗂𝗍𝗈*
+> *𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝙳 🎬*`;
 
       await conn.sendMessage(chatId, {
         video: { url: nowm },
-        caption:
-`🎬 *Resultado #${i + 1}*
-
-📌 *Título:* ${title}
-👤 *Autor:* ${author}
-🔍 *Buscado por:* ${text}
-
-━━━━━━━━━━━━━━
-🪄 *KilluaBot - Buscador TikTok*`,
+        caption,
         mimetype: "video/mp4"
       }, { quoted: msg });
     }
@@ -59,7 +60,7 @@ const handler = async (msg, { conn, text }) => {
   }
 };
 
-handler.command = ["tiktoksearch", "tiktoks"];
+handler.command = ["ttosearch", "tiktoks"];
 handler.tags = ["buscador"];
 handler.help = ["tiktoksearch <tema>"];
 handler.register = true;
