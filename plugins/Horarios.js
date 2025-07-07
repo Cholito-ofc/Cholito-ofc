@@ -2,6 +2,7 @@ const moment = require('moment-timezone');
 
 const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
+  const sender = msg.sender || msg.key.participant || msg.key.remoteJid;
 
   const zonas = [
     { nombre: '🇲🇽 México', zona: 'America/Mexico_City' },
@@ -37,9 +38,24 @@ const handler = async (msg, { conn }) => {
 
   texto += `\n📆 *Fecha:* ${moment().format('dddd, DD MMMM YYYY')}`;
 
+  const fkontak = {
+    key: {
+      participants: "0@s.whatsapp.net",
+      remoteJid: "status@broadcast",
+      fromMe: false,
+      id: "Halo"
+    },
+    message: {
+      contactMessage: {
+        vcard: `BEGIN:VCARD\nVERSION:3.0\nN:Sy;Bot;;;\nFN:y\nitem1.TEL;waid=${sender.split('@')[0]}:${sender.split('@')[0]}\nitem1.X-ABLabel:Ponsel\nEND:VCARD`
+      }
+    },
+    participant: "0@s.whatsapp.net"
+  };
+
   await conn.sendMessage(chatId, {
     text: texto
-  }, { quoted: msg });
+  }, { quoted: fkontak });
 };
 
 handler.command = ['horario', 'hora', 'horainternacional'];
