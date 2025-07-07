@@ -1,11 +1,7 @@
 const axios = require("axios");
 
-// Objeto temporal para guardar resultados por usuario
-const tempTikTokSearch = {};
-
 const handler = async (msg, { conn, text }) => {
   const chatId = msg.key.remoteJid;
-  const sender = msg.key.participant || msg.key.remoteJid;
 
   if (!text) {
     return conn.sendMessage(chatId, {
@@ -13,9 +9,12 @@ const handler = async (msg, { conn, text }) => {
 `🎯 *Búsqueda de Videos TikTok*
 
 📌 *Usa el comando así:*
-.ttsearch edits de Messi
+.tiktoksearch <tema>
 
-💡 *KilluaBot buscará hasta 10 resultados para ti...*`
+💡 *Ejemplo:*
+.tiktoksearch humor negro
+
+🔍 *KilluaBot buscará los mejores resultados para ti...*`
     }, { quoted: msg });
   }
 
@@ -29,33 +28,40 @@ const handler = async (msg, { conn, text }) => {
       }, { quoted: msg });
     }
 
-    results = results.slice(0, 10); // máximo 10 resultados
+    // Reordenar aleatoriamente
+    results.sort(() => Math.random() - 0.5);
 
-    // Guardar resultados temporalmente usando ID del usuario
-    tempTikTokSearch[sender] = results;
+    const topResults = results.slice(0, 5); // Solo 5 para no saturar
 
-    return conn.sendMessage(chatId, {
-      text:
-`🧠 *Se encontraron ${results.length} resultados para:* "${text}"
+    for (let i = 0; i < topResults.length; i++) {
+      const { nowm, title, author } = topResults[i];
 
-📥 *Responde con un número del 1 al ${results.length}* para recibir esa cantidad de videos.
+      await conn.sendMessage(chatId, {
+        video: { url: nowm },
+        caption:
+`🎬 *Resultado #${i + 1}*
 
-🔢 *Ejemplo:* 5`
-    }, { quoted: msg });
+📌 *Título:* ${title}
+👤 *Autor:* ${author}
+🔍 *Buscado por:* ${text}
+
+━━━━━━━━━━━━━━
+🪄 *KilluaBot - Buscador TikTok*`,
+        mimetype: "video/mp4"
+      }, { quoted: msg });
+    }
 
   } catch (err) {
     console.error(err);
     return conn.sendMessage(chatId, {
-      text: "❌ *Error al buscar en TikTok:*\n" + err.message
+      text: "❌ *Error al buscar o enviar los videos:*\n" + err.message
     }, { quoted: msg });
   }
 };
 
-handler.command = ["ttsearch"];
+handler.command = ["tiktoksearch", "tiktoks"];
 handler.tags = ["buscador"];
-handler.help = ["ttsearch <tema>"];
+handler.help = ["tiktoksearch <tema>"];
 handler.register = true;
 
-// Exportamos resultados temporales para usar en el otro plugin
 module.exports = handler;
-module.exports.tempTikTokSearch = tempTikTokSearch;
