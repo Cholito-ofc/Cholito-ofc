@@ -4,7 +4,7 @@ const axios = require("axios");
 
 const tiemposPath = path.resolve("./tiempos.json");
 
-// URL para la miniatura (opcional, puedes eliminar si no la usas)
+// URL para la miniatura (opcional)
 const urlImagen = 'https://cdn.russellxz.click/39109c83.jpeg'; 
 
 function formatearFecha(fecha) {
@@ -36,7 +36,7 @@ function calcularDiasRestantes(fechaFutura) {
 }
 
 const handler = async (msg, { conn, args }) => {
-  const chatId = msg.key.remoteJid;
+  let chatId = msg.key.remoteJid;
   const isGroup = chatId.endsWith("@g.us");
   const senderId = isGroup ? (msg.key.participant || msg.participant || msg.key.remoteJid) : msg.key.remoteJid;
   const senderNum = senderId.split('@')[0];
@@ -44,6 +44,7 @@ const handler = async (msg, { conn, args }) => {
 
   const OWNERS = ["31375424024748", "50489513153"];
   const isOwner = OWNERS.includes(senderNum);
+  const isPrivateOwner = !isGroup && isOwner;
 
   let metadata = null;
   let participant = null;
@@ -61,19 +62,7 @@ const handler = async (msg, { conn, args }) => {
 
   const tiempos = fs.existsSync(tiemposPath) ? JSON.parse(fs.readFileSync(tiemposPath)) : {};
 
-  /*
-  // Descarga la imagen para miniatura (opcional)
-  let bufferImagen;
-  try {
-    const response = await axios.get(urlImagen, { responseType: "arraybuffer" });
-    bufferImagen = Buffer.from(response.data, "binary");
-  } catch (e) {
-    console.error("Error al descargar la imagen:", e.message);
-    bufferImagen = null;
-  }
-  */
-
-  // Contacto modificado con vCard para citado
+  // Contacto citado
   const fkontak = {
     key: {
       participants: "0@s.whatsapp.net",
@@ -95,11 +84,19 @@ END:VCARD`
     participant: "0@s.whatsapp.net"
   };
 
-  // .tiempos <días>
+  // .tiempos <días> [grupo opcional]
   if (command.startsWith(".tiempos")) {
     if (!isOwner) return conn.sendMessage(chatId, { text: "🚫 *Solo el owner puede usar este comando.*" }, { quoted: msg });
 
     const dias = parseInt(args[0]);
+    const targetGroup = isPrivateOwner ? args[1] : chatId;
+
+    if (isPrivateOwner && (!targetGroup || !targetGroup.endsWith("@g.us"))) {
+      return conn.sendMessage(chatId, {
+        text: "❌ Debes proporcionar el ID del grupo. Ejemplo:\n*.tiempos 30 1234567890-123456@g.us*"
+      }, { quoted: msg });
+    }
+
     if (isNaN(dias) || dias <= 0) {
       return conn.sendMessage(chatId, {
         text: "⚠️ Especifica un número válido de días. Ejemplo: *.tiempos 30*"
@@ -108,15 +105,27 @@ END:VCARD`
 
     const fechaActual = Date.now();
     const fechaFin = fechaActual + dias * 24 * 60 * 60 * 1000;
-    tiempos[chatId] = { inicio: fechaActual, fin: fechaFin };
+    tiempos[targetGroup] = { inicio: fechaActual, fin: fechaFin };
     fs.writeFileSync(tiemposPath, JSON.stringify(tiempos, null, 2));
 
+    let grupoNombre = "Grupo desconocido";
+    if (isPrivateOwner) {
+      try {
+        const groupInfo = await conn.groupMetadata(targetGroup);
+        grupoNombre = groupInfo.subject;
+      } catch {
+        grupoNombre = targetGroup;
+      }
+    } else {
+      grupoNombre = metadata?.subject || grupoNombre;
+    }
+
     return conn.sendMessage(chatId, {
-      text: `➤ \`ORDENES RECIBIDAS\` ✅\n\n\`\`\`Finaliza en: ${dias} días.\`\`\`\n\`\`\`Fecha: ${formatearFecha(fechaFin)}\`\`\`\n\`\`\`Grupo: ${metadata?.subject || "Grupo desconocido"}\`\`\``
+      text: `➤ \`ORDENES RECIBIDAS\` ✅\n\n\`\`\`Finaliza en: ${dias} días.\`\`\`\n\`\`\`Fecha: ${formatearFecha(fechaFin)}\`\`\`\n\`\`\`Grupo: ${grupoNombre}\`\`\``
     }, { quoted: fkontak });
   }
 
-  // .verfecha
+  // .verfecha [grupo opcional]
   if (command.startsWith(".verfecha")) {
     if (!isOwner && !isAdmin) {
       return conn.sendMessage(chatId, {
@@ -124,13 +133,21 @@ END:VCARD`
       }, { quoted: msg });
     }
 
-    if (!tiempos[chatId]) {
+    const targetGroup = isPrivateOwner ? args[0] : chatId;
+
+    if (isPrivateOwner && (!targetGroup || !targetGroup.endsWith("@g.us"))) {
+      return conn.sendMessage(chatId, {
+        text: "❌ Debes proporcionar el ID del grupo. Ejemplo:\n*.verfecha 1234567890-123456@g.us*"
+      }, { quoted: msg });
+    }
+
+    if (!tiempos[targetGroup]) {
       return conn.sendMessage(chatId, {
         text: "❌ No se ha establecido ningún tiempo para este grupo."
       }, { quoted: msg });
     }
 
-    const { fin } = tiempos[chatId];
+    const { fin } = tiempos[targetGroup];
     const diasRestantes = calcularDiasRestantes(fin);
     const fechaTexto = formatearDiaCompleto(fin);
     const horaTexto = formatearFecha(fin).split(", ")[1];
@@ -140,11 +157,19 @@ END:VCARD`
     }, { quoted: fkontak });
   }
 
-  // .renovar
+  // .renovar [grupo opcional]
   if (command.startsWith(".renovar")) {
     if (!isOwner && !isAdmin) {
       return conn.sendMessage(chatId, {
         text: "🚫 *Solo los administradores y el owner pueden usar este comando.*"
+      }, { quoted: msg });
+    }
+
+    const targetGroup = isPrivateOwner ? args[0] : chatId;
+
+    if (isPrivateOwner && (!targetGroup || !targetGroup.endsWith("@g.us"))) {
+      return conn.sendMessage(chatId, {
+        text: "❌ Debes proporcionar el ID del grupo. Ejemplo:\n*.renovar 1234567890-123456@g.us*"
       }, { quoted: msg });
     }
 
@@ -164,6 +189,6 @@ END:VCARD`
 
 handler.command = ["tiempos", "verfecha", "renovar"];
 handler.tags = ["tools"];
-handler.help = [".tiempos <días>", ".verfecha", ".renovar"];
+handler.help = [".tiempos <días> [grupo]", ".verfecha [grupo]", ".renovar [grupo]"];
 
 module.exports = handler;
