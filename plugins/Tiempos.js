@@ -73,7 +73,7 @@ const handler = async (msg, { conn, args }) => {
     },
     message: {
       locationMessage: {
-        name: "𝙈𝙤𝙙𝙤 𝘾𝙖𝙡𝙞𝙚𝙣𝙩𝙚",
+        name: "𝗚𝗥𝗔𝗖𝗜𝗔𝗦 𝗣𝗢𝗥 𝗖𝗢𝗡𝗧𝗥𝗔𝗧𝗔𝗥𝗠𝗘",
         jpegThumbnail: thumb,
         vcard:
           "BEGIN:VCARD\n" +
