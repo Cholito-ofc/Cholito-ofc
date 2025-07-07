@@ -29,7 +29,9 @@ const handler = async (msg, { conn, text }) => {
     }
 
     results.sort(() => Math.random() - 0.5);
-    const topResults = results.slice(0, 5);
+    const topResults = results.slice(0, 5); // puedes cambiar a 10 si quieres más
+
+    const mediaGroup = [];
 
     for (let i = 0; i < topResults.length; i++) {
       const { nowm, title, author, duration, likes } = topResults[i];
@@ -45,11 +47,16 @@ const handler = async (msg, { conn, text }) => {
 📥 *𝖵𝗂́𝖽𝖾𝗈 𝖽𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝖽𝗈 𝖼𝗈𝗇 𝖾́𝗑𝗂𝗍𝗈*
 > *𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝙳 🎬*`;
 
-      await conn.sendMessage(chatId, {
+      mediaGroup.push({
         video: { url: nowm },
         caption,
         mimetype: "video/mp4"
-      }, { quoted: msg });
+      });
+    }
+
+    // Enviar todos como "álbum" simulado (envío secuencial)
+    for (const media of mediaGroup) {
+      await conn.sendMessage(chatId, media, { quoted: msg });
     }
 
   } catch (err) {
@@ -60,7 +67,7 @@ const handler = async (msg, { conn, text }) => {
   }
 };
 
-handler.command = ["ttosearch", "tiktoks"];
+handler.command = ["ttsearch", "tiktoks"];
 handler.tags = ["buscador"];
 handler.help = ["tiktoksearch <tema>"];
 handler.register = true;
