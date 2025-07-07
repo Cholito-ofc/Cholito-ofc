@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const fetch = require("node-fetch");
 
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
@@ -7,7 +8,7 @@ const handler = async (msg, { conn, args }) => {
   const senderClean = senderId.replace(/[^0-9]/g, "");
   const isGroup = chatId.endsWith("@g.us");
 
-  // Crear contacto falso
+  // Contacto personalizado con miniatura e información tipo empresa
   const fkontak = {
     key: {
       participants: "0@s.whatsapp.net",
@@ -16,8 +17,21 @@ const handler = async (msg, { conn, args }) => {
       id: "Halo"
     },
     message: {
-      contactMessage: {
-        vcard: `BEGIN:VCARD\nVERSION:3.0\nN:Sy;Bot;;;\nFN:y\nitem1.TEL;waid=${senderClean}:${senderClean}\nitem1.X-ABLabel:Ponsel\nEND:VCARD`
+      locationMessage: {
+        name: "Unlimited", // Nombre que se muestra arriba de la miniatura
+        jpegThumbnail: await (await fetch('https://iili.io/FCJSFix.jpg')).buffer(),
+        vcard:
+          "BEGIN:VCARD\n" +
+          "VERSION:3.0\n" +
+          "N:;Unlimited;;;\n" +
+          "FN:Unlimited\n" +
+          "ORG:Unlimited\n" +
+          "TITLE:\n" +
+          "item1.TEL;waid=19709001746:+1 (970) 900-1746\n" +
+          "item1.X-ABLabel:Unlimited\n" +
+          "X-WA-BIZ-DESCRIPTION:ofc\n" +
+          "X-WA-BIZ-NAME:Unlimited\n" +
+          "END:VCARD"
       }
     },
     participant: "0@s.whatsapp.net"
