@@ -1,19 +1,20 @@
-function setupConnection(conn) {
+(async () => {
+let canalId = ["120363400979242290@newsletter"];  
+let canalNombre = ["𝗞𝗜𝗟𝗟𝗨𝗔-𝗕𝗢𝗧 👑"]
+  function setupConnection(conn) {
   conn.sendMessage2 = async (chat, content, m, options = {}) => {
-    const firstChannel = {
-      id: canalId[0],
-      nombre: canalNombre[0]
+    const firstChannel = { 
+      id: canalId[0], 
+      nombre: canalNombre[0] 
     };
-
     if (content.sticker) {
-      return conn.sendMessage(chat, {
-        sticker: content.sticker
-      }, {
+      return conn.sendMessage(chat, { 
+        sticker: content.sticker 
+      }, { 
         quoted: m,
-        ...options
+        ...options 
       });
     }
-
     const messageOptions = {
       ...content,
       mentions: content.mentions || options.mentions || [],
@@ -36,14 +37,6 @@ function setupConnection(conn) {
       disappearingMessagesInChat: 86400000,
       ...options
     });
-  };
-
-  // ✅ NUEVA función para enviar múltiples videos como "álbum"
-  conn.sendAlbumMessage = async function (jid, mediaArray, options = {}) {
-    for (let i = 0; i < mediaArray.length; i++) {
-      const media = mediaArray[i];
-      await conn.sendMessage(jid, media, options);
-    }
   };
 }
 //nsfw 
