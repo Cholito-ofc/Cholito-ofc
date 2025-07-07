@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-let cacheTikTokSearch = {}; // ID mensaje => { chatId, sender, results, index, timeout }
+const cacheTikTokSearch = {}; // msgID => { chatId, sender, results, index, timeout }
 
 const handler = async (msg, { conn, text }) => {
   const chatId = msg.key.remoteJid;
@@ -27,7 +27,7 @@ const handler = async (msg, { conn, text }) => {
     });
 
     const { data: response } = await axios.get(`https://apis-starlights-team.koyeb.app/starlight/tiktoksearch?text=${encodeURIComponent(text)}`);
-    let results = response?.data;
+    const results = response?.data;
 
     if (!results || results.length === 0) {
       return conn.sendMessage(chatId, {
@@ -37,10 +37,11 @@ const handler = async (msg, { conn, text }) => {
 
     results.sort(() => Math.random() - 0.5);
     const topResults = results.slice(0, 5);
-    let index = 0;
-    const { nowm, author, duration, likes } = topResults[index];
 
-    const caption =
+    const sendVideo = async (index) => {
+      const { nowm, author, duration, likes } = topResults[index];
+
+      const caption =
 `╭「 🎬 𝗧𝗶𝗸𝗧𝗼𝗸 𝗗𝗲𝘀𝗰𝗮𝗿𝗴𝗮𝗱𝗼 」╮
 │
 │ 👤 *Autor:* ${author || "Desconocido"}
@@ -51,96 +52,40 @@ const handler = async (msg, { conn, text }) => {
 📥 *𝖵𝗂́𝖽𝖾𝗈 𝖽𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝖽𝗈 𝖼𝗈𝗇 𝖾́𝗑𝗂𝗍𝗈*
 > *𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝙳 🎬*
 
-🔁 *Reacciona a este video para ver el siguiente.*`;
+🔁 *Reacciona a este video para ver el siguiente (${topResults.length - index - 1} restantes).*`;
 
-    const sent = await conn.sendMessage(chatId, {
-      video: { url: nowm },
-      caption,
-      mimetype: "video/mp4"
-    }, { quoted: msg });
-
-    await conn.sendMessage(chatId, {
-      react: { text: "✅", key: sent.key },
-    });
-
-    // Guardar en cache
-    const timeout = setTimeout(() => {
-      delete cacheTikTokSearch[sent.key.id];
-    }, 2 * 60 * 1000); // 2 minutos
-
-    cacheTikTokSearch[sent.key.id] = {
-      chatId,
-      sender,
-      results: topResults,
-      index: 1,
-      timeout
-    };
-
-    // Listener de reacciones
-    conn.ev.on("messages.upsert", async ({ messages }) => {
-      const m = messages[0];
-      if (!m?.message?.reactionMessage) return;
-
-      const reaction = m.message.reactionMessage;
-      const reactedMsgId = reaction.key?.id;
-      const user = m.key.participant || m.key.remoteJid;
-
-      if (!cacheTikTokSearch[reactedMsgId]) return;
-      if (user !== cacheTikTokSearch[reactedMsgId].sender) return;
-
-      const { chatId, results, index, timeout } = cacheTikTokSearch[reactedMsgId];
-
-      if (index >= results.length) {
-        await conn.sendMessage(chatId, {
-          text: "✅ *Ya no hay más resultados para esta búsqueda.*",
-          mentions: [user]
-        });
-        clearTimeout(timeout);
-        delete cacheTikTokSearch[reactedMsgId];
-        return;
-      }
-
-      const { nowm, author, duration, likes } = results[index];
-
-      const newCaption =
-`╭「 🎬 𝗧𝗶𝗸𝗧𝗼𝗸 𝗗𝗲𝘀𝗰𝗮𝗿𝗴𝗮𝗱𝗼 」╮
-│
-│ 👤 *Autor:* ${author || "Desconocido"}
-│ ⏱️ *Duración:* ${duration || "Desconocida"}
-│ ❤️ *Likes:* ${likes || "0"}
-╰─────────────╯
-
-📥 *𝖵𝗂́𝖽𝖾𝗈 𝖽𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝖽𝗈 𝖼𝗈𝗇 𝖾́𝗑𝗂𝗍𝗈*
-> *𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝙳 🎬*
-
-🔁 *Reacciona a este video para ver el siguiente.*`;
-
-      const newMsg = await conn.sendMessage(chatId, {
+      const sentMsg = await conn.sendMessage(chatId, {
         video: { url: nowm },
-        caption: newCaption,
+        caption,
         mimetype: "video/mp4"
-      });
+      }, { quoted: msg });
 
       await conn.sendMessage(chatId, {
-        react: { text: "✅", key: newMsg.key },
+        react: { text: "✅", key: sentMsg.key },
       });
 
-      // Limpiar y actualizar
-      clearTimeout(timeout);
-      delete cacheTikTokSearch[reactedMsgId];
+      // Limpiar entradas anteriores
+      for (let id in cacheTikTokSearch) {
+        if (cacheTikTokSearch[id].sender === sender) {
+          clearTimeout(cacheTikTokSearch[id].timeout);
+          delete cacheTikTokSearch[id];
+        }
+      }
 
-      const newTimeout = setTimeout(() => {
-        delete cacheTikTokSearch[newMsg.key.id];
-      }, 2 * 60 * 1000);
+      const timeout = setTimeout(() => {
+        delete cacheTikTokSearch[sentMsg.key.id];
+      }, 2 * 60 * 1000); // 2 minutos
 
-      cacheTikTokSearch[newMsg.key.id] = {
+      cacheTikTokSearch[sentMsg.key.id] = {
         chatId,
-        sender: user,
-        results,
+        sender,
+        results: topResults,
         index: index + 1,
-        timeout: newTimeout
+        timeout,
       };
-    });
+    };
+
+    await sendVideo(0);
 
   } catch (err) {
     console.error(err);
@@ -150,9 +95,52 @@ const handler = async (msg, { conn, text }) => {
   }
 };
 
+// Listener GLOBAL (una sola vez)
+let listenerActivo = false;
+function registrarListener(conn) {
+  if (listenerActivo) return; // solo una vez
+  listenerActivo = true;
+
+  conn.ev.on("messages.upsert", async ({ messages }) => {
+    const m = messages[0];
+    if (!m?.message?.reactionMessage) return;
+
+    const reaction = m.message.reactionMessage;
+    const reactedMsgId = reaction.key?.id;
+    const user = m.key.participant || m.key.remoteJid;
+
+    if (!cacheTikTokSearch[reactedMsgId]) return;
+    if (user !== cacheTikTokSearch[reactedMsgId].sender) return;
+
+    const { chatId, results, index, timeout } = cacheTikTokSearch[reactedMsgId];
+
+    clearTimeout(timeout);
+    delete cacheTikTokSearch[reactedMsgId];
+
+    if (index >= results.length) {
+      await conn.sendMessage(chatId, {
+        text: "✅ *Ya no hay más resultados para esta búsqueda.*",
+        mentions: [user]
+      });
+      return;
+    }
+
+    // Llamamos al handler original para enviar siguiente video
+    const fakeMsg = {
+      key: { remoteJid: chatId, participant: user },
+      message: {},
+    };
+    handler(fakeMsg, { conn, text: results[index].title || "TikTok" });
+  });
+}
+
 handler.command = ["tiktoksearch", "tiktoks"];
 handler.tags = ["buscador"];
 handler.help = ["tiktoksearch <tema>"];
 handler.register = true;
+
+handler.after = async (conn) => {
+  registrarListener(conn);
+};
 
 module.exports = handler;
