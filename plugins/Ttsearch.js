@@ -64,7 +64,7 @@ const handler = async (msg, { conn, text }) => {
         react: { text: "✅", key: sentMsg.key },
       });
 
-      // Limpiar entradas anteriores
+      // Limpiar reacciones anteriores del mismo usuario
       for (let id in cacheTikTokSearch) {
         if (cacheTikTokSearch[id].sender === sender) {
           clearTimeout(cacheTikTokSearch[id].timeout);
@@ -95,10 +95,10 @@ const handler = async (msg, { conn, text }) => {
   }
 };
 
-// Listener GLOBAL (una sola vez)
+// Listener GLOBAL
 let listenerActivo = false;
 function registrarListener(conn) {
-  if (listenerActivo) return; // solo una vez
+  if (listenerActivo) return;
   listenerActivo = true;
 
   conn.ev.on("messages.upsert", async ({ messages }) => {
@@ -109,10 +109,11 @@ function registrarListener(conn) {
     const reactedMsgId = reaction.key?.id;
     const user = m.key.participant || m.key.remoteJid;
 
-    if (!cacheTikTokSearch[reactedMsgId]) return;
-    if (user !== cacheTikTokSearch[reactedMsgId].sender) return;
+    const session = cacheTikTokSearch[reactedMsgId];
+    if (!session) return;
+    if (session.sender !== user) return;
 
-    const { chatId, results, index, timeout } = cacheTikTokSearch[reactedMsgId];
+    const { chatId, results, index, timeout } = session;
 
     clearTimeout(timeout);
     delete cacheTikTokSearch[reactedMsgId];
@@ -125,20 +126,52 @@ function registrarListener(conn) {
       return;
     }
 
-    // Llamamos al handler original para enviar siguiente video
-    const fakeMsg = {
-      key: { remoteJid: chatId, participant: user },
-      message: {},
+    // Enviar siguiente video
+    const { nowm, author, duration, likes } = results[index];
+
+    const caption =
+`╭「 🎬 𝗧𝗶𝗸𝗧𝗼𝗸 𝗗𝗲𝘀𝗰𝗮𝗿𝗴𝗮𝗱𝗼 」╮
+│
+│ 👤 *Autor:* ${author || "Desconocido"}
+│ ⏱️ *Duración:* ${duration || "Desconocida"}
+│ ❤️ *Likes:* ${likes || "0"}
+╰─────────────╯
+
+📥 *𝖵𝗂́𝖽𝖾𝗈 𝖽𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝖽𝗈 𝖼𝗈𝗇 𝖾́𝗑𝗂𝗍𝗈*
+> *𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝙳 🎬*
+
+🔁 *Reacciona a este video para ver el siguiente (${results.length - index - 1} restantes).*`;
+
+    const sentMsg = await conn.sendMessage(chatId, {
+      video: { url: nowm },
+      caption,
+      mimetype: "video/mp4"
+    });
+
+    await conn.sendMessage(chatId, {
+      react: { text: "✅", key: sentMsg.key },
+    });
+
+    const newTimeout = setTimeout(() => {
+      delete cacheTikTokSearch[sentMsg.key.id];
+    }, 2 * 60 * 1000);
+
+    cacheTikTokSearch[sentMsg.key.id] = {
+      chatId,
+      sender: user,
+      results,
+      index: index + 1,
+      timeout: newTimeout
     };
-    handler(fakeMsg, { conn, text: results[index].title || "TikTok" });
   });
 }
 
-handler.command = ["ttsearch", "tiktoks"];
+handler.command = ["tiktoksearch", "tiktoks"];
 handler.tags = ["buscador"];
 handler.help = ["tiktoksearch <tema>"];
 handler.register = true;
 
+// Importante: registrar el listener cuando el bot inicia
 handler.after = async (conn) => {
   registrarListener(conn);
 };
