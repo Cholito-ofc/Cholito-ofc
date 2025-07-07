@@ -47,10 +47,12 @@ const handler = async (msg, { conn, text }) => {
 📥 𝖵𝗂́𝖽𝖾𝗈 𝖽𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝖽𝗈 𝖼𝗈𝗇 𝖾́𝗑𝗂𝗍𝗈
 > *𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝙳 🎬*`;
 
-      const videoBuffer = await conn.getFile(nowm); // o usa fetch si tu conn no tiene getFile
+      const res = await axios.get(nowm, { responseType: 'arraybuffer' });
+      const buffer = Buffer.from(res.data);
+
       return {
         type: 'videoMessage',
-        video: videoBuffer.data,
+        video: buffer,
         mimetype: 'video/mp4',
         caption: idx === 0 ? caption : undefined,
       };
@@ -61,8 +63,7 @@ const handler = async (msg, { conn, text }) => {
   } catch (err) {
     console.error(err);
     return conn.sendMessage(chatId, {
-      text: `❌ *Error al buscar o enviar los videos:*
-${err.message}`,
+      text: `❌ *Error al buscar o enviar los videos:*\n${err.message}`,
     }, { quoted: msg });
   }
 };
