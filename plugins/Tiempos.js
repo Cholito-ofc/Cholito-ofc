@@ -1,15 +1,12 @@
 const fs = require("fs");
 const path = require("path");
+const axios = require("axios");
 
 const tiemposPath = path.resolve("./tiempos.json");
 
-// Cambia aquí la URL de la imagen que quieres enviar
-const imageUrl = 'https://i.imgur.com/A1e6QbY.jpg';
+// URL para la miniatura (opcional, puedes eliminar si no la usas)
+const urlImagen = 'https://cdn.russellxz.click/39109c83.jpeg'; 
 
-// Cambia aquí el texto que quieres mostrar como caption en la imagen
-const captionText = 'KilluaBot';
-
-// Funciones de formato (igual que antes)
 function formatearFecha(fecha) {
   const date = new Date(fecha);
   return date.toLocaleString("es-MX", {
@@ -64,7 +61,19 @@ const handler = async (msg, { conn, args }) => {
 
   const tiempos = fs.existsSync(tiemposPath) ? JSON.parse(fs.readFileSync(tiemposPath)) : {};
 
-  // Contacto modificado con vCard para citado, aquí cambia el nombre que quieras que aparezca
+  /*
+  // Descarga la imagen para miniatura (opcional)
+  let bufferImagen;
+  try {
+    const response = await axios.get(urlImagen, { responseType: "arraybuffer" });
+    bufferImagen = Buffer.from(response.data, "binary");
+  } catch (e) {
+    console.error("Error al descargar la imagen:", e.message);
+    bufferImagen = null;
+  }
+  */
+
+  // Contacto modificado con vCard para citado
   const fkontak = {
     key: {
       participants: "0@s.whatsapp.net",
@@ -76,8 +85,8 @@ const handler = async (msg, { conn, args }) => {
       contactMessage: {
         vcard: `BEGIN:VCARD
 VERSION:3.0
-N:Bot;Killua;;;
-FN:KilluaBot
+N:Sy;Bot;;;
+FN:y
 item1.TEL;waid=${senderNum}:${senderNum}
 item1.X-ABLabel:Ponsel
 END:VCARD`
@@ -101,12 +110,6 @@ END:VCARD`
     const fechaFin = fechaActual + dias * 24 * 60 * 60 * 1000;
     tiempos[chatId] = { inicio: fechaActual, fin: fechaFin };
     fs.writeFileSync(tiemposPath, JSON.stringify(tiempos, null, 2));
-
-    // Envío la imagen con URL y caption personalizado, citado con la tarjeta contacto
-    await conn.sendMessage(chatId, {
-      image: { url: imageUrl },
-      caption: captionText
-    }, { quoted: fkontak });
 
     return conn.sendMessage(chatId, {
       text: `➤ \`ORDENES RECIBIDAS\` ✅\n\n\`\`\`Finaliza en: ${dias} días.\`\`\`\n\`\`\`Fecha: ${formatearFecha(fechaFin)}\`\`\`\n\`\`\`Grupo: ${metadata?.subject || "Grupo desconocido"}\`\`\``
