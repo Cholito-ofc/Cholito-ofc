@@ -45,7 +45,6 @@ function setupConnection(conn) {
       const media = mediaArray[i];
       await conn.sendMessage(jid, media, options);
     }
-  };
 }
     const messageOptions = {
       ...content,
