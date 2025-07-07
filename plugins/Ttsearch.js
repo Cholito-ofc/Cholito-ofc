@@ -1,93 +1,94 @@
 const axios = require("axios");
+const { proto, generateWAMessageContent, generateWAMessageFromContent } = require("@whiskeysockets/baileys");
 
-const temporales = {}; // Para almacenar búsquedas por chat
-
-module.exports = async (msg, { conn, text }) => {
-  const jid = msg.key.remoteJid;
+const handler = async (msg, { conn, text, command }) => {
+  const chatId = msg.key.remoteJid;
 
   if (!text) {
-    return conn.sendMessage(jid, {
-      text: `✳️ Escribe:\n.ttsearch <búsqueda>\nEj: *ttsearch* edits messi`,
+    return conn.sendMessage(chatId, {
+      text: "🍭 *Ingresa el nombre o tema del video de TikTok que deseas buscar.*\n\n📌 Ejemplo:\n.tiktoksearch gatos graciosos"
     }, { quoted: msg });
   }
 
-  // Reacción de carga
-  await conn.sendMessage(jid, {
-    react: { text: "🔍", key: msg.key }
-  });
+  const dev = "🤖 KilluaBot";
+  const icons = null; // Aquí puedes usar un buffer de thumbnail si deseas
+  const rdone = "✅"; // Emoji de reacción si usas message.react
 
-  // Buscar videos
-  let res;
-  try {
-    res = await axios.get(`https://api.siputzx.my.id/api/s/tiktok?query=sadencodeURIComponent(text)}`);
-  } catch (e) {
-    return conn.sendMessage(jid, {
-      text: `❌ Error al buscar: ${e.message}`
-    }, { quoted: msg });
-  }
-
-  const resultados = res.data?.result || [];
-  if (!resultados.length) {
-    return conn.sendMessage(jid, {
-      text: "❌ No se encontraron resultados.",
-    }, { quoted: msg });
-  }
-
-  const lista = resultados.slice(0, 10).map((v, i) => `*${i + 1}.* ${v.title || 'Sin título'}`).join("\n\n");
-
-  temporales[jid] = {
-    resultados,
-    usuario: msg.key.participant || msg.key.remoteJid,
-    tiempo: Date.now()
+  const createVideoMessage = async (url) => {
+    const { videoMessage } = await generateWAMessageContent({ video: { url } }, {
+      upload: conn.waUploadToServer
+    });
+    return videoMessage;
   };
 
-  await conn.sendMessage(jid, {
-    text: `🔍 *Resultados encontrados:*\n\n${lista}\n\n📌 *Responde con un número del 1 al 10* para descargar esa cantidad de videos.`,
-  }, { quoted: msg });
-};
+  const shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  };
 
-module.exports.before = async function (msg, { conn }) {
-  const jid = msg.key.remoteJid;
-  const entrada = temporales[jid];
+  try {
+    // Buscar en API
+    const { data: response } = await axios.get(`https://apis-starlights-team.koyeb.app/starlight/tiktoksearch?text=${encodeURIComponent(text)}`);
+    let searchResults = response?.data;
 
-  if (!entrada) return;
-  if ((msg.key.participant || msg.key.remoteJid) !== entrada.usuario) return;
-
-  const num = parseInt(msg.message?.conversation || "");
-  if (!num || num < 1 || num > 10) {
-    return conn.sendMessage(jid, {
-      text: "❗ Ingresa un número válido entre *1 y 10*."
-    }, { quoted: msg });
-  }
-
-  delete temporales[jid];
-
-  const seleccionados = entrada.resultados.slice(0, num);
-  await conn.sendMessage(jid, {
-    text: `⏳ Descargando ${num} video(s)...`
-  }, { quoted: msg });
-
-  for (let video of seleccionados) {
-    try {
-      const link = `https://api.siputzx.my.id/api/download/tiktok?url=${encodeURIComponent(video.url)}`;
-      const r = await axios.get(link);
-      const urlVideo = r.data?.result?.video || r.data?.result?.url;
-
-      if (!urlVideo) continue;
-
-      await conn.sendMessage(jid, {
-        video: { url: urlVideo },
-        caption: video.title || "🎬 Video TikTok"
-      }, { quoted: msg });
-
-    } catch (e) {
-      await conn.sendMessage(jid, {
-        text: `❌ Error con el video:\n${video.title || "sin título"}`
+    if (!searchResults || searchResults.length === 0) {
+      return conn.sendMessage(chatId, {
+        text: "😔 *No se encontraron resultados para tu búsqueda.*"
       }, { quoted: msg });
     }
-  }
 
-  return true;
+    shuffleArray(searchResults);
+    const selectedResults = searchResults.slice(0, 7);
+
+    const results = [];
+
+    for (const result of selectedResults) {
+      results.push({
+        body: proto.Message.InteractiveMessage.Body.fromObject({ text: null }),
+        footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: dev }),
+        header: proto.Message.InteractiveMessage.Header.fromObject({
+          title: result.title,
+          hasMediaAttachment: true,
+          videoMessage: await createVideoMessage(result.nowm)
+        }),
+        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({ buttons: [] })
+      });
+    }
+
+    const responseMessage = generateWAMessageFromContent(chatId, {
+      viewOnceMessage: {
+        message: {
+          messageContextInfo: {
+            deviceListMetadata: {},
+            deviceListMetadataVersion: 2
+          },
+          interactiveMessage: proto.Message.InteractiveMessage.fromObject({
+            body: proto.Message.InteractiveMessage.Body.create({ text: "🍭 *Resultados de búsqueda para:* " + text }),
+            footer: proto.Message.InteractiveMessage.Footer.create({ text: "🍿 TikTok Search - KilluaBot" }),
+            header: proto.Message.InteractiveMessage.Header.create({ hasMediaAttachment: false }),
+            carouselMessage: proto.Message.InteractiveMessage.CarouselMessage.fromObject({
+              cards: results
+            })
+          })
+        }
+      }
+    }, { quoted: msg });
+
+    await conn.relayMessage(chatId, responseMessage.message, { messageId: responseMessage.key.id });
+
+  } catch (err) {
+    console.error(err);
+    await conn.sendMessage(chatId, {
+      text: "🚫 *Error al buscar en TikTok:*\n" + err.message
+    }, { quoted: msg });
+  }
 };
 
-module.exports.command = ["ttsearch"];
+handler.command = ["ttsearch", "tiktoks"];
+handler.tags = ["buscador"];
+handler.help = ["tiktoksearch <texto>"];
+handler.register = true;
+
+module.exports = handler;
