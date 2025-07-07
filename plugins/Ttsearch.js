@@ -40,7 +40,7 @@ const handler = async (msg, { conn, text }) => {
 │ 👤 *Autor:* ${author || 'Desconocido'}
 │ ⏱️ *Duración:* ${duration || 'Desconocida'}
 │ ❤️ *Likes:* ${likes || '0'}
-╰─────────────╯
+╰────────────────╯
 
 📥 *𝖵𝗂́𝖽𝖾𝗈 𝖽𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝖽𝗈 𝖼𝗈𝗇 𝖾́𝗑𝗂𝗍𝗈*
 > *𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝙳 🎬*`;
