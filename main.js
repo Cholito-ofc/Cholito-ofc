@@ -663,7 +663,7 @@ case "modoadmins": {
       activos.modoAdmins[chatId] = true;
 
       const mensajeOn = `
-╭┈〔 👑 *MODO ADMINS ACTIVADO* 〕┈╮
+╭┈〔 👑 *MODO ADMINS ON* 〕┈╮
 ┊ Ahora *solo los administradores*
 ┊ podrán usar comandos en este grupo.
 ┊ Control total para evitar caos.
@@ -678,7 +678,7 @@ case "modoadmins": {
       delete activos.modoAdmins[chatId];
 
       const mensajeOff = `
-╭┈〔 🆓 *MODO ADMINS DESACTIVADO* 〕┈╮
+╭┈〔 🆓 *MODO ADMINS OFF* 〕┈╮
 ┊ Todos pueden usar comandos
 ┊ libremente sin restricciones.
 ┊ ¡A divertirse, grupo! 🎉
