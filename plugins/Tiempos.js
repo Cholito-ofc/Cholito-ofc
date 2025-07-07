@@ -109,7 +109,7 @@ const handler = async (msg, { conn, args }) => {
     fs.writeFileSync(tiemposPath, JSON.stringify(tiempos, null, 2));
 
     return conn.sendMessage(chatId, {
-      text: `➤ \`ORDENES RECIBIDAS\` ✅\n\n\`\`\`Finaliza en: ${dias} días.\`\`\`\n\`\`\`Fecha: ${formatearFecha(fechaFin)}\`\`\`\n\`\`\`Grupo: ${metadata?.subject || "Grupo desconocido"}\`\`\`\n> 𝖴𝗌𝖾 .𝗋𝖾𝗇𝗈𝗏𝖺𝗋`
+      text: `➤ \`ORDENES RECIBIDAS\` ✅\n\n\`\`\`Finaliza en: ${dias} días.\`\`\`\n\`\`\`Fecha: ${formatearFecha(fechaFin)}\`\`\`\n\`\`\`Grupo: ${metadata?.subject || "Grupo desconocido"}\`\`\`\n\n> 𝖴𝗌𝖾 .𝗏𝖾𝗋𝖿𝖾𝖼𝗁𝖺`
     }, { quoted: fkontak });
   }
 
