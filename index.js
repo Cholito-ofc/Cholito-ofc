@@ -405,59 +405,38 @@ const farewellTexts = [
 if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
-    const customMessage = customWelcomes[update.id];
-    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
+    let userName = await sock.getName(participant).catch(() => "Usuario");
+    const metadata = await sock.groupMetadata(update.id);
+    const groupName = metadata.subject || "Grupo";
+    const membersCount = metadata.participants.length;
 
+    // === Obtener avatar o usar por defecto ===
+    let avatar = "https://iili.io/37F8TL7.jpg";
     try {
-      profilePicUrl = await sock.profilePictureUrl(participant, "image");
-    } catch (err) {}
+      avatar = await sock.profilePictureUrl(participant, 'image');
+    } catch {}
 
-    let groupName = "";
-    try {
-      const metadata = await sock.groupMetadata(update.id);
-      groupName = metadata.subject || "Grupo desconocido";
-    } catch (err) {
-      groupName = "Grupo desconocido";
-    }
+    // === Generar imagen con canvafy ===
+    const { WelcomeLeave } = require("canvafy");
+    const image = await new WelcomeLeave()
+      .setAvatar(avatar)
+      .setBackground("image", "https://iili.io/35pqXEJ.md.jpg")
+      .setTitle("¡BIENVENIDO!")
+      .setDescription(`👤 ${userName} ahora somos ${membersCount}`)
+      .setBorder("#2a2e35")
+      .setAvatarBorder("#2a2e35")
+      .setOverlayOpacity(0.1)
+      .build();
 
-    let textoFinal = "";
-
-    if (customMessage) {
-      if (/(@user)/gi.test(customMessage)) {
-        textoFinal = `*╭━─━──────━─━╮*\n*╰╮»* 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔\n*╭━─━──────━─━╯*\n` +
-                     `*┊»* 👤𝑼𝒔𝒖𝒂𝒓𝒊𝒐: ${customMessage.replace(/@user/gi, mention)}\n` +
-                     `*┊»* 👥𝑮𝒓𝒖𝒑𝒐: ${groupName}\n` +
-                     `*╰┈┈┈┈┈┈┈┈┈┈┈┈≫*`;
-      } else {
-        textoFinal = `*╭━─━──────━─━╮*\n*╰╮»* 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔\n*╭━─━──────━─━╯*\n` +
-                     `*┊»* 👤𝑼𝒔𝒖𝒂𝒓𝒊𝒐: ${mention}\n` +
-                     `*┊»* 👥𝑮𝒓𝒖𝒑𝒐: ${groupName}\n` +
-                     `*╰┈┈┈┈┈┈┈┈┈┈┈┈≫*\n\n${customMessage}`;
-      }
-    } else {
-      let groupDesc = "";
-      try {
-        const metadata = await sock.groupMetadata(update.id);
-        groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
-      } catch (err) {
-        groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
-      }
-
-      textoFinal = `*╭━─━──────━─━╮*\n*╰╮»* 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔\n*╭━─━──────━─━╯*\n` +
-                   `*┊»* 👤𝑼𝒔𝒖𝒂𝒓𝒊𝒐: ${mention}\n` +
-                   `*┊»* 👥𝑮𝒓𝒖𝒑𝒐: ${groupName}\n` +
-                   `*╰┈┈┈┈┈┈┈┈┈┈┈┈≫*` + groupDesc;
-    }
-
-    // Mensaje de bienvenida con imagen
+    // === Enviar imagen de bienvenida generada ===
     await sock.sendMessage(update.id, {
-      image: { url: profilePicUrl },
-      caption: textoFinal,
+      image,
+      caption: `✨ *¡Bienvenido(a)!*\n👤 ${mention}`,
       mentions: [participant]
     });
 
-    // Enviar audio desde URL (ajusta tu URL abajo)
-    const audioUrl = 'https://cdn.russellxz.click/0e4d4b6c.mp3'; // <- pon aquí tu enlace
+    // === Enviar audio de bienvenida ===
+    const audioUrl = 'https://cdn.russellxz.click/0e4d4b6c.mp3';
     await sock.sendMessage(update.id, {
       audio: { url: audioUrl },
       mimetype: 'audio/mp4',
