@@ -379,44 +379,69 @@ if (fs.existsSync(welcomePath)) {
   "Hasta pronto, y gracias por haber compartido momentos inolvidables con 🪼 CORTANA 2.0 BOT 🪼 👋💖."
 
 // BIENVENIDA: solo cuando alguien entra
-if (update.action === "add" && welcomeActivo) {
-  for (const participant of update.participants) {
-    const mention = `@${participant.split("@")[0]}`;
-    let userName = sock.contacts[participant]?.notify || "Usuario";
-    const metadata = await sock.groupMetadata(update.id);
-    const groupName = metadata.subject || "Grupo";
-    const membersCount = metadata.participants.length;
+const { welcome } = require('./lib/welcome.js'); // Asegúrate que este archivo existe
+const fs = require('fs');
 
-    let avatar = "https://iili.io/37F8TL7.jpg";
+sock.ev.on('group-participants.update', async (update) => {
+  try {
+    const activos = JSON.parse(fs.readFileSync('./activos.json'));
+    if (!activos.includes(update.id)) return;
+
+    const groupId = update.id;
+    const participants = update.participants || [];
+
+    // Obtener metadata del grupo
+    let groupMetadata = {};
     try {
-      avatar = await sock.profilePictureUrl(participant, 'image');
-    } catch {}
+      groupMetadata = await sock.groupMetadata(groupId);
+    } catch (err) {
+      console.error("❌ Error obteniendo metadata del grupo:", err);
+      return;
+    }
 
-    const { WelcomeLeave } = require("canvafy");
-    const image = await new WelcomeLeave()
-      .setAvatar(avatar)
-      .setBackground("image", "https://iili.io/35pqXEJ.md.jpg")
-      .setTitle("¡BIENVENIDO!")
-      .setDescription(`👤 ${userName} ahora somos ${membersCount}`)
-      .setBorder("#2a2e35")
-      .setAvatarBorder("#2a2e35")
-      .setOverlayOpacity(0.1)
-      .build();
+    for (const participant of participants) {
+      const isWelcome = update.action === 'add';
+      const isBye = update.action === 'remove';
 
-    await sock.sendMessage(update.id, {
-      image,
-      caption: `✨ *¡Bienvenido(a)!*\n👤 ${mention}`,
-      mentions: [participant]
-    });
+      if (!isWelcome && !isBye) continue;
 
-    const audioUrl = 'https://cdn.russellxz.click/0e4d4b6c.mp3';
-    await sock.sendMessage(update.id, {
-      audio: { url: audioUrl },
-      mimetype: 'audio/mp4',
-      ptt: true
-    });
+      const profilePic = await sock.profilePictureUrl(participant, 'image')
+        .catch(() => 'https://telegra.ph/file/265c67242d6c5c9c6cab9.jpg');
+
+      // Llamar a tu función personalizada de bienvenida
+      const buffer = await welcome({
+        name: groupMetadata.subject,
+        member: (await sock.onWhatsApp(participant))[0]?.notify || "Nuevo Usuario",
+        pp: profilePic,
+        bg: 'https://i.ibb.co/rxSPppd/kb.jpg' // Fondo personalizado
+      });
+
+      const audio = fs.readFileSync('./media/bienvenido.mp3'); // Asegúrate de tener el audio
+
+      if (isWelcome) {
+        await sock.sendMessage(groupId, {
+          image: buffer,
+          caption: `👋 Bienvenido al grupo *${groupMetadata.subject}*`,
+        });
+
+        await sock.sendMessage(groupId, {
+          audio: audio,
+          mimetype: 'audio/mp4',
+          ptt: true
+        });
+      }
+
+      if (isBye) {
+        await sock.sendMessage(groupId, {
+          text: `👋 Adiós @${participant.split('@')[0]}`,
+          mentions: [participant]
+        });
+      }
+    }
+  } catch (err) {
+    console.error("❌ Error en el evento group-participants.update:", err);
   }
-}
+});
 
 // DESPEDIDA: solo cuando alguien sale
 if (update.action === "remove" && despedidasActivo) {
