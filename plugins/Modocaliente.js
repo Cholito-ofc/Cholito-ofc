@@ -7,10 +7,26 @@ const handler = async (msg, { conn, args }) => {
   const senderClean = senderId.replace(/[^0-9]/g, "");
   const isGroup = chatId.endsWith("@g.us");
 
+  // Crear contacto falso
+  const fkontak = {
+    key: {
+      participants: "0@s.whatsapp.net",
+      remoteJid: "status@broadcast",
+      fromMe: false,
+      id: "Halo"
+    },
+    message: {
+      contactMessage: {
+        vcard: `BEGIN:VCARD\nVERSION:3.0\nN:Sy;Bot;;;\nFN:y\nitem1.TEL;waid=${senderClean}:${senderClean}\nitem1.X-ABLabel:Ponsel\nEND:VCARD`
+      }
+    },
+    participant: "0@s.whatsapp.net"
+  };
+
   if (!isGroup) {
     await conn.sendMessage(chatId, {
       text: "❌ Este comando solo puede usarse en grupos."
-    }, { quoted: msg });
+    }, { quoted: fkontak });
     return;
   }
 
@@ -23,14 +39,14 @@ const handler = async (msg, { conn, args }) => {
   if (!isAdmin && !isOwner && !isFromMe) {
     await conn.sendMessage(chatId, {
       text: "🚫 Solo los administradores del grupo, el owner o el bot pueden usar este comando."
-    }, { quoted: msg });
+    }, { quoted: fkontak });
     return;
   }
 
   if (!args[0] || !["on", "off"].includes(args[0].toLowerCase())) {
     await conn.sendMessage(chatId, {
       text: "⚙️ Usa: *modocaliente on/off* para activar o desactivar el modo caliente en este grupo."
-    }, { quoted: msg });
+    }, { quoted: fkontak });
     return;
   }
 
@@ -46,12 +62,12 @@ const handler = async (msg, { conn, args }) => {
     activos.modocaliente[chatId] = true;
     await conn.sendMessage(chatId, {
       text: "✅ *Modo caliente activado* en este grupo."
-    }, { quoted: msg });
+    }, { quoted: fkontak });
   } else {
     delete activos.modocaliente[chatId];
     await conn.sendMessage(chatId, {
       text: "🛑 *Modo caliente desactivado* en este grupo."
-    }, { quoted: msg });
+    }, { quoted: fkontak });
   }
 
   fs.writeFileSync(activosPath, JSON.stringify(activos, null, 2));
