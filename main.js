@@ -580,35 +580,65 @@ break;
 
       // Aquí ya no está el comando 'pack2'
 
-      // Puedes seguir con los demás comandos...
-      
+      // Puedes seguir con los demás comandos.
+        
 case "modoadmins": {
   try {
+    const fs = require("fs");
+    const path = require("path");
+    const fetch = require("node-fetch");
+
     const chatId = msg.key.remoteJid;
     const isGroup = chatId.endsWith("@g.us");
     const senderId = msg.key.participant || msg.key.remoteJid;
     const senderNum = senderId.replace(/[^0-9]/g, "");
     const isBotMessage = msg.key.fromMe;
 
+    // fkontak estilo Izumi
+    const fkontak = {
+      key: {
+        participants: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast",
+        fromMe: false,
+        id: "Halo"
+      },
+      message: {
+        locationMessage: {
+          name: "𝗠𝗼𝗱𝗼 𝗔𝗱𝗺𝗶𝗻𝘀 𝗼𝗻",
+          jpegThumbnail: await (await fetch("https://cdn.russellxz.click/d6517f1b.jpeg")).buffer(),
+          vcard:
+            "BEGIN:VCARD\n" +
+            "VERSION:3.0\n" +
+            "N:;Unlimited;;;\n" +
+            "FN:Unlimited\n" +
+            "ORG:Unlimited\n" +
+            "TITLE:\n" +
+            "item1.TEL;waid=19709001746:+1 (970) 900-1746\n" +
+            "item1.X-ABLabel:Unlimited\n" +
+            "X-WA-BIZ-DESCRIPTION:ofc\n" +
+            "X-WA-BIZ-NAME:Unlimited\n" +
+            "END:VCARD"
+        }
+      },
+      participant: "0@s.whatsapp.net"
+    };
+
     if (!isGroup) {
       await sock.sendMessage(chatId, {
         text: "❌ Este comando solo se puede usar en grupos."
-      }, { quoted: msg });
+      }, { quoted: fkontak });
       break;
     }
 
-    // Obtener metadata del grupo
     const metadata = await sock.groupMetadata(chatId);
-
-    // Buscar el participante exacto (ya sea @lid o número real)
     const participant = metadata.participants.find(p => p.id === senderId);
     const isAdmin = participant?.admin === "admin" || participant?.admin === "superadmin";
     const isOwner = global.owner.some(([id]) => id === senderNum);
 
     if (!isAdmin && !isOwner && !isBotMessage) {
       await sock.sendMessage(chatId, {
-        text: "❌ Solo administradores o el owner pueden usar este comando."
-      }, { quoted: msg });
+        text: "🚫 Solo *administradores del grupo*, el *owner* o el *bot* pueden usar este comando."
+      }, { quoted: fkontak });
       break;
     }
 
@@ -617,13 +647,11 @@ case "modoadmins": {
 
     if (!["on", "off"].includes(args[0])) {
       await sock.sendMessage(chatId, {
-        text: "✳️ Usa correctamente:\n\n.modoadmins on / off"
-      }, { quoted: msg });
+        text: "⚙️ Formato correcto:\n\n*⦿ .modoadmins on*\n*⦿ .modoadmins off*\n\nActiva o desactiva el uso de comandos solo para admins."
+      }, { quoted: fkontak });
       break;
     }
 
-    const fs = require("fs");
-    const path = require("path");
     const activosPath = path.join(__dirname, "activos.json");
     const activos = fs.existsSync(activosPath)
       ? JSON.parse(fs.readFileSync(activosPath))
@@ -633,25 +661,31 @@ case "modoadmins": {
 
     if (args[0] === "on") {
       activos.modoAdmins[chatId] = true;
+      await sock.sendMessage(chatId, {
+        text: `✅ *Modo Admins ACTIVADO*\n\nAhora *solo los administradores* podrán usar comandos en este grupo.`
+      }, { quoted: fkontak });
     } else {
       delete activos.modoAdmins[chatId];
+      await sock.sendMessage(chatId, {
+        text: `🆓 *Modo Admins DESACTIVADO*\n\n¡Cualquiera en el grupo puede usar los comandos nuevamente!`
+      }, { quoted: fkontak });
     }
 
     fs.writeFileSync(activosPath, JSON.stringify(activos, null, 2));
 
+    // Reacción ✅
     await sock.sendMessage(chatId, {
-      text: `👑 Modo admins *${args[0] === "on" ? "activado" : "desactivado"}* en este grupo.`
-    }, { quoted: msg });
+      react: { text: "✅", key: msg.key }
+    });
 
   } catch (err) {
     console.error("❌ Error en modoadmins:", err);
     await sock.sendMessage(msg.key.remoteJid, {
-      text: "❌ Ocurrió un error al cambiar el modo admins."
-    }, { quoted: msg });
+      text: "❌ Ocurrió un error al activar o desactivar el modo admins."
+    }, { quoted: fkontak });
   }
   break;
-}
-
+          }
       
 case "modoprivado": {
   try {
