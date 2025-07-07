@@ -604,7 +604,7 @@ case "modoadmins": {
       },
       message: {
         locationMessage: {
-          name: "𝗠𝗼𝗱𝗼 𝗔𝗱𝗺𝗶𝗻𝘀",
+          name: "𝗠𝗢𝗗𝗢 𝗔𝗗𝗠𝗜𝗡𝗦",
           jpegThumbnail: await (await fetch("https://iili.io/FCJSFix.jpg")).buffer(),
           vcard:
             "BEGIN:VCARD\n" +
@@ -645,7 +645,7 @@ case "modoadmins": {
     const messageText = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
     const args = messageText.trim().split(" ").slice(1);
 
-    if (!["on", "off"].includes(args[0])) {
+    if (!args[0] || !["on", "off"].includes(args[0].toLowerCase())) {
       await sock.sendMessage(chatId, {
         text: "⚙️ Formato correcto:\n\n*⦿ .modoadmins on*\n*⦿ .modoadmins off*\n\nActiva o desactiva el uso de comandos solo para admins."
       }, { quoted: fkontak });
@@ -659,21 +659,40 @@ case "modoadmins": {
 
     activos.modoAdmins = activos.modoAdmins || {};
 
-    if (args[0] === "on") {
+    if (args[0].toLowerCase() === "on") {
       activos.modoAdmins[chatId] = true;
+
+      const mensajeOn = `
+╭┈〔 👑 *MODO ADMINS ACTIVADO* 〕┈╮
+┊ Ahora *solo los administradores*
+┊ podrán usar comandos en este grupo.
+┊ Control total para evitar caos.
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
+      `;
+
       await sock.sendMessage(chatId, {
-        text: `✅ *Modo Admins ACTIVADO*\n\nAhora *solo los administradores* podrán usar comandos en este grupo.`
+        text: mensajeOn.trim()
       }, { quoted: fkontak });
+
     } else {
       delete activos.modoAdmins[chatId];
+
+      const mensajeOff = `
+╭┈〔 🆓 *MODO ADMINS DESACTIVADO* 〕┈╮
+┊ Todos pueden usar comandos
+┊ libremente sin restricciones.
+┊ ¡A divertirse, grupo! 🎉
+╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
+      `;
+
       await sock.sendMessage(chatId, {
-        text: `🆓 *Modo Admins DESACTIVADO*\n\n¡Cualquiera en el grupo puede usar los comandos nuevamente!`
+        text: mensajeOff.trim()
       }, { quoted: fkontak });
     }
 
     fs.writeFileSync(activosPath, JSON.stringify(activos, null, 2));
 
-    // Reacción ✅
+    // Reacción ✅ para confirmar
     await sock.sendMessage(chatId, {
       react: { text: "✅", key: msg.key }
     });
@@ -685,7 +704,7 @@ case "modoadmins": {
     }, { quoted: fkontak });
   }
   break;
-          }
+}
       
 case "modoprivado": {
   try {
