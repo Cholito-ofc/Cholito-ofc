@@ -87,43 +87,63 @@ const { cargarSubbots } = require("./indexsubbots");
     const { default: makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, makeCacheableSignalKeyStore } = require("@whiskeysockets/baileys");
     const chalk = require("chalk");
     const yargs = require('yargs/yargs')
-    const { tmpdir } = require('os')
-    const { join } = require('path')
-    const figlet = require("figlet");
-    const fs = require("fs");
-    const { readdirSync, statSync, unlinkSync } = require('fs')
-    const readline = require("readline");
-    const pino = require("pino");
-    const { isOwner, getPrefix, allowedPrefixes } = require("./config");
-    const { handleCommand } = require("./main"); 
-    // Carga de credenciales y estado de autenticación
-    const { state, saveCreds } = await useMultiFileAuthState("./sessions");
-  const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
-  //lista
+const { tmpdir } = require('os');
+const { join } = require('path');
+const figlet = require("figlet");
+const fs = require("fs");
+const { readdirSync, statSync, unlinkSync } = require('fs');
+const readline = require("readline");
+const pino = require("pino");
+const { isOwner, getPrefix, allowedPrefixes } = require("./config");
+const { handleCommand } = require("./main");
+
+// Carga de credenciales y estado de autenticación
+const { state, saveCreds } = await useMultiFileAuthState("./sessions");
+const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
+
+// 📁 Cargar datos AFK por grupo
+const afkFile = "./afk.json";
+if (!fs.existsSync(afkFile)) {
+  fs.writeFileSync(afkFile, JSON.stringify({}, null, 2));
+}
+let afkData = JSON.parse(fs.readFileSync(afkFile, "utf-8"));
+
+// 🧠 Función para saber si un grupo está en modo AFK
+function isAfkGroup(chatId) {
+  if (!afkData[chatId]) return false;
+  const ahora = Date.now();
+  const tiempoFin = afkData[chatId].hasta || 0;
+  return ahora < tiempoFin;
+}
+
+// ✅ Función para guardar afkData
+function guardarAfk() {
+  fs.writeFileSync(afkFile, JSON.stringify(afkData, null, 2));
+}
+
+// 🟢 Lista de usuarios permitidos
 function isAllowedUser(sender) {
   const listaFile = "./lista.json";
   if (!fs.existsSync(listaFile)) return false;
   const lista = JSON.parse(fs.readFileSync(listaFile, "utf-8"));
-  // Extrae solo los dígitos del número para comparar
   const num = sender.replace(/\D/g, "");
   return lista.includes(num);
 }
-    
-    //privado y admins
 
+// ⚙️ Modo privado y admins
 const path = "./activos.json";
 
 // 📂 Cargar configuración de modos desde el archivo JSON
 function cargarModos() {
-    if (!fs.existsSync(path)) {
-        fs.writeFileSync(path, JSON.stringify({ modoPrivado: false, modoAdmins: {} }, null, 2));
-    }
-    return JSON.parse(fs.readFileSync(path, "utf-8"));
+  if (!fs.existsSync(path)) {
+    fs.writeFileSync(path, JSON.stringify({ modoPrivado: false, modoAdmins: {} }, null, 2));
+  }
+  return JSON.parse(fs.readFileSync(path, "utf-8"));
 }
 
 // 📂 Guardar configuración de modos en el archivo JSON
 function guardarModos(data) {
-    fs.writeFileSync(path, JSON.stringify(data, null, 2));
+  fs.writeFileSync(path, JSON.stringify(data, null, 2));
 }
 
 let modos = cargarModos();
