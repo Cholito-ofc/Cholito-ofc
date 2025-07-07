@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const tiemposPath = path.resolve("./tiempos.json");
+const relojPath = "./media/reloj.png"; // ← Tu imagen redonda
 
 function formatearFecha(fecha) {
   const date = new Date(fecha);
@@ -34,22 +35,13 @@ function calcularDiasRestantes(fechaFutura) {
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const isGroup = chatId.endsWith("@g.us");
-
-  // Obtener número real del remitente
-  let senderId;
-  if (isGroup) {
-    senderId = msg.key.participant || msg.participant || msg.key.remoteJid;
-  } else {
-    senderId = msg.key.remoteJid;
-  }
-
+  const senderId = isGroup ? (msg.key.participant || msg.participant || msg.key.remoteJid) : msg.key.remoteJid;
   const senderNum = senderId.replace(/[^0-9]/g, "");
+  const command = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
 
-  // Definir lista de Owners
   const OWNERS = ["31375424024748", "50489513153"];
   const isOwner = OWNERS.includes(senderNum);
 
-  // Metadata para saber si es admin
   let metadata = null;
   let participant = null;
   let isAdmin = false;
@@ -64,16 +56,32 @@ const handler = async (msg, { conn, args }) => {
     }
   }
 
-  const command = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
   const tiempos = fs.existsSync(tiemposPath) ? JSON.parse(fs.readFileSync(tiemposPath)) : {};
+
+  // Contacto modificado con imagen personalizada
+  const fkontak = {
+    key: {
+      fromMe: false,
+      participant: "0@s.whatsapp.net",
+      remoteJid: "status@broadcast",
+      id: "Killua"
+    },
+    message: {
+      imageMessage: {
+        mimetype: "image/png",
+        jpegThumbnail: fs.readFileSync(relojPath),
+        caption: "⏰ Tiempo activo", // ← Aquí cambias el texto "WhatsApp"
+        fileSha256: Buffer.from([]),
+        fileLength: "0",
+        height: 100,
+        width: 100
+      }
+    }
+  };
 
   // .tiempos <días>
   if (command.startsWith(".tiempos")) {
-    if (!isOwner) {
-      return conn.sendMessage(chatId, {
-        text: "🚫 *Solo el owner puede usar este comando.*"
-      }, { quoted: msg });
-    }
+    if (!isOwner) return conn.sendMessage(chatId, { text: "🚫 *Solo el owner puede usar este comando.*" }, { quoted: msg });
 
     const dias = parseInt(args[0]);
     if (isNaN(dias) || dias <= 0) {
@@ -84,17 +92,12 @@ const handler = async (msg, { conn, args }) => {
 
     const fechaActual = Date.now();
     const fechaFin = fechaActual + dias * 24 * 60 * 60 * 1000;
-
-    tiempos[chatId] = {
-      inicio: fechaActual,
-      fin: fechaFin
-    };
-
+    tiempos[chatId] = { inicio: fechaActual, fin: fechaFin };
     fs.writeFileSync(tiemposPath, JSON.stringify(tiempos, null, 2));
 
     return conn.sendMessage(chatId, {
       text: `➤ \`ORDENES RECIBIDAS\` ✅\n\n\`\`\`Finaliza en: ${dias} días.\`\`\`\n\`\`\`Fecha: ${formatearFecha(fechaFin)}\`\`\`\n\`\`\`Grupo: ${metadata?.subject || "Grupo desconocido"}\`\`\``
-    }, { quoted: msg });
+    }, { quoted: fkontak });
   }
 
   // .verfecha
@@ -118,7 +121,7 @@ const handler = async (msg, { conn, args }) => {
 
     return conn.sendMessage(chatId, {
       text: `📅 \`SHOWDATE\` 🔔\n\n\`\`\`Próximo ${fechaTexto}\`\`\`\n\`\`\`Hora exacta: ${horaTexto} (hora CDMX)\`\`\`\n\`\`\`Quedan, ${diasRestantes} días.\`\`\`\n\n> 𝖴𝗌𝖾 .𝗋𝖾𝗇𝗈𝗏𝖺𝗋`
-    }, { quoted: msg });
+    }, { quoted: fkontak });
   }
 
   // .renovar
@@ -139,7 +142,7 @@ const handler = async (msg, { conn, args }) => {
       vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:${o.name}\nTEL;type=CELL;type=VOICE;waid=${o.number}:${o.number}\nEND:VCARD`
     }));
 
-    return conn.sendMessage(chatId, { contacts }, { quoted: msg });
+    return conn.sendMessage(chatId, { contacts }, { quoted: fkontak });
   }
 };
 
