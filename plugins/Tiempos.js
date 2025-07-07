@@ -3,11 +3,9 @@ const path = require("path");
 const axios = require("axios");
 
 const tiemposPath = path.resolve("./tiempos.json");
-// Ya no necesitas ruta local, porque usaremos URL:
-// const relojPath = "./media/reloj.png"; 
 
-// Cambia aquí la URL de tu imagen redonda:
-const urlImagen = 'https://cdn.russellxz.click/39109c83.jpeg'; 
+// URL para la miniatura (opcional, puedes eliminar si no la usas)
+const urlImagen = 'https://i.imgur.com/A1e6QbY.jpg'; 
 
 function formatearFecha(fecha) {
   const date = new Date(fecha);
@@ -41,7 +39,7 @@ const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const isGroup = chatId.endsWith("@g.us");
   const senderId = isGroup ? (msg.key.participant || msg.participant || msg.key.remoteJid) : msg.key.remoteJid;
-  const senderNum = senderId.replace(/[^0-9]/g, "");
+  const senderNum = senderId.split('@')[0];
   const command = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
 
   const OWNERS = ["31375424024748", "50489513153"];
@@ -63,7 +61,8 @@ const handler = async (msg, { conn, args }) => {
 
   const tiempos = fs.existsSync(tiemposPath) ? JSON.parse(fs.readFileSync(tiemposPath)) : {};
 
-  // Descarga la imagen desde la URL para obtener el buffer
+  /*
+  // Descarga la imagen para miniatura (opcional)
   let bufferImagen;
   try {
     const response = await axios.get(urlImagen, { responseType: "arraybuffer" });
@@ -72,26 +71,28 @@ const handler = async (msg, { conn, args }) => {
     console.error("Error al descargar la imagen:", e.message);
     bufferImagen = null;
   }
+  */
 
-  // Contacto modificado con imagen personalizada desde URL
+  // Contacto modificado con vCard para citado
   const fkontak = {
     key: {
-      fromMe: false,
-      participant: "0@s.whatsapp.net",
+      participants: "0@s.whatsapp.net",
       remoteJid: "status@broadcast",
-      id: "Killua"
+      fromMe: false,
+      id: "Halo"
     },
     message: {
-      imageMessage: {
-        mimetype: "image/jpeg", // o "image/png" si tu imagen es PNG
-        jpegThumbnail: bufferImagen || Buffer.from([]), // si falla, vacío para evitar error
-        caption: "⏰ Tiempo activo",
-        fileSha256: Buffer.from([]),
-        fileLength: "0",
-        height: 100,
-        width: 100
+      contactMessage: {
+        vcard: `BEGIN:VCARD
+VERSION:3.0
+N:Sy;Bot;;;
+FN:y
+item1.TEL;waid=${senderNum}:${senderNum}
+item1.X-ABLabel:Ponsel
+END:VCARD`
       }
-    }
+    },
+    participant: "0@s.whatsapp.net"
   };
 
   // .tiempos <días>
