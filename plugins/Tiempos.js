@@ -5,7 +5,7 @@ const axios = require("axios");
 const tiemposPath = path.resolve("./tiempos.json");
 
 // URL para la miniatura (opcional, puedes eliminar si no la usas)
-const urlImagen = 'https://i.imgur.com/A1e6QbY.jpg'; 
+const urlImagen = 'https://cdn.russellxz.click/39109c83.jpeg'; 
 
 function formatearFecha(fecha) {
   const date = new Date(fecha);
