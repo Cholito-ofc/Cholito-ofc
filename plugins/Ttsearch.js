@@ -1,94 +1,67 @@
 const axios = require("axios");
-const { proto, generateWAMessageContent, generateWAMessageFromContent } = require("@whiskeysockets/baileys");
 
-const handler = async (msg, { conn, text, command }) => {
+const handler = async (msg, { conn, text }) => {
   const chatId = msg.key.remoteJid;
 
   if (!text) {
     return conn.sendMessage(chatId, {
-      text: "🍭 *Ingresa el nombre o tema del video de TikTok que deseas buscar.*\n\n📌 Ejemplo:\n.tiktoksearch gatos graciosos"
+      text:
+`🎯 *Búsqueda de Videos TikTok*
+
+📌 *Usa el comando así:*
+.tiktoksearch <tema>
+
+💡 *Ejemplo:*
+.tiktoksearch humor negro
+
+🔍 *KilluaBot buscará los mejores resultados para ti...*`
     }, { quoted: msg });
   }
 
-  const dev = "🤖 KilluaBot";
-  const icons = null; // Aquí puedes usar un buffer de thumbnail si deseas
-  const rdone = "✅"; // Emoji de reacción si usas message.react
-
-  const createVideoMessage = async (url) => {
-    const { videoMessage } = await generateWAMessageContent({ video: { url } }, {
-      upload: conn.waUploadToServer
-    });
-    return videoMessage;
-  };
-
-  const shuffleArray = (array) => {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-  };
-
   try {
-    // Buscar en API
     const { data: response } = await axios.get(`https://apis-starlights-team.koyeb.app/starlight/tiktoksearch?text=${encodeURIComponent(text)}`);
-    let searchResults = response?.data;
+    let results = response?.data;
 
-    if (!searchResults || searchResults.length === 0) {
+    if (!results || results.length === 0) {
       return conn.sendMessage(chatId, {
         text: "😔 *No se encontraron resultados para tu búsqueda.*"
       }, { quoted: msg });
     }
 
-    shuffleArray(searchResults);
-    const selectedResults = searchResults.slice(0, 7);
+    // Reordenar aleatoriamente
+    results.sort(() => Math.random() - 0.5);
 
-    const results = [];
+    const topResults = results.slice(0, 5); // Solo 5 para no saturar
 
-    for (const result of selectedResults) {
-      results.push({
-        body: proto.Message.InteractiveMessage.Body.fromObject({ text: null }),
-        footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: dev }),
-        header: proto.Message.InteractiveMessage.Header.fromObject({
-          title: result.title,
-          hasMediaAttachment: true,
-          videoMessage: await createVideoMessage(result.nowm)
-        }),
-        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({ buttons: [] })
-      });
+    for (let i = 0; i < topResults.length; i++) {
+      const { nowm, title, author } = topResults[i];
+
+      await conn.sendMessage(chatId, {
+        video: { url: nowm },
+        caption:
+`🎬 *Resultado #${i + 1}*
+
+📌 *Título:* ${title}
+👤 *Autor:* ${author}
+🔍 *Buscado por:* ${text}
+
+━━━━━━━━━━━━━━
+🪄 *KilluaBot - Buscador TikTok*`,
+        mimetype: "video/mp4"
+      }, { quoted: msg });
     }
-
-    const responseMessage = generateWAMessageFromContent(chatId, {
-      viewOnceMessage: {
-        message: {
-          messageContextInfo: {
-            deviceListMetadata: {},
-            deviceListMetadataVersion: 2
-          },
-          interactiveMessage: proto.Message.InteractiveMessage.fromObject({
-            body: proto.Message.InteractiveMessage.Body.create({ text: "🍭 *Resultados de búsqueda para:* " + text }),
-            footer: proto.Message.InteractiveMessage.Footer.create({ text: "🍿 TikTok Search - KilluaBot" }),
-            header: proto.Message.InteractiveMessage.Header.create({ hasMediaAttachment: false }),
-            carouselMessage: proto.Message.InteractiveMessage.CarouselMessage.fromObject({
-              cards: results
-            })
-          })
-        }
-      }
-    }, { quoted: msg });
-
-    await conn.relayMessage(chatId, responseMessage.message, { messageId: responseMessage.key.id });
 
   } catch (err) {
     console.error(err);
-    await conn.sendMessage(chatId, {
-      text: "🚫 *Error al buscar en TikTok:*\n" + err.message
+    return conn.sendMessage(chatId, {
+      text: "❌ *Error al buscar o enviar los videos:*\n" + err.message
     }, { quoted: msg });
   }
 };
 
-handler.command = ["ttsearch", "tiktoks"];
+handler.command = ["tiktoksearch", "tiktoks"];
 handler.tags = ["buscador"];
-handler.help = ["tiktoksearch <texto>"];
+handler.help = ["tiktoksearch <tema>"];
 handler.register = true;
 
 module.exports = handler;
