@@ -3,13 +3,13 @@ const { tempTikTokSearch } = require("./ttsearch");
 const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
+
   const body = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
   const num = parseInt(body.trim());
 
-  // Validar si es número válido
-  if (!Number.isInteger(num) || num < 1 || num > 10) return;
+  if (!Number.isInteger(num) || num < 1 || num > 10) return; // Ignorar si no es un número válido
 
-  // Verificar si hay resultados almacenados
+  // Verificamos si hay búsqueda guardada
   const results = tempTikTokSearch[sender];
   if (!results || results.length === 0) {
     return conn.sendMessage(chatId, {
@@ -42,11 +42,10 @@ const handler = async (msg, { conn }) => {
     }, { quoted: msg });
   }
 
-  // Limpiar resultados temporales
-  delete tempTikTokSearch[sender];
+  delete tempTikTokSearch[sender]; // Limpiar para no repetir
 };
 
 handler.customPrefix = /^([1-9]|10)$/i;
-handler.command = new RegExp(""); // obligatorio para capturar solo respuestas numéricas
+handler.command = new RegExp(""); // Obligatorio para respuestas numéricas
 
 module.exports = handler;
