@@ -1,67 +1,79 @@
+3. El usuario responde con un número (por ejemplo, `5`).
+
+4. El bot envía **5 videos TikTok** (uno por uno, vertical, con descripción).
+
+---
+
+### ✅ Implementación estilo KilluaBot
+
+Este comando se manejará en dos partes:
+
+- `ttsearch`: hace la búsqueda y guarda los resultados temporalmente.
+- Al responder con un número (1–10), el bot lee la respuesta, busca los resultados guardados y envía solo esa cantidad de videos.
+
+---
+
+### ✅ Código: `ttsearch.js`
+
+```js
 const axios = require("axios");
 
-const handler = async (msg, { conn, text }) => {
-  const chatId = msg.key.remoteJid;
+const tempTikTokSearch = {}; // Objeto temporal en memoria
 
-  if (!text) {
-    return conn.sendMessage(chatId, {
-      text:
+const handler = async (msg, { conn, text }) => {
+const chatId = msg.key.remoteJid;
+const sender = msg.key.participant || msg.key.remoteJid;
+
+if (!text) {
+ return conn.sendMessage(chatId, {
+   text:
 `🎯 *Búsqueda de Videos TikTok*
 
 📌 *Usa el comando así:*
-.tiktoksearch <tema>
+.ttsearch edits de Messi
 
-💡 *Ejemplo:*
-.tiktoksearch humor negro
+💡 *KilluaBot buscará hasta 10 resultados para ti...*`
+ }, { quoted: msg });
+}
 
-🔍 *KilluaBot buscará los mejores resultados para ti...*`
-    }, { quoted: msg });
-  }
+try {
+ const { data: response } = await axios.get(`https://apis-starlights-team.koyeb.app/starlight/tiktoksearch?text=${encodeURIComponent(text)}`);
+ let results = response?.data;
 
-  try {
-    const { data: response } = await axios.get(`https://apis-starlights-team.koyeb.app/starlight/tiktoksearch?text=${encodeURIComponent(text)}`);
-    let results = response?.data;
+ if (!results || results.length === 0) {
+   return conn.sendMessage(chatId, {
+     text: "😔 *No se encontraron resultados para tu búsqueda.*"
+   }, { quoted: msg });
+ }
 
-    if (!results || results.length === 0) {
-      return conn.sendMessage(chatId, {
-        text: "😔 *No se encontraron resultados para tu búsqueda.*"
-      }, { quoted: msg });
-    }
+ results = results.slice(0, 10); // máximo 10
 
-    // Reordenar aleatoriamente
-    results.sort(() => Math.random() - 0.5);
+ // Guardar resultados temporalmente usando ID del usuario
+ tempTikTokSearch[sender] = results;
 
-    const topResults = results.slice(0, 5); // Solo 5 para no saturar
+ return conn.sendMessage(chatId, {
+   text:
+`🧠 *Se encontraron ${results.length} resultados para:* "${text}"
 
-    for (let i = 0; i < topResults.length; i++) {
-      const { nowm, title, author } = topResults[i];
+📥 *Responde con un número del 1 al ${results.length}* para recibir esa cantidad de videos.
 
-      await conn.sendMessage(chatId, {
-        video: { url: nowm },
-        caption:
-`🎬 *Resultado #${i + 1}*
+🔢 *Ejemplo:* 5`
+ }, { quoted: msg });
 
-📌 *Título:* ${title}
-👤 *Autor:* ${author}
-🔍 *Buscado por:* ${text}
-
-━━━━━━━━━━━━━━
-🪄 *KilluaBot - Buscador TikTok*`,
-        mimetype: "video/mp4"
-      }, { quoted: msg });
-    }
-
-  } catch (err) {
-    console.error(err);
-    return conn.sendMessage(chatId, {
-      text: "❌ *Error al buscar o enviar los videos:*\n" + err.message
-    }, { quoted: msg });
-  }
+} catch (err) {
+ console.error(err);
+ return conn.sendMessage(chatId, {
+   text: "❌ *Error al buscar en TikTok:*\n" + err.message
+ }, { quoted: msg });
+}
 };
 
-handler.command = ["ttsearch", "tiktoks"];
+handler.command = ["ttsearch"];
 handler.tags = ["buscador"];
-handler.help = ["tiktoksearch <tema>"];
+handler.help = ["ttsearch <tema>"];
 handler.register = true;
 
 module.exports = handler;
+
+// Exportamos los datos temporales para usarlos en el segundo handler
+module.exports.tempTikTokSearch = tempTikTokSearch;
