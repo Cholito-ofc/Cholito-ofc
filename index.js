@@ -380,7 +380,7 @@ if (fs.existsSync(welcomePath)) {
 
 // BIENVENIDA: solo cuando alguien entra
 const { welcome } = require('./lib/welcome.js'); // Asegúrate que este archivo existe
-const fs = require('fs'); // Solo debe declararse una vez en todo el proyecto
+ // Solo debe declararse una vez en todo el proyecto
 
 sock.ev.on('group-participants.update', async (update) => {
   try {
