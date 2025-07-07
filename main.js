@@ -604,8 +604,8 @@ case "modoadmins": {
       },
       message: {
         locationMessage: {
-          name: "𝗠𝗼𝗱𝗼 𝗔𝗱𝗺𝗶𝗻𝘀 𝗼𝗻",
-          jpegThumbnail: await (await fetch("https://cdn.russellxz.click/d6517f1b.jpeg")).buffer(),
+          name: "𝗠𝗼𝗱𝗼 𝗔𝗱𝗺𝗶𝗻𝘀",
+          jpegThumbnail: await (await fetch("https://iili.io/FCJSFix.jpg")).buffer(),
           vcard:
             "BEGIN:VCARD\n" +
             "VERSION:3.0\n" +
