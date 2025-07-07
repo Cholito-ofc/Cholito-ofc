@@ -1,9 +1,11 @@
-// versión modificada del comando .tiempos para aceptar número de grupo
-
 const fs = require("fs");
 const path = require("path");
 
 const tiemposPath = path.resolve("./tiempos.json");
+const afkPath = path.resolve("./afk.json");
+
+// Cargar AFK en memoria
+global.gruposAfk = fs.existsSync(afkPath) ? JSON.parse(fs.readFileSync(afkPath)) : {};
 
 function formatearFecha(fecha) {
   const date = new Date(fecha);
@@ -43,15 +45,23 @@ const handler = async (msg, { conn, args }) => {
   const OWNERS = ["31375424024748", "50489513153"];
   const isOwner = OWNERS.includes(senderNum);
 
-  const command = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
+  const commandText = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
   const tiempos = fs.existsSync(tiemposPath) ? JSON.parse(fs.readFileSync(tiemposPath)) : {};
 
-  if (command.startsWith(".tiempos")) {
-    if (!isOwner) {
+  // Validar existencia de grupos cargados
+  if ([".tiempos", ".afk", ".activar"].some(cmd => commandText.startsWith(cmd))) {
+    if (!global.gruposAdmin || global.gruposAdmin.length === 0) {
       return conn.sendMessage(chatId, {
-        text: "🚫 *Solo el owner puede usar este comando.*"
+        text: `❌ Primero usa el comando *.listgrupos* para ver los grupos disponibles.`
       }, { quoted: msg });
     }
+  }
+
+  // =========================
+  // COMANDO: .tiempos <días> <grupo?>
+  // =========================
+  if (commandText.startsWith(".tiempos")) {
+    if (!isOwner) return conn.sendMessage(chatId, { text: "🚫 *Solo el owner puede usar este comando.*" }, { quoted: msg });
 
     const dias = parseInt(args[0]);
     if (isNaN(dias) || dias <= 0) {
@@ -60,16 +70,14 @@ const handler = async (msg, { conn, args }) => {
       }, { quoted: msg });
     }
 
-    // Si se proporciona número de grupo, buscarlo en global.gruposAdmin
     let targetGroupId = chatId;
     let grupoNombre = "Este grupo";
 
     if (args.length >= 2 && /^\d+$/.test(args[1])) {
-      const groupNum = args[1];
-      const grupo = global.gruposAdmin?.find(g => g.code === groupNum);
+      const grupo = global.gruposAdmin.find(g => g.code === args[1]);
       if (!grupo) {
         return conn.sendMessage(chatId, {
-          text: `❌ No se encontró ningún grupo con el número *${groupNum}*. Usa *!listgrupos* para ver los disponibles.`
+          text: `❌ No se encontró ningún grupo con el número *${args[1]}*. Usa *.listgrupos* para ver los disponibles.`
         }, { quoted: msg });
       }
       targetGroupId = grupo.id;
@@ -79,28 +87,26 @@ const handler = async (msg, { conn, args }) => {
     const fechaActual = Date.now();
     const fechaFin = fechaActual + dias * 24 * 60 * 60 * 1000;
 
-    tiempos[targetGroupId] = {
-      inicio: fechaActual,
-      fin: fechaFin
-    };
-
+    tiempos[targetGroupId] = { inicio: fechaActual, fin: fechaFin };
     fs.writeFileSync(tiemposPath, JSON.stringify(tiempos, null, 2));
 
-await conn.sendMessage(targetGroupId, {
-  text:
-    `➤ \`ORDENES RECIBIDAS\` ✅\n\n` +
-    `\`\`\`Finaliza en: ${dias} días.\`\`\`\n` +
-    `\`\`\`Fecha: ${formatearFecha(fechaFin)}\`\`\`\n` +
-    `\`\`\`Grupo: ${grupoNombre}\`\`\``
-});
+    await conn.sendMessage(targetGroupId, {
+      text:
+        `➤ \`ORDENES RECIBIDAS\` ✅\n\n` +
+        `\`\`\`Finaliza en: ${dias} días.\`\`\`\n` +
+        `\`\`\`Fecha: ${formatearFecha(fechaFin)}\`\`\`\n` +
+        `\`\`\`Grupo: ${grupoNombre}\`\`\``
+    });
 
-return conn.sendMessage(chatId, {
-  text: `✅ *El mensaje fue enviado al grupo:* _${grupoNombre}_`
-}, { quoted: msg });
+    return conn.sendMessage(chatId, {
+      text: `✅ *El mensaje fue enviado al grupo:* _${grupoNombre}_`
+    }, { quoted: msg });
   }
 
-  // .verfecha
-  if (command.startsWith(".verfecha")) {
+  // =========================
+  // COMANDO: .verfecha
+  // =========================
+  if (commandText.startsWith(".verfecha")) {
     let metadata = null;
     let participant = null;
     let isAdmin = false;
@@ -110,9 +116,7 @@ return conn.sendMessage(chatId, {
         metadata = await conn.groupMetadata(chatId);
         participant = metadata.participants.find(p => p.id === senderId);
         isAdmin = participant?.admin === "admin" || participant?.admin === "superadmin";
-      } catch (e) {
-        console.error("Error al obtener metadata del grupo:", e.message);
-      }
+      } catch (e) {}
     }
 
     if (!isOwner && !isAdmin) {
@@ -133,22 +137,14 @@ return conn.sendMessage(chatId, {
     const horaTexto = formatearFecha(fin).split(", ")[1];
 
     return conn.sendMessage(chatId, {
-      text: `📅 \`SHOWDATE\` 🔔\n\n\`\`\`Próximo ${fechaTexto}\`\`\`\n\`\`\`Hora exacta: ${horaTexto} (hora CDMX)\`\`\`\n\`\`\`Quedan, ${diasRestantes} días.\`\`\`\n\n> 𝖴𝗌𝖾 .𝗋𝖾𝗇𝗈𝗏𝖺𝗋`
+      text: `📅 \`SHOWDATE\` 🔔\n\n\`\`\`Próximo ${fechaTexto}\`\`\`\n\`\`\`Hora exacta: ${horaTexto} (hora CDMX)\`\`\`\n\`\`\`Quedan, ${diasRestantes} días.\`\`\``
     }, { quoted: msg });
   }
 
-  // .renovar
-  if (command.startsWith(".renovar")) {
-    const metadata = await conn.groupMetadata(chatId);
-    const participant = metadata.participants.find(p => p.id === senderId);
-    const isAdmin = participant?.admin === "admin" || participant?.admin === "superadmin";
-
-    if (!isOwner && !isAdmin) {
-      return conn.sendMessage(chatId, {
-        text: "🚫 *Solo los administradores y el owner pueden usar este comando.*"
-      }, { quoted: msg });
-    }
-
+  // =========================
+  // COMANDO: .renovar
+  // =========================
+  if (commandText.startsWith(".renovar")) {
     const ownersInfo = [
       { name: "Cholito", number: "50489513153" },
       { name: "Support", number: "31375424024748" }
@@ -161,10 +157,69 @@ return conn.sendMessage(chatId, {
 
     return conn.sendMessage(chatId, { contacts }, { quoted: msg });
   }
+
+  // =========================
+  // COMANDO: .afk <tiempo> <grupo>
+  // =========================
+  if (commandText.startsWith(".afk")) {
+    if (!isOwner) return conn.sendMessage(chatId, { text: "🚫 *Solo el owner puede usar este comando.*" }, { quoted: msg });
+
+    const tiempoTexto = args.slice(0, -1).join(" ");
+    const grupoCode = args[args.length - 1];
+
+    const grupo = global.gruposAdmin.find(g => g.code === grupoCode);
+    if (!grupo) {
+      return conn.sendMessage(chatId, {
+        text: `❌ Grupo no encontrado. Usa *.listgrupos* para ver los disponibles.`
+      }, { quoted: msg });
+    }
+
+    const tiempoMs = 1000 * 60 * 60 * 24; // 1 día por defecto
+    const hasta = Date.now() + tiempoMs;
+
+    global.gruposAfk[grupo.id] = hasta;
+    fs.writeFileSync(afkPath, JSON.stringify(global.gruposAfk, null, 2));
+
+    await conn.sendMessage(grupo.id, {
+      text:
+        `⚠️ *BOT EN MODO AFK*\n\n` +
+        `🕒 Tiempo: ${tiempoTexto}\n` +
+        `💬 Motivo: El servicio está suspendido por falta de pago.\n` +
+        `💳 Contacta al owner para reactivarlo.`
+    });
+
+    return conn.sendMessage(chatId, {
+      text: `✅ Grupo *${grupo.name}* fue puesto en modo AFK.`
+    }, { quoted: msg });
+  }
+
+  // =========================
+  // COMANDO: .activar <grupo>
+  // =========================
+  if (commandText.startsWith(".activar")) {
+    if (!isOwner) return conn.sendMessage(chatId, { text: "🚫 *Solo el owner puede usar este comando.*" }, { quoted: msg });
+
+    const grupoCode = args[0];
+    const grupo = global.gruposAdmin.find(g => g.code === grupoCode);
+    if (!grupo) {
+      return conn.sendMessage(chatId, { text: `❌ Grupo no encontrado.` }, { quoted: msg });
+    }
+
+    delete global.gruposAfk[grupo.id];
+    fs.writeFileSync(afkPath, JSON.stringify(global.gruposAfk, null, 2));
+
+    await conn.sendMessage(grupo.id, {
+      text: `✅ *BOT REACTIVADO*\n\nEl servicio ha sido restaurado correctamente.`
+    });
+
+    return conn.sendMessage(chatId, {
+      text: `✅ Grupo *${grupo.name}* fue reactivado.`
+    }, { quoted: msg });
+  }
 };
 
-handler.command = ["tiempos", "verfecha", "renovar"];
+handler.command = ["tiempos", "verfecha", "renovar", "afk", "activar"];
 handler.tags = ["tools"];
-handler.help = [".tiempos <días> [grupo]", ".verfecha", ".renovar"];
+handler.help = [".tiempos <días> [grupo]", ".verfecha", ".renovar", ".afk <tiempo> <grupo>", ".activar <grupo>"];
 
 module.exports = handler;
