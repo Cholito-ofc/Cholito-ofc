@@ -4,6 +4,7 @@ function setupConnection(conn) {
       id: canalId[0],
       nombre: canalNombre[0]
     };
+
     if (content.sticker) {
       return conn.sendMessage(chat, {
         sticker: content.sticker
@@ -12,6 +13,7 @@ function setupConnection(conn) {
         ...options
       });
     }
+
     const messageOptions = {
       ...content,
       mentions: content.mentions || options.mentions || [],
@@ -36,36 +38,12 @@ function setupConnection(conn) {
     });
   };
 
-  // ✅ Agregamos sendAlbumMessage correctamente dentro
+  // ✅ NUEVA función para enviar múltiples videos como "álbum"
   conn.sendAlbumMessage = async function (jid, mediaArray, options = {}) {
     for (let i = 0; i < mediaArray.length; i++) {
       const media = mediaArray[i];
       await conn.sendMessage(jid, media, options);
     }
-  };
-} // 👈 Este cierre es el importante. Después de aquí ya puedes tener otras funciones como getPrompt()
-    const messageOptions = {
-      ...content,
-      mentions: content.mentions || options.mentions || [],
-      contextInfo: {
-        ...(content.contextInfo || {}),
-        forwardedNewsletterMessageInfo: {
-          newsletterJid: firstChannel.id,
-          serverMessageId: '',
-          newsletterName: firstChannel.nombre
-        },
-        forwardingScore: 9999999,
-        isForwarded: true,
-        mentionedJid: content.mentions || options.mentions || []
-      }
-    };
-
-    return conn.sendMessage(chat, messageOptions, {
-      quoted: m,
-      ephemeralExpiration: 86400000,
-      disappearingMessagesInChat: 86400000,
-      ...options
-    });
   };
 }
 //nsfw 
