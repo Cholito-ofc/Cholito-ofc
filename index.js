@@ -379,83 +379,69 @@ if (fs.existsSync(welcomePath)) {
   "Hasta pronto, y gracias por haber compartido momentos inolvidables con 🪼 CORTANA 2.0 BOT 🪼 👋💖."
 
 // BIENVENIDA: solo cuando alguien entra
-const { welcome } = require('./lib/welcome.js'); // Asegúrate que este archivo existe
- // Solo debe declararse una vez en todo el proyecto
+if (update.action === "add" && welcomeActivo) {
+  for (const participant of update.participants) {
+    const mention = `@${participant.split("@")[0]}`;
+    const customMessage = customWelcomes[update.id];
+    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
 
-sock.ev.on('group-participants.update', async (update) => {
-  try {
-    const activos = JSON.parse(fs.readFileSync('./activos.json'));
-    if (!activos.includes(update.id)) return;
-
-    const groupId = update.id;
-    const participants = update.participants || [];
-
-    // Obtener metadata del grupo
-    let groupMetadata = {};
     try {
-      groupMetadata = await sock.groupMetadata(groupId);
+      profilePicUrl = await sock.profilePictureUrl(participant, "image");
+    } catch (err) {}
+
+    let groupName = "";
+    try {
+      const metadata = await sock.groupMetadata(update.id);
+      groupName = metadata.subject || "Grupo desconocido";
     } catch (err) {
-      console.error("❌ Error obteniendo metadata del grupo:", err);
-      return;
+      groupName = "Grupo desconocido";
     }
 
-    for (const participant of participants) {
-      const isWelcome = update.action === 'add';
-      const isBye = update.action === 'remove';
+    let textoFinal = "";
 
-      if (!isWelcome && !isBye) continue;
-
-      let profilePic;
+    if (customMessage) {
+      if (/(@user)/gi.test(customMessage)) {
+        textoFinal = `*╭━─━──────━─━╮*\n*╰╮»* 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔\n*╭━─━──────━─━╯*\n` +
+                     `*┊»* 👤𝑼𝒔𝒖𝒂𝒓𝒊𝒐: ${customMessage.replace(/@user/gi, mention)}\n` +
+                     `*┊»* 👥𝑮𝒓𝒖𝒑𝒐: ${groupName}\n` +
+                     `*╰┈┈┈┈┈┈┈┈┈┈┈┈≫*`;
+      } else {
+        textoFinal = `*╭━─━──────━─━╮*\n*╰╮»* 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔\n*╭━─━──────━─━╯*\n` +
+                     `*┊»* 👤𝑼𝒔𝒖𝒂𝒓𝒊𝒐: ${mention}\n` +
+                     `*┊»* 👥𝑮𝒓𝒖𝒑𝒐: ${groupName}\n` +
+                     `*╰┈┈┈┈┈┈┈┈┈┈┈┈≫*\n\n${customMessage}`;
+      }
+    } else {
+      let groupDesc = "";
       try {
-        profilePic = await sock.profilePictureUrl(participant, 'image');
-      } catch {
-        profilePic = 'https://telegra.ph/file/265c67242d6c5c9c6cab9.jpg';
+        const metadata = await sock.groupMetadata(update.id);
+        groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
+      } catch (err) {
+        groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
       }
 
-      // Obtener nombre del usuario
-      let userNotify;
-      try {
-        const userInfo = await sock.onWhatsApp(participant);
-        userNotify = userInfo[0]?.notify || "Nuevo Usuario";
-      } catch {
-        userNotify = "Nuevo Usuario";
-      }
-
-      // Generar imagen de bienvenida
-      const buffer = await welcome({
-        name: groupMetadata.subject,
-        member: userNotify,
-        pp: profilePic,
-        bg: 'https://i.ibb.co/rxSPppd/kb.jpg' // Fondo personalizado
-      });
-
-      // Leer audio de bienvenida
-      const audio = fs.readFileSync('./media/bienvenido.mp3'); // Asegúrate de tener el audio en esta ruta
-
-      if (isWelcome) {
-        await sock.sendMessage(groupId, {
-          image: buffer,
-          caption: `👋 Bienvenido al grupo *${groupMetadata.subject}*`,
-        });
-
-        await sock.sendMessage(groupId, {
-          audio: audio,
-          mimetype: 'audio/mp4',
-          ptt: true
-        });
-      }
-
-      if (isBye) {
-        await sock.sendMessage(groupId, {
-          text: `👋 Adiós @${participant.split('@')[0]}`,
-          mentions: [participant]
-        });
-      }
+      textoFinal = `*╭━─━──────━─━╮*\n*╰╮»* 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔\n*╭━─━──────━─━╯*\n` +
+                   `*┊»* 👤𝑼𝒔𝒖𝒂𝒓𝒊𝒐: ${mention}\n` +
+                   `*┊»* 👥𝑮𝒓𝒖𝒑𝒐: ${groupName}\n` +
+                   `*╰┈┈┈┈┈┈┈┈┈┈┈┈≫*` + groupDesc;
     }
-  } catch (err) {
-    console.error("❌ Error en el evento group-participants.update:", err);
+
+    // Mensaje de bienvenida con imagen
+    await sock.sendMessage(update.id, {
+      image: { url: profilePicUrl },
+      caption: textoFinal,
+      mentions: [participant]
+    });
+
+    // Enviar audio desde URL (ajusta tu URL abajo)
+    const audioUrl = 'https://cdn.russellxz.click/0e4d4b6c.mp3'; // <- pon aquí tu enlace
+    await sock.sendMessage(update.id, {
+      audio: { url: audioUrl },
+      mimetype: 'audio/mp4',
+      ptt: true
+    });
   }
-});
+}
 
 // DESPEDIDA: solo cuando alguien sale
 if (update.action === "remove" && despedidasActivo) {
