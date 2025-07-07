@@ -377,7 +377,6 @@ if (fs.existsSync(welcomePath)) {
 }
 // Textos integrados para bienvenida y despedida
   "Hasta pronto, y gracias por haber compartido momentos inolvidables con 🪼 CORTANA 2.0 BOT 🪼 👋💖."
-];
 
 // BIENVENIDA: solo cuando alguien entra
 if (update.action === "add" && welcomeActivo) {
