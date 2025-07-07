@@ -60,7 +60,7 @@ const handler = async (msg, { conn, text }) => {
   }
 };
 
-handler.command = ["ttosearch", "tiktoks"];
+handler.command = ["ttsearch", "tiktoks"];
 handler.tags = ["buscador"];
 handler.help = ["tiktoksearch <tema>"];
 handler.register = true;
