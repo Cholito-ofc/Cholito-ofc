@@ -380,7 +380,7 @@ if (fs.existsSync(welcomePath)) {
 
 // BIENVENIDA: solo cuando alguien entra
 const { welcome } = require('./lib/welcome.js'); // Asegúrate que este archivo existe
-const fs = require('fs');
+const fs = require('fs'); // Solo debe declararse una vez en todo el proyecto
 
 sock.ev.on('group-participants.update', async (update) => {
   try {
@@ -405,18 +405,32 @@ sock.ev.on('group-participants.update', async (update) => {
 
       if (!isWelcome && !isBye) continue;
 
-      const profilePic = await sock.profilePictureUrl(participant, 'image')
-        .catch(() => 'https://telegra.ph/file/265c67242d6c5c9c6cab9.jpg');
+      let profilePic;
+      try {
+        profilePic = await sock.profilePictureUrl(participant, 'image');
+      } catch {
+        profilePic = 'https://telegra.ph/file/265c67242d6c5c9c6cab9.jpg';
+      }
 
-      // Llamar a tu función personalizada de bienvenida
+      // Obtener nombre del usuario
+      let userNotify;
+      try {
+        const userInfo = await sock.onWhatsApp(participant);
+        userNotify = userInfo[0]?.notify || "Nuevo Usuario";
+      } catch {
+        userNotify = "Nuevo Usuario";
+      }
+
+      // Generar imagen de bienvenida
       const buffer = await welcome({
         name: groupMetadata.subject,
-        member: (await sock.onWhatsApp(participant))[0]?.notify || "Nuevo Usuario",
+        member: userNotify,
         pp: profilePic,
         bg: 'https://i.ibb.co/rxSPppd/kb.jpg' // Fondo personalizado
       });
 
-      const audio = fs.readFileSync('./media/bienvenido.mp3'); // Asegúrate de tener el audio
+      // Leer audio de bienvenida
+      const audio = fs.readFileSync('./media/bienvenido.mp3'); // Asegúrate de tener el audio en esta ruta
 
       if (isWelcome) {
         await sock.sendMessage(groupId, {
