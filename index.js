@@ -1,18 +1,15 @@
-(async () => {
-let canalId = ["120363400979242290@newsletter"];  
-let canalNombre = ["kіᥣᒪᥙᥲ ᑲ᥆𝗍 ᥴһᥲᥒᥱᥣ ⚡"]
 function setupConnection(conn) {
   conn.sendMessage2 = async (chat, content, m, options = {}) => {
-    const firstChannel = { 
-      id: canalId[0], 
-      nombre: canalNombre[0] 
+    const firstChannel = {
+      id: canalId[0],
+      nombre: canalNombre[0]
     };
     if (content.sticker) {
-      return conn.sendMessage(chat, { 
-        sticker: content.sticker 
-      }, { 
+      return conn.sendMessage(chat, {
+        sticker: content.sticker
+      }, {
         quoted: m,
-        ...options 
+        ...options
       });
     }
     const messageOptions = {
@@ -39,13 +36,14 @@ function setupConnection(conn) {
     });
   };
 
-  // ✅ NUEVA FUNCIÓN PARA ENVIAR ÁLBUMES (uno por uno)
+  // ✅ Agregamos sendAlbumMessage correctamente dentro
   conn.sendAlbumMessage = async function (jid, mediaArray, options = {}) {
     for (let i = 0; i < mediaArray.length; i++) {
       const media = mediaArray[i];
       await conn.sendMessage(jid, media, options);
     }
-}
+  };
+} // 👈 Este cierre es el importante. Después de aquí ya puedes tener otras funciones como getPrompt()
     const messageOptions = {
       ...content,
       mentions: content.mentions || options.mentions || [],
