@@ -376,28 +376,6 @@ if (fs.existsSync(welcomePath)) {
   customWelcomes = JSON.parse(fs.readFileSync(welcomePath, "utf-8"));
 }
 // Textos integrados para bienvenida y despedida
-const welcomeTexts = [
-  "¡Bienvenido(a)! 🪼 KILLUA 2.0 BOT 🪼 te recibe con los brazos abiertos 🤗✨. ¡Disfruta y comparte!",
-  "¡Hola! 🪼 KILLUA 2.0 BOT 🪼 te abraza con alegría 🎉🤖. ¡Prepárate para grandes aventuras!",
-  "¡Saludos! 🪼 KILLUA 2.0 BOT 🪼 Bot te da la bienvenida para que descubras ideas brillantes 🚀🌟.",
-  "¡Bienvenido(a) al grupo! 🪼 CORTANA 2.0 BOT 🪼te invita a explorar un mundo de posibilidades 🤩💡.",
-  "¡Qué alegría verte! 🪼 KILLUA 2.0 BOT 🪼 te recibe y te hace sentir en casa 🏠💖.",
-  "¡Hola! Gracias por unirte; Azura Ultra 2.0 Bot te saluda con entusiasmo 🎊😊.",
-  "¡Bienvenido(a)! Cada nuevo miembro es una chispa de inspiración en 🪼 KILLUA 2.0 BOT 🪼 🔥✨.",
-  "¡Saludos cordiales! 🪼 KILLUA 2.0 BOT 🪼 te envía un abrazo virtual 🤗💙.",
-  "¡Bienvenido(a)! Únete a la experiencia 🪼 KILLUA 2.0 BOT 🪼y comparte grandes ideas 🎉🌈.",
-  "¡Hola! 🪼 KILLUA 2.0 BOT 🪼te da la bienvenida para vivir experiencias inolvidables 🚀✨!"
-];
-const farewellTexts = [
-  "¡Adiós! 🪼 KILLUA 2.0 BOT 🪼 Bot te despide con gratitud y te desea éxitos en tus nuevos caminos 👋💫.",
-  "Hasta pronto, desde 🪼 KILLUA 2.0 BOT 🪼 te deseamos lo mejor y esperamos verte de nuevo 🌟🙏.",
-  "¡Chao! 🪼 KILLUA 2.0 BOT 🪼 se despide, pero siempre tendrás un lugar si decides regresar 🤗💔.",
-  "Nos despedimos con cariño; gracias por compartir momentos en 🪼 CORTANA 2.0 BOT 🪼 🏠❤️.",
-  "¡Adiós, amigo(a)! 🪼 KILLUA 2.0 BOT 🪼te manda un abrazo y te desea mucha suerte 🤝🌟.",
-  "Hasta luego, y gracias por haber sido parte de nuestra comunidad 🚀💙.",
-  "Chao, que tus futuros proyectos sean tan brillantes como tú 🌟✨. 🪼 CORTANA 2.0 BOT 🪼 te recuerda siempre.",
-  "¡Nos vemos! 🪼 KILLUA BOT 🪼 te dice adiós con un corazón lleno de gratitud 🤗❤️.",
-  "¡Adiós! Que tu camino esté lleno de éxitos, te lo desea 🪼 CORTANA 2.0 BOT 🪼 🚀🌟.",
   "Hasta pronto, y gracias por haber compartido momentos inolvidables con 🪼 CORTANA 2.0 BOT 🪼 👋💖."
 ];
 
@@ -405,18 +383,16 @@ const farewellTexts = [
 if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
-    let userName = await sock.getName(participant).catch(() => "Usuario");
+    let userName = sock.contacts[participant]?.notify || "Usuario";
     const metadata = await sock.groupMetadata(update.id);
     const groupName = metadata.subject || "Grupo";
     const membersCount = metadata.participants.length;
 
-    // === Obtener avatar o usar por defecto ===
     let avatar = "https://iili.io/37F8TL7.jpg";
     try {
       avatar = await sock.profilePictureUrl(participant, 'image');
     } catch {}
 
-    // === Generar imagen con canvafy ===
     const { WelcomeLeave } = require("canvafy");
     const image = await new WelcomeLeave()
       .setAvatar(avatar)
@@ -428,14 +404,12 @@ if (update.action === "add" && welcomeActivo) {
       .setOverlayOpacity(0.1)
       .build();
 
-    // === Enviar imagen de bienvenida generada ===
     await sock.sendMessage(update.id, {
       image,
       caption: `✨ *¡Bienvenido(a)!*\n👤 ${mention}`,
       mentions: [participant]
     });
 
-    // === Enviar audio de bienvenida ===
     const audioUrl = 'https://cdn.russellxz.click/0e4d4b6c.mp3';
     await sock.sendMessage(update.id, {
       audio: { url: audioUrl },
