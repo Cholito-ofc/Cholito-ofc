@@ -1,8 +1,13 @@
 const fs = require("fs");
 const path = require("path");
+const axios = require("axios");
 
 const tiemposPath = path.resolve("./tiempos.json");
-const relojPath = "./media/reloj.png"; // ← Tu imagen redonda
+// Ya no necesitas ruta local, porque usaremos URL:
+// const relojPath = "./media/reloj.png"; 
+
+// Cambia aquí la URL de tu imagen redonda:
+const urlImagen = 'https://cdn.russellxz.click/39109c83.jpeg'; 
 
 function formatearFecha(fecha) {
   const date = new Date(fecha);
@@ -58,7 +63,17 @@ const handler = async (msg, { conn, args }) => {
 
   const tiempos = fs.existsSync(tiemposPath) ? JSON.parse(fs.readFileSync(tiemposPath)) : {};
 
-  // Contacto modificado con imagen personalizada
+  // Descarga la imagen desde la URL para obtener el buffer
+  let bufferImagen;
+  try {
+    const response = await axios.get(urlImagen, { responseType: "arraybuffer" });
+    bufferImagen = Buffer.from(response.data, "binary");
+  } catch (e) {
+    console.error("Error al descargar la imagen:", e.message);
+    bufferImagen = null;
+  }
+
+  // Contacto modificado con imagen personalizada desde URL
   const fkontak = {
     key: {
       fromMe: false,
@@ -68,9 +83,9 @@ const handler = async (msg, { conn, args }) => {
     },
     message: {
       imageMessage: {
-        mimetype: "image/png",
-        jpegThumbnail: fs.readFileSync(relojPath),
-        caption: "⏰ Tiempo activo", // ← Aquí cambias el texto "WhatsApp"
+        mimetype: "image/jpeg", // o "image/png" si tu imagen es PNG
+        jpegThumbnail: bufferImagen || Buffer.from([]), // si falla, vacío para evitar error
+        caption: "⏰ Tiempo activo",
         fileSha256: Buffer.from([]),
         fileLength: "0",
         height: 100,
