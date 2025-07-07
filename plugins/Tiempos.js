@@ -86,9 +86,17 @@ const handler = async (msg, { conn, args }) => {
 
     fs.writeFileSync(tiemposPath, JSON.stringify(tiempos, null, 2));
 
-    return conn.sendMessage(chatId, {
-      text: `✅ *Tiempo asignado correctamente al grupo:* _${grupoNombre}_\n\n🗓️ Finaliza en: *${dias} días*\n📆 Fecha: ${formatearFecha(fechaFin)}`
-    }, { quoted: msg });
+await conn.sendMessage(targetGroupId, {
+  text:
+    `➤ \`ORDENES RECIBIDAS\` ✅\n\n` +
+    `\`\`\`Finaliza en: ${dias} días.\`\`\`\n` +
+    `\`\`\`Fecha: ${formatearFecha(fechaFin)}\`\`\`\n` +
+    `\`\`\`Grupo: ${grupoNombre}\`\`\``
+});
+
+return conn.sendMessage(chatId, {
+  text: `✅ *El mensaje fue enviado al grupo:* _${grupoNombre}_`
+}, { quoted: msg });
   }
 
   // .verfecha
