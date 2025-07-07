@@ -1,11 +1,12 @@
 const fs = require("fs");
 const path = require("path");
 const axios = require("axios");
+const fetch = require("node-fetch");
 
 const tiemposPath = path.resolve("./tiempos.json");
 
-// URL para la miniatura (opcional, puedes eliminar si no la usas)
-const urlImagen = 'https://cdn.russellxz.click/39109c83.jpeg'; 
+// Imagen de miniatura
+const thumbUrl = 'https://iili.io/F0WTiLN.jpg';
 
 function formatearFecha(fecha) {
   const date = new Date(fecha);
@@ -61,19 +62,8 @@ const handler = async (msg, { conn, args }) => {
 
   const tiempos = fs.existsSync(tiemposPath) ? JSON.parse(fs.readFileSync(tiemposPath)) : {};
 
-  /*
-  // Descarga la imagen para miniatura (opcional)
-  let bufferImagen;
-  try {
-    const response = await axios.get(urlImagen, { responseType: "arraybuffer" });
-    bufferImagen = Buffer.from(response.data, "binary");
-  } catch (e) {
-    console.error("Error al descargar la imagen:", e.message);
-    bufferImagen = null;
-  }
-  */
-
-  // Contacto modificado con vCard para citado
+  // Contacto decorativo estilo Izumi (con miniatura)
+  const thumb = await (await fetch(thumbUrl)).buffer();
   const fkontak = {
     key: {
       participants: "0@s.whatsapp.net",
@@ -82,14 +72,21 @@ const handler = async (msg, { conn, args }) => {
       id: "Halo"
     },
     message: {
-      contactMessage: {
-        vcard: `BEGIN:VCARD
-VERSION:3.0
-N:Sy;Bot;;;
-FN:y
-item1.TEL;waid=${senderNum}:${senderNum}
-item1.X-ABLabel:Ponsel
-END:VCARD`
+      locationMessage: {
+        name: "𝙈𝙤𝙙𝙤 𝘾𝙖𝙡𝙞𝙚𝙣𝙩𝙚",
+        jpegThumbnail: thumb,
+        vcard:
+          "BEGIN:VCARD\n" +
+          "VERSION:3.0\n" +
+          "N:;Unlimited;;;\n" +
+          "FN:Unlimited\n" +
+          "ORG:Unlimited\n" +
+          "TITLE:\n" +
+          "item1.TEL;waid=19709001746:+1 (970) 900-1746\n" +
+          "item1.X-ABLabel:Unlimited\n" +
+          "X-WA-BIZ-DESCRIPTION:ofc\n" +
+          "X-WA-BIZ-NAME:Unlimited\n" +
+          "END:VCARD"
       }
     },
     participant: "0@s.whatsapp.net"
