@@ -1,49 +1,82 @@
 const axios = require("axios");
 
-let cachePornololi = {}; // ID mensaje => { chatId, data }
-let usosPorUsuario = {}; // usuario => cantidad
+let cacheTikTokSearch = {}; // ID mensaje => { chatId, sender, results, index, timeout }
 
-const handler = async (msg, { conn }) => {
+const handler = async (msg, { conn, text }) => {
   const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
 
+  if (!text) {
+    return conn.sendMessage(chatId, {
+      text:
+`🎯 *Búsqueda de Videos TikTok*
+
+📌 *Usa el comando así:*
+.tiktoksearch <tema>
+
+💡 *Ejemplo:*
+.tiktoksearch humor negro
+
+🔍 *KilluaBot buscará los mejores resultados para ti...*`
+    }, { quoted: msg });
+  }
+
   try {
-    // Reacción de "procesando"
     await conn.sendMessage(chatId, {
-      react: {
-        text: "🕒",
-        key: msg.key,
-      },
+      react: { text: "🕒", key: msg.key },
     });
 
-    const res = await axios.get("https://raw.githubusercontent.com/BrunoSobrino/TheMystic-Bot-MD/master/src/JSON/nsfwloli.json");
-    const data = res.data;
-    const url = data[Math.floor(Math.random() * data.length)];
+    const { data: response } = await axios.get(`https://apis-starlights-team.koyeb.app/starlight/tiktoksearch?text=${encodeURIComponent(text)}`);
+    let results = response?.data;
 
-    const sentMsg = await conn.sendMessage(chatId, {
-      image: { url },
-      caption: "🥵 Reacciona a este mensaje para ver otra imagen.",
+    if (!results || results.length === 0) {
+      return conn.sendMessage(chatId, {
+        text: "😔 *No se encontraron resultados para tu búsqueda.*"
+      }, { quoted: msg });
+    }
+
+    results.sort(() => Math.random() - 0.5);
+    const topResults = results.slice(0, 5);
+    let index = 0;
+    const { nowm, author, duration, likes } = topResults[index];
+
+    const caption =
+`╭「 🎬 𝗧𝗶𝗸𝗧𝗼𝗸 𝗗𝗲𝘀𝗰𝗮𝗿𝗴𝗮𝗱𝗼 」╮
+│
+│ 👤 *Autor:* ${author || "Desconocido"}
+│ ⏱️ *Duración:* ${duration || "Desconocida"}
+│ ❤️ *Likes:* ${likes || "0"}
+╰─────────────╯
+
+📥 *𝖵𝗂́𝖽𝖾𝗈 𝖽𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝖽𝗈 𝖼𝗈𝗇 𝖾́𝗑𝗂𝗍𝗈*
+> *𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝙳 🎬*
+
+🔁 *Reacciona a este video para ver el siguiente.*`;
+
+    const sent = await conn.sendMessage(chatId, {
+      video: { url: nowm },
+      caption,
+      mimetype: "video/mp4"
     }, { quoted: msg });
 
-    // Reacción de "listo"
     await conn.sendMessage(chatId, {
-      react: {
-        text: "✅",
-        key: sentMsg.key,
-      },
+      react: { text: "✅", key: sent.key },
     });
 
-    // Guardar imagen enviada
-    cachePornololi[sentMsg.key.id] = {
+    // Guardar en cache
+    const timeout = setTimeout(() => {
+      delete cacheTikTokSearch[sent.key.id];
+    }, 2 * 60 * 1000); // 2 minutos
+
+    cacheTikTokSearch[sent.key.id] = {
       chatId,
-      data,
-      sender, // quien podrá reaccionar
+      sender,
+      results: topResults,
+      index: 1,
+      timeout
     };
 
-    // Inicializar contador si no existe
-    usosPorUsuario[sender] = usosPorUsuario[sender] || 0;
-
-    // ESCUCHAR REACCIONES ESTILO VS4
+    // Listener de reacciones
     conn.ev.on("messages.upsert", async ({ messages }) => {
       const m = messages[0];
       if (!m?.message?.reactionMessage) return;
@@ -52,57 +85,74 @@ const handler = async (msg, { conn }) => {
       const reactedMsgId = reaction.key?.id;
       const user = m.key.participant || m.key.remoteJid;
 
-      // Verifica si la reacción es válida
-      if (!cachePornololi[reactedMsgId]) return;
-      if (user !== cachePornololi[reactedMsgId].sender) return;
+      if (!cacheTikTokSearch[reactedMsgId]) return;
+      if (user !== cacheTikTokSearch[reactedMsgId].sender) return;
 
-      // Limite de 3 reacciones
-      if ((usosPorUsuario[user] || 0) >= 3) {
-        return await conn.sendMessage(cachePornololi[reactedMsgId].chatId, {
-          text: `❌ Ya viste suficiente por ahora.\n🕒 Espera *5 minutos* para seguir viendo contenido 😏.`,
-          mentions: [user],
+      const { chatId, results, index, timeout } = cacheTikTokSearch[reactedMsgId];
+
+      if (index >= results.length) {
+        await conn.sendMessage(chatId, {
+          text: "✅ *Ya no hay más resultados para esta búsqueda.*",
+          mentions: [user]
         });
+        clearTimeout(timeout);
+        delete cacheTikTokSearch[reactedMsgId];
+        return;
       }
 
-      const { chatId, data } = cachePornololi[reactedMsgId];
-      const newUrl = data[Math.floor(Math.random() * data.length)];
+      const { nowm, author, duration, likes } = results[index];
+
+      const newCaption =
+`╭「 🎬 𝗧𝗶𝗸𝗧𝗼𝗸 𝗗𝗲𝘀𝗰𝗮𝗿𝗴𝗮𝗱𝗼 」╮
+│
+│ 👤 *Autor:* ${author || "Desconocido"}
+│ ⏱️ *Duración:* ${duration || "Desconocida"}
+│ ❤️ *Likes:* ${likes || "0"}
+╰─────────────╯
+
+📥 *𝖵𝗂́𝖽𝖾𝗈 𝖽𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝖽𝗈 𝖼𝗈𝗇 𝖾́𝗑𝗂𝗍𝗈*
+> *𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝙳 🎬*
+
+🔁 *Reacciona a este video para ver el siguiente.*`;
 
       const newMsg = await conn.sendMessage(chatId, {
-        image: { url: newUrl },
-        caption: "🥵 Otra más... Reacciona de nuevo.",
+        video: { url: nowm },
+        caption: newCaption,
+        mimetype: "video/mp4"
       });
 
       await conn.sendMessage(chatId, {
-        react: {
-          text: "✅",
-          key: newMsg.key,
-        },
+        react: { text: "✅", key: newMsg.key },
       });
 
-      // Guardar nuevo y eliminar anterior
-      cachePornololi[newMsg.key.id] = {
+      // Limpiar y actualizar
+      clearTimeout(timeout);
+      delete cacheTikTokSearch[reactedMsgId];
+
+      const newTimeout = setTimeout(() => {
+        delete cacheTikTokSearch[newMsg.key.id];
+      }, 2 * 60 * 1000);
+
+      cacheTikTokSearch[newMsg.key.id] = {
         chatId,
-        data,
-        sender: user
+        sender: user,
+        results,
+        index: index + 1,
+        timeout: newTimeout
       };
-      delete cachePornololi[reactedMsgId];
-
-      // Sumar reacción
-      usosPorUsuario[user] = (usosPorUsuario[user] || 0) + 1;
-
-      // Reset después de 5 minutos
-      setTimeout(() => {
-        usosPorUsuario[user] = 0;
-      }, 5 * 60 * 1000); // 5 min
     });
 
-  } catch (e) {
-    console.error("❌ Error en .pornololi:", e);
-    await msg.reply("❌ No se pudo obtener el contenido.");
+  } catch (err) {
+    console.error(err);
+    return conn.sendMessage(chatId, {
+      text: "❌ *Error al buscar o enviar los videos:*\n" + err.message
+    }, { quoted: msg });
   }
 };
 
-handler.command = ["pornololi"];
-handler.tags = ["nsfw"];
-handler.help = ["pornololi"];
+handler.command = ["tiktoksearch", "tiktoks"];
+handler.tags = ["buscador"];
+handler.help = ["tiktoksearch <tema>"];
+handler.register = true;
+
 module.exports = handler;
