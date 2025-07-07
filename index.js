@@ -1,7 +1,7 @@
 (async () => {
 let canalId = ["120363400979242290@newsletter"];  
-let canalNombre = ["kіᥣᥣᥙᥲ ᑲ᥆𝗍 ᥴһᥲᥒᥱᥣ ⚡"]
-  function setupConnection(conn) {
+let canalNombre = ["kіᥣᒪᥙᥲ ᑲ᥆𝗍 ᥴһᥲᥒᥱᥣ ⚡"]
+function setupConnection(conn) {
   conn.sendMessage2 = async (chat, content, m, options = {}) => {
     const firstChannel = { 
       id: canalId[0], 
@@ -15,6 +15,38 @@ let canalNombre = ["kіᥣᥣᥙᥲ ᑲ᥆𝗍 ᥴһᥲᥒᥱᥣ ⚡"]
         ...options 
       });
     }
+    const messageOptions = {
+      ...content,
+      mentions: content.mentions || options.mentions || [],
+      contextInfo: {
+        ...(content.contextInfo || {}),
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: firstChannel.id,
+          serverMessageId: '',
+          newsletterName: firstChannel.nombre
+        },
+        forwardingScore: 9999999,
+        isForwarded: true,
+        mentionedJid: content.mentions || options.mentions || []
+      }
+    };
+
+    return conn.sendMessage(chat, messageOptions, {
+      quoted: m,
+      ephemeralExpiration: 86400000,
+      disappearingMessagesInChat: 86400000,
+      ...options
+    });
+  };
+
+  // ✅ NUEVA FUNCIÓN PARA ENVIAR ÁLBUMES (uno por uno)
+  conn.sendAlbumMessage = async function (jid, mediaArray, options = {}) {
+    for (let i = 0; i < mediaArray.length; i++) {
+      const media = mediaArray[i];
+      await conn.sendMessage(jid, media, options);
+    }
+  };
+}
     const messageOptions = {
       ...content,
       mentions: content.mentions || options.mentions || [],
