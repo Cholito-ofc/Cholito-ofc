@@ -23,23 +23,24 @@ const handler = async (msg, { conn }) => {
       const jid = p.id || '';
       if (jid.endsWith('@s.whatsapp.net')) {
         const numero = jid.split('@')[0];
-        conLib.push(`• ${jid}  +${numero}`);
+        conLib.push(`➤ +${numero}`);
       } else if (jid.endsWith('@lid')) {
-        sinLib.push(`• ${jid}`);
+        sinLib.push(`➤ ${jid}`);
       }
     }
 
     const mensaje = `
-📄 *Estado de LID en el grupo:*
-👥 *Total miembros:* ${participantes.length}
+╭━━━〔 *📊 ESTADO DE VISIBILIDAD* 〕━━━╮
+┃ 👥 *Miembros totales:* ${participantes.length}
+┃ 
+┃ ✅ *Visibles (+Número):* ${conLib.length}
+┃ ${conLib.length ? conLib.join('\n┃ ') : '┃ ➤ Ninguno'}
+┃ 
+┃ ❌ *Ocultos (ID - LID):* ${sinLib.length}
+┃ ${sinLib.length ? sinLib.join('\n┃ ') : '┃ ➤ Ninguno'}
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
 
-✅ *Sin LID (número visible):* ${conLib.length}
-${conLib.length ? conLib.join('\n') : '• Ninguno'}
-
-❌ *Con LIB (numeros ocultos por - lid para mayor seguridad segun whatsapp):* ${sinLib.length}
-${sinLib.length ? sinLib.join('\n') : '• Ninguno'}
-
-ℹ️ WhatsApp está ocultando números reales con el formato *@lid* para proteger la privacidad.
+📌 *Nota:* WhatsApp oculta algunos números por privacidad usando el formato *@lid*.
 `;
 
     await conn.sendMessage(chatId, {
