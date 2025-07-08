@@ -3138,7 +3138,7 @@ case 'infogrupo': {
   break;
 }
       
-          case 'tiktokstalk': {
+          case 'ttstalk': {
     const fetch = require('node-fetch');
 
     if (!text) {
@@ -3179,7 +3179,7 @@ case 'infogrupo': {
                         `❤️ *Me gusta totales:* ${userInfo.meGustaTotales}\n` +
                         `🎥 *Videos totales:* ${userInfo.videosTotales}\n` +
                         `🤝 *Amigos totales:* ${userInfo.amigosTotales}\n\n` +
-                        `✨ *Información obtenida por Azura Ultra 2.0 Bot*`;
+                        `✨ *Información obtenida por KilluaBot*`;
 
         await sock.sendMessage(msg.key.remoteJid, {
             image: { url: userInfo.avatar },
@@ -4013,153 +4013,154 @@ case 'menu': {
 ┃➜ 🚩 ᴜsᴀ ᴇʟ ᴘʀᴇғɪᴊᴏ ᴀɴᴛᴇs ᴅᴇ ᴄᴀᴅᴀ ᴄᴏᴍᴀɴᴅᴏ.
 
 ╭━━[ *INFORMACIÓN 💻* ]━⬣
-┃➜ ${global.prefix}guia
-┃➜ ${global.prefix}reporte
-┃➜ ${global.prefix}info
-┃➜ ${global.prefix}speedtest
-┃➜ ${global.prefix}ping
-┃➜ ${global.prefix}creador
+┃➜ ${global.prefix}𝗀𝗎𝗂𝖺
+┃➜ ${global.prefix}𝗋𝖾𝗉𝗈𝗋𝗍𝖾
+┃➜ ${global.prefix}𝗂𝗇𝖿𝗈
+┃➜ ${global.prefix}𝗌𝗉𝖾𝖾𝖽
+┃➜ ${global.prefix}𝗉𝗂𝗇𝗀
+┃➜ ${global.prefix}𝗈𝗐𝗇𝖾𝗋
 ┃➜ ${global.prefix}𝗁𝗈𝗋𝖺𝗋𝗂𝗈
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 ╭━━[ *MENÚS DISPONIBLES 🗂️* ]━⬣
-┃➜ ${global.prefix}allmenu
-┃➜ ${global.prefix}menugrupo
-┃➜ ${global.prefix}menuaudio
-┃➜ ${global.prefix}menurpg
-┃➜ ${global.prefix}info
-┃➜ ${global.prefix}menuowner
-┃➜ ${global.prefix}menuff
+┃➜ ${global.prefix}𝖺𝗅𝗅𝗆𝖾𝗇𝗎
+┃➜ ${global.prefix}𝗆𝖾𝗇𝗎𝗀𝗋𝗎𝗉𝗈
+┃➜ ${global.prefix}𝗆𝖾𝗇𝗎𝖺𝗎𝖽𝗂𝗈
+┃➜ ${global.prefix}𝗆𝖾𝗇𝗎𝗋𝗉𝗀
+┃➜ ${global.prefix}𝗆𝖾𝗇𝗎𝗈𝗐𝗇𝖾𝗋
+┃➜ ${global.prefix}𝗆𝖾𝗇𝗎𝖿𝖿
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 ╭━━[ *SISTEMA DE VENTAS 🛍️* ]━⬣
-┃➜ ${global.prefix}setstock
-┃➜ ${global.prefix}stock
-┃➜ ${global.prefix}setnetflix
-┃➜ ${global.prefix}netflix
-┃➜ ${global.prefix}setpago
-┃➜ ${global.prefix}pago
-┃➜ ${global.prefix}setcombos
-┃➜ ${global.prefix}combos
-┃➜ ${global.prefix}setreglas
-┃➜ ${global.prefix}reglas
-┃➜ ${global.prefix}sorteo
+┃➜ ${global.prefix}𝗌𝖾𝗍𝗌𝗍𝗈𝖼𝗄
+┃➜ ${global.prefix}𝗌𝗍𝗈𝖼𝗄
+┃➜ ${global.prefix}𝗌𝖾𝗍𝗇𝖾𝗍𝖿𝗅𝗂𝗑
+┃➜ ${global.prefix}𝗇𝖾𝗍𝖿𝗅𝗂𝗑
+┃➜ ${global.prefix}𝗌𝖾𝗍𝗉𝖺𝗀𝗈
+┃➜ ${global.prefix}𝗉𝖺𝗀𝗈
+┃➜ ${global.prefix}𝗌𝖾𝗍𝖼𝗈𝗆𝖻𝗈𝗌
+┃➜ ${global.prefix}𝖼𝗈𝗆𝖻𝗈𝗌
+┃➜ ${global.prefix}𝗌𝖾𝗍𝗋𝖾𝗀𝗅𝖺𝗌
+┃➜ ${global.prefix}𝗋𝖾𝗀𝗅𝖺𝗌
+┃➜ ${global.prefix}𝗌𝗈𝗋𝗍𝖾𝗈
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 ╭━━[ *IA & CHATBOTS 👨‍💻* ]━⬣
-┃➜ ${global.prefix}gemini
-┃➜ ${global.prefix}chatgpt
-┃➜ ${global.prefix}dalle
-┃➜ ${global.prefix}vision
-┃➜ ${global.prefix}vision2
-┃➜ ${global.prefix}simi
-┃➜ ${global.prefix}chat on/off
-┃➜ ${global.prefix}lumi on/off
-┃➜ ${global.prefix}luminai
+┃➜ ${global.prefix}𝗂𝖺
+┃➜ ${global.prefix}𝗀𝖾𝗆𝗂𝗇𝗂
+┃➜ ${global.prefix}𝖼𝗁𝖺𝗍𝗀𝗉𝗍
+┃➜ ${global.prefix}𝖽𝖺𝗅𝗅𝖾
+┃➜ ${global.prefix}𝗏𝗂𝗌𝗂𝗈𝗇
+┃➜ ${global.prefix}𝗏𝗂𝗌𝗂𝗈𝗇𝟤
+┃➜ ${global.prefix}𝗌𝗂𝗆𝗂
+┃➜ ${global.prefix}𝖼𝗁𝖺𝗍 𝗈𝗇/𝗈𝖿𝖿
+┃➜ ${global.prefix}𝗅𝗎𝗆𝗂 𝗈𝗇/𝗈𝖿𝖿
+┃➜ ${global.prefix}𝗅𝗎𝗆𝗂𝗇𝖺𝗂
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 ╭━━[ *DESCARGAS 📥* ]━⬣
-┃➜ ${global.prefix}play
+┃➜ ${global.prefix}𝗉𝗅𝖺𝗒
 ┃➜ ${global.prefix}𝗉𝗅𝖺𝗒𝗉𝗋𝗈
 ┃➜ ${global.prefix}play1
-┃➜ ${global.prefix}play2
-┃➜ ${global.prefix}play3
-┃➜ ${global.prefix}ytmp3
-┃➜ ${global.prefix}ytmp4
-┃➜ ${global.prefix}ytmp3doc
-┃➜ ${global.prefix}ytmp4doc
-┃➜ ${global.prefix}spotify
-┃➜ ${global.prefix}mediafire
-┃➜ ${global.prefix}apk
-┃➜ ${global.prefix}tiktok
-┃➜ ${global.prefix}fb
-┃➜ ${global.prefix}ig
+┃➜ ${global.prefix}𝗉𝗅𝖺𝗒𝟤
+┃➜ ${global.prefix}𝗋𝗈𝗅𝗂𝗍𝖺
+┃➜ ${global.prefix}𝗒𝗍𝗆𝗉𝟥
+┃➜ ${global.prefix}𝗒𝗍𝗆𝗉𝟦
+┃➜ ${global.prefix}𝗒𝗍𝗆𝗉𝟥𝖽𝗈𝖼
+┃➜ ${global.prefix}𝗒𝗍𝗆𝗉𝟦𝖽𝗈𝖼
+┃➜ ${global.prefix}𝗌𝗉𝗈𝗍𝗂𝖿𝗒
+┃➜ ${global.prefix}𝗆𝖾𝖽𝗂𝖺𝖿𝗂𝗋𝖾
+┃➜ ${global.prefix}𝖺𝗉𝗄
+┃➜ ${global.prefix}𝗍𝗂𝗄𝗍𝗈𝗄
+┃➜ ${global.prefix}𝖿𝖻
+┃➜ ${global.prefix}𝗂𝗀
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 ╭━━[ *BUSCADORES 🔍* ]━⬣
-┃➜ ${global.prefix}pixai
-┃➜ ${global.prefix}yts
-┃➜ ${global.prefix}tiktoksearch
-┃➜ ${global.prefix}tiktokstalk
+┃➜ ${global.prefix}𝗉𝗂𝗑𝖺𝗂
+┃➜ ${global.prefix}𝗒𝗍𝗌
+┃➜ ${global.prefix}𝗍𝗍𝗌𝖾𝖺𝗋𝖼𝗁
+┃➜ ${global.prefix}𝗍𝗍𝗌𝗍𝖺𝗅𝗄
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 ╭━━[ *CONVERTIDORES 🧰* ]━⬣
-┃➜ ${global.prefix}tomp3
-┃➜ ${global.prefix}tovideo
-┃➜ ${global.prefix}toimg
-┃➜ ${global.prefix}tts
-┃➜ ${global.prefix}gifvideo
-┃➜ ${global.prefix}ff
-┃➜ ${global.prefix}ff2
+┃➜ ${global.prefix}𝗍𝗈𝖺𝗎𝖽𝗂𝗈
+┃➜ ${global.prefix}𝗍𝗈𝗏𝗂𝖽𝖾𝗈
+┃➜ ${global.prefix}𝗍𝗈𝗂𝗆𝗀
+┃➜ ${global.prefix}𝗍𝗍𝗌
+┃➜ ${global.prefix}𝗀𝗂𝖿𝗏𝗂𝖽𝖾𝗈
+┃➜ ${global.prefix}𝖿𝖿
+┃➜ ${global.prefix}𝖿𝖿𝟤
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 ╭━━[ *STICKERS 🧩* ]━⬣
-┃➜ ${global.prefix}s
-┃➜ ${global.prefix}newpack
-┃➜ ${global.prefix}addsticker
-┃➜ ${global.prefix}listapacks
-┃➜ ${global.prefix}sendpack
-┃➜ ${global.prefix}texto
-┃➜ ${global.prefix}qc
-┃➜ ${global.prefix}qc2
+┃➜ ${global.prefix}𝗌
+┃➜ ${global.prefix}𝗇𝖾𝗐𝗉𝖺𝖼𝗄
+┃➜ ${global.prefix}𝖺𝖽𝖽𝗌𝗍𝗂𝖼𝗄𝖾𝗋
+┃➜ ${global.prefix}𝗅𝗂𝗌𝗍𝖺𝗋𝗉𝖺𝖼𝗄
+┃➜ ${global.prefix}𝗌𝖾𝗇𝖽𝗉𝖺𝖼𝗄
+┃➜ ${global.prefix}𝗍𝖾𝗑𝗍𝗈
+┃➜ ${global.prefix}𝗊𝖼
+┃➜ ${global.prefix}𝗊𝖼𝟤
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 ╭━━[ *HERRAMIENTAS 🛠️* ]━⬣
-┃➜ ${global.prefix}ver
-┃➜ ${global.prefix}tourl
-┃➜ ${global.prefix}whatmusic
-┃➜ ${global.prefix}perfil
-┃➜ ${global.prefix}carga
-┃➜ ${global.prefix}get
-┃➜ ${global.prefix}addco
-┃➜ ${global.prefix}delco
+┃➜ ${global.prefix}𝗏𝖾𝗋
+┃➜ ${global.prefix}𝗍𝗈𝗎𝗋𝗅
+┃➜ ${global.prefix}𝗐𝗁𝖺𝗍𝗆𝗎𝗌𝗂𝖼
+┃➜ ${global.prefix}𝗐𝗁𝖺𝗍𝗆𝗎𝗌𝗂𝖼6
+┃➜ ${global.prefix}𝗉𝖾𝗋𝖿𝗂𝗅
+┃➜ ${global.prefix}𝖼𝖺𝗋𝗀𝖺
+┃➜ ${global.prefix}𝗀𝖾𝗍
+┃➜ ${global.prefix}𝖺𝖽𝖽𝖼𝗈
+┃➜ ${global.prefix}𝖽𝖾𝗅𝖼𝗈
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 ╭━━[ *MINI JUEGOS 🎮* ]━⬣
-┃➜ ${global.prefix}minovia
-┃➜ ${global.prefix}minovio
-┃➜ ${global.prefix}puto
-┃➜ ${global.prefix}puta
-┃➜ ${global.prefix}peruano
-┃➜ ${global.prefix}peruana
-┃➜ ${global.prefix}lesbiana
-┃➜ ${global.prefix}gay
-┃➜ ${global.prefix}negra
-┃➜ ${global.prefix}negro
-┃➜ ${global.prefix}manca
-┃➜ ${global.prefix}manco
-┃➜ ${global.prefix}fea
-┃➜ ${global.prefix}feo
-┃➜ ${global.prefix}enana
-┃➜ ${global.prefix}enano
-┃➜ ${global.prefix}pajera
-┃➜ ${global.prefix}pajero
-┃➜ ${global.prefix}cachuda
-┃➜ ${global.prefix}cachudo
-┃➜ ${global.prefix}adoptada
-┃➜ ${global.prefix}adoptado
-┃➜ ${global.prefix}rata
-┃➜ ${global.prefix}verdad
-┃➜ ${global.prefix}reto
-┃➜ ${global.prefix}ship
-┃➜ ${global.prefix}parejas
-┃➜ ${global.prefix}personalidad
-┃➜ ${global.prefix}menurpg
+┃➜ ${global.prefix}𝗆𝗂𝗇𝗈𝗏𝗂𝖺
+┃➜ ${global.prefix}𝗆𝗂𝗇𝗈𝗏𝗂𝗈
+┃➜ ${global.prefix}𝗉𝗎𝗍𝖺
+┃➜ ${global.prefix}𝗉𝗎𝗍𝗈
+┃➜ ${global.prefix}𝗉𝖾𝗋𝗎𝖺𝗇𝖺
+┃➜ ${global.prefix}𝗉𝖾𝗋𝗎𝖺𝗇𝗈
+┃➜ ${global.prefix}𝗅𝖾𝗌𝖻𝗂𝖺𝗇𝖺
+┃➜ ${global.prefix}𝗀𝖺𝗒
+┃➜ ${global.prefix}𝗀𝖾𝗀𝗋𝖺
+┃➜ ${global.prefix}𝗇𝖾𝗀𝗋𝗈
+┃➜ ${global.prefix}𝗆𝖺𝗇𝖼𝖺
+┃➜ ${global.prefix}𝗆𝖺𝗇𝖼𝗈
+┃➜ ${global.prefix}𝖿𝖾𝖺
+┃➜ ${global.prefix}𝖿𝖾𝗈
+┃➜ ${global.prefix}𝖾𝗇𝖺𝗇𝖺
+┃➜ ${global.prefix}𝖾𝗇𝖺𝗇𝗈
+┃➜ ${global.prefix}𝗉𝖺𝗋𝖾𝗃𝖺
+┃➜ ${global.prefix}𝗉𝖺𝗃𝖾𝗋𝗈
+┃➜ ${global.prefix}𝖼𝖺𝖼𝗁𝗎𝖽𝖺
+┃➜ ${global.prefix}𝖼𝖺𝖼𝗁𝗎𝖽𝗈
+┃➜ ${global.prefix}𝖺𝖽𝗈𝗉𝗍𝖺𝖽𝖺
+┃➜ ${global.prefix}𝖺𝖽𝗈𝗉𝗍𝖺𝖽𝗈
+┃➜ ${global.prefix}𝗋𝖺𝗍𝖺
+┃➜ ${global.prefix}𝗏𝖾𝗋𝖽𝖺𝖽
+┃➜ ${global.prefix}𝗋𝖾𝗍𝗈
+┃➜ ${global.prefix}𝗌𝗁𝗂𝗉
+┃➜ ${global.prefix}𝗉𝖺𝗋𝖾𝗃𝖺𝗌
+┃➜ ${global.prefix}𝗉𝖾𝗋𝗌𝗈𝗇𝖺𝗅𝗂𝖽𝖺𝖽
+┃➜ ${global.prefix}𝗆𝖾𝗇𝗎𝗋𝗉𝗀
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 ╭━━[ *CONTENIDO 🔞* ]━⬣
-┃➜ ${global.prefix}pack 
+┃➜ ${global.prefix}𝗉𝖺𝖼𝗄 
 ┃➜ ${global.prefix}pack1
-┃➜ ${global.prefix}pack2 
-┃➜ ${global.prefix}pack3
-┃➜ ${global.prefix}videoxxx
-┃➜ ${global.prefix}videoxxxlesbi
-┃➜ ${global.prefix}porno
-┃➜ ${global.prefix}pornololi
-┃➜ ${global.prefix}nsfwneko
-┃➜ ${global.prefix}waifu
-┃➜ ${global.prefix}neko
-┃➜ ${global.prefix}nsfwwaifu
+┃➜ ${global.prefix}𝗉𝖺𝖼𝗄𝟤
+┃➜ ${global.prefix}𝗉𝖺𝖼𝗄𝟥
+┃➜ ${global.prefix}𝗏𝗂𝖽𝖾𝗈𝗑𝗑𝗑
+┃➜ ${global.prefix}𝗏𝗂𝖽𝖾𝗈𝗑𝗑𝗑𝗅𝖾𝗌𝖻𝗂
+┃➜ ${global.prefix}𝗉𝗈𝗋𝗇𝗈
+┃➜ ${global.prefix}𝗉𝗈𝗋𝗇𝗈𝗅𝗈𝗅𝗂
+┃➜ ${global.prefix}𝗇𝗌𝖿𝗐𝗇𝖾𝗄𝗈
+┃➜ ${global.prefix}𝗐𝖺𝗂𝖿𝗎
+┃➜ ${global.prefix}𝗇𝖾𝗄𝗈
+┃➜ ${global.prefix}𝗇𝗌𝖿𝗐𝗐𝖺𝗂𝖿𝗎
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 > *⍴᥆ᥕᥱrᥱძ ᑲᥡ һᥒ ᥴһ᥆ᥣі𝗍᥆*`;
@@ -5227,26 +5228,59 @@ case 'resetemoji': {
 case 'antiarabe': {
   try {
     const fs = require("fs");
+    const fetch = require("node-fetch");
     const path = "./activos.json";
     const chatId = msg.key.remoteJid; // Debe ser un grupo
     const param = args[0] ? args[0].toLowerCase() : "";
+    const senderId = msg.key.participant || msg.key.remoteJid;
+    const senderNum = senderId.replace(/[^0-9]/g, "");
+
+    // vCard decorativa
+    const fkontak = {
+      key: {
+        participants: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast",
+        fromMe: false,
+        id: "Halo"
+      },
+      message: {
+        locationMessage: {
+          name: "𝙈𝙤𝙙𝙤 𝘼𝙣𝙩𝙞𝘼𝙧𝙖𝙗𝙚",
+          jpegThumbnail: await (await fetch('https://iili.io/FCJSFix.jpg')).buffer(),
+          vcard:
+            "BEGIN:VCARD\n" +
+            "VERSION:3.0\n" +
+            "N:;Unlimited;;;\n" +
+            "FN:Unlimited\n" +
+            "ORG:Unlimited\n" +
+            "TITLE:\n" +
+            "item1.TEL;waid=19709001746:+1 (970) 900-1746\n" +
+            "item1.X-ABLabel:Unlimited\n" +
+            "X-WA-BIZ-DESCRIPTION:ofc\n" +
+            "X-WA-BIZ-NAME:Unlimited\n" +
+            "END:VCARD"
+        }
+      },
+      participant: "0@s.whatsapp.net"
+    };
 
     // Verificar que se use en un grupo
     if (!chatId.endsWith("@g.us")) {
-      await sock.sendMessage(chatId, { text: "⚠️ *Este comando solo se puede usar en grupos.*" }, { quoted: msg });
-      return;
-    }
-
-    // Verificar que se haya especificado "on" o "off"
-    if (!param || (param !== "on" && param !== "off")) {
-      await sock.sendMessage(chatId, { 
-        text: `⚠️ *Uso incorrecto.*\nEjemplo: \`${global.prefix}antiarabe on\` o \`${global.prefix}antiarabe off\``
+      await sock.sendMessage(chatId, {
+        text: "⚠️ *Este comando solo se puede usar en grupos.*"
       }, { quoted: msg });
       return;
     }
 
-    // Verificar permisos: solo administradores o el propietario pueden usar este comando
-    const senderId = msg.key.participant || msg.key.remoteJid;
+    // Verificar parámetro válido
+    if (!param || (param !== "on" && param !== "off")) {
+      await sock.sendMessage(chatId, {
+        text: `*╭┈〔 ⚠️ USO INCORRECTO 〕┈╮*\n*┊*\n*┊*📥 *Ejemplo:*\n*┊* 𝘌𝘴𝘤𝘳𝘪𝘣𝘦: *.antiarabe on* 𝘰 *.antiarabe off*\n*╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫*`
+      }, { quoted: msg });
+      return;
+    }
+
+    // Verificar permisos (admin o owner)
     let isSenderAdmin = false;
     try {
       const groupMetadata = await sock.groupMetadata(chatId);
@@ -5257,38 +5291,45 @@ case 'antiarabe': {
     } catch (err) {
       console.error("Error obteniendo metadata del grupo:", err);
     }
-    if (!isSenderAdmin && !isOwner(senderId)) {
-      await sock.sendMessage(chatId, { 
+
+    const isOwner = global.owner.some(([id]) => id === senderNum);
+
+    if (!isSenderAdmin && !isOwner) {
+      await sock.sendMessage(chatId, {
         text: "⚠️ *Solo los administradores o el propietario pueden usar este comando.*"
       }, { quoted: msg });
       return;
     }
 
-    // Cargar o crear el archivo activos.json
-    let activos = {};
-    if (fs.existsSync(path)) {
-      activos = JSON.parse(fs.readFileSync(path, "utf-8"));
-    }
-    // Asegurarse de tener la propiedad "antiarabe"
-    if (!activos.hasOwnProperty("antiarabe")) {
-      activos.antiarabe = {};
-    }
+    // Leer archivo de configuración
+    let activos = fs.existsSync(path) ? JSON.parse(fs.readFileSync(path, "utf-8")) : {};
+    if (!activos.antiarabe) activos.antiarabe = {};
 
     if (param === "on") {
       activos.antiarabe[chatId] = true;
-      await sock.sendMessage(chatId, { text: "✅ *Antiarabe activado en este grupo.*" }, { quoted: msg });
+      const textoOn = `*╭┈〔 🔒 MODO ANTIÁRABE ON 〕┈╮*\n*┊*\n*┊*🚫 *A partir de ahora se expulsarán números árabes automáticamente.*\n*┊*🛡️ *El grupo está protegido contra spam árabe.*\n*┊*👑 *Acción por:* @${senderNum}\n*╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫*`;
+      await sock.sendMessage(chatId, {
+        text: textoOn,
+        mentions: [senderId]
+      }, { quoted: fkontak });
     } else {
       delete activos.antiarabe[chatId];
-      await sock.sendMessage(chatId, { text: "✅ *Antiarabe desactivado en este grupo.*" }, { quoted: msg });
+      const textoOff = `*╭┈〔 🔓 MODO ANTIÁRABE OFF 〕┈╮*\n*┊*\n*┊*✅ *Los números árabes ya no serán expulsados.*\n*┊*📵 *Modo desactivado. Reactiva si es necesario.*\n*┊*👑 *Acción por:* @${senderNum}\n*╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫*`;
+      await sock.sendMessage(chatId, {
+        text: textoOff,
+        mentions: [senderId]
+      }, { quoted: fkontak });
     }
 
     fs.writeFileSync(path, JSON.stringify(activos, null, 2));
   } catch (error) {
     console.error("❌ Error en el comando antiarabe:", error);
-    await sock.sendMessage(msg.key.remoteJid, { text: "❌ *Ocurrió un error al ejecutar el comando antiarabe.*" }, { quoted: msg });
+    await sock.sendMessage(msg.key.remoteJid, {
+      text: "❌ *Ocurrió un error al ejecutar el comando antiarabe.*"
+    }, { quoted: msg });
   }
   break;
-}
+        }
         
 case 'antilink': {
   try {
