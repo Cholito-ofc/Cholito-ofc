@@ -40,7 +40,7 @@ const handler = async (msg, { conn, args }) => {
     activos = JSON.parse(fs.readFileSync(activosPath, "utf-8"));
   }
 
-  if (!activos.rpgkillua) activos.rpgazura = {};
+  if (!activos.rpgazura) activos.rpgazura = {};
 
   if (args[0].toLowerCase() === "on") {
     activos.rpgkillua[chatId] = true;
