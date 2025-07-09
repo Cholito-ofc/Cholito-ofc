@@ -9,7 +9,7 @@ const handler = async (msg, { conn, text }) => {
   const sender = msg.key.participant || msg.key.remoteJid;
   const senderNum = sender.replace(/[^0-9]/g, "");
 
-  // vCard decorativo (igual al del modo apagado)
+  // vCard decorativo con miniatura funcional
   const fkontak = {
     key: {
       participants: "0@s.whatsapp.net",
@@ -20,7 +20,7 @@ const handler = async (msg, { conn, text }) => {
     message: {
       locationMessage: {
         name: "ᴛɪᴋᴛᴏᴋ sᴇᴀʀᴄʜ",
-        jpegThumbnail: await (await fetch('https://iili.io/F1Wvr8J.md.png')).buffer(),
+        jpegThumbnail: await (await fetch('https://telegra.ph/file/17c1e39933989e4b3c0f6.jpg')).buffer(),
         vcard:
           "BEGIN:VCARD\n" +
           "VERSION:3.0\n" +
@@ -44,7 +44,7 @@ const handler = async (msg, { conn, text }) => {
 `\`𝖴𝖲𝖮 𝖨𝖭𝖢𝖮𝖱𝖱𝖤𝖢𝖳𝖮 ❌\`
 > 𝖯𝗋𝗂𝗆𝖾𝗋𝗈 𝖾𝗌𝖼𝗋𝗂𝖻𝖾 𝖾𝗅 𝖼𝗈𝗆𝖺𝗇𝖽𝗈 𝗒 𝗅𝗎𝖾𝗀𝗈 𝖽𝖾𝗅 𝖼𝗈𝗆𝖺𝗇𝖽𝗈 𝗅𝖺 𝖻𝗎́𝗌𝗊𝗎𝖾𝖽𝖺 𝗊𝗎𝖾 𝗊𝗎𝗂𝖾𝗋𝖾𝗌 𝗁𝖺𝖼𝖾𝗋. 
 
-📌 *𝖤𝗌𝖼𝗋𝗂𝖻𝖾:* .𝗍𝗍𝗌𝖾𝖺𝗋𝖼𝗁 <𝗍𝖾𝗆𝖺>
+📌 *𝖤𝗌𝖼𝗋𝗂𝖇𝖾:* .𝗍𝗍𝗌𝖾𝖺𝗋𝖼𝗁 <𝗍𝖾𝗆𝖺>
 📌 *𝖤𝗃𝖾𝗆𝗉𝗅𝗈:*.𝗍𝗍𝗌𝖾𝖺𝗋𝖼𝗁 𝖤𝖽𝗂𝗍𝗌 𝖢𝖱𝟩`,
       contextInfo: {
         forwardedNewsletterMessageInfo: {
@@ -84,7 +84,7 @@ const handler = async (msg, { conn, text }) => {
     });
 
     const caption =
-`*┏━〔 🎬 𝗧𝗶𝗸𝗧𝗼𝗸 𝗗𝗲𝘀𝗰𝗮𝗿𝗴𝗮𝗱𝗼 〕━┓*
+`*┏━〔 🎬 𝗧𝗶𝗸𝗧𝗼𝗸 𝗗𝗲𝘀𝗰𝗮𝗿𝗀𝗮𝗱𝗼 〕━┓*
 *┃» 👤𝖠𝗎𝗍𝗈𝗋:* ${author || "Desconocido"}
 *┃» 📆𝖯𝗎𝖻𝗅𝗂𝖼𝖺𝖽𝗈:* ${fecha}
 *┃» ⏰𝖣𝗎𝗋𝖺𝖼𝗂𝗈́𝗇:* ${duration || "Desconocida"}
@@ -98,7 +98,7 @@ const handler = async (msg, { conn, text }) => {
       video: { url: nowm },
       caption,
       mimetype: "video/mp4"
-    }, { quoted: msg }); // Sin canal aquí
+    }, { quoted: msg });
 
     await conn.sendMessage(chatId, {
       react: {
@@ -151,7 +151,7 @@ const handler = async (msg, { conn, text }) => {
       const newCaption =
 `*┏━〔 🎬 𝗧𝗶𝗸𝗧𝗼𝗸 𝗗𝗲𝘀𝗰𝗮𝗿𝗀𝗮𝗱𝗼 〕━┓*
 *┃» 👤𝖠𝗎𝗍𝗈𝗋:* ${author || "Desconocido"}
-*┃» 📆𝖯𝗎𝖻𝗅𝗂𝖼𝖺𝖽𝗈:* ${fecha}
+*┃» 📆𝖯𝗎𝗁𝗅𝗂𝖼𝖺𝖽𝗈:* ${fecha}
 *┃» ⏰𝖣𝗎𝗋𝖺𝖼𝗂𝗈́𝗇:* ${duration || "Desconocida"}
 *┃» ❤️ 𝖫𝗂𝗄𝖾𝗌:* ${likes || "0"}
 *┗━━━━━━━━━━━━━━━━━┛*
@@ -196,7 +196,10 @@ const handler = async (msg, { conn, text }) => {
   }
 };
 
-handler.command = ["ttsearch", "tiktoks", "tiktoksearch"];
+// Soporte para prefijos con espacios o símbolos raros
+handler.customPrefix = /^[°•π÷×¶∆£¢€¥®™+✓_=|~!?@#$%^&.\/\\©^`´\-–—\s]*tt(search|iktoks?|iktoksearch)/i;
+handler.command = new RegExp();
+
 handler.tags = ["buscador"];
 handler.help = ["tiktoksearch <tema>"];
 handler.register = true;
