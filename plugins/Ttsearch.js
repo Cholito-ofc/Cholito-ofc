@@ -7,7 +7,6 @@ let usosPorUsuarioTT = {};
 const handler = async (msg, { conn, text }) => {
   const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
-  const senderNum = sender.replace(/[^0-9]/g, "");
 
   const fkontak = {
     key: {
@@ -44,7 +43,7 @@ const handler = async (msg, { conn, text }) => {
 > 𝖯𝗋𝗂𝗆𝖾𝗋𝗈 𝖾𝗌𝖼𝗋𝗂𝖻𝖾 𝖾𝗅 𝖼𝗈𝗆𝖺𝗇𝖽𝗈 𝗒 𝗅𝗎𝖾𝗀𝗈 𝖽𝖾𝗅 𝖼𝗈𝗆𝖺𝗇𝖽𝗈 𝗅𝖺 𝖻𝗎́𝗌𝗊𝗎𝖾𝖽𝖺 𝗊𝗎𝗂𝖾𝗋𝖾𝗌 𝗁𝖺𝖼𝖾𝗋. 
 
 📌 *𝖤𝗌𝖼𝗋𝗂𝖻𝖾:* .𝗍𝗍𝗌𝖾𝖺𝗋𝖼𝗁 <𝗍𝖾𝗆𝖺>
-📌 *𝖤𝗃𝖾𝗆𝗉𝗅𝗈:*.𝗍𝗍𝗌𝖾𝖺𝗋𝖼𝗁 𝖤𝖽𝗂𝗍𝗌 𝖢𝖱𝟩`,
+📌 *𝖤𝗃𝖾𝗆𝗉𝗅𝗈:*.𝗍𝗍𝗌𝖾𝖺𝗋𝖼𝗁 𝖤𝖽𝗂𝖙𝗌 𝖢𝖱𝟩`,
       contextInfo: {
         forwardedNewsletterMessageInfo: {
           newsletterJid: "120363400979242290@newsletter",
@@ -150,7 +149,7 @@ const handler = async (msg, { conn, text }) => {
       const newCaption =
 `*┏━〔 🎬 𝗧𝗶𝗸𝗧𝗼𝗸 𝗗𝗲𝘀𝗰𝗮𝗿𝗀𝗮𝗱𝗼 〕━┓*
 *┃» 👤𝖠𝗎𝗍𝗈𝗋:* ${author || "Desconocido"}
-*┃» 📆𝖯𝗎𝗁𝗅𝗂𝖼𝖺𝖽𝗈:* ${fecha}
+*┃» 📆𝖯𝗎𝖻𝗅𝗂𝖼𝖺𝖽𝗈:* ${fecha}
 *┃» ⏰𝖣𝗎𝗋𝖺𝖼𝗂𝗈́𝗇:* ${duration || "Desconocida"}
 *┃» ❤️ 𝖫𝗂𝗄𝖾𝗌:* ${likes || "0"}
 *┗━━━━━━━━━━━━━━━━━┛*
@@ -195,9 +194,9 @@ const handler = async (msg, { conn, text }) => {
   }
 };
 
-// Soporte para prefijos con espacios o símbolos raros y espacios antes del comando
-handler.customPrefix = /^[°•π÷×¶∆£¢€¥®™+✓_=|~!?@#$%^&.\/\\©^`´\-–—\s]*\s*tt(search|iktoks?|iktoksearch)/i;
-// handler.command = new RegExp(); // ❌ Eliminado porque causaba error
+// Soporte para prefijos y para que reconozca el comando con espacios entre tt y search
+handler.customPrefix = /^[°•π÷×¶∆£¢€¥®™+✓_=|~!?@#$%^&.\/\\©^`´\-–—]*\.?/i;
+handler.command = /^tt\s*search|^tt\s*iktoks?|^tt\s*iktoksearch/i;
 
 handler.tags = ["buscador"];
 handler.help = ["tiktoksearch <tema>"];
