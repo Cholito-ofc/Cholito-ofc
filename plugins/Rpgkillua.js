@@ -43,7 +43,7 @@ const handler = async (msg, { conn, args }) => {
   if (!activos.rpgazura) activos.rpgazura = {};
 
   if (args[0].toLowerCase() === "on") {
-    activos.rpgkillua[chatId] = true;
+    activos.rpgazura[chatId] = true;
     await conn.sendMessage(chatId, {
       text: "⚔️ *Modo RPG Killua ACTIVADO*\n\nPrepárense para la batalla, el juego comienza ahora.",
     }, { quoted: msg });
