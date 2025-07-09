@@ -1,24 +1,51 @@
 const axios = require("axios");
+const fetch = require("node-fetch");
 
-let cacheTikTok = {}; // ID del mensaje => { chatId, results, index, sender }
-let usosPorUsuarioTT = {}; // usuario => cantidad
+let cacheTikTok = {};
+let usosPorUsuarioTT = {};
 
 const handler = async (msg, { conn, text }) => {
   const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
+  const senderNum = sender.replace(/[^0-9]/g, "");
+
+  // vCard decorativo (igual al del modo apagado)
+  const fkontak = {
+    key: {
+      participants: "0@s.whatsapp.net",
+      remoteJid: "status@broadcast",
+      fromMe: false,
+      id: "Halo"
+    },
+    message: {
+      locationMessage: {
+        name: "𝗞𝗜𝗟𝗟𝗨𝗔 𝗕𝗢𝗧",
+        jpegThumbnail: await (await fetch('https://iili.io/F0WZNEX.th.png')).buffer(),
+        vcard:
+          "BEGIN:VCARD\n" +
+          "VERSION:3.0\n" +
+          "N:;Unlimited;;;\n" +
+          "FN:Unlimited\n" +
+          "ORG:Unlimited\n" +
+          "TITLE:\n" +
+          "item1.TEL;waid=19709001746:+1 (970) 900-1746\n" +
+          "item1.X-ABLabel:Unlimited\n" +
+          "X-WA-BIZ-DESCRIPTION:ofc\n" +
+          "X-WA-BIZ-NAME:Unlimited\n" +
+          "END:VCARD"
+      }
+    },
+    participant: "0@s.whatsapp.net"
+  };
 
   if (!text) {
     return conn.sendMessage(chatId, {
       text:
-`🎯 *Búsqueda de Videos TikTok*
+`\`𝖴𝖲𝖮 𝖨𝖭𝖢𝖮𝖱𝖱𝖤𝖢𝖳𝖮 ❌\`
+> 𝖯𝗋𝗂𝗆𝖾𝗋𝗈 𝖾𝗌𝖼𝗋𝗂𝖻𝖾 𝖾𝗅 𝖼𝗈𝗆𝖺𝗇𝖽𝗈 𝗒 𝗅𝗎𝖾𝗀𝗈 𝖽𝖾𝗅 𝖼𝗈𝗆𝖺𝗇𝖽𝗈 𝗅𝖺 𝖻𝗎́𝗌𝗊𝗎𝖾𝖽𝖺 𝗊𝗎𝖾 𝗊𝗎𝗂𝖾𝗋𝖾𝗌 𝗁𝖺𝖼𝖾𝗋. 
 
-📌 *Usa el comando así:*
-.tiktoksearch <tema>
-
-💡 *Ejemplo:*
-.tiktoksearch humor negro
-
-🔍 *KilluaBot buscará los mejores resultados para ti...*`,
+📌 *𝖤𝗌𝖼𝗋𝗂𝖻𝖾:* .𝗍𝗍𝗌𝖾𝖺𝗋𝖼𝗁 <𝗍𝖾𝗆𝖺>
+📌 *𝖤𝗃𝖾𝗆𝗉𝗅𝗈:*.𝗍𝗍𝗌𝖾𝖺𝗋𝖼𝗁 𝖤𝖽𝗂𝗍𝗌 𝖢𝖱𝟩`,
       contextInfo: {
         forwardedNewsletterMessageInfo: {
           newsletterJid: "120363400979242290@newsletter",
@@ -28,7 +55,7 @@ const handler = async (msg, { conn, text }) => {
         forwardingScore: 9999999,
         isForwarded: true
       }
-    }, { quoted: msg });
+    }, { quoted: fkontak });
   }
 
   try {
@@ -51,7 +78,7 @@ const handler = async (msg, { conn, text }) => {
     results.sort(() => Math.random() - 0.5);
     const topResults = results.slice(0, 4);
 
-    const { nowm, title, author, duration, likes } = topResults[0];
+    const { nowm, author, duration, likes } = topResults[0];
     const fecha = new Date().toLocaleDateString("es-HN", {
       year: "numeric", month: "2-digit", day: "2-digit"
     });
@@ -70,17 +97,8 @@ const handler = async (msg, { conn, text }) => {
     const sentMsg = await conn.sendMessage(chatId, {
       video: { url: nowm },
       caption,
-      mimetype: "video/mp4",
-      contextInfo: {
-        forwardedNewsletterMessageInfo: {
-          newsletterJid: "120363400979242290@newsletter",
-          newsletterName: "𝗞𝗜𝗟𝗟𝗨𝗔-𝗕𝗢𝗧 👑",
-          serverMessageId: ""
-        },
-        forwardingScore: 9999999,
-        isForwarded: true
-      }
-    }, { quoted: msg });
+      mimetype: "video/mp4"
+    }, { quoted: msg }); // Sin canal aquí
 
     await conn.sendMessage(chatId, {
       react: {
@@ -131,7 +149,7 @@ const handler = async (msg, { conn, text }) => {
       });
 
       const newCaption =
-`*┏━〔 🎬 𝗧𝗶𝗸𝗧𝗼𝗸 𝗗𝗲𝘀𝗰𝗮𝗿𝗴𝗮𝗱𝗼 〕━┓*
+`*┏━〔 🎬 𝗧𝗶𝗸𝗧𝗼𝗸 𝗗𝗲𝘀𝗰𝗮𝗿𝗀𝗮𝗱𝗼 〕━┓*
 *┃» 👤𝖠𝗎𝗍𝗈𝗋:* ${author || "Desconocido"}
 *┃» 📆𝖯𝗎𝖻𝗅𝗂𝖼𝖺𝖽𝗈:* ${fecha}
 *┃» ⏰𝖣𝗎𝗋𝖺𝖼𝗂𝗈́𝗇:* ${duration || "Desconocida"}
