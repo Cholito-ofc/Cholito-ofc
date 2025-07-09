@@ -9,7 +9,6 @@ const handler = async (msg, { conn, text }) => {
   const sender = msg.key.participant || msg.key.remoteJid;
   const senderNum = sender.replace(/[^0-9]/g, "");
 
-  // vCard decorativo con miniatura funcional
   const fkontak = {
     key: {
       participants: "0@s.whatsapp.net",
@@ -198,7 +197,7 @@ const handler = async (msg, { conn, text }) => {
 
 // Soporte para prefijos con espacios o símbolos raros
 handler.customPrefix = /^[°•π÷×¶∆£¢€¥®™+✓_=|~!?@#$%^&.\/\\©^`´\-–—\s]*tt(search|iktoks?|iktoksearch)/i;
-handler.command = new RegExp();
+// handler.command = new RegExp(); // ❌ Eliminado porque causaba error
 
 handler.tags = ["buscador"];
 handler.help = ["tiktoksearch <tema>"];
