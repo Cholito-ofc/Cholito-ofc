@@ -11359,7 +11359,7 @@ case 'memes': {
 
             
 
-case 'hd': {
+case 'hdimagenpro': {
     try {
         const FormData = require("form-data");
 
