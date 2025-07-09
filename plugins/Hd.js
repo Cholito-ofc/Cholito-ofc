@@ -1,6 +1,8 @@
 const axios = require("axios");
 const { downloadMediaMessage } = require("@whiskeysockets/baileys");
 const FormData = require("form-data");
+const path = require("path");
+const fs = require("fs");
 
 const handler = async (msg, { conn }) => {
   const quoted = msg.quoted?.message || msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
@@ -9,42 +11,55 @@ const handler = async (msg, { conn }) => {
 
   if (!quoted || !isImage) {
     return await conn.sendMessage(msg.key.remoteJid, {
-      text: `🖼️ *| COMANDO:* *hd*\n\n📌 *Responde a una imagen para mejorarla con calidad HD (x4).*`,
+      text: `📸 *| COMANDO:* *hd*\n\n🧠 *Responde a una imagen para mejorarla en calidad HD (x4).*`,
     }, { quoted: msg });
   }
 
   try {
-    // Descargar imagen como buffer
-    const mediaBuffer = await downloadMediaMessage(
+    // Descargar la imagen
+    const buffer = await downloadMediaMessage(
       { message: quoted },
       "buffer",
       {},
       { logger: console }
     );
 
-    // Crear form-data para enviar a Pixelcut
+    // Guardar como archivo temporal .jpg
+    const tempPath = path.join(__dirname, `temp_${Date.now()}.jpg`);
+    fs.writeFileSync(tempPath, buffer);
+
+    // Crear formulario para enviar a la API Pixelcut
     const form = new FormData();
-    form.append("image_file", mediaBuffer, {
+    form.append("image_file", fs.createReadStream(tempPath), {
       filename: "image.jpg",
-      contentType: "image/jpeg",
+      contentType: "image/jpeg"
     });
 
-    // Enviar a la API Pixelcut
-    const response = await axios.post("https://api2.pixelcut.app/image/upscale/v1", form, {
-      headers: form.getHeaders(),
-      responseType: "arraybuffer",
-    });
+    const response = await axios.post(
+      "https://api2.pixelcut.app/image/upscale/v1",
+      form,
+      {
+        headers: {
+          ...form.getHeaders(),
+          "User-Agent": "KilluaBot/1.0"
+        },
+        responseType: "arraybuffer"
+      }
+    );
 
     // Enviar imagen mejorada al chat
     await conn.sendMessage(msg.key.remoteJid, {
       image: response.data,
-      caption: `🧠 *Imagen mejorada en HD (x4)*\n🔧 _Potenciado por Killua Bot_`,
+      caption: `🔍 *Imagen mejorada en HD (x4)*\n✨ _Potenciado por Killua Bot_`,
     }, { quoted: msg });
 
+    // Eliminar archivo temporal
+    fs.unlinkSync(tempPath);
+
   } catch (err) {
-    console.error("❌ Error en Pixelcut API:", err);
+    console.error("🔥 Error al mejorar imagen (Pixelcut):", err);
     await conn.sendMessage(msg.key.remoteJid, {
-      text: `❌ *Error al mejorar la imagen.*\nLa API pudo haber fallado o la imagen no es válida.`,
+      text: `❌ *Ocurrió un error al mejorar la imagen.*\nRevisa si la imagen es válida y vuelve a intentarlo.`,
     }, { quoted: msg });
   }
 };
