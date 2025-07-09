@@ -24,9 +24,11 @@ const handler = async (msg, { conn, command }) => {
   }
 
   const pack1 = [
-    'https://telegra.ph/file/957fe4031132ef90b66ec.jpg',
-    'https://telegra.ph/file/c4b85bd53030cb648382f.jpg',
-    'https://telegra.ph/file/df56f8a76145df9c923ad.jpg'
+    'https://cdn.russellxz.click/c369ab4a.jpeg',
+    'https://cdn.russellxz.click/61b2ba1a.jpeg',
+    'https://cdn.russellxz.click/f1a47198.jpeg',
+    'https://cdn.russellxz.click/19fcba1b.jpeg', 
+    'https://cdn.russellxz.click/800156c7.jpeg',  'https://cdn.russellxz.click/469b833a.jpeg'
   ];
 
   const pack2 = [
