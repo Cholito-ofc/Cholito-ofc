@@ -1333,7 +1333,7 @@ try {
 
   const commandOnly = messageText.slice(global.prefix.length).trim().split(" ")[0].toLowerCase();
 
-  const rpgActivo = activos.rpgkillua?.[chatId];
+  const rpgActivo = activos.rpgazura?.[chatId];
 
   if (comandosRpg.includes(commandOnly) && !rpgActivo) {
     const mensajesBloqueo = [
