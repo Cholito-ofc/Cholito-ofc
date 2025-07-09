@@ -512,7 +512,7 @@ if (update.action === "remove" && despedidasActivo) {
 sock.ev.on("messages.upsert", async (messageUpsert) => {
   try {
     const msg = messageUpsert.messages[0];
-    if (!msg) return;
+    if (!msg || !msg.message) return;
 
     const chatId = msg.key.remoteJid;
     const isGroup = chatId.endsWith("@g.us");
@@ -521,8 +521,15 @@ sock.ev.on("messages.upsert", async (messageUpsert) => {
       : msg.key.remoteJid.replace(/[^0-9]/g, "");
     const botNumber = sock.user.id.split(":")[0];
     const fromMe = msg.key.fromMe || sender === botNumber;
-    let messageText = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
-    let messageType = Object.keys(msg.message || {})[0];
+
+    // 🧠 Detectar texto del mensaje
+    const text = msg.message?.conversation 
+              || msg.message?.extendedTextMessage?.text 
+              || msg.message?.imageMessage?.caption 
+              || msg.message?.videoMessage?.caption 
+              || "";
+
+    const messageType = Object.keys(msg.message || {})[0];
 
     const activos = fs.existsSync("./activos.json") ? JSON.parse(fs.readFileSync("./activos.json")) : {};
     const lista = fs.existsSync("./lista.json") ? JSON.parse(fs.readFileSync("./lista.json")) : [];
@@ -531,8 +538,26 @@ sock.ev.on("messages.upsert", async (messageUpsert) => {
     console.log(chalk.yellow(`\n📩 Nuevo mensaje recibido`));
     console.log(chalk.green(`📨 De: ${fromMe ? "[Tú]" : "[Usuario]"} ${chalk.bold(sender)}`));
     console.log(chalk.cyan(`💬 Tipo: ${messageType}`));
-    console.log(chalk.cyan(`💬 Mensaje: ${chalk.bold(messageText || "📂 (Mensaje multimedia)")}`));
+    console.log(chalk.cyan(`💬 Mensaje: ${chalk.bold(text || "📂 (Mensaje multimedia)")}`));
     console.log(chalk.gray("──────────────────────────"));
+
+    // ✅ Prefijos personalizados
+    const prefixes = fs.existsSync("prefixes.json")
+      ? JSON.parse(fs.readFileSync("prefixes.json", "utf-8"))
+      : {};
+
+    const usedPrefix = prefixes[msg.key.participant || msg.key.remoteJid] || ".";
+
+    // ✅ Soporte para ".play", ". Play", ".   PlAy", etc.
+    const prefixRegex = new RegExp(`^\\${usedPrefix}\\s*`, 'i');
+    if (!prefixRegex.test(text)) return; // no es comando válido
+
+    const commandBody = text.replace(prefixRegex, '').trim();
+    const command = commandBody.split(' ')[0].toLowerCase();
+    const args = commandBody.split(' ').slice(1).join(' ');
+
+    // 📦 Ejecutar comando
+    handleCommand(command, args, msg, sock);
 
 // 🔗 Antilink en grupos
       if (isGroup && activos.antilink?.[chatId]) {
