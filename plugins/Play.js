@@ -7,17 +7,14 @@ const { pipeline } = require('stream');
 const { promisify } = require('util');
 const streamPipeline = promisify(pipeline);
 
-// 🔹 Obtener miniatura personalizada
 const getThumbnail = async () => {
   const imageUrl = "https://cdn.russellxz.click/c87a5d88.jpeg";
   const res = await axios.get(imageUrl, { responseType: 'arraybuffer' });
   return Buffer.from(res.data);
 };
 
-// 🔹 Limpiar el título para que no tenga caracteres prohibidos
 const sanitize = (text) => text.replace(/[\/\\?%*:|"<>]/g, '');
 
-// 🔹 Enviar audio Killua sin responder al mensaje
 const sendAudioKillua = async (conn, chat, filePath, title) => {
   try {
     const buffer = fs.readFileSync(filePath);
@@ -47,7 +44,7 @@ const sendAudioKillua = async (conn, chat, filePath, title) => {
   }
 };
 
-const handler = async (msg, { conn, text }) => {
+const handler = async (msg, { conn }) => {
   const rawID = conn.user?.id || "";
   const subbotID = rawID.split(":")[0] + "@s.whatsapp.net";
   const chatId = msg.key.remoteJid;
@@ -60,8 +57,17 @@ const handler = async (msg, { conn, text }) => {
 
   const usedPrefix = prefixes[subbotID] || ".";
 
+  // 🧠 Detectar texto del mensaje
+  let body = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
+  body = body.trim();
+
+  // 🧩 Detectar comando (ej: .play, . Play, .pLaY, etc)
+  const match = body.match(new RegExp(`^\\${usedPrefix}\\s*play`, "i"));
+  if (!match) return;
+
+  const text = body.slice(match[0].length).trim();
   if (!text) {
-    return await conn.sendMessage2(chatId, {
+    return conn.sendMessage2(chatId, {
       text: `*╭┈〔 ⚠️ USO INCORRECTO ⚠️ 〕┈╮*
 *┊*
 *┊* 🎧 𝖤𝗌𝖼𝗋𝗂𝖻𝖾: *${usedPrefix}𝗉𝗅𝖺𝗒 𝖠𝗋𝗍𝗂𝗌𝗍𝖺 / 𝖢𝖺𝗇𝖼𝗂𝗈́𝗇* 
@@ -79,26 +85,21 @@ const handler = async (msg, { conn, text }) => {
     const video = search.videos[0];
     if (!video) throw new Error('No se encontraron resultados');
 
-    const videoUrl = video.url;
-    const thumbnail = video.thumbnail;
-    const title = video.title;
-    const fduration = video.timestamp;
-    const views = video.views.toLocaleString();
-    const channel = video.author.name || 'Desconocido';
+    const { url: videoUrl, thumbnail, title, timestamp: fduration, views, author } = video;
+    const channel = author.name || 'Desconocido';
 
     const infoMessage = `*╭┈┈≫* *「 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 𝖬𝗎́𝗌𝗂𝖼 ⚡ 」≪┈┈╮*
 *┊*
 *┊»* 🎵 𝗧𝗶́𝘁𝘂𝗹𝗼: ${title}
 *┊»* ⏱️ 𝗗𝘂𝗿𝗮𝗰𝗶𝗼́𝗻: ${fduration}
 *┊»* 👤 𝗔𝘂𝘁𝗼𝗿: ${channel}
-*┊»* 👀 𝗩𝗶𝘀𝘁𝗮𝘀: ${views}
+*┊»* 👀 𝗩𝗶𝘀𝘁𝗮𝘀: ${views.toLocaleString()}
 *╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫*
 *» 𝘌𝘕𝘝𝘐𝘈𝘕𝘋𝘖 𝘈𝘜𝘋𝘐𝘖  🎧*
 *» 𝘈𝘎𝘜𝘈𝘙𝘋𝘌 𝘜𝘕 𝘗𝘖𝘊𝘖...*
 
 *⇆‌ ㅤ◁ㅤㅤ❚❚ㅤㅤ▷ㅤ↻*`;
 
-    // ✅ Imagen CON respuesta al mensaje
     await conn.sendMessage(chatId, {
       image: { url: thumbnail },
       caption: infoMessage
@@ -129,7 +130,6 @@ const handler = async (msg, { conn, text }) => {
         .on('error', reject);
     });
 
-    // ❌ Audio SIN respuesta al mensaje
     await sendAudioKillua(conn, chatId, finalPath, title);
 
     fs.unlinkSync(rawPath);
@@ -150,5 +150,5 @@ const handler = async (msg, { conn, text }) => {
   }
 };
 
-handler.command = ['play'];
+handler.command = ["play"];
 module.exports = handler;
