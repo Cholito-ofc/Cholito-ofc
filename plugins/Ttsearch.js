@@ -20,7 +20,7 @@ const handler = async (msg, { conn, text }) => {
     message: {
       locationMessage: {
         name: "ᴛɪᴋᴛᴏᴋ sᴇᴀʀᴄʜ",
-        jpegThumbnail: await (await fetch('https://iili.io/F1Wvr8J.md.png')).buffer(),
+        jpegThumbnail: await (await fetch('https://iili.io/F1Wvr8J.th.png')).buffer(),
         vcard:
           "BEGIN:VCARD\n" +
           "VERSION:3.0\n" +
