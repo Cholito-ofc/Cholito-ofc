@@ -1,121 +1,57 @@
-const fs = require('fs');
-const path = require('path');
-const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
-const FormData = require('form-data');
-const axios = require('axios');
-
-const remini = async (imageBuffer, operation = "enhance") => {
-    const validOperations = ["enhance", "recolor", "dehaze"];
-    operation = validOperations.includes(operation) ? operation : "enhance";
-    
-    const form = new FormData();
-    form.append('image', imageBuffer, {
-        filename: 'image_to_enhance.jpg',
-        contentType: 'image/jpeg'
-    });
-    form.append('model_version', '1');
-
-    try {
-        const { data } = await axios({
-            method: 'post',
-            url: `https://inferenceengine.vyro.ai/${operation}.vyro`,
-            data: form,
-            headers: {
-                ...form.getHeaders(),
-                'User-Agent': 'okhttp/4.9.3',
-                'Accept-Encoding': 'gzip'
-            },
-            responseType: 'arraybuffer',
-            timeout: 30000
-        });
-
-        return data;
-    } catch (error) {
-        console.error('Error en API remini:', error.message);
-        throw new Error('No se pudo procesar la imagen. Inténtalo de nuevo más tarde.');
-    }
-};
+const axios = require("axios");
+const { downloadMediaMessage } = require("@whiskeysockets/baileys");
+const fs = require("fs");
+const path = require("path");
+const FormData = require("form-data");
 
 const handler = async (msg, { conn }) => {
-    try {
-        // Verificar mensaje citado
-        const quoted = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
-        if (!quoted) {
-            return await conn.sendMessage(msg.key.remoteJid, {
-                text: "🚫 *Debes responder a una imagen con el comando* `.hd`"
-            }, { quoted: msg });
-        }
+  const mime = (msg.quoted?.mimetype || msg.mimetype) || "";
+  const isImage = mime.startsWith("image/");
 
-        // Verificar tipo de archivo
-        const mime = quoted.imageMessage?.mimetype || "";
-        if (!/image\/(jpe?g|png)/.test(mime)) {
-            return await conn.sendMessage(msg.key.remoteJid, {
-                text: "⚠️ *Formato no soportado. Solo se permiten imágenes JPG/PNG*"
-            }, { quoted: msg });
-        }
+  if (!msg.quoted || !isImage) {
+    return await conn.sendMessage(msg.key.remoteJid, {
+      text: `📸 *| COMANDO:* *hd*\n\n💡 *Responde a una imagen para mejorarla con calidad HD (x4).*`,
+    }, { quoted: msg });
+  }
 
-        // Reacción de procesamiento
-        await conn.sendMessage(msg.key.remoteJid, {
-            react: { text: "🔄", key: msg.key }
-        });
+  try {
+    // Descargar imagen
+    const mediaBuffer = await downloadMediaMessage(msg.quoted, "buffer", {}, { logger: console });
+    const tempFile = path.join(__dirname, `hd_${Date.now()}.jpg`);
+    fs.writeFileSync(tempFile, mediaBuffer);
 
-        // Descargar imagen
-        const mediaStream = await downloadContentFromMessage(quoted.imageMessage, "image");
-        let buffer = Buffer.alloc(0);
-        
-        for await (const chunk of mediaStream) {
-            buffer = Buffer.concat([buffer, chunk]);
-        }
+    // Subir a servidor temporal (Uguu)
+    const form = new FormData();
+    form.append("file", fs.createReadStream(tempFile));
+    const upload = await axios.post("https://uguu.se/upload.php", form, {
+      headers: form.getHeaders(),
+    });
 
-        if (buffer.length === 0) {
-            throw new Error("La imagen está vacía o no se pudo descargar");
-        }
+    const imageUrl = upload.data.files[0].url;
 
-        // Crear directorio temporal si no existe
-        const tmpDir = path.join(__dirname, '../tmp');
-        if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+    // Enviar a la API externa para mejorar
+    const apiUrl = `https://fastrestapis.fasturl.cloud/aiimage/upscale?imageUrl=${encodeURIComponent(imageUrl)}&resize=4`;
+    const result = await axios.get(apiUrl, { responseType: "arraybuffer" });
 
-        // Procesar imagen
-        const startTime = Date.now();
-        const enhancedImage = await remini(buffer);
-        console.log(`Procesamiento completado en ${(Date.now() - startTime)/1000} segundos`);
+    // Enviar la imagen mejorada
+    await conn.sendMessage(msg.key.remoteJid, {
+      image: result.data,
+      caption: `🔍 *Imagen mejorada en HD (x4)*\n✨ _Potenciado por Killua Bot_`,
+    }, { quoted: msg });
 
-        // Enviar resultado
-        await conn.sendMessage(msg.key.remoteJid, {
-            image: enhancedImage,
-            caption: "🖼️ *Imagen mejorada con tecnología HD*\n\n💡 *Sugerencia:* Para mejores resultados use fotos con buena iluminación\n\n🤖 *Azura Ultra 2.0*"
-        }, { quoted: msg });
+    fs.unlinkSync(tempFile);
 
-        // Reacción de éxito
-        await conn.sendMessage(msg.key.remoteJid, {
-            react: { text: "✅", key: msg.key }
-        });
-
-    } catch (error) {
-        console.error("Error en comando hd:", error);
-        
-        let errorMessage = "❌ *Error al procesar la imagen*";
-        if (error.message.includes("timeout")) {
-            errorMessage = "⌛ *El servidor tardó demasiado en responder. Intenta con una imagen más pequeña*";
-        }
-
-        await conn.sendMessage(msg.key.remoteJid, {
-            text: errorMessage
-        }, { quoted: msg });
-
-        await conn.sendMessage(msg.key.remoteJid, {
-            react: { text: "❌", key: msg.key }
-        });
-    }
+  } catch (err) {
+    console.error("❌ Error al mejorar imagen:", err);
+    await conn.sendMessage(msg.key.remoteJid, {
+      text: `⚠️ *Ocurrió un error al mejorar la imagen.*\nInténtalo más tarde.`,
+    }, { quoted: msg });
+  }
 };
 
-// Configuración del plugin
-handler.command = ['hd', 'enhance', 'remini'];
-handler.tags = ['tools'];
-handler.help = [
-    'hd <responde a imagen> - Mejora la calidad de la imagen',
-    'enhance <responde a imagen> - Alternativa para mejorar imágenes',
-    'remini <responde a imagen> - Usa IA para mejorar fotos'
-];
+handler.command = ["hd"];
+handler.help = ["hd (responde a una imagen)"];
+handler.tags = ["ia", "imagen"];
+handler.register = true;
 
 module.exports = handler;
