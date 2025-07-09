@@ -40,7 +40,7 @@ const handler = async (msg, { conn, args }) => {
     activos = JSON.parse(fs.readFileSync(activosPath, "utf-8"));
   }
 
-  if (!activos.rpgkillua) activos.rpgkillua = {};
+  if (!activos.rpgkillua) activos.rpgazura = {};
 
   if (args[0].toLowerCase() === "on") {
     activos.rpgkillua[chatId] = true;
@@ -48,7 +48,7 @@ const handler = async (msg, { conn, args }) => {
       text: "⚔️ *Modo RPG Killua ACTIVADO*\n\nPrepárense para la batalla, el juego comienza ahora.",
     }, { quoted: msg });
   } else {
-    delete activos.killua[chatId];
+    delete activos.azura[chatId];
     await conn.sendMessage(chatId, {
       text: "💤 *Modo RPG Killua DESACTIVADO*\n\nEl mundo se ha silenciado... por ahora.",
     }, { quoted: msg });
