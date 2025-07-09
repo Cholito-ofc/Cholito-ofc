@@ -7,7 +7,9 @@ let usosPorUsuarioTT = {};
 const handler = async (msg, { conn, text }) => {
   const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
+  const senderNum = sender.replace(/[^0-9]/g, "");
 
+  // vCard decorativo (igual al del modo apagado)
   const fkontak = {
     key: {
       participants: "0@s.whatsapp.net",
@@ -18,7 +20,7 @@ const handler = async (msg, { conn, text }) => {
     message: {
       locationMessage: {
         name: "ᴛɪᴋᴛᴏᴋ sᴇᴀʀᴄʜ",
-        jpegThumbnail: await (await fetch('https://iili.io/F0WZNEX.th.png')).buffer(),
+        jpegThumbnail: await (await fetch('https://iili.io/F1Wvr8J.md.png')).buffer(),
         vcard:
           "BEGIN:VCARD\n" +
           "VERSION:3.0\n" +
@@ -36,14 +38,14 @@ const handler = async (msg, { conn, text }) => {
     participant: "0@s.whatsapp.net"
   };
 
-  if (!text || !text.trim()) {
+  if (!text) {
     return conn.sendMessage(chatId, {
       text:
 `\`𝖴𝖲𝖮 𝖨𝖭𝖢𝖮𝖱𝖱𝖤𝖢𝖳𝖮 ❌\`
-> 𝖯𝗋𝗂𝗆𝖾𝗋𝗈 𝖾𝗌𝖼𝗋𝗂𝖻𝖾 𝖾𝗅 𝖼𝗈𝗆𝖺𝗇𝖽𝗈 𝗒 𝗅𝗎𝖾𝗀𝗈 𝖽𝖾𝗅 𝖼𝗈𝗆𝖺𝗇𝖽𝗈 𝗅𝖺 𝖻𝗎́𝗌𝗊𝗎𝖾𝖽𝖺 𝗊𝗎𝗂𝖾𝗋𝖾𝗌 𝗁𝖺𝖼𝖾𝗋. 
+> 𝖯𝗋𝗂𝗆𝖾𝗋𝗈 𝖾𝗌𝖼𝗋𝗂𝖻𝖾 𝖾𝗅 𝖼𝗈𝗆𝖺𝗇𝖽𝗈 𝗒 𝗅𝗎𝖾𝗀𝗈 𝖽𝖾𝗅 𝖼𝗈𝗆𝖺𝗇𝖽𝗈 𝗅𝖺 𝖻𝗎́𝗌𝗊𝗎𝖾𝖽𝖺 𝗊𝗎𝖾 𝗊𝗎𝗂𝖾𝗋𝖾𝗌 𝗁𝖺𝖼𝖾𝗋. 
 
 📌 *𝖤𝗌𝖼𝗋𝗂𝖻𝖾:* .𝗍𝗍𝗌𝖾𝖺𝗋𝖼𝗁 <𝗍𝖾𝗆𝖺>
-📌 *𝖤𝗃𝖾𝗆𝗉𝗅𝗈:*.𝗍𝗍𝗌𝖾𝖺𝗋𝖼𝗁 𝖤𝖽𝗂𝖙𝗌 𝖢𝖱𝟩`,
+📌 *𝖤𝗃𝖾𝗆𝗉𝗅𝗈:*.𝗍𝗍𝗌𝖾𝖺𝗋𝖼𝗁 𝖤𝖽𝗂𝗍𝗌 𝖢𝖱𝟩`,
       contextInfo: {
         forwardedNewsletterMessageInfo: {
           newsletterJid: "120363400979242290@newsletter",
@@ -82,7 +84,7 @@ const handler = async (msg, { conn, text }) => {
     });
 
     const caption =
-`*┏━〔 🎬 𝗧𝗶𝗸𝗧𝗼𝗸 𝗗𝗲𝘀𝗰𝗮𝗿𝗀𝗮𝗱𝗼 〕━┓*
+`*┏━〔 🎬 𝗧𝗶𝗸𝗧𝗼𝗸 𝗗𝗲𝘀𝗰𝗮𝗿𝗴𝗮𝗱𝗼 〕━┓*
 *┃» 👤𝖠𝗎𝗍𝗈𝗋:* ${author || "Desconocido"}
 *┃» 📆𝖯𝗎𝖻𝗅𝗂𝖼𝖺𝖽𝗈:* ${fecha}
 *┃» ⏰𝖣𝗎𝗋𝖺𝖼𝗂𝗈́𝗇:* ${duration || "Desconocida"}
@@ -96,7 +98,7 @@ const handler = async (msg, { conn, text }) => {
       video: { url: nowm },
       caption,
       mimetype: "video/mp4"
-    }, { quoted: msg });
+    }, { quoted: msg }); // Sin canal aquí
 
     await conn.sendMessage(chatId, {
       react: {
@@ -194,10 +196,7 @@ const handler = async (msg, { conn, text }) => {
   }
 };
 
-// Soporte para prefijos y para que reconozca el comando con espacios entre tt y search
-handler.customPrefix = /^[°•π÷×¶∆£¢€¥®™+✓_=|~!?@#$%^&.\/\\©^`´\-–—]*\.?/i;
-handler.command = /^tt\s*search|^tt\s*iktoks?|^tt\s*iktoksearch/i;
-
+handler.command = ["ttsearch", "tiktoks", "tiktoksearch"];
 handler.tags = ["buscador"];
 handler.help = ["tiktoksearch <tema>"];
 handler.register = true;
