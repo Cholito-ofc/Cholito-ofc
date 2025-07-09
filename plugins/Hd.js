@@ -3,18 +3,20 @@ const FormData = require('form-data');
 
 const handler = async (msg, { conn, command, usedPrefix }) => {
   const chatId = msg.key.remoteJid;
-  const senderId = msg.key.participant || msg.key.remoteJid;
-  const isGroup = chatId.endsWith("@g.us");
+  const quoted = msg.quoted || msg;
 
-  const quoted = msg.quoted ? msg.quoted : msg;
-  const mime = quoted.mimetype || quoted.msg?.mimetype || '';
+  // Buscar mimetype correctamente
+  const mime = quoted.message?.imageMessage?.mimetype ||
+               quoted.mimetype ||
+               quoted.msg?.mimetype ||
+               '';
 
   if (!/image\/(jpe?g|png)/i.test(mime)) {
     await conn.sendMessage(chatId, {
       react: { text: '❗', key: msg.key }
     });
     await conn.sendMessage(chatId, {
-      text: `📸 Envía o responde a una *imagen* con el comando:\n*${usedPrefix + command}*`
+      text: `📸 *Responde a una imagen JPG o PNG* con:\n*${usedPrefix + command}*`
     }, { quoted: msg });
     return;
   }
@@ -56,11 +58,11 @@ const handler = async (msg, { conn, command, usedPrefix }) => {
     await conn.sendMessage(chatId, {
       image: resultBuffer,
       caption: `
-✨ *Imagen mejorada con éxito*
+✨ *Imagen mejorada*
 
-🔍 Resolución aumentada x2  
-📈 Mayor nitidez y detalle  
-🧰 Úsalo para mejorar imágenes borrosas
+🔍 Resolución x2  
+📈 Nitidez mejorada  
+🧰 Ideal para imágenes borrosas
       `.trim()
     }, { quoted: msg });
 
@@ -73,7 +75,7 @@ const handler = async (msg, { conn, command, usedPrefix }) => {
       react: { text: '❌', key: msg.key }
     });
     await conn.sendMessage(chatId, {
-      text: `❌ *Error al mejorar la imagen:*\n${err.message || err}`
+      text: `❌ *Ocurrió un error:*\n${err.message || err}`
     }, { quoted: msg });
   }
 };
