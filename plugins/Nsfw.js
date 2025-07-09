@@ -7,6 +7,9 @@ let usosPorUsuario = {};
 const handler = async (msg, { conn, command }) => {
   const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
+  const senderNum = sender.replace(/[^0-9]/g, "");
+
+  const isOwner = global.owner.some(([id]) => id === senderNum);
 
   const activosPath = path.resolve("activos.json");
   let activos = fs.existsSync(activosPath)
@@ -39,7 +42,7 @@ const handler = async (msg, { conn, command }) => {
 
   const videoxxx = [
     'https://telegra.ph/file/4a270d9945ac46f42d95c.mp4',
-'https://cdn.russellxz.click/dfda5547.mp4',
+    'https://cdn.russellxz.click/dfda5547.mp4',
     'https://telegra.ph/file/958c11e84d271e783ea3f.mp4',
     'https://telegra.ph/file/f753759342337c4012b3f.mp4'
   ];
@@ -84,9 +87,12 @@ const handler = async (msg, { conn, command }) => {
     contentArray,
     isVideo,
     sender,
+    isOwner
   };
 
-  usosPorUsuario[sender] = usosPorUsuario[sender] || 0;
+  if (!isOwner) {
+    usosPorUsuario[sender] = usosPorUsuario[sender] || 0;
+  }
 
   conn.ev.on("messages.upsert", async ({ messages }) => {
     const m = messages[0];
@@ -95,18 +101,21 @@ const handler = async (msg, { conn, command }) => {
     const reaction = m.message.reactionMessage;
     const reactedMsgId = reaction.key?.id;
     const user = m.key.participant || m.key.remoteJid;
+    const userNum = user.replace(/[^0-9]/g, "");
+    const esOwner = global.owner.some(([id]) => id === userNum);
 
-    if (!cacheHot[reactedMsgId]) return;
-    if (user !== cacheHot[reactedMsgId].sender) return;
+    const cached = cacheHot[reactedMsgId];
+    if (!cached) return;
+    if (user !== cached.sender) return;
 
-    if ((usosPorUsuario[user] || 0) >= 3) {
+    if (!esOwner && (usosPorUsuario[user] || 0) >= 3) {
       return await conn.sendMessage(chatId, {
         text: `⛔ Ya viste suficiente por ahora.\n🕐 Espera *5 minutos* para continuar.`,
         mentions: [user],
       });
     }
 
-    const { contentArray, isVideo } = cacheHot[reactedMsgId];
+    const { contentArray, isVideo } = cached;
     const nextUrl = contentArray[Math.floor(Math.random() * contentArray.length)];
 
     const newMsg = await conn.sendMessage(chatId, {
@@ -123,14 +132,16 @@ const handler = async (msg, { conn, command }) => {
       contentArray,
       isVideo,
       sender: user,
+      isOwner: esOwner
     };
     delete cacheHot[reactedMsgId];
 
-    usosPorUsuario[user] = (usosPorUsuario[user] || 0) + 1;
-
-    setTimeout(() => {
-      usosPorUsuario[user] = 0;
-    }, 5 * 60 * 1000);
+    if (!esOwner) {
+      usosPorUsuario[user] = (usosPorUsuario[user] || 0) + 1;
+      setTimeout(() => {
+        usosPorUsuario[user] = 0;
+      }, 5 * 60 * 1000);
+    }
   });
 };
 
