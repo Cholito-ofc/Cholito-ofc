@@ -57,7 +57,7 @@ const handler = async (msg, { conn, command }) => {
 
   const videoxxxlesbi = [
     'https://telegra.ph/file/2dfb1ad0cab22951e30d1.mp4',
-    'https://telegra.ph/file/c430651857023968d3a76.mp4',
+'https://cdn.russellxz.click/a6594eb8.mp4',    'https://telegra.ph/file/c430651857023968d3a76.mp4',
     'https://telegra.ph/file/1ba17f6230dd1ea2de48c.mp4'
   ];
 
