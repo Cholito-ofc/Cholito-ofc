@@ -19,8 +19,8 @@ const handler = async (msg, { conn, text }) => {
     },
     message: {
       locationMessage: {
-        name: "𝗞𝗜𝗟𝗟𝗨𝗔 𝗕𝗢𝗧",
-        jpegThumbnail: await (await fetch('https://iili.io/F0WZNEX.th.png')).buffer(),
+        name: "ᴛɪᴋᴛᴏᴋ sᴇᴀʀᴄʜ",
+        jpegThumbnail: await (await fetch('https://iili.io/F1Wvr8J.md.png')).buffer(),
         vcard:
           "BEGIN:VCARD\n" +
           "VERSION:3.0\n" +
