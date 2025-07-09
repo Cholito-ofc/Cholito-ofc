@@ -48,7 +48,7 @@ const handler = async (msg, { conn, args }) => {
       text: "⚔️ *Modo RPG Killua ACTIVADO*\n\nPrepárense para la batalla, el juego comienza ahora.",
     }, { quoted: msg });
   } else {
-    delete activos.azura[chatId];
+    delete activos.rpgazura[chatId];
     await conn.sendMessage(chatId, {
       text: "💤 *Modo RPG Killua DESACTIVADO*\n\nEl mundo se ha silenciado... por ahora.",
     }, { quoted: msg });
