@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const handler = async (msg, { conn }) => {
+const handler = async (msg, { conn, command }) => {
   const chatId = msg.key.remoteJid;
   const isGroup = chatId.endsWith("@g.us");
   const senderId = msg.key.participant || msg.key.remoteJid;
@@ -59,22 +59,40 @@ const handler = async (msg, { conn }) => {
     }, { quoted: msg });
   }
 
-  // Construir mensaje con todas las opciones activas o no
-  let texto = "╭━〔 𝚂𝙸𝚂𝙺𝙴𝙳 𝙴𝚂𝚃𝙰𝙳𝙾 〕━⬣\n";
+  // Según comando, filtrar opciones a mostrar
+  let opcionesMostrar = opcionesConfig;
+  if (command === "on") {
+    opcionesMostrar = opcionesConfig.filter(op => estaActivo(op));
+  } else if (command === "off") {
+    opcionesMostrar = opcionesConfig.filter(op => !estaActivo(op));
+  }
 
-  opcionesConfig.forEach(opcion => {
+  if (opcionesMostrar.length === 0) {
+    return conn.sendMessage(chatId, {
+      text: command === "on"
+        ? "⚠️ No hay opciones activas en este grupo."
+        : "⚠️ No hay opciones desactivadas en este grupo."
+    }, { quoted: msg });
+  }
+
+  // Construir mensaje estilo KilluaBot
+  let texto = "┏━━━〔 𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 ⚡ 〕━━━┓\n";
+  texto += "┃      • 𝚂𝙸𝚂𝚃𝙴𝙼𝙰 𝙳𝙴 𝙲𝙾𝙽𝙵𝙸𝙶𝚄𝚁𝙰𝙲𝙸Ó𝙽 •\n";
+  texto += "┣━━━━━━━━━━━━━━━━━━━━━━\n";
+
+  opcionesMostrar.forEach(opcion => {
     const activo = estaActivo(opcion);
-    texto += `┃ ${opcion}: ${activo ? "✅" : "❌"}\n`;
+    texto += `┃ ▸ ${opcion.padEnd(13)}: ${activo ? "✅" : "❌"}\n`;
   });
 
-  texto += "╰━━━━━━━━━━━━━━━━⬣";
+  texto += "┗━━━━━━━━━━━━━━━━━━━━━━";
 
   await conn.sendMessage(chatId, { react: { text: "📊", key: msg.key } });
   await conn.sendMessage(chatId, { text: texto }, { quoted: msg });
 };
 
-handler.command = ["estado", "configstatus"];
+handler.command = ["estado", "on", "off"];
 handler.tags = ["info"];
-handler.help = ["estado", "configstatus"];
+handler.help = ["estado", "on", "off"];
 
 module.exports = handler;
