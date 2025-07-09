@@ -4,12 +4,25 @@ const fetch = require("node-fetch");
 let cacheTikTok = {};
 let usosPorUsuarioTT = {};
 
-const handler = async (msg, { conn, text }) => {
+const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
   const senderNum = sender.replace(/[^0-9]/g, "");
 
-  // vCard decorativo (igual al del modo apagado)
+  const body = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
+  const cleanBody = body.trim();
+
+  const comandos = ["ttsearch", "tiktoks", "tiktoksearch"];
+  const usedPrefix = "."; // Aquí puedes detectar dinámicamente si usas varios prefijos
+
+  // Crear una expresión para detectar cualquiera de los comandos con o sin espacio
+  const match = cleanBody.match(new RegExp(`^\\${usedPrefix}\\s*(${comandos.join("|")})`, "i"));
+  if (!match) return;
+
+  const commandDetected = match[1].toLowerCase();
+  const text = cleanBody.slice(match[0].length).trim();
+
+  // vCard decorativo
   const fkontak = {
     key: {
       participants: "0@s.whatsapp.net",
@@ -21,18 +34,17 @@ const handler = async (msg, { conn, text }) => {
       locationMessage: {
         name: "ᴛɪᴋᴛᴏᴋ sᴇᴀʀᴄʜ",
         jpegThumbnail: await (await fetch('https://iili.io/F1Wvr8J.th.png')).buffer(),
-        vcard:
-          "BEGIN:VCARD\n" +
-          "VERSION:3.0\n" +
-          "N:;Unlimited;;;\n" +
-          "FN:Unlimited\n" +
-          "ORG:Unlimited\n" +
-          "TITLE:\n" +
-          "item1.TEL;waid=19709001746:+1 (970) 900-1746\n" +
-          "item1.X-ABLabel:Unlimited\n" +
-          "X-WA-BIZ-DESCRIPTION:ofc\n" +
-          "X-WA-BIZ-NAME:Unlimited\n" +
-          "END:VCARD"
+        vcard: `BEGIN:VCARD
+VERSION:3.0
+N:;Unlimited;;;
+FN:Unlimited
+ORG:Unlimited
+TITLE:
+item1.TEL;waid=19709001746:+1 (970) 900-1746
+item1.X-ABLabel:Unlimited
+X-WA-BIZ-DESCRIPTION:ofc
+X-WA-BIZ-NAME:Unlimited
+END:VCARD`
       }
     },
     participant: "0@s.whatsapp.net"
@@ -42,10 +54,10 @@ const handler = async (msg, { conn, text }) => {
     return conn.sendMessage(chatId, {
       text:
 `\`𝖴𝖲𝖮 𝖨𝖭𝖢𝖮𝖱𝖱𝖤𝖢𝖳𝖮\` ❌
-> 𝖯𝗋𝗂𝗆𝖾𝗋𝗈 𝖾𝗌𝖼𝗋𝗂𝖻𝖾 𝖾𝗅 𝖼𝗈𝗆𝖺𝗇𝖽𝗈 𝗒 𝗅𝗎𝖾𝗀𝗈 𝖽𝖾𝗅 𝖼𝗈𝗆𝖺𝗇𝖽𝗈 𝗅𝖺 𝖻𝗎́𝗌𝗊𝗎𝖾𝖽𝖺 𝗊𝗎𝖾 𝗊𝗎𝗂𝖾𝗋𝖾𝗌 𝗁𝖺𝖼𝖾𝗋. 
+> 𝖯𝗋𝗂𝗆𝖾𝗋𝗈 𝖾𝗌𝖼𝗋𝗂𝖻𝖾 𝖾𝗅 𝖼𝗈𝗆𝖺𝗇𝖽𝗈 𝗒 𝗅𝖺 𝖻𝗎́𝗌𝗊𝗎𝖾𝖽𝖺 𝗊𝗎𝖾 𝗊𝗎𝗂𝖾𝗋𝖾𝗌 𝗁𝖺𝖼𝖾𝗋. 
 
-📌 *𝖤𝗌𝖼𝗋𝗂𝖻𝖾:* .𝗍𝗍𝗌𝖾𝖺𝗋𝖼𝗁 <𝗍𝖾𝗆𝖺>
-📌 *𝖤𝗃𝖾𝗆𝗉𝗅𝗈:* .𝗍𝗍𝗌𝖾𝖺𝗋𝖼𝗁 𝖤𝖽𝗂𝗍𝗌 𝖢𝖱𝟩`,
+📌 *𝖤𝗌𝖼𝗋𝗂𝖻𝖾:* .𝗍𝗍𝗌𝖾𝗮𝗋𝖼𝗁 <𝗍𝖾𝗆𝖺>
+📌 *𝖤𝗃𝖾𝗆𝗉𝗅𝗈:* .𝗍𝗍𝗌𝖾𝗮𝗋𝖼𝗁 𝖤𝖽𝗂𝗍𝗌 𝖢𝖱𝟩`,
       contextInfo: {
         forwardedNewsletterMessageInfo: {
           newsletterJid: "120363400979242290@newsletter",
@@ -60,10 +72,7 @@ const handler = async (msg, { conn, text }) => {
 
   try {
     await conn.sendMessage(chatId, {
-      react: {
-        text: "🔍",
-        key: msg.key,
-      },
+      react: { text: "🔍", key: msg.key }
     });
 
     const { data: response } = await axios.get(`https://apis-starlights-team.koyeb.app/starlight/tiktoksearch?text=${encodeURIComponent(text)}`);
@@ -98,20 +107,17 @@ const handler = async (msg, { conn, text }) => {
       video: { url: nowm },
       caption,
       mimetype: "video/mp4"
-    }, { quoted: msg }); // Sin canal aquí
+    }, { quoted: msg });
 
     await conn.sendMessage(chatId, {
-      react: {
-        text: "✅",
-        key: sentMsg.key,
-      },
+      react: { text: "✅", key: sentMsg.key }
     });
 
     cacheTikTok[sentMsg.key.id] = {
       chatId,
       results: topResults,
       index: 1,
-      sender,
+      sender
     };
 
     usosPorUsuarioTT[sender] = usosPorUsuarioTT[sender] || 0;
@@ -128,7 +134,7 @@ const handler = async (msg, { conn, text }) => {
       if (user !== cacheTikTok[reactedMsgId].sender) return;
 
       if ((usosPorUsuarioTT[user] || 0) >= 3) {
-        return await conn.sendMessage(chatId, {
+        return conn.sendMessage(chatId, {
           text: `🚫 Ya viste suficientes *TikToks* por ahora.\n🕒 Espera *5 minutos* para continuar.`,
           mentions: [user],
         });
@@ -138,7 +144,7 @@ const handler = async (msg, { conn, text }) => {
       const { results, index } = state;
 
       if (index >= results.length) {
-        return await conn.sendMessage(chatId, {
+        return conn.sendMessage(chatId, {
           text: "✅ Ya viste todos los resultados disponibles.",
         });
       }
@@ -166,17 +172,14 @@ const handler = async (msg, { conn, text }) => {
       });
 
       await conn.sendMessage(chatId, {
-        react: {
-          text: "✅",
-          key: newMsg.key,
-        },
+        react: { text: "✅", key: newMsg.key }
       });
 
       cacheTikTok[newMsg.key.id] = {
         chatId,
         results,
         index: index + 1,
-        sender: user,
+        sender: user
       };
 
       delete cacheTikTok[reactedMsgId];
