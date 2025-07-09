@@ -5,42 +5,32 @@ const handler = async (msg, { conn, command, usedPrefix }) => {
   const chatId = msg.key.remoteJid;
   const quoted = msg.quoted;
 
-  // Verificar que haya mensaje citado
   if (!quoted) {
-    await conn.sendMessage(chatId, {
-      react: { text: '❗', key: msg.key }
-    });
-    await conn.sendMessage(chatId, {
-      text: `📸 Por favor, *responde a una imagen* con el comando:\n*${usedPrefix + command}*`
-    }, { quoted: msg });
+    await conn.sendMessage(chatId, { text: `❗ Por favor responde a una imagen con:\n*${usedPrefix + command}*` }, { quoted: msg });
     return;
   }
 
-  // Detectar si el mensaje citado es imagen (imageMessage)
-  const isImage = quoted.message && quoted.message.imageMessage;
-  if (!isImage) {
-    await conn.sendMessage(chatId, {
-      react: { text: '❗', key: msg.key }
-    });
-    await conn.sendMessage(chatId, {
-      text: `📸 Por favor, *responde a una imagen JPG o PNG* con:\n*${usedPrefix + command}*`
-    }, { quoted: msg });
+  // Tratar de obtener el mimetype en todas las formas posibles
+  const mime =
+    (quoted.msg && quoted.msg.mimetype) ||
+    (quoted.message && quoted.message.imageMessage && quoted.message.imageMessage.mimetype) ||
+    (quoted.mimetype) ||
+    '';
+
+  if (!mime || !mime.startsWith('image/')) {
+    await conn.sendMessage(chatId, { text: `❗ Responde a una imagen JPG o PNG con:\n*${usedPrefix + command}*` }, { quoted: msg });
     return;
   }
 
   try {
-    await conn.sendMessage(chatId, {
-      react: { text: '⏳', key: msg.key }
-    });
+    await conn.sendMessage(chatId, { react: { text: '⏳', key: msg.key } });
 
-    // Obtener mimetype y descargar la imagen
-    const mime = quoted.message.imageMessage.mimetype || '';
+    // Descargar imagen usando downloadM (compatible con Baileys)
     const media = await conn.downloadM(quoted);
 
-    const ext = mime.split('/')[1] || 'jpg'; // Fallback a jpg
+    const ext = mime.split('/')[1] || 'jpg';
     const filename = `mejorada_${Date.now()}.${ext}`;
 
-    // Preparar formulario para la API
     const form = new FormData();
     form.append('image', media, { filename, contentType: mime });
     form.append('scale', '2');
@@ -60,33 +50,24 @@ const handler = async (msg, { conn, command, usedPrefix }) => {
 
     const json = await res.json();
 
-    if (!json?.result_url || !json.result_url.startsWith('http')) {
-      throw new Error('No se pudo obtener la imagen mejorada desde Pixelcut.');
-    }
+    if (!json?.result_url || !json.result_url.startsWith('http')) throw new Error('No se pudo obtener la imagen mejorada');
 
     const resultBuffer = await (await fetch(json.result_url)).buffer();
 
     await conn.sendMessage(chatId, {
       image: resultBuffer,
       caption: `
-✨ *Imagen mejorada*
-
-🔍 Resolución x2  
-📈 Nitidez mejorada  
-🧰 Ideal para imágenes borrosas o pixeladas
+✨ Imagen mejorada (x2 resolución)
+🔍 Más nitidez y detalles
+🧰 Para imágenes borrosas o pixeladas
       `.trim()
     }, { quoted: msg });
 
-    await conn.sendMessage(chatId, {
-      react: { text: '✅', key: msg.key }
-    });
-  } catch (err) {
-    await conn.sendMessage(chatId, {
-      react: { text: '❌', key: msg.key }
-    });
-    await conn.sendMessage(chatId, {
-      text: `❌ *Error al mejorar la imagen:*\n${err.message || err}`
-    }, { quoted: msg });
+    await conn.sendMessage(chatId, { react: { text: '✅', key: msg.key } });
+
+  } catch (error) {
+    await conn.sendMessage(chatId, { react: { text: '❌', key: msg.key } });
+    await conn.sendMessage(chatId, { text: `❌ Error al mejorar imagen:\n${error.message || error}` }, { quoted: msg });
   }
 };
 
