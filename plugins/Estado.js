@@ -91,8 +91,8 @@ const handler = async (msg, { conn, command }) => {
   await conn.sendMessage(chatId, { text: texto }, { quoted: msg });
 };
 
-handler.command = ["estado", "on", "off"];
+handler.command = ["estado"];
 handler.tags = ["info"];
-handler.help = ["estado", "on", "off"];
+handler.help = ["estado"];
 
 module.exports = handler;
