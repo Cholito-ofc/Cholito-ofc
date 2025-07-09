@@ -1,48 +1,19 @@
 const axios = require("axios");
-
-let cacheTikTok = {}; // ID del mensaje => { chatId, results, index, sender }
-let usosPorUsuarioTT = {}; // usuario => cantidad
-
-const handler = async (msg, { conn, text }) => {
-  const chatId = msg.key.remoteJid;
-  const sender = msg.key.participant || msg.key.remoteJid;
-
-  if (!text) {
-    return conn.sendMessage(chatId, {
-      text:
-`🎯 *Búsqueda de Videos TikTok*
-
-📌 *Usa el comando así:*
-.tiktoksearch <tema>
-
-💡 *Ejemplo:*
-.tiktoksearch humor negro
-
-🔍 *KilluaBot buscará los mejores resultados para ti...*`
-    }, { quoted: msg });
-  }
-
-  try {
-    await conn.sendMessage(chatId, {
-      react: {
-        text: "🔍",
-        key: msg.key,
-      },
-    });
-
-    const { data: response } = await axios.get(`https://apis-starlights-team.koyeb.app/starlight/tiktoksearch?text=${encodeURIComponent(text)}`);
-    let results = response?.data;
-
-    if (!results || results.length === 0) {
-      return conn.sendMessage(chatId, {
-        text: "😔 *No se encontraron resultados para tu búsqueda.*"
-      }, { quoted: msg });
-    }
-
-    results.sort(() => Math.random() - 0.5);
-    const topResults = results.slice(0, 4);
-
-    const { nowm, title, author, duration, likes } = topResults[0];
+ 
+let cacheTikTok = {}; // ID del mensaje => { chatId, results, index, sender } let usosPorUsuarioTT = {}; // usuario => cantidad
+ 
+const handler = async (msg, { conn, text }) => { const chatId = msg.key.remoteJid; const sender = msg.key.participant || msg.key.remoteJid;
+ 
+if (!text) { return conn.sendMessage(chatId, { text: `🎯 *Búsqueda de Videos TikTok*
+ 
+📌 *Usa el comando así:* .tiktoksearch 
+ 
+💡 *Ejemplo:* .tiktoksearch humor negro
+ 
+🔍 *KilluaBot buscará los mejores resultados para ti...*`, contextInfo: { forwardedNewsletterMessageInfo: { newsletterJid: "120363400979242290@newsletter", newsletterName: "𝗞𝗜𝗟𝗟𝗨𝗔-𝗕𝗢𝗧 👑", serverMessageId: "" }, forwardingScore: 9999999, isForwarded: true } }, { quoted: msg }); }
+ 
+try { await conn.sendMessage(chatId, { react: { text: "🔍", key: msg.key, }, });
+ `const { data: response } = await axios.get(`https://apis-starlights-team.koyeb.app/starlight/tiktoksearch?text=${encodeURIComponent(text)}`); let results = response?.data;  if (!results || results.length === 0) {   return conn.sendMessage(chatId, {     text: "😔 *No se encontraron resultados para tu búsqueda.*"   }, { quoted: msg }); }  results.sort(() => Math.random() - 0.5); const topResults = results.slice(0, 4);  const { nowm, title, author, duration, likes } = topResults[0]; const fecha = new Date().toLocaleDateString("es-HN", {   year: "numeric", month: "2-digit", day: "2-digit" }); 
 
     const caption = 
 `╭「 🎬 𝗧𝗶𝗸𝗧𝗼𝗸 𝗗𝗲𝘀𝗰𝗮𝗿𝗴𝗮𝗱𝗼 」╮
