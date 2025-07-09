@@ -18,7 +18,7 @@ const handler = async (msg, { conn }) => {
   const fechaCapitalizada = fechaLarga.charAt(0).toUpperCase() + fechaLarga.slice(1);
 
   // URL del video animado (tipo GIF)
-  const mediaUrl = 'https://cdn.russellxz.click/b69a1970.mp4';
+  const mediaUrl = 'https://cdn.russellxz.click/e46c442a.mp4';
 
   // Mensaje del menú guía
   let message = `
