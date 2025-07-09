@@ -4190,10 +4190,8 @@ case 'menu': {
 ┃➜ ${global.prefix}𝗏𝗂𝖽𝖾𝗈𝗑𝗑𝗑𝗅𝖾𝗌𝖻𝗂
 ┃➜ ${global.prefix}𝗉𝗈𝗋𝗇𝗈
 ┃➜ ${global.prefix}𝗉𝗈𝗋𝗇𝗈𝗅𝗈𝗅𝗂
-┃➜ ${global.prefix}𝗇𝗌𝖿𝗐𝗇𝖾𝗄𝗈
 ┃➜ ${global.prefix}𝗐𝖺𝗂𝖿𝗎
 ┃➜ ${global.prefix}𝗇𝖾𝗄𝗈
-┃➜ ${global.prefix}𝗇𝗌𝖿𝗐𝗐𝖺𝗂𝖿𝗎
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 > *⍴᥆ᥕᥱrᥱძ ᑲᥡ һᥒ ᥴһ᥆ᥣі𝗍᥆*`;
@@ -4238,6 +4236,7 @@ case 'menugrupo': {
 ┗━━━━━━✦━━━━━━━☪︎
 
 ┏━ [ 𝗖𝗢𝗡𝗙𝗜𝗚𝗨𝗥𝗔𝗖𝗜𝗢𝗡 🛠️ ]━☪︎
+┃➣ ${global.prefix}𝘦𝘴𝘵𝘢𝘥𝘰
 ┃➣ ${global.prefix}𝘵𝘪𝘦𝘮𝘱𝘰𝘴
 ┃➣ ${global.prefix}𝘷𝘦𝘳𝘧𝘦𝘤𝘩𝘢
 ┃➣ ${global.prefix}𝘴𝘦𝘵𝘪𝘯𝘧𝘰
