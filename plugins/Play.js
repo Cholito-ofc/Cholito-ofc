@@ -5,7 +5,6 @@ const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
 const { pipeline } = require('stream');
 const { promisify } = require('util');
-const fetch = require('node-fetch');
 const streamPipeline = promisify(pipeline);
 
 const getThumbnail = async () => {
@@ -29,7 +28,7 @@ const sendAudioKillua = async (conn, chat, filePath, title) => {
       contextInfo: {
         externalAdReply: {
           title: title.slice(0, 100),
-          body: '𝗞𝗶𝗹𝗅𝘂𝗮𝗕𝗼𝘁 𝗠𝘂́𝘀𝗶𝗰 ⚡',
+          body: '𝗞𝗶𝗹𝗹𝘂𝗮𝗕𝗼𝘁 𝗠𝘂́𝘀𝗶𝗰 ⚡',
           previewType: 'PHOTO',
           thumbnail: thumb,
           mediaType: 2,
@@ -50,34 +49,6 @@ const handler = async (msg, { conn }) => {
   const subbotID = rawID.split(":")[0] + "@s.whatsapp.net";
   const chatId = msg.key.remoteJid;
 
-  const fkontak = {
-    key: {
-      participants: "0@s.whatsapp.net",
-      remoteJid: "status@broadcast",
-      fromMe: false,
-      id: "Halo"
-    },
-    message: {
-      locationMessage: {
-        name: "𝙈𝙤𝙙𝙤 𝘼𝙥𝙖𝙜𝙖𝙙𝙤",
-        jpegThumbnail: await (await fetch('https://iili.io/F0WZNEX.th.png')).buffer(),
-        vcard:
-          "BEGIN:VCARD\n" +
-          "VERSION:3.0\n" +
-          "N:;Unlimited;;;\n" +
-          "FN:Unlimited\n" +
-          "ORG:Unlimited\n" +
-          "TITLE:\n" +
-          "item1.TEL;waid=19709001746:+1 (970) 900-1746\n" +
-          "item1.X-ABLabel:Unlimited\n" +
-          "X-WA-BIZ-DESCRIPTION:ofc\n" +
-          "X-WA-BIZ-NAME:Unlimited\n" +
-          "END:VCARD"
-      }
-    },
-    participant: "0@s.whatsapp.net"
-  };
-
   const prefixPath = path.resolve("prefixes.json");
   let prefixes = {};
   if (fs.existsSync(prefixPath)) {
@@ -86,9 +57,11 @@ const handler = async (msg, { conn }) => {
 
   const usedPrefix = prefixes[subbotID] || ".";
 
+  // 🧠 Detectar texto del mensaje
   let body = msg.message?.conversation || msg.message?.extendedTextMessage?.text || "";
   body = body.trim();
 
+  // 🧩 Detectar comando (ej: .play, . Play, .pLaY, etc)
   const match = body.match(new RegExp(`^\\${usedPrefix}\\s*play`, "i"));
   if (!match) return;
 
@@ -173,7 +146,7 @@ const handler = async (msg, { conn }) => {
 𝖯𝗋𝗎𝖾𝖻𝖾 𝗎𝗌𝖺𝗋 *.𝗉𝗅𝖺𝗒𝗉𝗋𝗈* *.𝗌𝗉𝗈𝗍𝗂𝖿𝗒* 𝗈 *.𝗋𝗈𝗅𝗂𝗍𝖺*
 ".𝗋𝖾𝗉𝗈𝗋𝗍𝖾 𝗇𝗈 𝖿𝗎𝗇𝖼𝗂𝗈𝗇𝖺 .play"
 > 𝖤𝗅 𝖾𝗊𝗎𝗂𝗉𝗈 𝗅𝗈 𝗋𝖾𝗏𝗂𝗌𝖺𝗋𝖺 𝗉𝗋𝗈𝗇𝗍𝗈. 🚔`
-    }, { quoted: fkontak });
+    }, { quoted: msg });
   }
 };
 
