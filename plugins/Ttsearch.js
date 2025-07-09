@@ -37,13 +37,13 @@ const handler = async (msg, { conn, text }) => {
     participant: "0@s.whatsapp.net"
   };
 
-  if (!text) {
+  if (!text || !text.trim()) {
     return conn.sendMessage(chatId, {
       text:
 `\`𝖴𝖲𝖮 𝖨𝖭𝖢𝖮𝖱𝖱𝖤𝖢𝖳𝖮 ❌\`
-> 𝖯𝗋𝗂𝗆𝖾𝗋𝗈 𝖾𝗌𝖼𝗋𝗂𝖻𝖾 𝖾𝗅 𝖼𝗈𝗆𝖺𝗇𝖽𝗈 𝗒 𝗅𝗎𝖾𝗀𝗈 𝖽𝖾𝗅 𝖼𝗈𝗆𝖺𝗇𝖽𝗈 𝗅𝖺 𝖻𝗎́𝗌𝗊𝗎𝖾𝖽𝖺 𝗊𝗎𝖾 𝗊𝗎𝗂𝖾𝗋𝖾𝗌 𝗁𝖺𝖼𝖾𝗋. 
+> 𝖯𝗋𝗂𝗆𝖾𝗋𝗈 𝖾𝗌𝖼𝗋𝗂𝖻𝖾 𝖾𝗅 𝖼𝗈𝗆𝖺𝗇𝖽𝗈 𝗒 𝗅𝗎𝖾𝗀𝗈 𝖽𝖾𝗅 𝖼𝗈𝗆𝖺𝗇𝖽𝗈 𝗅𝖺 𝖻𝗎́𝗌𝗊𝗎𝖾𝖽𝖺 𝗊𝗎𝗂𝖾𝗋𝖾𝗌 𝗁𝖺𝖼𝖾𝗋. 
 
-📌 *𝖤𝗌𝖼𝗋𝗂𝖇𝖾:* .𝗍𝗍𝗌𝖾𝖺𝗋𝖼𝗁 <𝗍𝖾𝗆𝖺>
+📌 *𝖤𝗌𝖼𝗋𝗂𝖻𝖾:* .𝗍𝗍𝗌𝖾𝖺𝗋𝖼𝗁 <𝗍𝖾𝗆𝖺>
 📌 *𝖤𝗃𝖾𝗆𝗉𝗅𝗈:*.𝗍𝗍𝗌𝖾𝖺𝗋𝖼𝗁 𝖤𝖽𝗂𝗍𝗌 𝖢𝖱𝟩`,
       contextInfo: {
         forwardedNewsletterMessageInfo: {
@@ -195,8 +195,8 @@ const handler = async (msg, { conn, text }) => {
   }
 };
 
-// Soporte para prefijos con espacios o símbolos raros
-handler.customPrefix = /^[°•π÷×¶∆£¢€¥®™+✓_=|~!?@#$%^&.\/\\©^`´\-–—\s]*tt(search|iktoks?|iktoksearch)/i;
+// Soporte para prefijos con espacios o símbolos raros y espacios antes del comando
+handler.customPrefix = /^[°•π÷×¶∆£¢€¥®™+✓_=|~!?@#$%^&.\/\\©^`´\-–—\s]*\s*tt(search|iktoks?|iktoksearch)/i;
 // handler.command = new RegExp(); // ❌ Eliminado porque causaba error
 
 handler.tags = ["buscador"];
