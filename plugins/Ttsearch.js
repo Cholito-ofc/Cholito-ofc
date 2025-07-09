@@ -20,7 +20,7 @@ const handler = async (msg, { conn, text }) => {
     message: {
       locationMessage: {
         name: "ᴛɪᴋᴛᴏᴋ sᴇᴀʀᴄʜ",
-        jpegThumbnail: await (await fetch('https://telegra.ph/file/17c1e39933989e4b3c0f6.jpg')).buffer(),
+        jpegThumbnail: await (await fetch('https://iili.io/F0WZNEX.th.png')).buffer(),
         vcard:
           "BEGIN:VCARD\n" +
           "VERSION:3.0\n" +
