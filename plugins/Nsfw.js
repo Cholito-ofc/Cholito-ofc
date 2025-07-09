@@ -42,10 +42,15 @@ const handler = async (msg, { conn, command }) => {
   ];
 
   const videoxxx = [
-    'https://telegra.ph/file/4a270d9945ac46f42d95c.mp4',
+    'https://cdn.russellxz.click/5666da3b.mp4',
     'https://cdn.russellxz.click/dfda5547.mp4',
-    'https://telegra.ph/file/958c11e84d271e783ea3f.mp4',
-    'https://telegra.ph/file/f753759342337c4012b3f.mp4'
+    'https://cdn.russellxz.click/e7d16640.mp4',
+    'https://cdn.russellxz.click/54a44e17.mp4',
+    'https://cdn.russellxz.click/a7525131.mp4', 
+    'https://cdn.russellxz.click/6a068771.mp4',
+    'https://cdn.russellxz.click/b1c5b7cd.mp4', 
+    'https://cdn.russellxz.click/63bdb5a2.mp4', 
+    'https://cdn.russellxz.click/796715a2.mp4', 'https://cdn.russellxz.click/4379f692.mp4'
   ];
 
   const videoxxxlesbi = [
