@@ -43,12 +43,12 @@ const handler = async (msg, { conn, args }) => {
   if (!activos.rpgkillua) activos.rpgkillua = {};
 
   if (args[0].toLowerCase() === "on") {
-    activos.rpgazura[chatId] = true;
+    activos.rpgkillua[chatId] = true;
     await conn.sendMessage(chatId, {
       text: "⚔️ *Modo RPG Killua ACTIVADO*\n\nPrepárense para la batalla, el juego comienza ahora.",
     }, { quoted: msg });
   } else {
-    delete activos.rpgazura[chatId];
+    delete activos.killua[chatId];
     await conn.sendMessage(chatId, {
       text: "💤 *Modo RPG Killua DESACTIVADO*\n\nEl mundo se ha silenciado... por ahora.",
     }, { quoted: msg });
