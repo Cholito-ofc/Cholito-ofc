@@ -5,22 +5,29 @@ const path = require("path");
 const FormData = require("form-data");
 
 const handler = async (msg, { conn }) => {
-  const mime = (msg.quoted?.mimetype || msg.mimetype) || "";
-  const isImage = mime.startsWith("image/");
+  const quoted = msg.quoted?.message || msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+  const mime = quoted ? Object.keys(quoted)[0] : null;
+  const isImage = mime === "imageMessage";
 
-  if (!msg.quoted || !isImage) {
+  if (!quoted || !isImage) {
     return await conn.sendMessage(msg.key.remoteJid, {
       text: `📸 *| COMANDO:* *hd*\n\n💡 *Responde a una imagen para mejorarla con calidad HD (x4).*`,
     }, { quoted: msg });
   }
 
   try {
-    // Descargar imagen
-    const mediaBuffer = await downloadMediaMessage(msg.quoted, "buffer", {}, { logger: console });
+    // Descargar imagen citada
+    const mediaBuffer = await downloadMediaMessage(
+      { message: quoted },
+      "buffer",
+      {},
+      { logger: console }
+    );
+
     const tempFile = path.join(__dirname, `hd_${Date.now()}.jpg`);
     fs.writeFileSync(tempFile, mediaBuffer);
 
-    // Subir a servidor temporal (Uguu)
+    // Subir imagen a servidor temporal
     const form = new FormData();
     form.append("file", fs.createReadStream(tempFile));
     const upload = await axios.post("https://uguu.se/upload.php", form, {
@@ -29,11 +36,11 @@ const handler = async (msg, { conn }) => {
 
     const imageUrl = upload.data.files[0].url;
 
-    // Enviar a la API externa para mejorar
+    // Enviar imagen a API para mejorarla
     const apiUrl = `https://fastrestapis.fasturl.cloud/aiimage/upscale?imageUrl=${encodeURIComponent(imageUrl)}&resize=4`;
     const result = await axios.get(apiUrl, { responseType: "arraybuffer" });
 
-    // Enviar la imagen mejorada
+    // Enviar imagen mejorada
     await conn.sendMessage(msg.key.remoteJid, {
       image: result.data,
       caption: `🔍 *Imagen mejorada en HD (x4)*\n✨ _Potenciado por Killua Bot_`,
