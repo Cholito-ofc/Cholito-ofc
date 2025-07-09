@@ -11363,23 +11363,25 @@ case 'hd': {
     try {
         const FormData = require("form-data");
 
-        let quoted = msg.message.extendedTextMessage?.contextInfo?.quotedMessage;
+        // 🌀 Verificar si respondiste a una imagen
+        let quoted = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
         if (!quoted) {
             return sock.sendMessage(msg.key.remoteJid, { 
-                text: "⚠️ *Responde a una imagen con el comando `.hd` para mejorarla.*" 
+                text: "😒 *¿En serio?* Responde a una imagen con `.hd` si quieres que la mejore, no adivino cosas." 
             }, { quoted: msg });
         }
 
+        // ⚠️ Revisar si tiene imagen válida
         let mime = quoted.imageMessage?.mimetype || "";
         if (!mime) {
             return sock.sendMessage(msg.key.remoteJid, { 
-                text: "⚠️ *El mensaje citado no contiene una imagen.*" 
+                text: "📸 *Hey, eso no es una imagen.* Intenta otra vez, pero esta vez usa una imagen de verdad." 
             }, { quoted: msg });
         }
 
         if (!/image\/(jpe?g|png)/.test(mime)) {
             return sock.sendMessage(msg.key.remoteJid, { 
-                text: "⚠️ *Solo se admiten imágenes en formato JPG o PNG.*" 
+                text: "🚫 *Solo trabajo con JPG o PNG.* No me pidas milagros con otros formatos, ¿vale?" 
             }, { quoted: msg });
         }
 
@@ -11388,23 +11390,38 @@ case 'hd': {
             react: { text: "🛠️", key: msg.key } 
         });
 
-        let img = await downloadContentFromMessage(quoted.imageMessage, "image");
+        // ⬇️ Descargar imagen
+        const stream = await downloadContentFromMessage(quoted.imageMessage, 'image');
         let buffer = Buffer.alloc(0);
-        for await (const chunk of img) {
+        for await (const chunk of stream) {
             buffer = Buffer.concat([buffer, chunk]);
         }
 
         if (buffer.length === 0) {
-            throw new Error("❌ Error: No se pudo descargar la imagen.");
+            throw new Error("📉 No pude descargar la imagen... tal vez está mal enviada.");
         }
 
-        // 📌 Procesar imagen mejorada
-        let pr = await remini(buffer, "enhance");
+        // ⚙️ Comprobar que remini() existe
+        if (typeof remini !== 'function') {
+            throw new Error("🧩 La función `remini` no existe. ¿Te saltaste algo en tu código?");
+        }
 
-        // 📤 Enviar imagen con la marca de agua en el texto
+        // ✨ Mejorar imagen
+        let pr;
+        try {
+            pr = await remini(buffer, "enhance");
+        } catch (err) {
+            throw new Error("💥 Algo explotó al procesar la imagen: " + err.message);
+        }
+
+        if (!pr || !Buffer.isBuffer(pr)) {
+            throw new Error("❌ No obtuve una imagen mejorada válida.");
+        }
+
+        // 📤 Enviar imagen mejorada
         await sock.sendMessage(msg.key.remoteJid, {
             image: pr,
-            caption: "✨ *Imagen mejorada con éxito.*\n\n© Cortana 2.0 Bot"
+            caption: "⚡ *Listo.* Imagen mejorada. No fue tan difícil, ¿verdad?\n\n©  powered by Killua 😎"
         }, { quoted: msg });
 
         // ✅ Reacción de éxito
@@ -11415,10 +11432,9 @@ case 'hd': {
     } catch (e) {
         console.error("❌ Error en el comando .hd:", e);
         await sock.sendMessage(msg.key.remoteJid, { 
-            text: "❌ *Hubo un error al mejorar la imagen. Inténtalo de nuevo.*" 
+            text: `😑 *Ups... fallé mejorando tu imagen.*\n\`\`\`${e.message}\`\`\`\nIntenta otra imagen o dime qué rayos hiciste.` 
         }, { quoted: msg });
 
-        // ❌ Reacción de error
         await sock.sendMessage(msg.key.remoteJid, { 
             react: { text: "❌", key: msg.key } 
         });
