@@ -5,18 +5,16 @@ const handler = async (msg, { conn, command, usedPrefix }) => {
   const chatId = msg.key.remoteJid;
   const quoted = msg.quoted || msg;
 
-  // Buscar mimetype correctamente
-  const mime = quoted.message?.imageMessage?.mimetype ||
-               quoted.mimetype ||
-               quoted.msg?.mimetype ||
-               '';
+  // Detectar tipo de mensaje e imagen
+  const type = Object.keys(quoted.message || {})[0] || '';
+  const isImage = type === 'imageMessage';
 
-  if (!/image\/(jpe?g|png)/i.test(mime)) {
+  if (!isImage) {
     await conn.sendMessage(chatId, {
       react: { text: '❗', key: msg.key }
     });
     await conn.sendMessage(chatId, {
-      text: `📸 *Responde a una imagen JPG o PNG* con:\n*${usedPrefix + command}*`
+      text: `📸 *Responde a una imagen (JPG o PNG)* con:\n*${usedPrefix + command}*`
     }, { quoted: msg });
     return;
   }
@@ -26,6 +24,7 @@ const handler = async (msg, { conn, command, usedPrefix }) => {
       react: { text: '⏳', key: msg.key }
     });
 
+    const mime = quoted.message.imageMessage.mimetype;
     const media = await quoted.download();
     const ext = mime.split('/')[1];
     const filename = `mejorada_${Date.now()}.${ext}`;
@@ -61,8 +60,8 @@ const handler = async (msg, { conn, command, usedPrefix }) => {
 ✨ *Imagen mejorada*
 
 🔍 Resolución x2  
-📈 Nitidez mejorada  
-🧰 Ideal para imágenes borrosas
+📈 Nitidez y detalles mejorados  
+🧰 Ideal para imágenes borrosas o pixeladas
       `.trim()
     }, { quoted: msg });
 
@@ -75,7 +74,7 @@ const handler = async (msg, { conn, command, usedPrefix }) => {
       react: { text: '❌', key: msg.key }
     });
     await conn.sendMessage(chatId, {
-      text: `❌ *Ocurrió un error:*\n${err.message || err}`
+      text: `❌ *Error al mejorar la imagen:*\n${err.message || err}`
     }, { quoted: msg });
   }
 };
