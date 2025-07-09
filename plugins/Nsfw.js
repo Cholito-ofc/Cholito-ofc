@@ -81,7 +81,7 @@ const handler = async (msg, { conn, command }) => {
     react: { text: "✅", key: sentMsg.key }
   });
 
-  // Guardar para reacciones
+  // Guardar en cache
   cacheHot[sentMsg.key.id] = {
     chatId,
     contentArray,
@@ -93,6 +93,24 @@ const handler = async (msg, { conn, command }) => {
   if (!isOwner) {
     usosPorUsuario[sender] = usosPorUsuario[sender] || 0;
   }
+};
+
+handler.command = [
+  "pack1",
+  "pack2",
+  "pack3",
+  "videoxxx",
+  "videoxxxlesbi"
+];
+handler.tags = ["nsfw"];
+handler.help = ["pack1", "pack2", "pack3", "videoxxx", "videoxxxlesbi"];
+module.exports = handler;
+
+// Listener de reacciones (una sola vez)
+if (!global._hotReactionListener) {
+  global._hotReactionListener = true;
+
+  const { conn } = require("../lib/conn"); // Ajusta esta línea si tu conexión está en otro lugar
 
   conn.ev.on("messages.upsert", async ({ messages }) => {
     const m = messages[0];
@@ -109,7 +127,7 @@ const handler = async (msg, { conn, command }) => {
     if (user !== cached.sender) return;
 
     if (!esOwner && (usosPorUsuario[user] || 0) >= 3) {
-      return await conn.sendMessage(chatId, {
+      return await conn.sendMessage(cached.chatId, {
         text: `⛔ Ya viste suficiente por ahora.\n🕐 Espera *5 minutos* para continuar.`,
         mentions: [user],
       });
@@ -118,22 +136,23 @@ const handler = async (msg, { conn, command }) => {
     const { contentArray, isVideo } = cached;
     const nextUrl = contentArray[Math.floor(Math.random() * contentArray.length)];
 
-    const newMsg = await conn.sendMessage(chatId, {
+    const newMsg = await conn.sendMessage(cached.chatId, {
       [isVideo ? "video" : "image"]: { url: nextUrl },
       caption: `🔥 Otra más...`,
     });
 
-    await conn.sendMessage(chatId, {
+    await conn.sendMessage(cached.chatId, {
       react: { text: "✅", key: newMsg.key }
     });
 
     cacheHot[newMsg.key.id] = {
-      chatId,
+      chatId: cached.chatId,
       contentArray,
       isVideo,
       sender: user,
       isOwner: esOwner
     };
+
     delete cacheHot[reactedMsgId];
 
     if (!esOwner) {
@@ -143,15 +162,4 @@ const handler = async (msg, { conn, command }) => {
       }, 5 * 60 * 1000);
     }
   });
-};
-
-handler.command = [
-  "pack1",
-  "pack2",
-  "pack3",
-  "videoxxx",
-  "videoxxxlesbi"
-];
-handler.tags = ["nsfw"];
-handler.help = ["pack1", "pack2", "pack3", "videoxxx", "videoxxxlesbi"];
-module.exports = handler;
+}
