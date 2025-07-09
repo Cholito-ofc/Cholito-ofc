@@ -77,15 +77,15 @@ const handler = async (msg, { conn, command }) => {
 
   // Construir mensaje estilo KilluaBot
   let texto = "┏━━━〔 *𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 ⚡* 〕━━━┓\n";
-  texto += "┃    *𝚂𝙸𝚂𝚃𝙴𝙼𝙰 𝙳𝙴 𝙲𝙾𝙽𝙵𝙸𝙶𝚄𝚁𝙰𝙲𝙸Ó𝙽*\n";
-  texto += "┣━━━━━━━━━━━━━━━━━━━━━━\n";
+  texto += "┃   *𝚂𝙸𝚂𝚃𝙴𝙼𝙰 𝙳𝙴 𝙲𝙾𝙽𝙵𝙸𝙶𝚄𝚁𝙰𝙲𝙸Ó𝙽*\n";
+  texto += "┣━━━━━━━━━━━━━━━━━━━━━\n";
 
   opcionesMostrar.forEach(opcion => {
     const activo = estaActivo(opcion);
     texto += `┃ ▸ ${opcion.padEnd(13)}: ${activo ? "✅" : "❌"}\n`;
   });
 
-  texto += "┗━━━━━━━━━━━━━━━━━━━━━━";
+  texto += "┗━━━━━━━━━━━━━━━━━━━━━";
 
   await conn.sendMessage(chatId, { react: { text: "📊", key: msg.key } });
   await conn.sendMessage(chatId, { text: texto }, { quoted: msg });
