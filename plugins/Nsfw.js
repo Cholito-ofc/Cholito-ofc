@@ -3,6 +3,7 @@ const path = require("path");
 
 let cacheHot = {};
 let usosPorUsuario = {};
+let reactionListenerAgregado = false;
 
 const handler = async (msg, { conn, command }) => {
   const chatId = msg.key.remoteJid;
@@ -62,7 +63,6 @@ const handler = async (msg, { conn, command }) => {
   };
 
   const isVideo = command.startsWith("video");
-
   const contentArray = dataMap[command];
   const url = contentArray[Math.floor(Math.random() * contentArray.length)];
 
@@ -81,7 +81,6 @@ const handler = async (msg, { conn, command }) => {
     react: { text: "✅", key: sentMsg.key }
   });
 
-  // Guardar en cache
   cacheHot[sentMsg.key.id] = {
     chatId,
     contentArray,
@@ -92,6 +91,62 @@ const handler = async (msg, { conn, command }) => {
 
   if (!isOwner) {
     usosPorUsuario[sender] = usosPorUsuario[sender] || 0;
+  }
+
+  // Solo una vez se registra el listener
+  if (!reactionListenerAgregado) {
+    conn.ev.on("messages.upsert", async ({ messages }) => {
+      const m = messages[0];
+      if (!m?.message?.reactionMessage) return;
+
+      const reaction = m.message.reactionMessage;
+      const reactedMsgId = reaction.key?.id;
+      const user = m.key.participant || m.key.remoteJid;
+      const userNum = user.replace(/[^0-9]/g, "");
+      const esOwner = global.owner.some(([id]) => id === userNum);
+
+      const cached = cacheHot[reactedMsgId];
+      if (!cached) return;
+      if (user !== cached.sender) return;
+
+      if (!esOwner && (usosPorUsuario[user] || 0) >= 3) {
+        return await conn.sendMessage(cached.chatId, {
+          text: `⛔ Ya viste suficiente por ahora.\n🕐 Espera *5 minutos* para continuar.`,
+          mentions: [user],
+        });
+      }
+
+      const { contentArray, isVideo } = cached;
+      const nextUrl = contentArray[Math.floor(Math.random() * contentArray.length)];
+
+      const newMsg = await conn.sendMessage(cached.chatId, {
+        [isVideo ? "video" : "image"]: { url: nextUrl },
+        caption: `🔥 Otra más...`,
+      });
+
+      await conn.sendMessage(cached.chatId, {
+        react: { text: "✅", key: newMsg.key }
+      });
+
+      cacheHot[newMsg.key.id] = {
+        chatId: cached.chatId,
+        contentArray,
+        isVideo,
+        sender: user,
+        isOwner: esOwner
+      };
+
+      delete cacheHot[reactedMsgId];
+
+      if (!esOwner) {
+        usosPorUsuario[user] = (usosPorUsuario[user] || 0) + 1;
+        setTimeout(() => {
+          usosPorUsuario[user] = 0;
+        }, 5 * 60 * 1000);
+      }
+    });
+
+    reactionListenerAgregado = true;
   }
 };
 
@@ -105,61 +160,3 @@ handler.command = [
 handler.tags = ["nsfw"];
 handler.help = ["pack1", "pack2", "pack3", "videoxxx", "videoxxxlesbi"];
 module.exports = handler;
-
-// Listener de reacciones (una sola vez)
-if (!global._hotReactionListener) {
-  global._hotReactionListener = true;
-
-  const { conn } = require("../lib/conn"); // Ajusta esta línea si tu conexión está en otro lugar
-
-  conn.ev.on("messages.upsert", async ({ messages }) => {
-    const m = messages[0];
-    if (!m?.message?.reactionMessage) return;
-
-    const reaction = m.message.reactionMessage;
-    const reactedMsgId = reaction.key?.id;
-    const user = m.key.participant || m.key.remoteJid;
-    const userNum = user.replace(/[^0-9]/g, "");
-    const esOwner = global.owner.some(([id]) => id === userNum);
-
-    const cached = cacheHot[reactedMsgId];
-    if (!cached) return;
-    if (user !== cached.sender) return;
-
-    if (!esOwner && (usosPorUsuario[user] || 0) >= 3) {
-      return await conn.sendMessage(cached.chatId, {
-        text: `⛔ Ya viste suficiente por ahora.\n🕐 Espera *5 minutos* para continuar.`,
-        mentions: [user],
-      });
-    }
-
-    const { contentArray, isVideo } = cached;
-    const nextUrl = contentArray[Math.floor(Math.random() * contentArray.length)];
-
-    const newMsg = await conn.sendMessage(cached.chatId, {
-      [isVideo ? "video" : "image"]: { url: nextUrl },
-      caption: `🔥 Otra más...`,
-    });
-
-    await conn.sendMessage(cached.chatId, {
-      react: { text: "✅", key: newMsg.key }
-    });
-
-    cacheHot[newMsg.key.id] = {
-      chatId: cached.chatId,
-      contentArray,
-      isVideo,
-      sender: user,
-      isOwner: esOwner
-    };
-
-    delete cacheHot[reactedMsgId];
-
-    if (!esOwner) {
-      usosPorUsuario[user] = (usosPorUsuario[user] || 0) + 1;
-      setTimeout(() => {
-        usosPorUsuario[user] = 0;
-      }, 5 * 60 * 1000);
-    }
-  });
-}
