@@ -3,18 +3,27 @@ const FormData = require('form-data');
 
 const handler = async (msg, { conn, command, usedPrefix }) => {
   const chatId = msg.key.remoteJid;
-  const quoted = msg.quoted || msg;
+  const quoted = msg.quoted;
 
-  // Detectar tipo de mensaje e imagen
-  const type = Object.keys(quoted.message || {})[0] || '';
-  const isImage = type === 'imageMessage';
+  // Verificar que haya mensaje citado
+  if (!quoted) {
+    await conn.sendMessage(chatId, {
+      react: { text: '❗', key: msg.key }
+    });
+    await conn.sendMessage(chatId, {
+      text: `📸 Por favor, *responde a una imagen* con el comando:\n*${usedPrefix + command}*`
+    }, { quoted: msg });
+    return;
+  }
 
+  // Detectar si el mensaje citado es imagen (imageMessage)
+  const isImage = quoted.message && quoted.message.imageMessage;
   if (!isImage) {
     await conn.sendMessage(chatId, {
       react: { text: '❗', key: msg.key }
     });
     await conn.sendMessage(chatId, {
-      text: `📸 *Responde a una imagen (JPG o PNG)* con:\n*${usedPrefix + command}*`
+      text: `📸 Por favor, *responde a una imagen JPG o PNG* con:\n*${usedPrefix + command}*`
     }, { quoted: msg });
     return;
   }
@@ -24,11 +33,14 @@ const handler = async (msg, { conn, command, usedPrefix }) => {
       react: { text: '⏳', key: msg.key }
     });
 
-    const mime = quoted.message.imageMessage.mimetype;
-    const media = await quoted.download();
-    const ext = mime.split('/')[1];
+    // Obtener mimetype y descargar la imagen
+    const mime = quoted.message.imageMessage.mimetype || '';
+    const media = await conn.downloadM(quoted);
+
+    const ext = mime.split('/')[1] || 'jpg'; // Fallback a jpg
     const filename = `mejorada_${Date.now()}.${ext}`;
 
+    // Preparar formulario para la API
     const form = new FormData();
     form.append('image', media, { filename, contentType: mime });
     form.append('scale', '2');
@@ -60,7 +72,7 @@ const handler = async (msg, { conn, command, usedPrefix }) => {
 ✨ *Imagen mejorada*
 
 🔍 Resolución x2  
-📈 Nitidez y detalles mejorados  
+📈 Nitidez mejorada  
 🧰 Ideal para imágenes borrosas o pixeladas
       `.trim()
     }, { quoted: msg });
@@ -68,7 +80,6 @@ const handler = async (msg, { conn, command, usedPrefix }) => {
     await conn.sendMessage(chatId, {
       react: { text: '✅', key: msg.key }
     });
-
   } catch (err) {
     await conn.sendMessage(chatId, {
       react: { text: '❌', key: msg.key }
