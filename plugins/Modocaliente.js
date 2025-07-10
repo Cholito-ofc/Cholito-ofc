@@ -75,12 +75,24 @@ const handler = async (msg, { conn, args }) => {
   if (args[0].toLowerCase() === "on") {
     activos.modocaliente[chatId] = true;
     await conn.sendMessage(chatId, {
-      text: `🔥 *MODO CALIENTE ACTIVADO* 🔥\n\nDesde ahora este grupo tiene acceso a los comandos +18 😈\n\nDisfruten con responsabilidad, degenerados.`
+      text: ``「 𝖠𝖼𝖼𝗂𝗈́𝗇 𝗋𝖾𝖺𝗅𝗂𝗓𝖺𝖽𝖺 ✅ 」`
+
+*│┊➺ 𝖢𝗈𝗆𝖺𝗇𝖽𝗈* 𝖬𝗈𝖽𝗈𝖼𝖺𝗅𝗂𝖾𝗇𝗍𝖾
+*│┊➺ 𝖤𝗌𝗍𝖺𝖽𝗈 :* 𝖠𝖼𝗍𝗂𝗏𝖺𝖽𝗈
+*│┊➺ 𝖯𝖺𝗋𝖺:* 𝖤𝗌𝗍𝖾 𝗀𝗋𝗎𝗉𝗈
+*│┊➺ 𝖥𝗎𝗇𝖼𝗂𝗈́𝗇:* 𝖠𝖼𝗍𝗂𝗏𝖺 𝗅𝗈𝗌 𝖼𝗈𝗆𝖺𝗇𝖽𝗈𝗌 +𝟣𝟪
+*╰ ∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙ ∙ ∙ ∙ ∙*`
     }, { quoted: fkontak });
   } else {
     delete activos.modocaliente[chatId];
     await conn.sendMessage(chatId, {
-      text: `🧯 *MODO CALIENTE DESACTIVADO* 🧯\n\nLos comandos +18 ya no están disponibles en este grupo.\n\nModo fresas activado 🍓`
+      text: ``「 𝖠𝖼𝖼𝗂𝗈́𝗇 𝗋𝖾𝖺𝗅𝗂𝗓𝖺𝖽𝖺 ✅ 」`
+
+*│┊➺ 𝖢𝗈𝗆𝖺𝗇𝖽𝗈* 𝖬𝗈𝖽𝗈𝖼𝖺𝗅𝗂𝖾𝗇𝗍𝖾
+*│┊➺ 𝖤𝗌𝗍𝖺𝖽𝗈 :* 𝖣𝖾𝗌𝖺𝖼𝗍𝗂𝗏𝖺𝖽𝗈
+*│┊➺ 𝖯𝖺𝗋𝖺:* 𝖤𝗌𝗍𝖾 𝗀𝗋𝗎𝗉𝗈
+*│┊➺ 𝖥𝗎𝗇𝖼𝗂𝗈́𝗇:* 𝖣𝖾𝗌𝖺𝖼𝗍𝗂𝗏𝖺 𝗅𝗈𝗌 𝖼𝗈𝗆𝖺𝗇𝖽𝗈𝗌 +𝟣𝟪
+*╰ ∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙ ∙ ∙ ∙ ∙*`
     }, { quoted: fkontak });
   }
 
