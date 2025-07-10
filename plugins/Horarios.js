@@ -4,39 +4,55 @@ const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
   const sender = msg.sender || msg.key.participant || msg.key.remoteJid;
 
-  const zonas = [
-    { nombre: '🇲🇽 México', zona: 'America/Mexico_City' },
-    { nombre: '🇭🇳 Honduras', zona: 'America/Tegucigalpa' },
-    { nombre: '🇬🇹 Guatemala', zona: 'America/Guatemala' },
-    { nombre: '🇸🇻 El Salvador', zona: 'America/El_Salvador' },
-    { nombre: '🇳🇮 Nicaragua', zona: 'America/Managua' },
-    { nombre: '🇨🇷 Costa Rica', zona: 'America/Costa_Rica' },
-    { nombre: '🇵🇦 Panamá', zona: 'America/Panama' },
-    { nombre: '🇨🇴 Colombia', zona: 'America/Bogota' },
-    { nombre: '🇻🇪 Venezuela', zona: 'America/Caracas' },
-    { nombre: '🇵🇪 Perú', zona: 'America/Lima' },
-    { nombre: '🇨🇱 Chile', zona: 'America/Santiago' },
-    { nombre: '🇦🇷 Argentina', zona: 'America/Argentina/Buenos_Aires' },
-    { nombre: '🇧🇷 Brasil', zona: 'America/Sao_Paulo' },
-    { nombre: '🇺🇸 USA (NY)', zona: 'America/New_York' },
-    { nombre: '🇪🇸 España', zona: 'Europe/Madrid' },
-    { nombre: '🇯🇵 Japón', zona: 'Asia/Tokyo' },
-    { nombre: '🇰🇷 Corea del Sur', zona: 'Asia/Seoul' },
-    { nombre: '🇬🇧 Reino Unido', zona: 'Europe/London' },
-    { nombre: '🇷🇺 Rusia (Moscú)', zona: 'Europe/Moscow' },
-    { nombre: '🇮🇳 India', zona: 'Asia/Kolkata' }
-  ];
+  const zonas = {
+    '🌎 América del Norte': [
+      { nombre: 'México', zona: 'America/Mexico_City' },
+      { nombre: 'USA (NY)', zona: 'America/New_York' }
+    ],
+    '🌎 Centroamérica': [
+      { nombre: 'Honduras', zona: 'America/Tegucigalpa' },
+      { nombre: 'Guatemala', zona: 'America/Guatemala' },
+      { nombre: 'El Salvador', zona: 'America/El_Salvador' },
+      { nombre: 'Nicaragua', zona: 'America/Managua' },
+      { nombre: 'Costa Rica', zona: 'America/Costa_Rica' },
+      { nombre: 'Panamá', zona: 'America/Panama' }
+    ],
+    '🌎 Sudamérica': [
+      { nombre: 'Colombia', zona: 'America/Bogota' },
+      { nombre: 'Perú', zona: 'America/Lima' },
+      { nombre: 'Venezuela', zona: 'America/Caracas' },
+      { nombre: 'Chile', zona: 'America/Santiago' },
+      { nombre: 'Argentina', zona: 'America/Argentina/Buenos_Aires' },
+      { nombre: 'Brasil', zona: 'America/Sao_Paulo' }
+    ],
+    '🌍 Europa': [
+      { nombre: 'España', zona: 'Europe/Madrid' },
+      { nombre: 'Reino Unido', zona: 'Europe/London' },
+      { nombre: 'Rusia', zona: 'Europe/Moscow' }
+    ],
+    '🌏 Asia': [
+      { nombre: 'India', zona: 'Asia/Kolkata' },
+      { nombre: 'Japón', zona: 'Asia/Tokyo' },
+      { nombre: 'Corea del Sur', zona: 'Asia/Seoul' }
+    ]
+  };
 
-  let texto = '┏━━━━━━━༺🌐༻━━━━━━━┓\n';
-  texto += '          *HORARIO INTERNACIONAL*\n';
-  texto += '┗━━━━━━━━━━━━━━━━━━━━┛\n\n';
+  let texto = '┏━━❖ 🌐 *HORARIO MUNDIAL* ❖━━┓\n';
+  texto += `📆 *Fecha:* ${moment().format('dddd, DD MMMM YYYY')}\n`;
+  texto += '┗━━━━━━━━━━━━━━━━━━━━━━┛\n\n';
 
-  for (let lugar of zonas) {
-    const hora = moment().tz(lugar.zona).format('hh:mm:ss A');
-    texto += `📍 *${lugar.nombre}*\n🕒 Hora: *${hora}*\n*╰┈┈┈┈┈┈┈┈┈┈┈┈┈≫*\n`;
+  for (const [region, paises] of Object.entries(zonas)) {
+    texto += `📍 *${region}*\n`;
+    for (let lugar of paises) {
+      const hora = moment().tz(lugar.zona).format('hh:mm A');
+      const linea = `${lugar.nombre.padEnd(15)} ${hora}`;
+      texto += `\`\`\`${linea}\`\`\`\n`;
+    }
+    texto += '\n';
   }
 
-  texto += `\n📆 *Fecha:* ${moment().format('dddd, DD MMMM YYYY')}`;
+  // ✅ Firma personalizada del bot
+  texto += '✨ Generado por: *KilluaBot*';
 
   const fkontak = {
     key: {
@@ -54,7 +70,7 @@ const handler = async (msg, { conn }) => {
   };
 
   await conn.sendMessage(chatId, {
-    text: texto
+    text: texto.trim()
   }, { quoted: fkontak });
 };
 
