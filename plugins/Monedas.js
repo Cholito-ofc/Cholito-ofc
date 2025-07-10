@@ -19,7 +19,8 @@ const handler = async (m, { conn }) => {
 
   if (!text.toLowerCase().startsWith('.monedas')) return;
 
-  const match = text.match(/(\d+([.,]\d+)?)\s*(\w+(?:\s\w+)*)\s*(a|en)?\s*(.+)/i);
+  // NUEVA REGEX
+  const match = text.match(/(\d+(?:[.,]\d+)?)\s*([^\d]+?)\s*(?:a|en)?\s*(.+)/i);
   if (!match) {
     console.log('[.monedas] Formato incorrecto');
     return conn.sendMessage(chatId, {
@@ -28,8 +29,10 @@ const handler = async (m, { conn }) => {
   }
 
   const amount = parseFloat(match[1].replace(',', '.'));
-  const [fromCode, fromSymbol] = getCurrencyData(match[3]);
-  const [toCode, toSymbol] = getCurrencyData(match[5]);
+  const fromRaw = match[2];
+  const toRaw = match[3];
+  const [fromCode, fromSymbol] = getCurrencyData(fromRaw);
+  const [toCode, toSymbol] = getCurrencyData(toRaw);
 
   console.log(`[.monedas] Parsed: ${amount} ${fromCode} -> ${toCode}`);
 
@@ -42,13 +45,10 @@ const handler = async (m, { conn }) => {
 
     console.log('[.monedas] API response:', data);
 
-    if (!data.success) {
-      throw new Error('Conversión fallida');
-    }
+    if (!data.success) throw new Error('Conversión fallida');
 
     const result = Number(data.result).toLocaleString('es-ES', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      minimumFractionDigits: 2, maximumFractionDigits: 2
     });
 
     const updated = new Date(data.date).toLocaleDateString('es-ES', {
