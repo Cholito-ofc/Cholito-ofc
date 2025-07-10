@@ -52,6 +52,7 @@ const handler = async (m, { conn }) => {
     });
   }
 
+  // Extraer cantidad, moneda origen, preposición y moneda destino
   const match = text.match(/(\d+([.,]\d+)?)\s*(\w+(?:\s\w+)*)\s*(a|en)?\s*(.+)/i);
   if (!match) {
     return conn.sendMessage(chatId, {
