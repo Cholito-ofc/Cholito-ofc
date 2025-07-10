@@ -1,34 +1,34 @@
+
 const fetch = require('node-fetch');
 
-const ALIASES = {
-  // Inglés / español a código de moneda ISO
-  dolar: 'USD',
+constante ALIAS = {
+  dólar: 'USD',
   dólares: 'USD',
   usd: 'USD',
   euro: 'EUR',
   euros: 'EUR',
-  eur: 'EUR',
+  euros: 'EUR',
   libra: 'GBP',
   libras: 'GBP',
   gbp: 'GBP',
   yen: 'JPY',
   yenes: 'JPY',
-  jpy: 'JPY',
-  pesos: 'MXN', // por defecto
+  yen: 'JPY',
+  pesos: 'MXN',
   'pesos mexicanos': 'MXN',
   'pesos argentinos': 'ARS',
   'pesos colombianos': 'COP',
   'pesos chilenos': 'CLP',
   mxn: 'MXN',
   ars: 'ARS',
-  cop: 'COP',
+  policía: 'POLICÍA',
   clp: 'CLP',
   brl: 'BRL',
   reales: 'BRL',
   inr: 'INR',
   rupias: 'INR',
-  rupees: 'INR',
-  cny: 'CNY',
+  rupias: 'INR',
+  chino: 'chino',
   yuanes: 'CNY',
   yuan: 'CNY',
   cad: 'CAD',
@@ -37,63 +37,64 @@ const ALIASES = {
   australianos: 'AUD',
 };
 
-function getCurrencyCode(word = '') {
-  word = word.toLowerCase().trim();
-  return ALIASES[word] || word.toUpperCase();
+función obtenerCódigoDeCurrencia(palabra = '') {
+  palabra = palabra.toLowerCase().trim();
+  devolver ALIASES[palabra] || palabra.toUpperCase();
 }
 
-const handler = async (m, { conn }) => {
-  const chatId = m.chat;
-  const text = m.text;
+controlador constante = async (m, { conn }) => {
+  constante chatId = m.chat;
+  constante texto = m.texto || '';
 
-  // Ejemplos válidos:
-  // .monedas 10 USD COP
-  // .monedas 10 dólares a pesos colombianos
-  // .monedas 100 euro en yenes
-
-  const match = text.match(/(\d+([.,]\d+)?)\s*(\w+)\s*(a|en)?\s*(.+)/i);
-  if (!match) {
-    return conn.sendMessage(chatId, {
-      text: '❗ Uso: .monedas <cantidad> <moneda_origen> <a|en> <moneda_destino>\nEj: `.monedas 10 dólares en pesos colombianos`'
+  si (!texto || !texto.toLowerCase().includes('.monedas')) {
+    devolver conn.sendMessage(chatId, {
+      text: 'â — Uso: .monedas <cantidad> <moneda_origen> <a|en> <moneda_destino>\nEj: `.monedas 10 dólares en pesos colombianos`'
     });
   }
 
-  const amount = parseFloat(match[1].replace(',', '.'));
-  const fromRaw = match[3];
-  const toRaw = match[5];
+  const match = texto.match(/(\d+([.,]\d+)?)\s*(\w+)\s*(a|en)?\s*(.+)/i);
+  si (!coincidencia) {
+    devolver conn.sendMessage(chatId, {
+      text: 'â — Uso: .monedas <cantidad> <moneda_origen> <a|en> <moneda_destino>\nEj: `.monedas 10 dólares en pesos colombianos`'
+    });
+  }
 
-  const from = getCurrencyCode(fromRaw);
-  const to = getCurrencyCode(toRaw);
+  constante cantidad = parseFloat(match[1].replace(',', '.'));
+  constante fromRaw = match[3];
+  constante toRaw = match[5];
 
-  try {
+  const from = obtenerCódigoDeCurrency(fromRaw);
+  constante to = obtenerCódigoDeCurrency(toRaw);
+
+  intentar {
     const res = await fetch(`https://api.exchangerate.host/convert?from=${from}&to=${to}&amount=${amount}`);
-    const data = await res.json();
+    const datos = await res.json();
 
     if (!data.success) throw new Error('Conversión fallida');
 
-    const result = Number(data.result).toLocaleString('es-ES', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+    const resultado = Número(datos.resultado).toLocaleString('es-ES', {
+      dígitosFracciónMínimos: 2,
+      máximoFracciónDígitos: 2
     });
 
-    const updated = new Date(data.date).toLocaleDateString('es-ES', {
-      day: 'numeric', month: 'long', year: 'numeric'
+    const actualizado = new Date(data.date).toLocaleDateString('es-ES', {
+      día: 'numérico', mes: 'largo', año: 'numérico'
     });
 
-    const reply =
-      `💱 *${amount}* ${from.toUpperCase()} ≈ *${result}* ${to.toUpperCase()}\n` +
-      `📅 Actualizado: *${updated}*\n` +
-      `✨ Generado por: *KilluaBot*`;
+    respuesta constante =
+      `ðŸ'± *${cantidad}*â€¯${desde.aUpperCase()} â‰ˆ *${resultado}*â€¯${a.aUpperCase()}\n` +
+      `ðŸ“… Actualizado: *${actualizado}*\n` +
+      `âœ¨ Generado por: *KilluaBot*`;
 
-    await conn.sendMessage(chatId, { text: reply });
+    esperar conn.sendMessage(chatId, { texto: responder });
 
-  } catch (err) {
-    console.error(err);
-    await conn.sendMessage(chatId, {
-      text: '❗ No pude obtener la tasa. Asegúrate de escribir monedas válidas.'
+  } atrapar (err) {
+    consola.error(err);
+    esperar conn.sendMessage(chatId, {
+      texto: 'â — No pude obtener la tasa. Asegúrate de escribir monedas válidas.'
     });
   }
 };
 
 handler.command = ['monedas'];
-module.exports = handler;
+módulo.exports = manejador;
