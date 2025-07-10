@@ -6,34 +6,34 @@ const handler = async (msg, { conn }) => {
 
   const zonas = {
     '🌎 América del Norte': [
-      { nombre: 'México', zona: 'America/Mexico_City' },
-      { nombre: 'USA (NY)', zona: 'America/New_York' }
+      { bandera: '🇲🇽', nombre: 'México', zona: 'America/Mexico_City' },
+      { bandera: '🇺🇸', nombre: 'USA (NY)', zona: 'America/New_York' }
     ],
     '🌎 Centroamérica': [
-      { nombre: 'Honduras', zona: 'America/Tegucigalpa' },
-      { nombre: 'Guatemala', zona: 'America/Guatemala' },
-      { nombre: 'El Salvador', zona: 'America/El_Salvador' },
-      { nombre: 'Nicaragua', zona: 'America/Managua' },
-      { nombre: 'Costa Rica', zona: 'America/Costa_Rica' },
-      { nombre: 'Panamá', zona: 'America/Panama' }
+      { bandera: '🇭🇳', nombre: 'Honduras', zona: 'America/Tegucigalpa' },
+      { bandera: '🇬🇹', nombre: 'Guatemala', zona: 'America/Guatemala' },
+      { bandera: '🇸🇻', nombre: 'El Salvador', zona: 'America/El_Salvador' },
+      { bandera: '🇳🇮', nombre: 'Nicaragua', zona: 'America/Managua' },
+      { bandera: '🇨🇷', nombre: 'Costa Rica', zona: 'America/Costa_Rica' },
+      { bandera: '🇵🇦', nombre: 'Panamá', zona: 'America/Panama' }
     ],
     '🌎 Sudamérica': [
-      { nombre: 'Colombia', zona: 'America/Bogota' },
-      { nombre: 'Perú', zona: 'America/Lima' },
-      { nombre: 'Venezuela', zona: 'America/Caracas' },
-      { nombre: 'Chile', zona: 'America/Santiago' },
-      { nombre: 'Argentina', zona: 'America/Argentina/Buenos_Aires' },
-      { nombre: 'Brasil', zona: 'America/Sao_Paulo' }
+      { bandera: '🇨🇴', nombre: 'Colombia', zona: 'America/Bogota' },
+      { bandera: '🇵🇪', nombre: 'Perú', zona: 'America/Lima' },
+      { bandera: '🇻🇪', nombre: 'Venezuela', zona: 'America/Caracas' },
+      { bandera: '🇨🇱', nombre: 'Chile', zona: 'America/Santiago' },
+      { bandera: '🇦🇷', nombre: 'Argentina', zona: 'America/Argentina/Buenos_Aires' },
+      { bandera: '🇧🇷', nombre: 'Brasil', zona: 'America/Sao_Paulo' }
     ],
     '🌍 Europa': [
-      { nombre: 'España', zona: 'Europe/Madrid' },
-      { nombre: 'Reino Unido', zona: 'Europe/London' },
-      { nombre: 'Rusia', zona: 'Europe/Moscow' }
+      { bandera: '🇪🇸', nombre: 'España', zona: 'Europe/Madrid' },
+      { bandera: '🇬🇧', nombre: 'Reino Unido', zona: 'Europe/London' },
+      { bandera: '🇷🇺', nombre: 'Rusia', zona: 'Europe/Moscow' }
     ],
     '🌏 Asia': [
-      { nombre: 'India', zona: 'Asia/Kolkata' },
-      { nombre: 'Japón', zona: 'Asia/Tokyo' },
-      { nombre: 'Corea del Sur', zona: 'Asia/Seoul' }
+      { bandera: '🇮🇳', nombre: 'India', zona: 'Asia/Kolkata' },
+      { bandera: '🇯🇵', nombre: 'Japón', zona: 'Asia/Tokyo' },
+      { bandera: '🇰🇷', nombre: 'Corea del Sur', zona: 'Asia/Seoul' }
     ]
   };
 
@@ -45,7 +45,7 @@ const handler = async (msg, { conn }) => {
     texto += `📍 *${region}*\n`;
     for (let lugar of paises) {
       const hora = moment().tz(lugar.zona).format('hh:mm A');
-      const linea = `${lugar.nombre.padEnd(15)} ${hora}`;
+      const linea = `${lugar.bandera} ${lugar.nombre.padEnd(13)} ${hora}`;
       texto += `\`\`\`${linea}\`\`\`\n`;
     }
     texto += '\n';
