@@ -25,7 +25,7 @@ const handler = async (msg, { conn }) => {
   const cpuModel = os.cpus()[0].model;
 
   const info = `
-╭━━━[ 🤖 *ESTADO DEL BOT* ]━━⬣
+╭━━━〔 *𝙴𝚂𝚃𝙰𝙳𝙾 𝙳𝙴𝙻 𝙱𝙾𝚃* 〕━━⬣
 ┃
 ┃ 🏓 *Velocidad:* ${latency} ms
 ┃ 📦 *RAM usada:* ${usedMemMB} MB / ${totalMemGB} GB
