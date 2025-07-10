@@ -21,6 +21,7 @@ const handler = async (m, { conn }) => {
 
   const match = text.match(/(\d+([.,]\d+)?)\s*(\w+(?:\s\w+)*)\s*(a|en)?\s*(.+)/i);
   if (!match) {
+    console.log('[.monedas] Formato incorrecto');
     return conn.sendMessage(chatId, {
       text: '❗ Formato incorrecto. Ej: `.monedas 10 euros en pesos colombianos`'
     });
@@ -30,20 +31,30 @@ const handler = async (m, { conn }) => {
   const [fromCode, fromSymbol] = getCurrencyData(match[3]);
   const [toCode, toSymbol] = getCurrencyData(match[5]);
 
-  console.log(`[.monedas] Conversion: ${amount} ${fromCode} -> ${toCode}`);
+  console.log(`[.monedas] Parsed: ${amount} ${fromCode} -> ${toCode}`);
 
   try {
-    const res = await fetch(`https://api.exchangerate.host/convert?from=${fromCode}&to=${toCode}&amount=${amount}`);
+    const url = `https://api.exchangerate.host/convert?from=${fromCode}&to=${toCode}&amount=${amount}`;
+    console.log('[.monedas] Fetching:', url);
+
+    const res = await fetch(url);
     const data = await res.json();
 
-    if (!data.success) throw new Error('Conversión fallida');
+    console.log('[.monedas] API response:', data);
+
+    if (!data.success) {
+      throw new Error('Conversión fallida');
+    }
 
     const result = Number(data.result).toLocaleString('es-ES', {
-      minimumFractionDigits: 2, maximumFractionDigits: 2
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     });
 
     const updated = new Date(data.date).toLocaleDateString('es-ES', {
-      day: 'numeric', month: 'long', year: 'numeric'
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
     });
 
     const reply =
@@ -53,7 +64,7 @@ const handler = async (m, { conn }) => {
     await conn.sendMessage(chatId, { text: reply });
 
   } catch (err) {
-    console.error('Error en .monedas:', err);
+    console.error('[.monedas] Error:', err);
     await conn.sendMessage(chatId, {
       text: '❗ No pude obtener la tasa. Asegúrate de escribir monedas válidas.'
     });
