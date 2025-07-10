@@ -1,8 +1,11 @@
 const moment = require('moment-timezone');
+require('moment/locale/es'); // Para español
 
 const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
   const sender = msg.sender || msg.key.participant || msg.key.remoteJid;
+
+  moment.locale('es'); // Establecer español
 
   const zonas = {
     '🌎 América del Norte': [
@@ -37,8 +40,10 @@ const handler = async (msg, { conn }) => {
     ]
   };
 
+  const fecha = moment().format('dddd, D [de] MMMM [de] YYYY');
+
   let texto = '┏━━❖ 🌐 *HORARIO MUNDIAL* ❖━━┓\n';
-  texto += `📆 *Fecha:* ${moment().format('dddd, DD MMMM YYYY')}\n`;
+  texto += `\`\`\`📆 ${fecha.charAt(0).toUpperCase() + fecha.slice(1)}\`\`\`\n`;
   texto += '┗━━━━━━━━━━━━━━━━━━━━━━┛\n\n';
 
   for (const [region, paises] of Object.entries(zonas)) {
@@ -51,7 +56,6 @@ const handler = async (msg, { conn }) => {
     texto += '\n';
   }
 
-  // ✅ Firma personalizada del bot
   texto += '✨ Generado por: *KilluaBot*';
 
   const fkontak = {
