@@ -1,4 +1,7 @@
 const handler = async (m, { conn }) => {
+  const sender = m.sender || m.key?.participant || m.key?.remoteJid || "";
+  const senderNumber = sender.split("@")[0];
+
   const img = 'https://i.ibb.co/4jft6vs/file.jpg';
 
   const texto = `┏━━━━━━━━━━━━━━━━━⬣
@@ -71,7 +74,7 @@ const handler = async (m, { conn }) => {
     },
     message: {
       contactMessage: {
-        vcard: `BEGIN:VCARD\nVERSION:3.0\nN:Killua;;;\nFN:KilluaBot\nitem1.TEL;waid=${m.sender.split("@")[0]}:${m.sender.split("@")[0]}\nitem1.X-ABLabel:Usuario\nEND:VCARD`
+        vcard: `BEGIN:VCARD\nVERSION:3.0\nN:Killua;;;\nFN:KilluaBot\nitem1.TEL;waid=${senderNumber}:${senderNumber}\nitem1.X-ABLabel:Usuario\nEND:VCARD`
       }
     }
   };
