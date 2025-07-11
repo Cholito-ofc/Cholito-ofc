@@ -81,10 +81,10 @@ const handler = async (msg, { conn, args }) => {
 
   fs.writeFileSync(activosPath, JSON.stringify(activos, null, 2));
 
-  const estadoTexto = estado ? "Activado" : "Desactivado";
+  const estadoTexto = estado ? "𝖠𝖼𝗍𝗂𝗏𝖺𝖽𝗈" : "𝖣𝖾𝗌𝖺𝖼𝗍𝗂𝗏𝖺𝖽𝗈";
   const funcionTexto = estado
-    ? "Enviar mensaje cuando alguien salga del grupo"
-    : "No enviar mensaje cuando alguien salga";
+    ? "𝖤𝗇𝗏𝗂𝖺𝗋 𝗆𝖾𝗇𝗌𝖺𝗃𝖾 𝖼𝗎𝖺́𝗇𝖽𝗈 𝖺𝗅𝗀𝗎𝗂𝖾́𝗇 𝗌𝖺𝗅𝗀𝖺 𝖽𝖾𝗅 𝗀𝗋𝗎𝗉𝗈"
+    : "𝖭𝗈 𝖾𝗇𝗏𝗂𝖺𝗋 𝗆𝖾𝗇𝗌𝖺𝗃𝖾 𝖼𝗎𝖺𝗇𝖽𝗈 𝖺𝗅𝗀𝗎𝗂𝖾𝗇 𝗌𝖺𝗅𝗀𝖺";
 
   const mensaje = `\`「 𝖠𝖼𝖼𝗂𝗈́𝗇 𝗋𝖾𝖺𝗅𝗂𝗓𝖺𝖽𝖺 ✅ 」\`\n\n` +
                   `*│┊➺ Comando:* Despedidas\n` +
