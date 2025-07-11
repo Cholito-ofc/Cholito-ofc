@@ -5266,12 +5266,11 @@ case 'antiarabe': {
     const fs = require("fs");
     const fetch = require("node-fetch");
     const path = "./activos.json";
-    const chatId = msg.key.remoteJid; // Debe ser un grupo
+    const chatId = msg.key.remoteJid;
     const param = args[0] ? args[0].toLowerCase() : "";
     const senderId = msg.key.participant || msg.key.remoteJid;
     const senderNum = senderId.replace(/[^0-9]/g, "");
 
-    // vCard decorativa
     const fkontak = {
       key: {
         participants: "0@s.whatsapp.net",
@@ -5281,7 +5280,7 @@ case 'antiarabe': {
       },
       message: {
         locationMessage: {
-          name: "𝙈𝙤𝙙𝙤 𝘼𝙣𝙩𝙞𝘼𝙧𝙖𝙗𝙚",
+          name: "𝗠𝗢𝗗𝗢 𝗔𝗡𝗧𝗜𝗔𝗥𝗔𝗕𝗘",
           jpegThumbnail: await (await fetch('https://iili.io/FCJSFix.jpg')).buffer(),
           vcard:
             "BEGIN:VCARD\n" +
@@ -5300,23 +5299,20 @@ case 'antiarabe': {
       participant: "0@s.whatsapp.net"
     };
 
-    // Verificar que se use en un grupo
     if (!chatId.endsWith("@g.us")) {
       await sock.sendMessage(chatId, {
-        text: "⚠️ *Este comando solo se puede usar en grupos.*"
-      }, { quoted: msg });
+        text: "⚠️ Este comando solo se puede usar en grupos."
+      }, { quoted: fkontak });
       return;
     }
 
-    // Verificar parámetro válido
     if (!param || (param !== "on" && param !== "off")) {
       await sock.sendMessage(chatId, {
-        text: `*╭┈〔 ⚠️ USO INCORRECTO 〕┈╮*\n*┊*\n*┊*📥 *Ejemplo:*\n*┊* 𝘌𝘴𝘤𝘳𝘪𝘣𝘦: *.antiarabe on* 𝘰 *.antiarabe off*\n*╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫*`
-      }, { quoted: msg });
+        text: `⚙️ Usa: *.antiarabe on/off* para activar o desactivar el modo antiárabe.`
+      }, { quoted: fkontak });
       return;
     }
 
-    // Verificar permisos (admin o owner)
     let isSenderAdmin = false;
     try {
       const groupMetadata = await sock.groupMetadata(chatId);
@@ -5329,35 +5325,46 @@ case 'antiarabe': {
     }
 
     const isOwner = global.owner.some(([id]) => id === senderNum);
-
     if (!isSenderAdmin && !isOwner) {
       await sock.sendMessage(chatId, {
-        text: "⚠️ *Solo los administradores o el propietario pueden usar este comando.*"
-      }, { quoted: msg });
+        text: "🚫 Solo los administradores o el owner pueden usar este comando."
+      }, { quoted: fkontak });
       return;
     }
 
-    // Leer archivo de configuración
     let activos = fs.existsSync(path) ? JSON.parse(fs.readFileSync(path, "utf-8")) : {};
     if (!activos.antiarabe) activos.antiarabe = {};
 
-    if (param === "on") {
+    const estado = param === "on";
+    if (estado) {
       activos.antiarabe[chatId] = true;
-      const textoOn = `*╭┈〔 🔒 MODO ANTIÁRABE ON 〕┈╮*\n*┊*\n*┊*🚫 *A partir de ahora se expulsarán números árabes automáticamente.*\n*┊*🛡️ *El grupo está protegido contra spam árabe.*\n*┊*👑 *Acción por:* @${senderNum}\n*╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫*`;
-      await sock.sendMessage(chatId, {
-        text: textoOn,
-        mentions: [senderId]
-      }, { quoted: fkontak });
     } else {
       delete activos.antiarabe[chatId];
-      const textoOff = `*╭┈〔 🔓 MODO ANTIÁRABE OFF 〕┈╮*\n*┊*\n*┊*✅ *Los números árabes ya no serán expulsados.*\n*┊*📵 *Modo desactivado. Reactiva si es necesario.*\n*┊*👑 *Acción por:* @${senderNum}\n*╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫*`;
-      await sock.sendMessage(chatId, {
-        text: textoOff,
-        mentions: [senderId]
-      }, { quoted: fkontak });
     }
 
     fs.writeFileSync(path, JSON.stringify(activos, null, 2));
+
+    const estadoTexto = estado ? "𝖠𝖼𝗍𝗂𝗏𝖺𝖽𝗈" : "𝖣𝖾𝗌𝖺𝖼𝗍𝗂𝗏𝖺𝖽𝗈";
+    const funcionTexto = estado
+      ? "𝖤𝗑𝗉𝗎𝗅𝗌𝖺𝗋 𝖺𝗎𝗍𝗈𝗆𝖺́𝗍𝗂𝖼𝖺𝗆𝖾𝗇𝗍𝖾 𝗇𝗎́𝗆𝖾𝗋𝗈𝗌 𝖺́𝗋𝖺𝖻𝖾𝗌"
+      : "𝖣𝖾𝗌𝖺𝖼𝗍𝗂𝗏𝖺 𝖾𝗅 𝖿𝗂𝗅𝗍𝗋𝗈 𝖺𝗇𝗍𝗂𝖺́𝗋𝖺𝖻𝖾";
+
+    const mensaje = `\`「 𝖠𝖼𝖼𝗂𝗈́𝗇 𝗋𝖾𝖺𝗅𝗂𝗓𝖺𝖽𝖺 ✅ 」\`\n\n` +
+                    `*│┊➺ 𝖢𝗈𝗆𝖺𝗇𝖽𝗈:* AntiÁrabe\n` +
+                    `*│┊➺ 𝖤𝗌𝗍𝖺𝖽𝗈:* ${estadoTexto}\n` +
+                    `*│┊➺ 𝖯𝖺𝗋𝖺:* Este grupo\n` +
+                    `*│┊➺ 𝖥𝗎𝗇𝖼𝗂𝗈́𝗇:* ${funcionTexto}\n` +
+                    `*╰ ∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙ ∙ ∙ ∙ ∙*`;
+
+    await sock.sendMessage(chatId, {
+      text: mensaje,
+      mentions: [senderId]
+    }, { quoted: fkontak });
+
+    await sock.sendMessage(chatId, {
+      react: { text: "✅", key: msg.key }
+    });
+
   } catch (error) {
     console.error("❌ Error en el comando antiarabe:", error);
     await sock.sendMessage(msg.key.remoteJid, {
@@ -5365,70 +5372,118 @@ case 'antiarabe': {
     }, { quoted: msg });
   }
   break;
-        }
+}
+  
         
 case 'antilink': {
   try {
     const fs = require("fs");
+    const fetch = require("node-fetch");
     const path = "./activos.json";
-    const chatId = msg.key.remoteJid; // ID del grupo
-    const param = args[0] ? args[0].toLowerCase() : "";
 
-    // Verificar que se use en un grupo
+    const chatId = msg.key.remoteJid;
+    const param = args[0] ? args[0].toLowerCase() : "";
+    const senderId = msg.key.participant || msg.key.remoteJid;
+    const senderNum = senderId.replace(/[^0-9]/g, "");
+
+    const fkontak = {
+      key: {
+        participants: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast",
+        fromMe: false,
+        id: "Halo"
+      },
+      message: {
+        locationMessage: {
+          name: "𝗠𝗢𝗗𝗢 𝗔𝗡𝗧𝗜𝗟𝗜𝗡𝗞",
+          jpegThumbnail: await (await fetch("https://iili.io/FCJSFix.jpg")).buffer(),
+          vcard:
+            "BEGIN:VCARD\n" +
+            "VERSION:3.0\n" +
+            "N:;Unlimited;;;\n" +
+            "FN:Unlimited\n" +
+            "ORG:Unlimited\n" +
+            "TITLE:\n" +
+            "item1.TEL;waid=19709001746:+1 (970) 900-1746\n" +
+            "item1.X-ABLabel:Unlimited\n" +
+            "X-WA-BIZ-DESCRIPTION:ofc\n" +
+            "X-WA-BIZ-NAME:Unlimited\n" +
+            "END:VCARD"
+        }
+      },
+      participant: "0@s.whatsapp.net"
+    };
+
     if (!chatId.endsWith("@g.us")) {
-      await sock.sendMessage(chatId, { text: "⚠️ *Este comando solo se puede usar en grupos.*" }, { quoted: msg });
+      await sock.sendMessage(chatId, {
+        text: "⚠️ Este comando solo se puede usar en grupos."
+      }, { quoted: fkontak });
       return;
     }
 
-    // Verificar que se haya especificado "on" o "off"
     if (!param || (param !== "on" && param !== "off")) {
       await sock.sendMessage(chatId, {
-        text: `⚠️ *Uso incorrecto.*\nEjemplo: \`${global.prefix}antilink on\` o \`${global.prefix}antilink off\``
-      }, { quoted: msg });
+        text: `⚙️ Usa: *${global.prefix}antilink on/off* para activar o desactivar el filtro de enlaces.`
+      }, { quoted: fkontak });
       return;
     }
 
-    // Verificar permisos: solo administradores o el propietario pueden usar este comando
-    const senderIdFull = msg.key.participant || msg.key.remoteJid;
+    // Verificar si el remitente es admin o owner
     let isSenderAdmin = false;
     try {
-      const groupMetadata = await sock.groupMetadata(chatId);
-      const senderParticipant = groupMetadata.participants.find(p => p.id === senderIdFull);
-      if (senderParticipant && (senderParticipant.admin === "admin" || senderParticipant.admin === "superadmin")) {
-        isSenderAdmin = true;
-      }
+      const metadata = await sock.groupMetadata(chatId);
+      const participant = metadata.participants.find(p => p.id === senderId);
+      isSenderAdmin = participant?.admin === "admin" || participant?.admin === "superadmin";
     } catch (err) {
-      console.error("Error obteniendo metadata del grupo:", err);
+      console.error("Error obteniendo metadata:", err);
     }
-    if (!isSenderAdmin && !isOwner(senderIdFull)) {
+
+    const isOwner = global.owner.some(([id]) => id === senderNum);
+    if (!isSenderAdmin && !isOwner) {
       await sock.sendMessage(chatId, {
-        text: "⚠️ *Solo los administradores o el propietario pueden usar este comando.*"
-      }, { quoted: msg });
+        text: "🚫 Solo los administradores o el owner pueden usar este comando."
+      }, { quoted: fkontak });
       return;
     }
 
-    // Cargar o crear el archivo activos.json
-    let activos = {};
-    if (fs.existsSync(path)) {
-      activos = JSON.parse(fs.readFileSync(path, "utf-8"));
-    }
-    // Asegurarse de tener la propiedad "antilink"
-    if (!activos.hasOwnProperty("antilink")) {
-      activos.antilink = {};
-    }
+    let activos = fs.existsSync(path) ? JSON.parse(fs.readFileSync(path, "utf-8")) : {};
+    if (!activos.antilink) activos.antilink = {};
 
-    if (param === "on") {
+    const estado = param === "on";
+    if (estado) {
       activos.antilink[chatId] = true;
-      await sock.sendMessage(chatId, { text: "✅ *Antilink activado en este grupo.*" }, { quoted: msg });
     } else {
       delete activos.antilink[chatId];
-      await sock.sendMessage(chatId, { text: "✅ *Antilink desactivado en este grupo.*" }, { quoted: msg });
     }
 
     fs.writeFileSync(path, JSON.stringify(activos, null, 2));
+
+    const estadoTexto = estado ? "𝖠𝖼𝗍𝗂𝗏𝖺𝖽𝗈" : "𝖣𝖾𝗌𝖺𝖼𝗍𝗂𝗏𝖺𝖽𝗈";
+    const funcionTexto = estado
+      ? "𝖤𝗅𝗂𝗆𝗂𝗇𝖺 𝖾𝗇𝗅𝖺𝖼𝖾𝗌 𝗒 𝖺𝗅 𝗎𝗌𝗎𝖺𝗋𝗂𝗈 𝗊𝗎𝖾 𝗅𝗈 𝖾𝗇𝗏𝗂𝗈́"
+      : "𝖤𝗅 𝗀𝗋𝗎𝗉𝗈 𝖺𝗁𝗈𝗋𝖺 𝗉𝖾𝗋𝗆𝗂𝗍𝖾 𝖾𝗇𝗏𝗂𝖺𝗋 𝖾𝗇𝗅𝖺𝖼𝖾𝗌";
+
+    const mensaje = `\`「 𝖠𝖼𝖼𝗂𝗈́𝗇 𝗋𝖾𝖺𝗅𝗂𝗓𝖺𝖽𝖺 ✅ 」\`\n\n` +
+                    `*│┊➺ 𝖢𝗈𝗆𝖺𝗇𝖽𝗈:* 𝖠𝗇𝗍𝗂𝗅𝗂𝗇𝗄\n` +
+                    `*│┊➺ Estado:* ${estadoTexto}\n` +
+                    `*│┊➺ 𝖯𝖺𝗋𝖺:* 𝖤𝗌𝗍𝖾 𝗀𝗋𝗎𝗉𝗈\n` +
+                    `*│┊➺ 𝖥𝗎𝗇𝖼𝗂𝗈́𝗇:* ${funcionTexto}\n` +
+                    `*╰ ∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙ ∙ ∙ ∙ ∙*`;
+
+    await sock.sendMessage(chatId, {
+      text: mensaje,
+      mentions: [senderId]
+    }, { quoted: fkontak });
+
+    await sock.sendMessage(chatId, {
+      react: { text: "✅", key: msg.key }
+    });
+
   } catch (error) {
     console.error("❌ Error en el comando antilink:", error);
-    await sock.sendMessage(msg.key.remoteJid, { text: "❌ *Ocurrió un error al ejecutar el comando antilink.*" }, { quoted: msg });
+    await sock.sendMessage(msg.key.remoteJid, {
+      text: "❌ *Ocurrió un error al ejecutar el comando antilink.*"
+    }, { quoted: msg });
   }
   break;
 }
@@ -5436,99 +5491,104 @@ case 'antilink': {
 case 'welcome': {
   try {
     const fs = require("fs");
+    const fetch = require("node-fetch");
     const path = "./activos.json";
     const chatId = msg.key.remoteJid;
     const param = args[0] ? args[0].toLowerCase() : "";
+    const senderId = msg.key.participant || msg.key.remoteJid;
+    const senderNum = senderId.replace(/[^0-9]/g, "");
+
+    const fkontak = {
+      key: {
+        participants: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast",
+        fromMe: false,
+        id: "Halo"
+      },
+      message: {
+        locationMessage: {
+          name: "𝗠𝗢𝗗𝗢 𝗪𝗘𝗟𝗖𝗢𝗠𝗘",
+          jpegThumbnail: await (await fetch("https://iili.io/FCJSFix.jpg")).buffer(),
+          vcard:
+            "BEGIN:VCARD\n" +
+            "VERSION:3.0\n" +
+            "N:;Unlimited;;;\n" +
+            "FN:Unlimited\n" +
+            "ORG:Unlimited\n" +
+            "TITLE:\n" +
+            "item1.TEL;waid=19709001746:+1 (970) 900-1746\n" +
+            "item1.X-ABLabel:Unlimited\n" +
+            "X-WA-BIZ-DESCRIPTION:ofc\n" +
+            "X-WA-BIZ-NAME:Unlimited\n" +
+            "END:VCARD"
+        }
+      },
+      participant: "0@s.whatsapp.net"
+    };
 
     if (!chatId.endsWith("@g.us")) {
       await sock.sendMessage(chatId, {
-        text: `
-╭┈〔 ⚠️ *COMANDO SOLO PARA GRUPOS* 〕┈╮
-┊ Este comando solo funciona dentro de grupos.
-╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
-        `.trim()
-      }, { quoted: msg });
+        text: "⚠️ Este comando solo funciona dentro de grupos."
+      }, { quoted: fkontak });
       return;
     }
 
     if (!param || (param !== "on" && param !== "off")) {
       await sock.sendMessage(chatId, {
-        text: `
-╭┈〔 ⚠️ *USO INCORRECTO* 〕┈╮
-┊ Usa el comando de esta forma:
-┊
-┊ 📥 *Ejemplo:*
-┊ ${global.prefix}welcome on
-┊ ${global.prefix}welcome off
-┊
-┊📝 Este comando solo controla las *bienvenidas*.
-╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
-        `.trim()
-      }, { quoted: msg });
+        text: `⚙️ Usa: *${global.prefix}welcome on/off* para activar o desactivar los mensajes de bienvenida.`
+      }, { quoted: fkontak });
       return;
     }
 
-    // Verificar permisos del remitente
-    const senderIdFull = msg.key.participant || msg.key.remoteJid;
     let isSenderAdmin = false;
-
     try {
-      const groupMetadata = await sock.groupMetadata(chatId);
-      const senderParticipant = groupMetadata.participants.find(p => p.id === senderIdFull);
-      if (senderParticipant && (senderParticipant.admin === "admin" || senderParticipant.admin === "superadmin")) {
-        isSenderAdmin = true;
-      }
+      const metadata = await sock.groupMetadata(chatId);
+      const participant = metadata.participants.find(p => p.id === senderId);
+      isSenderAdmin = participant?.admin === "admin" || participant?.admin === "superadmin";
     } catch (err) {
       console.error("Error obteniendo metadata del grupo:", err);
     }
 
-    if (!isSenderAdmin && !isOwner(senderIdFull)) {
+    const isOwner = global.owner.some(([id]) => id === senderNum);
+    if (!isSenderAdmin && !isOwner) {
       await sock.sendMessage(chatId, {
-        text: `
-╭┈〔 ⛔ *ACCESO DENEGADO* 〕┈╮
-┊ Solo los *administradores* o el *propietario* del bot
-┊ pueden activar o desactivar las bienvenidas.
-╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
-        `.trim()
-      }, { quoted: msg });
+        text: "🚫 Solo los administradores o el owner pueden usar este comando."
+      }, { quoted: fkontak });
       return;
     }
 
-    // Cargar configuración
-    let activos = {};
-    if (fs.existsSync(path)) {
-      activos = JSON.parse(fs.readFileSync(path, "utf-8"));
-    }
+    let activos = fs.existsSync(path) ? JSON.parse(fs.readFileSync(path, "utf-8")) : {};
+    if (!activos.welcome) activos.welcome = {};
 
-    if (!activos.hasOwnProperty("welcome")) {
-      activos.welcome = {};
-    }
-
-    let respuesta = "";
-
-    if (param === "on") {
+    const estado = param === "on";
+    if (estado) {
       activos.welcome[chatId] = true;
-      respuesta = `
-╭┈〔 ✅ *BIENVENIDAS ACTIVADAS* 〕┈╮
-┊ Ahora se enviarán *mensajes de bienvenida*
-┊ cada vez que un usuario entre al grupo.
-╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
-      `.trim();
     } else {
       delete activos.welcome[chatId];
-      respuesta = `
-╭┈〔 🚫 *BIENVENIDAS DESACTIVADAS* 〕┈╮
-┊ Los *mensajes de bienvenida* fueron
-┊ desactivados en este grupo.
-╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
-      `.trim();
     }
 
     fs.writeFileSync(path, JSON.stringify(activos, null, 2));
 
+    const estadoTexto = estado ? "𝖠𝖼𝗍𝗂𝗏𝖺𝖽𝗈" : "𝖣𝖾𝗌𝖺𝖼𝗍𝗂𝗏𝖺𝖽𝗈";
+    const funcionTexto = estado
+      ? "𝖤𝗇𝗏𝗂𝖺𝗋 𝗆𝖾𝗇𝗌𝖺𝗃𝖾 𝖽𝖾 𝖻𝗂𝖾𝗇𝗏𝖾𝗇𝗂𝖽𝖺"
+      : "𝖣𝖾𝗍𝖾𝗇𝖾𝗋 𝗆𝖾𝗇𝗌𝖺𝗃𝖾 𝖽𝖾 𝖻𝗂𝖾𝗇𝗏𝖾𝗇𝗂𝖽𝖺";
+
+    const mensaje = `\`「 𝖠𝖼𝖼𝗂𝗈́𝗇 𝗋𝖾𝖺𝗅𝗂𝗓𝖺𝖽𝖺 ✅ 」\`\n\n` +
+                    `*│┊➺ 𝖢𝗈𝗆𝖺𝗇𝖽𝗈:* Welcome\n` +
+                    `*│┊➺ 𝖤𝗌𝗍𝖺𝖽𝗈:* ${estadoTexto}\n` +
+                    `*│┊➺ 𝖯𝖺𝗋𝖺:* Este grupo\n` +
+                    `*│┊➺ 𝖥𝗎𝗇𝖼𝗂𝗈́𝗇:* ${funcionTexto}\n` +
+                    `*╰ ∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙ ∙ ∙ ∙ ∙*`;
+
     await sock.sendMessage(chatId, {
-      text: respuesta
-    }, { quoted: msg });
+      text: mensaje,
+      mentions: [senderId]
+    }, { quoted: fkontak });
+
+    await sock.sendMessage(chatId, {
+      react: { text: "✅", key: msg.key }
+    });
 
   } catch (error) {
     console.error("❌ Error en el comando welcome:", error);
