@@ -482,10 +482,15 @@ case "menuaudio": {
       react: { text: "🎧", key: msg.key }
     });
 
+    // Aseguramos que global.db y sus propiedades existan para evitar errores
+    if (!global.db) global.db = {};
+    if (!global.db.data) global.db.data = {};
+    if (!global.db.data.chats) global.db.data.chats = {};
+
     const chat = global.db.data.chats[msg.key.remoteJid] || {};
     const audiosActivos = chat.audios ? "✅ Activos" : "❌ Desactivados";
 
-    // Lista de audios fijos sin prefijo
+    // Audios sin prefijo (fijos)
     const audiosFijos = [
       "takataka", "tarado", "tka", "hey", "freefire", "feriado", "aguanta", "nadie te pregunto",
       "niconico", "no chupala", "no me hables", "no me hagas usar esto", "omg", "contexto", "pero esto",
