@@ -1,4 +1,4 @@
-const handler = async (m, { args, command, usedPrefix }) => {
+let handler = async (m, { args, command, usedPrefix }) => {
   const chatId = m.chat;
 
   if (!global.db) global.db = {};
@@ -21,7 +21,7 @@ const handler = async (m, { args, command, usedPrefix }) => {
 };
 
 handler.command = /^(on|off)$/i;
-handler.admin = true; // Solo admins pueden activar/desactivar
-handler.group = true; // Solo en grupos
+handler.admin = true;
+handler.group = true;
 
-export default handler;
+module.exports = handler;
