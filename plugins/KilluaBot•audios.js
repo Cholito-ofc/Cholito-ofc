@@ -74,6 +74,8 @@ handler.customPrefix = new RegExp(
   '^(tarado|teamo|tka|hey|freefire|feriado|aguanta|nadie te pregunto|niconico|no chupala|no me hables|no me hagas usar esto|omg|contexto|pero esto|pikachu|pokemon|verdad que te engañe|vivan los novios|una pregunta|hermoso negro|buen dia grupo|calla fan de bts|cambiate a movistar|corte corte|el toxico|elmo sabe donde vives|en caso de una investigacion|no estes tite|las reglas del grupo|me anda buscando anonymous|motivacion|muchachos escucharon|nico nico|no rompas mas|potasio|que tal grupo|se estan riendo de mi|su nivel de pendejo|tal vez|te gusta el pepino|tengo los calzones|entrada|bien pensado woody|esto va a ser epico papus|fino señores|me voy|homero chino|jesucristo|laoracion|me pican los cocos)$',
   'i'
 );
-handler.command = new RegExp;
+
+// Aquí ponemos handler.command como array vacío para evitar errores
+handler.command = [];
 
 module.exports = handler;
