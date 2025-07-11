@@ -14,11 +14,17 @@ const handler = async (msg, { conn }) => {
     year: 'numeric'
   }).format(new Date());
 
-  // Capitalizar la primera letra
   const fechaCapitalizada = fechaLarga.charAt(0).toUpperCase() + fechaLarga.slice(1);
 
-  // URL del video animado (tipo GIF)
-  const mediaUrl = 'https://cdn.russellxz.click/807bff18.mp4';
+  // Lista de URLs de videos animados (tipo GIF)
+  const videos = [
+    'https://cdn.russellxz.click/807bff18.mp4',
+    'https://cdn.russellxz.click/f5627b7a.mp4',
+    'https://cdn.russellxz.click/27484148.mp4'
+  ];
+
+  // Selecciona una URL aleatoriamente
+  const mediaUrl = videos[Math.floor(Math.random() * videos.length)];
 
   // Mensaje del menú guía
   let message = `
@@ -84,7 +90,7 @@ const handler = async (msg, { conn }) => {
 ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 `.trim();
 
-  // Enviamos el video como GIF animado (se reproduce automáticamente)
+  // Enviar el video como GIF animado con el mensaje y mención
   await conn.sendMessage(chatId, {
     video: { url: mediaUrl },
     gifPlayback: true,
@@ -92,7 +98,7 @@ const handler = async (msg, { conn }) => {
     mentions: [senderId]
   }, { quoted: msg });
 
-  // Reacción ✅
+  // Reacción ✅ para confirmar envío
   await conn.sendMessage(chatId, {
     react: { text: "✅", key: msg.key }
   });
