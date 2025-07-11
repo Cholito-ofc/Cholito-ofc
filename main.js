@@ -482,72 +482,53 @@ case "menuaudio": {
       react: { text: "🎧", key: msg.key }
     });
 
-    // Aseguramos que global.db y sus propiedades existan para evitar errores
-    if (!global.db) global.db = {};
-    if (!global.db.data) global.db.data = {};
-    if (!global.db.data.chats) global.db.data.chats = {};
-
-    const chat = global.db.data.chats[msg.key.remoteJid] || {};
-    const audiosActivos = chat.audios ? "✅ Activos" : "❌ Desactivados";
-
-    // Audios sin prefijo (fijos)
-    const audiosFijos = [
-      "takataka", "tarado", "tka", "hey", "freefire", "feriado", "aguanta", "nadie te pregunto",
-      "niconico", "no chupala", "no me hables", "no me hagas usar esto", "omg", "contexto", "pero esto",
-      "pikachu", "pokemon", "verdad que te engañe", "vivan los novios", "una pregunta", "hermoso negro",
-      "buen dia grupo", "calla fan de bts", "cambiate a movistar", "corte corte", "el toxico", "elmo sabe donde vives",
-      "en caso de una investigacion", "no estes tite", "las reglas del grupo", "me anda buscando anonymous",
-      "motivacion", "muchachos escucharon", "nico nico", "no rompas mas", "potasio", "que tal grupo",
-      "se estan riendo de mi", "su nivel de pendejo", "tal vez", "te gusta el pepino", "tengo los calzones",
-      "entrada", "bien pensado woody", "esto va a ser epico papus", "fino señores", "me voy", "homero chino",
-      "jesucristo", "laoracion", "me pican los cocos", "teamo"
-    ];
-
-    let claves = [];
-    if (fs.existsSync("./guar.json")) {
-      const guarData = JSON.parse(fs.readFileSync("./guar.json", "utf-8"));
-      claves = Object.keys(guarData);
+    if (!fs.existsSync("./guar.json")) {
+      return sock.sendMessage(
+        msg.key.remoteJid,
+        {
+          text: "❌ *Error:* No hay multimedia guardado aún. Usa `.guar` para guardar algo primero."
+        },
+        { quoted: msg }
+      );
     }
 
-    let listaMensaje = `🎧 𓆩 𝐌𝐄𝐍𝐔́ 𝐌𝐔𝐋𝐓𝐈𝐌𝐄𝐃𝐈𝐀 — 𝐊𝐈𝐋𝐋𝐔𝐀 𝟐.𝟎 𓆪
+    const guarData = JSON.parse(fs.readFileSync("./guar.json", "utf-8"));
+    let claves = Object.keys(guarData);
 
-🔊 *Audios sin prefijo:* ${audiosActivos}
-✦ Puedes escribir solo la palabra: *"tarado"*, *"teamo"*, etc.
+    let listaMensaje = `🎧 *KILLUA BOT MENU AUDIO*
 
-🎵 *Audios disponibles:*\n`;
+🔑 *Palabras clave almacenadas:*  
+✦ Usa el comando: *${global.prefix}g palabra_clave*  
+✦ También puedes escribir la palabra directamente.
 
-    audiosFijos.forEach((a, i) => {
-      listaMensaje += `➤ ${i + 1}. _${a}_\n`;
-    });
+🎵 *Claves disponibles:*\n`;
 
-    if (claves.length > 0) {
-      listaMensaje += `\n💾 *Audios guardados con .guar:*\n`;
-      claves.forEach((c, i) => {
-        listaMensaje += `✔️ ${i + 1}. ${c}\n`;
-      });
+    if (claves.length === 0) {
+      listaMensaje += "🚫 *No hay ninguna palabra clave guardada.*\n";
     } else {
-      listaMensaje += `\n📁 *No hay audios personalizados aún.* Usa *.guar* para guardar uno.\n`;
+      claves.forEach((clave, index) => {
+        listaMensaje += `➤ ${index + 1}. ${clave}\n`;
+      });
     }
 
     listaMensaje += `
 ━━━━━━━━━━━━━━━━━━
-🛠 *Comandos útiles:*
+🛠 *Otros comandos útiles:*
 
 📥 ${global.prefix}guar — Guardar archivo  
-📤 ${global.prefix}g — Reproducir archivo  
+📤 ${global.prefix}g — Recuperar archivo  
 🗑️ ${global.prefix}kill — Eliminar archivo
 
 > 🚀 𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 𝚆𝙷𝙰𝚃𝚂𝙰𝙿𝙿 📈`;
 
-    await sock.sendMessage(
+    await sock.sendMessage2(
       msg.key.remoteJid,
       {
         image: { url: "https://cdn.russellxz.click/eec4cf99.jpeg" },
         caption: listaMensaje
       },
-      { quoted: msg }
+      msg
     );
-
   } catch (error) {
     console.error("❌ Error al enviar el menú de multimedia:", error);
     await sock.sendMessage(
