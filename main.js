@@ -519,8 +519,7 @@ case "menuaudio": {
 📤 ${global.prefix}g — Recuperar archivo  
 🗑️ ${global.prefix}kill — Eliminar archivo
 
-🚀 *killua 2.0 Bot está en constante expansión.*
-👨‍💻 *Desarrollado por Cholo XZ*`;
+> 🚀 𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 𝚆𝙷𝙰𝚃𝚂𝙰𝙿𝙿 📈`;
 
     await sock.sendMessage2(
       msg.key.remoteJid,
@@ -1076,7 +1075,6 @@ case 'tourl': {
               }
 
 case 'fix':
-case 'update':        
 case 'carga': {
   if (!isOwner) {
     await sock.sendMessage(msg.key.remoteJid, {
@@ -1775,7 +1773,7 @@ case "git": {
         }
 
         // Extraer el código del comando
-        const commandCode = `📜 *Código del comando ${commandName}:*\n\n\`\`\`${match[0]}\`\`\``;
+        const commandCode = `📈 *Código del comando ${commandName}:*\n\n\`\`\`${match[0]}\`\`\``;
 
         // Enviar el código como mensaje
         await sock.sendMessage(msg.key.remoteJid, {
