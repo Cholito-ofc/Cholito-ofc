@@ -1,14 +1,16 @@
 const fs = require("fs");
 const path = require("path");
+const fetch = require("node-fetch");
 
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const senderId = msg.key.participant || msg.key.remoteJid;
   const senderClean = senderId.replace(/[^0-9]/g, "");
-  const isOwner = global.owner.some(([id]) => id === senderClean);
   const isGroup = chatId.endsWith("@g.us");
   const isFromMe = msg.key.fromMe;
+  const isOwner = global.owner.some(([id]) => id === senderClean);
 
+  // Contacto decorativo estilo Izumi
   const fkontak = {
     key: {
       participants: "0@s.whatsapp.net",
@@ -17,8 +19,21 @@ const handler = async (msg, { conn, args }) => {
       id: "Halo"
     },
     message: {
-      contactMessage: {
-        vcard: `BEGIN:VCARD\nVERSION:3.0\nN:Sy;Bot;;;\nFN:y\nitem1.TEL;waid=${senderClean}:${senderClean}\nitem1.X-ABLabel:Ponsel\nEND:VCARD`
+      locationMessage: {
+        name: "𝖠𝖭𝖳𝖨𝖣𝖤𝖫𝖤𝖳𝖤",
+        jpegThumbnail: await (await fetch('https://iili.io/FCJSFix.jpg')).buffer(),
+        vcard:
+          "BEGIN:VCARD\n" +
+          "VERSION:3.0\n" +
+          "N:;Unlimited;;;\n" +
+          "FN:Unlimited\n" +
+          "ORG:Unlimited\n" +
+          "TITLE:\n" +
+          "item1.TEL;waid=19709001746:+1 (970) 900-1746\n" +
+          "item1.X-ABLabel:Unlimited\n" +
+          "X-WA-BIZ-DESCRIPTION:ofc\n" +
+          "X-WA-BIZ-NAME:Unlimited\n" +
+          "END:VCARD"
       }
     },
     participant: "0@s.whatsapp.net"
@@ -31,7 +46,8 @@ const handler = async (msg, { conn, args }) => {
   }
 
   const metadata = await conn.groupMetadata(chatId);
-  const isAdmin = metadata.participants.find(p => p.id === senderId)?.admin;
+  const participante = metadata.participants.find(p => p.id === senderId);
+  const isAdmin = participante?.admin === "admin" || participante?.admin === "superadmin";
 
   if (!isAdmin && !isOwner && !isFromMe) {
     return conn.sendMessage(chatId, {
@@ -67,7 +83,7 @@ const handler = async (msg, { conn, args }) => {
                   `*│┊➺ 𝖢𝗈𝗆𝖺𝗇𝖽𝗈:* 𝖠𝗇𝗍𝗂𝖽𝖾𝗅𝖾𝗍𝖾\n` +
                   `*│┊➺ 𝖤𝗌𝗍𝖺𝖽𝗈 :* ${estadoTexto}\n` +
                   `*│┊➺ 𝖯𝖺𝗋𝖺:* 𝖤𝗌𝗍𝖾 𝗀𝗋𝗎𝗉𝗈\n` +
-                  `*│┊➺ 𝖥𝗎𝗇𝖼𝗂𝗈́𝗇:* 𝖠𝖼𝗍𝗂𝗏𝖺 / 𝖣𝖾𝗌𝖺𝖼𝗍𝗂𝗏𝖺 𝗅𝗈𝗌 𝗆𝖾𝗇𝗌𝖺𝗃𝖾𝗌 𝖾𝗅𝗂𝗆𝗂𝗇𝖺𝖽𝗈𝗌\n` +
+                  `*│┊➺ 𝖥𝗎𝗇𝖼𝗂𝗈́𝗇:* ${estado ? "𝖠𝖼𝗍𝗂𝗏𝖺 𝗅𝖺 𝗋𝖾𝖼𝗎𝗉𝖾𝗋𝖺𝖼𝗂𝗈́𝗇 𝖽𝖾 𝗆𝖾𝗇𝗌𝖺𝗃𝖾𝗌 𝖾𝗅𝗂𝗆𝗂𝗇𝖺𝖽𝗈𝗌" : "𝖣𝖾𝗌𝖺𝖼𝗍𝗂𝗏𝖺 𝗅𝖺 𝗋𝖾𝖼𝗎𝗉𝖾𝗋𝖺𝖼𝗂𝗈́𝗇 𝖽𝖾 𝗆𝖾𝗇𝗌𝖺𝗃𝖾𝗌"}\n` +
                   `*╰ ∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙ ∙ ∙ ∙ ∙*`;
 
   await conn.sendMessage(chatId, { text: mensaje }, { quoted: fkontak });
