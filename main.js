@@ -534,14 +534,15 @@ case "menuaudio": {
 
 > 🚀 𝙺𝙸𝙻𝙻𝚄𝙰 𝙱𝙾𝚃 𝚆𝙷𝙰𝚃𝚂𝙰𝙿𝙿 📈`;
 
-    await sock.sendMessage2(
+    await sock.sendMessage(
       msg.key.remoteJid,
       {
         image: { url: "https://cdn.russellxz.click/eec4cf99.jpeg" },
         caption: listaMensaje
       },
-      msg
+      { quoted: msg }
     );
+
   } catch (error) {
     console.error("❌ Error al enviar el menú de multimedia:", error);
     await sock.sendMessage(
@@ -554,7 +555,6 @@ case "menuaudio": {
   }
   break;
 }
-
         
        case 'nsfwwaifu': {
   const chatId = msg.key.remoteJid;
