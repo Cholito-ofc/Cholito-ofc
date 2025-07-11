@@ -1,6 +1,6 @@
 let handler = async (m, { conn }) => {
   let chat = global.db?.data?.chats?.[m.chat] || {};
-  if (!chat.audios) return; // Si no están activos, no responde
+  if (!chat.audios) return;
 
   let text = m.text?.toLowerCase();
   if (!text) return;
@@ -69,6 +69,6 @@ let handler = async (m, { conn }) => {
 };
 
 handler.customPrefix = /^[\s\S]+$/i;
-handler.command = new RegExp;
+handler.command = new RegExp();
 
-export default handler;
+module.exports = handler;
