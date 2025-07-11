@@ -1,65 +1,38 @@
-const handler = async (msg, { conn }) => {
-  const chatId = msg.key.remoteJid;
-  const sender = msg.key.participant || msg.key.remoteJid;
-  const senderNum = sender.replace(/[^0-9]/g, "");
+const handler = async (m, { conn }) => {
+  const chat = global.db.data.chats[m.chat];
+  const text = m.text.toLowerCase();
 
-  if (!global.owner.some(([id]) => id === senderNum)) {
-    return conn.sendMessage(chatId, {
-      text: "❌ Solo el *owner* del bot puede usar este comando."
-    }, { quoted: msg });
-  }
+  if (!chat.audios) return;
 
-  let fetched;
+  const audios = {
+    'tarado': 'https://qu.ax/CoOd.mp3',
+    'teamo': 'https://cdn.russellxz.click/4a69e7be.mp3',
+    'tka': 'https://qu.ax/jakw.mp3',
+    'hey': 'https://qu.ax/AaBt.mp3',
+    'freefire': 'https://qu.ax/Dwqp.mp3',
+    'feriado': 'https://qu.ax/mFCT.mp3',
+    'aguanta': 'https://qu.ax/Qmz.mp3',
+    'niconico': 'https://qu.ax/YdVq.mp3',
+    'buen dia grupo': 'https://qu.ax/GoKq.mp3',
+    'calla fan de bts': 'https://qu.ax/oqNf.mp3',
+    'cambiate a movistar': 'https://qu.ax/RxJC.mp3',
+    'omg': 'https://qu.ax/PfuN.mp3',
+  };
+
+  const url = audios[text];
+  if (!url) return;
+
   try {
-    fetched = await conn.groupFetchAllParticipating();
-  } catch (e) {
-    console.error('Error en groupFetchAllParticipating:', e);
-    return conn.sendMessage(chatId, { text: '❌ Error al obtener grupos.' }, { quoted: msg });
+    await conn.sendPresenceUpdate('recording', m.chat);
+    await conn.sendFile(m.chat, url, `${text}.mp3`, null, m, true, { type: 'audioMessage' });
+  } catch (err) {
+    console.error(err);
+    m.reply('❌ Ocurrió un error al enviar el audio.');
   }
-
-  const entries = fetched instanceof Map
-    ? Array.from(fetched.entries())
-    : Object.entries(fetched || {});
-
-  const grupos = [];
-
-  for (const [jid, meta] of entries) {
-    if (!meta || !meta.subject) continue;
-    if (!jid.endsWith('@g.us')) continue;
-
-    grupos.push({
-      name: meta.subject,
-      id: jid
-    });
-  }
-
-  if (grupos.length === 0) {
-    global.gruposAdmin = [];
-    return conn.sendMessage(chatId, { text: '🚫 No estoy en ningún grupo.' }, { quoted: msg });
-  }
-
-  grupos.forEach((g, idx) => {
-    g.code = String(idx + 1);
-  });
-
-  global.gruposAdmin = grupos;
-
-  let texto = `
-╭━━━〔 *🌐 GRUPOS ACTIVOS DEL BOT* 〕━━⬣\n`;
-
-  grupos.forEach((g) => {
-    texto += `
-┣ 📌 *${g.code}. ${g.name}*
-┃ 🆔 ${g.id}
-┃ ✦ Usa: *.salir ${g.code}*
-╰━━━━━━━━━━━━━━━━━━━━⬣\n`;
-  });
-
-  texto += `\n🎯 *Total:* ${grupos.length} grupo(s)
-📤 Usa *.salir <número>* para salir de uno.`;
-
-  return conn.sendMessage(chatId, { text: texto.trim() }, { quoted: msg });
 };
 
-handler.command = ['cmd', 'salirgrupos'];
+handler.customPrefix = /^(tarado|teamo|tka|hey|freefire|feriado|aguanta|niconico|buen dia grupo|calla fan de bts|cambiate a movistar|omg)$/i;
+handler.command = [];
+handler.exp = 0;
+handler.register = false;
 module.exports = handler;
