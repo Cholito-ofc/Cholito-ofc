@@ -20,40 +20,12 @@ const handler = async (m, { conn }) => {
           await conn.sendFile(m.chat, 'https://qu.ax/jakw.mp3', 'tka.mp3', null, m, true, { type: 'audioMessage' });
           break;
 
-        case 'hey':
-          await conn.sendPresenceUpdate('recording', m.chat);
-          await conn.sendFile(m.chat, 'https://qu.ax/AaBt.mp3', 'hey.mp3', null, m, true, { type: 'audioMessage' });
-          break;
-
-        case 'freefire':
-          await conn.sendPresenceUpdate('recording', m.chat);
-          await conn.sendFile(m.chat, 'https://qu.ax/Dwqp.mp3', 'freefire.mp3', null, m, true, { type: 'audioMessage' });
-          break;
-
-        case 'feriado':
-          await conn.sendPresenceUpdate('recording', m.chat);
-          await conn.sendFile(m.chat, 'https://qu.ax/mFCT.mp3', 'feriado.mp3', null, m, true, { type: 'audioMessage' });
-          break;
-
-        case 'aguanta':
-          await conn.sendPresenceUpdate('recording', m.chat);
-          await conn.sendFile(m.chat, 'https://qu.ax/Qmz.mp3', 'aguanta.mp3', null, m, true, { type: 'audioMessage' });
-          break;
-
-        case 'niconico':
-          await conn.sendPresenceUpdate('recording', m.chat);
-          await conn.sendFile(m.chat, 'https://qu.ax/YdVq.mp3', 'niconico.mp3', null, m, true, { type: 'audioMessage' });
-          break;
-
         case 'buen dia grupo':
           await conn.sendPresenceUpdate('recording', m.chat);
           await conn.sendFile(m.chat, 'https://qu.ax/GoKq.mp3', 'buen_dia_grupo.mp3', null, m, true, { type: 'audioMessage' });
           break;
 
-        // ➕ Agrega más audios aquí si querés...
-
-        default:
-          // no hace nada si no hay coincidencia
+        // 🔁 Agregá más aquí si querés
       }
     }
   } catch (err) {
@@ -62,8 +34,8 @@ const handler = async (m, { conn }) => {
   }
 };
 
-// Sin comando porque se activa solo por texto
-handler.customPrefix = /^(tarado|teamo|tka|hey|freefire|feriado|aguanta|niconico|buen dia grupo)$/i;
-handler.command = []; // Corregido: sin función, solo vacío
+// 📌 Usá customPrefix con las palabras exactas
+handler.customPrefix = /^(tarado|teamo|tka|buen dia grupo)$/i;
+handler.command = /^$/; // Esto evita que cause conflicto con main.js
 
 module.exports = handler;
