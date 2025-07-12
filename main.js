@@ -14750,54 +14750,51 @@ case "perfil": {
 case 'owner':
 case 'creador': {
   try {
-    // DATOS PRINCIPALES
     const ownerNumber = '50489513153'
     const ownerName = 'cholito ᥊ᥡz⚡'
-    const senderClean = msg.key.participant?.replace(/[^0-9]/g, '') || ''
-    
-    // Tarjeta tipo Izumi con vCard embebida y thumbnail
-    const fkontak = {
-      key: {
-        participants: '0@s.whatsapp.net',
-        remoteJid: 'status@broadcast',
-        fromMe: false,
-        id: 'Halo'
-      },
-      message: {
-        locationMessage: {
-          name: '𝗖𝗥𝗘𝗔𝗗𝗢𝗥 𝗢𝗙𝗜𝗖𝗜𝗔𝗟',
-          jpegThumbnail: await (await fetch('https://iili.io/FMIAJ7S.th.png')).buffer(),
-          vcard:
-            `BEGIN:VCARD\n` +
-            `VERSION:3.0\n` +
-            `N:${ownerName};;;;\n` +
-            `FN:${ownerName}\n` +
-            `ORG:ᥴһ᥆ᥣі𝗍᥆ ᥊ᥡz 🇭🇳\n` +
-            `TITLE:Creador & Soporte Oficial\n` +
-            `TEL;waid=${ownerNumber}:${ownerNumber}\n` +
-            `X-WA-BIZ-NAME:GonBotv1\n` +
-            `NOTE:⚡ No hacer Spam • Respuesta casi divina\n` +
-            `END:VCARD`
+
+    // Generar vCard oficial
+    const vcard =
+      `BEGIN:VCARD\n` +
+      `VERSION:3.0\n` +
+      `N:${ownerName};;;;\n` +
+      `FN:${ownerName}\n` +
+      `ORG:ᥴһ᥆ᥣі𝗍᥆ ᥊ᥡz 🇭🇳\n` +
+      `TITLE:Creador & Soporte Oficial\n` +
+      `TEL;waid=${ownerNumber}:${ownerNumber}\n` +
+      `X-WA-BIZ-NAME:GonBotv1\n` +
+      `NOTE:⚡ No hacer Spam • Respuesta casi divina\n` +
+      `END:VCARD`
+
+    // Miniatura para el contacto (tipo Izumi)
+    const thumbnail = await (await fetch('https://iili.io/FCJSFix.jpg')).buffer()
+
+    // Enviar contacto real con botones "Mensaje" y "Añadir"
+    const sent = await sock.sendMessage(
+      msg.key.remoteJid,
+      {
+        contacts: {
+          displayName: ownerName,
+          contacts: [{ vcard }]
         }
       },
-      participant: '0@s.whatsapp.net'
-    }
+      {
+        quoted: msg,
+        jpegThumbnail: thumbnail
+      }
+    )
 
-    // TEXTO EXPLICATIVO
+    // Mensaje explicativo
     const texto = 
-`🗣️ *𝖢𝗈𝗇𝗍𝖺𝖼𝗍𝗈 𝖽𝖾𝗅 𝖢𝗋𝖾𝖺𝖽𝗈𝗋*
+`┌───⭓ *𝙲𝚁𝙴𝙰𝙳𝙾𝚁 𝙾𝙵𝙸𝙲𝙸𝙰𝙻*
+▢ *Nombre:* ${ownerName}
+▢ *Número:* +${ownerNumber}
+▢ *Soporte:* Pulsa el contacto y escribe.
+└───────⭓`
 
-Si tienes dudas, bugs o sugerencias, habla directo con el guardián del bot.
+    // Enviar mensaje citando el contacto
+    await sock.sendMessage(msg.key.remoteJid, { text: texto }, { quoted: sent.key })
 
-📌 *Nombre:* 𝗖𝗵𝗼𝗹𝗶𝘁𝗼 𝘅𝟳
-📌 *Número:* +${ownerNumber}  
-💬 *Chat inmediato:* pulsa la tarjeta y escribe.`
-
-    // ENVÍO DEL MENSAJE
-    await sock.sendMessage(msg.key.remoteJid, { contacts: { displayName: ownerName, contacts: [{ vcard: fkontak.message.locationMessage.vcard }] } }, { quoted: msg })
-    
-    await sock.sendMessage(msg.key.remoteJid, { text: texto }, { quoted: fkontak })
-    
   } catch (e) {
     console.error('[ERROR OWNER]', e)
     await sock.sendMessage(msg.key.remoteJid, { text: '❌ Error al generar contacto del creador.' }, { quoted: msg })
