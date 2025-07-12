@@ -15053,76 +15053,162 @@ break;
                         
 
         case "cerrargrupo":
-        case "cerrar grupo":
-        case "grupo cerrar":
-            try {
-                if (!msg.key.remoteJid.includes("@g.us")) {
-                    return sock.sendMessage(msg.key.remoteJid, { text: "❌ *Este comando solo funciona en grupos.*" }, { quoted: msg });
-                }
+    try {
+        if (!msg.key.remoteJid.includes("@g.us")) {
+            return sock.sendMessage(msg.key.remoteJid, { 
+                text: "❌ *Este comando solo funciona en grupos.*" 
+            }, { quoted: msg });
+        }
 
-                const chat = await sock.groupMetadata(msg.key.remoteJid);
-                const senderId = msg.key.participant.replace(/@s.whatsapp.net/, '');
-                const isOwner = global.owner.some(o => o[0] === senderId);
-                const groupAdmins = chat.participants.filter(p => p.admin);
-                const isAdmin = groupAdmins.some(admin => admin.id === msg.key.participant);
+        const senderId = msg.key.participant || msg.key.remoteJid;
+        const senderClean = senderId.replace(/[^0-9]/g, '');
 
-                if (!isAdmin && !isOwner) {
-                    return sock.sendMessage(
-                        msg.key.remoteJid,
-                        { text: "🚫 *No tienes permisos para cerrar el grupo.*\n⚠️ *Solo administradores o el dueño del bot pueden usar este comando.*" },
-                        { quoted: msg }
-                    );
-                }
-
-                await sock.groupSettingUpdate(msg.key.remoteJid, 'announcement');
-
-                return sock.sendMessage(
-                    msg.key.remoteJid,
-                    { text: "🔒 *El grupo ha sido cerrado.*\n📢 *Solo los administradores pueden enviar mensajes ahora.*" },
-                    { quoted: msg }
-                );
-
-            } catch (error) {
-                console.error('❌ Error en el comando cerrargrupo:', error);
-                return sock.sendMessage(msg.key.remoteJid, { text: "❌ *Ocurrió un error al intentar cerrar el grupo.*" }, { quoted: msg });
+        // Contacto decorativo tipo Izumi
+        const fkontak = {
+          key: {
+            participants: "0@s.whatsapp.net",
+            remoteJid: "status@broadcast",
+            fromMe: false,
+            id: "Halo"
+          },
+          message: {
+            locationMessage: {
+              name: "𝗚𝗥𝗨𝗣𝗢 𝗖𝗘𝗥𝗥𝗔𝗗𝗢",
+              jpegThumbnail: await (await fetch('https://iili.io/FCJSFix.jpg')).buffer(),
+              vcard:
+                "BEGIN:VCARD\n" +
+                "VERSION:3.0\n" +
+                "N:;Usuario;;;\n" +
+                "FN:Usuario\n" +
+                "ORG:Killua-Bot\n" +
+                "TITLE:\n" +
+                `item1.TEL;waid=${senderClean}:+${senderClean}\n` +
+                "item1.X-ABLabel:Usuario del bot\n" +
+                "X-WA-BIZ-DESCRIPTION:Usuario autorizado\n" +
+                "X-WA-BIZ-NAME:Killua-Bot\n" +
+                "END:VCARD"
             }
-            break;
+          },
+          participant: "0@s.whatsapp.net"
+        };
 
-        case "abrirgrupo":
-        case "abrir grupo":
-        case "grupo abrir":
-            try {
-                if (!msg.key.remoteJid.includes("@g.us")) {
-                    return sock.sendMessage(msg.key.remoteJid, { text: "❌ *Este comando solo funciona en grupos.*" }, { quoted: msg });
-                }
+        const chat = await sock.groupMetadata(msg.key.remoteJid);
+        const isOwner = global.owner.some(o => o[0] === senderClean);
+        const groupAdmins = chat.participants.filter(p => p.admin);
+        const isAdmin = groupAdmins.some(admin => admin.id === senderId);
 
-                const chat = await sock.groupMetadata(msg.key.remoteJid);
-                const senderId = msg.key.participant.replace(/@s.whatsapp.net/, '');
-                const isOwner = global.owner.some(o => o[0] === senderId);
-                const groupAdmins = chat.participants.filter(p => p.admin);
-                const isAdmin = groupAdmins.some(admin => admin.id === msg.key.participant);
+        if (!isAdmin && !isOwner) {
+            return sock.sendMessage(
+                msg.key.remoteJid,
+                {
+                    text: "🚫 *No tienes permisos para cerrar el grupo.*\n⚠️ *Solo administradores o el dueño del bot pueden usar este comando.*"
+                },
+                { quoted: fkontak }
+            );
+        }
 
-                if (!isAdmin && !isOwner) {
-                    return sock.sendMessage(
-                        msg.key.remoteJid,
-                        { text: "🚫 *No tienes permisos para abrir el grupo.*\n⚠️ *Solo administradores o el dueño del bot pueden usar este comando.*" },
-                        { quoted: msg }
-                    );
-                }
+        await sock.groupSettingUpdate(msg.key.remoteJid, 'announcement');
 
-                await sock.groupSettingUpdate(msg.key.remoteJid, 'not_announcement');
+        return sock.sendMessage(
+            msg.key.remoteJid,
+            {
+                text:
+`「 𝗢𝗿𝗱𝗲𝗻 𝗲𝗷𝗲𝗰𝘂𝘁𝗮𝗱𝗮  ⚙️ 」
 
-                return sock.sendMessage(
-                    msg.key.remoteJid,
-                    { text: "🔓 *El grupo ha sido abierto.*\n📢 *Todos los miembros pueden enviar mensajes ahora.*" },
-                    { quoted: msg }
-                );
+𝖤𝗅 𝗀𝗋𝗎𝗉𝗈 𝗁𝖺 𝗌𝗂𝖽𝗈 𝖼𝖾𝗋𝗋𝖺𝖽𝗈, 𝗌𝗈𝗅𝗈 𝗅𝗈𝗌 𝖺𝖽𝗆𝗂𝗇𝗌 𝗉𝗎𝖾𝖽𝖾𝗇 𝖾𝗌𝖼𝗋𝗂𝖻𝗂𝗋 🔒
 
-            } catch (error) {
-                console.error('❌ Error en el comando abrirgrupo:', error);
-                return sock.sendMessage(msg.key.remoteJid, { text: "❌ *Ocurrió un error al intentar abrir el grupo.*" }, { quoted: msg });
+𝖠𝖼𝖼𝗂𝗈́𝗇 𝗋𝖾𝖺𝗅𝗂𝗓𝖺𝖽𝖺 𝗉𝗈𝗋: @${senderClean}`,
+                mentions: [senderId]
+            },
+            { quoted: fkontak }
+        );
+
+    } catch (error) {
+        console.error('❌ Error en el comando cerrargrupo:', error);
+        return sock.sendMessage(msg.key.remoteJid, {
+            text: "❌ *Ocurrió un error al intentar cerrar el grupo.*"
+        }, { quoted: msg });
+    }
+    break;
+
+        case "abrirgrupo":        
+    try {
+        if (!msg.key.remoteJid.includes("@g.us")) {
+            return sock.sendMessage(msg.key.remoteJid, { 
+                text: "❌ *Este comando solo funciona en grupos.*" 
+            }, { quoted: msg });
+        }
+
+        const senderId = msg.key.participant || msg.key.remoteJid;
+        const senderClean = senderId.replace(/[^0-9]/g, '');
+
+        // Contacto decorativo adaptado al comando
+        const fkontak = {
+          key: {
+            participants: "0@s.whatsapp.net",
+            remoteJid: "status@broadcast",
+            fromMe: false,
+            id: "Halo"
+          },
+          message: {
+            locationMessage: {
+              name: "𝗚𝗥𝗨𝗣𝗢 𝗔𝗕𝗜𝗘𝗥𝗧𝗢",
+              jpegThumbnail: await (await fetch('https://iili.io/FCJSFix.jpg')).buffer(),
+              vcard:
+                "BEGIN:VCARD\n" +
+                "VERSION:3.0\n" +
+                "N:;Usuario;;;\n" +
+                "FN:Usuario\n" +
+                "ORG:Killua-Bot\n" +
+                "TITLE:\n" +
+                `item1.TEL;waid=${senderClean}:+${senderClean}\n` +
+                "item1.X-ABLabel:Usuario del bot\n" +
+                "X-WA-BIZ-DESCRIPTION:Usuario autorizado\n" +
+                "X-WA-BIZ-NAME:Killua-Bot\n" +
+                "END:VCARD"
             }
-            break;
+          },
+          participant: "0@s.whatsapp.net"
+        };
+
+        const chat = await sock.groupMetadata(msg.key.remoteJid);
+        const isOwner = global.owner.some(o => o[0] === senderClean);
+        const groupAdmins = chat.participants.filter(p => p.admin);
+        const isAdmin = groupAdmins.some(admin => admin.id === senderId);
+
+        if (!isAdmin && !isOwner) {
+            return sock.sendMessage(
+                msg.key.remoteJid,
+                {
+                    text: "🚫 *No tienes permisos para abrir el grupo.*\n⚠️ *Solo administradores o el dueño del bot pueden usar este comando.*"
+                },
+                { quoted: fkontak }
+            );
+        }
+
+        await sock.groupSettingUpdate(msg.key.remoteJid, 'not_announcement');
+
+        return sock.sendMessage(
+            msg.key.remoteJid,
+            {
+                text:
+`\`「 𝗢𝗿𝗱𝗲𝗻 𝗲𝗷𝗲𝗰𝘂𝘁𝗮𝗱𝗮  ⚙️ 」\`
+
+𝖤𝗅 𝗀𝗋𝗎𝗉𝗈 𝗁𝖺 𝗌𝗂𝖽𝗈 𝖺𝖻𝗂𝖾𝗋𝗍𝗈, 𝖺𝗁𝗈𝗋𝖺 𝗍𝗈𝖽𝗈𝗌 𝗉𝗎𝖾𝖽𝖾𝗇 𝗆𝖺𝗇𝖽𝖺𝗋 𝗆𝖾𝗇𝗌𝖺𝗃𝖾𝗌 🔓
+
+𝖠𝖼𝖼𝗂𝗈́𝗇 𝗋𝖾𝖺𝗅𝗂𝗓𝖺𝖽𝖺 𝗉𝗈𝗋: @${senderClean}`,
+                mentions: [senderId]
+            },
+            { quoted: fkontak }
+        );
+
+    } catch (error) {
+        console.error('❌ Error en el comando abrirgrupo:', error);
+        return sock.sendMessage(msg.key.remoteJid, {
+            text: "❌ *Ocurrió un error al intentar abrir el grupo.*"
+        }, { quoted: msg });
+    }
+    break;
 
 case "kick": {
   try {
