@@ -14750,50 +14750,36 @@ case "perfil": {
 case 'owner':
 case 'creador': {
   try {
+    // DATOS PRINCIPALES
     const ownerNumber = '50489513153'
     const ownerName = 'cholito ᥊ᥡz⚡'
+    const senderClean = msg.key.participant?.replace(/[^0-9]/g, '') || ''
 
-    // Generar vCard oficial
-    const vcard =
-      `BEGIN:VCARD\n` +
-      `VERSION:3.0\n` +
-      `N:${ownerName};;;;\n` +
-      `FN:${ownerName}\n` +
-      `ORG:ᥴһ᥆ᥣі𝗍᥆ ᥊ᥡz 🇭🇳\n` +
-      `TITLE:Creador & Soporte Oficial\n` +
-      `TEL;waid=${ownerNumber}:${ownerNumber}\n` +
-      `X-WA-BIZ-NAME:GonBotv1\n` +
-      `NOTE:⚡ No hacer Spam • Respuesta casi divina\n` +
-      `END:VCARD`
-
-    // Miniatura para el contacto (tipo Izumi)
-    const thumbnail = await (await fetch('https://iili.io/FCJSFix.jpg')).buffer()
-
-    // Enviar contacto real con botones "Mensaje" y "Añadir"
-    const sent = await sock.sendMessage(
-      msg.key.remoteJid,
-      {
-        contacts: {
-          displayName: ownerName,
-          contacts: [{ vcard }]
-        }
-      },
-      {
-        quoted: msg,
-        jpegThumbnail: thumbnail
-      }
-    )
-
-    // Mensaje explicativo
+    // TEXTO EXPLICATIVO
     const texto = 
-`┌───⭓ *𝙲𝚁𝙴𝙰𝙳𝙾𝚁 𝙾𝙵𝙸𝙲𝙸𝙰𝙻*
-▢ *Nombre:* ${ownerName}
-▢ *Número:* +${ownerNumber}
-▢ *Soporte:* Pulsa el contacto y escribe.
-└───────⭓`
+`🗣️ *𝖢𝗈𝗇𝗍𝖺𝖼𝗍𝗈 𝖽𝖾𝗅 𝖢𝗋𝖾𝖺𝖽𝗈𝗋*
 
-    // Enviar mensaje citando el contacto
-    await sock.sendMessage(msg.key.remoteJid, { text: texto }, { quoted: sent.key })
+Si tienes dudas, bugs o sugerencias, habla directo con el guardián del bot.
+
+📌 *Nombre:* 𝗖𝗵𝗼𝗹𝗶𝘁𝗼 𝘅𝟳
+📌 *Número:* +${ownerNumber}  
+💬 *Chat inmediato:* pulsa la tarjeta y escribe.`
+
+    // ENVÍO DEL CONTACTO COMO TARJETA NORMAL (con botón de mensaje y añadir)
+    await sock.sendMessage(msg.key.remoteJid, {
+      contact: {
+        displayName: ownerName,
+        vcard:
+          `BEGIN:VCARD\n` +
+          `VERSION:3.0\n` +
+          `FN:${ownerName}\n` +
+          `TEL;waid=${ownerNumber}:${ownerNumber}\n` +
+          `END:VCARD`
+      }
+    }, { quoted: msg })
+
+    // ENVÍA EL TEXTO EXPLICATIVO (igual que antes)
+    await sock.sendMessage(msg.key.remoteJid, { text: texto }, { quoted: msg })
 
   } catch (e) {
     console.error('[ERROR OWNER]', e)
