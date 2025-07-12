@@ -1,5 +1,5 @@
 const fs = require("fs");
-const fetch = require("node-fetch");
+const axios = require("axios");
 const cheerio = require("cheerio");
 const { lookup } = require("mime-types");
 
@@ -27,7 +27,7 @@ const handler = async (msg, { conn, text }) => {
 *📐 Tamaño:* ${res.size}
 *📄 MIME:* ${res.mimetype}
 *🗓️ Subido:* ${res.uploadDate}
-*🔗 URL:* ${res.url}
+*🔗 Enlace:* ${res.url}
 `.trim();
 
     const fkontak = {
@@ -40,7 +40,7 @@ const handler = async (msg, { conn, text }) => {
       message: {
         locationMessage: {
           name: "Descarga Mediafire",
-          jpegThumbnail: await (await fetch('https://iili.io/F0WZNEX.th.png')).buffer(),
+          jpegThumbnail: (await axios.get('https://iili.io/F0WZNEX.th.png', { responseType: 'arraybuffer' })).data,
           vcard:
             "BEGIN:VCARD\n" +
             "VERSION:3.0\n" +
@@ -67,9 +67,10 @@ const handler = async (msg, { conn, text }) => {
 
     await conn.sendMessage(chatId, { react: { text: "✅", key: msg.key } });
   } catch (err) {
+    console.error("[ERROR MEDIAFIRE]", err);
     await conn.sendMessage(chatId, { react: { text: "❌", key: msg.key } });
     return conn.sendMessage(chatId, {
-      text: `❌ *Ocurrió un error al procesar el enlace.*\nIntenta con otro link o más tarde.`,
+      text: `❌ *Ocurrió un error:*\n\`\`\`${err.message || err}\`\`\``,
       mentions: [sender]
     }, { quoted: msg });
   }
@@ -78,27 +79,26 @@ const handler = async (msg, { conn, text }) => {
 handler.command = ["mediafire", "mf", "mfdl"];
 module.exports = handler;
 
-// ─── FUNCIÓN DE DESCARGA ─────────────────────
+// ─── SCRAPER DE MEDIAFIRE ───────────────────────
 async function mediafire(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+  const { data } = await axios.get(url);
+  const $ = cheerio.load(data);
 
-  const html = await res.text();
-  const $ = cheerio.load(html);
-
-  const filename = $(".dl-btn-label").attr("title");
+  const filename = $(".dl-btn-label").attr("title") || $("a#downloadButton").text().trim();
   if (!filename) throw new Error("No se encontró el nombre del archivo.");
 
-  const extMatch = filename.match(/\.([^\.]+)$/);
-  const ext = extMatch ? extMatch[1].toLowerCase() : "desconocido";
+  const extMatch = filename.match(/\.([0-9a-z]+)$/i);
+  const ext = extMatch ? extMatch[1].toLowerCase() : "bin";
   const mimetype = lookup(ext) || `application/${ext}`;
-  const sizeText = $(".download_link .input").text().trim();
+
+  const download = $("a#downloadButton").attr("href");
+  if (!download) throw new Error("No se pudo extraer el enlace de descarga.");
+
+  const sizeText = $(".download_file_info span").text().trim();
   const sizeMatch = sizeText.match(/\((.*?)\)/);
   const size = sizeMatch ? sizeMatch[1] : "desconocido";
-  const download = $(".input").attr("href");
-  if (!download) throw new Error("No se encontró el enlace de descarga.");
 
-  let uploadDate = "Fecha no encontrada";
+  let uploadDate = "No disponible";
   const dataCreation = $("[data-creation]").attr("data-creation");
   if (dataCreation && !isNaN(dataCreation)) {
     const date = new Date(parseInt(dataCreation) * 1000);
