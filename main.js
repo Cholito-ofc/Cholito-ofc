@@ -14238,7 +14238,7 @@ case "rest":
 
         if (!isOwner(senderNumber) && !isBotMessage) {
             await sock.sendMessage(msg.key.remoteJid, {
-                text: "⛔ *Solo los dueños del bot o el bot mismo pueden reiniciar el servidor.*"
+                text: "⚠️ *𝘠 𝘵𝘶 𝘲𝘶𝘪𝘦𝘯 𝘦𝘳𝘦𝘴? 𝘦𝘴𝘵𝘦 𝘤𝘰𝘮𝘢𝘯𝘥𝘰 𝘦𝘴 𝘦𝘹𝘤𝘭𝘶𝘴𝘪𝘷𝘰 𝘱𝘢𝘳𝘢 𝘮𝘪 𝘤𝘳𝘦𝘢𝘥𝘰𝘳*"
             }, { quoted: msg });
             return;
         }
@@ -14247,44 +14247,46 @@ case "rest":
             react: { text: "🛠️", key: msg.key }
         });
 
+        const header = "*「 🛠️ 」𝘙𝘌𝘐𝘕𝘐𝘊𝘐𝘈𝘕𝘋𝘖 𝘌𝘓 𝘚𝘐𝘚𝘛𝘌𝘔𝘼...*\n\n";
+        const finalMsg = "*「 🛠️ 」𝘙𝘌𝘐𝘕𝘐𝘊𝘐𝘈𝘕𝘋𝘖 𝘌𝘓 𝘚𝘐𝘚𝘛𝘌𝘔𝘈...*\n\n*𝘊𝘖́𝘋𝘐𝘎𝘖 𝘈𝘓𝘐𝘕𝘌𝘈𝘋𝘖 𝘌𝘚𝘗𝘌𝘙𝘈 𝘜𝘕𝘖𝘚 𝘚𝘌𝘎𝘜𝘕𝘋𝘖𝘚...*";
+
         const progressFrames = [
             "▒▒▒▒▒▒▒▒▒▒ 0%",
-            "██▒▒▒▒▒▒▒▒ 20%",
-            "████▒▒▒▒▒▒ 40%",
-            "██████▒▒▒▒ 60%",
-            "████████▒▒ 80%",
+            "███▒▒▒▒▒▒▒ 25%",
+            "██████▒▒▒▒ 50%",
+            "█████████▒ 75%",
             "██████████ 100%"
         ];
 
-        const header = "*「 🛠️ 」𝘙𝘌𝘐𝘕𝘐𝘊𝘐𝘈𝘕𝘋𝘖 𝘌𝘓 𝘚𝘐𝘚𝘛𝘌𝘔𝘼...*\n\n";
-        const footer = "\n\n*𝘊𝘖́𝘋𝘐𝘎𝘖 𝘈𝘓𝘐𝘕𝘌𝘈𝘋𝘖 ✔️*";
-
-        // Enviar el primer mensaje
+        // Enviar primer mensaje con barra 0%
         let status = await sock.sendMessage(msg.key.remoteJid, {
             text: header + progressFrames[0]
         }, { quoted: msg });
 
-        // Ir editando el mismo mensaje
+        // Editar mensaje para cada frame (25%, 50%, 75%, 100%)
         for (let i = 1; i < progressFrames.length; i++) {
-            await new Promise(res => setTimeout(res, 650));
-            const finalText = (i === progressFrames.length - 1)
-                ? header + progressFrames[i] + footer
-                : header + progressFrames[i];
-
+            await new Promise(res => setTimeout(res, 700));
             await sock.sendMessage(msg.key.remoteJid, {
-                text: finalText,
+                text: header + progressFrames[i],
                 edit: status.key
             });
         }
 
-        // Guardar el chat que pidió reinicio
+        // Esperar un momento y luego quitar barra, dejando solo texto final
+        await new Promise(res => setTimeout(res, 800));
+        await sock.sendMessage(msg.key.remoteJid, {
+            text: finalMsg,
+            edit: status.key
+        });
+
+        // Guardar chat que pidió reinicio
         const lastRestarterFile = "./lastRestarter.json";
         fs.writeFileSync(lastRestarterFile, JSON.stringify({ chatId: msg.key.remoteJid }, null, 2));
 
-        // Reiniciar el proceso
+        // Reiniciar el bot
         setTimeout(() => {
             process.exit(1);
-        }, 1200);
+        }, 1000);
 
     } catch (error) {
         console.error("❌ Error en el comando rest:", error);
