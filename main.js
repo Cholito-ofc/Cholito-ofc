@@ -3716,9 +3716,11 @@ case 'bc': {
   await sock.sendMessage(msg.key.remoteJid, { text: `✅ Broadcast enviado a ${groupIds.length} grupos.` });
   break;
 }
-        
-
-case 'allmenu': {
+   
+     
+case 'allmenu':
+case 'menu2':
+case 'menucompleto': {
   try {
     const fs = require("fs");
     const path = require("path");
@@ -4030,7 +4032,7 @@ case 'menu': {
 ┃𝐴𝑞𝑢𝑖 𝑡𝑖𝑒𝑛𝑒𝑠 𝑑𝑖𝑠𝑝𝑜𝑛𝑖𝑏𝑙𝑒𝑠 𝑡𝑜𝑑𝑜𝑠
 ┃𝑙𝑜𝑠 𝑚𝑒𝑛𝑢́𝑠 𝑑𝑒 𝑘𝑖𝑙𝑙𝑢𝑎𝐵𝑜𝑡. 
 ┃┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
-┃➜ ${global.prefix}𝖺𝗅𝗅𝗆𝖾𝗇𝗎
+┃➜ ${global.prefix}𝗆𝖾𝗇𝗎𝖼𝗈𝗆𝗉𝗅𝖾𝗍𝗈
 ┃➜ ${global.prefix}𝗆𝖾𝗇𝗎𝗀𝗋𝗎𝗉𝗈
 ┃➜ ${global.prefix}𝗆𝖾𝗇𝗎𝖺𝗎𝖽𝗂𝗈
 ┃➜ ${global.prefix}𝗆𝖾𝗇𝗎𝗋𝗉𝗀
@@ -4093,10 +4095,11 @@ case 'menu': {
 *╰━━━━━━⋆★⋆━━━━━━⬣*
 
 ╭━━[ *BUSCADORES 🔍* ]━⬣
-┃𝐶𝑜𝑛𝑠𝑢𝑙𝑡𝑎 𝑡𝑢𝑠 𝑏𝑢́𝑠𝑞𝑢𝑒𝑑𝑎𝑠 𝑐𝑜𝑛 𝑙𝑜𝑠 𝑠𝑖𝑔𝑢𝑖𝑒𝑛𝑡𝑒𝑠 𝑐𝑜𝑚𝑎𝑛𝑑𝑜𝑠
-┃𝐾𝑖𝑙𝑙𝑢𝑎𝐵𝑜𝑡 𝑝𝑟𝑒𝑠𝑒𝑛𝑡𝑒 𝑝𝑎𝑟𝑎 𝑡𝑢𝑠 𝑑𝑒𝑠𝑒𝑜𝑠 
+┃𝐶𝑜𝑛𝑠𝑢𝑙𝑡𝑎 𝑡𝑢𝑠 𝑏𝑢́𝑠𝑞𝑢𝑒𝑑𝑎𝑠 𝑐𝑜𝑛 𝑙𝑜𝑠 𝑠𝑖𝑔𝑢𝑖𝑒𝑛𝑡𝑒𝑠
+┃𝑐𝑜𝑚𝑎𝑛𝑑𝑜𝑠 𝐾𝑖𝑙𝑙𝑢𝑎𝐵𝑜𝑡 𝑝𝑟𝑒𝑠𝑒𝑛𝑡𝑒 𝑝𝑎𝑟𝑎 𝑡𝑢𝑠 𝑑𝑒𝑠𝑒𝑜𝑠 
 ┃┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 ┃➜ ${global.prefix}𝗉𝗂𝗑𝖺𝗂
+┃➜ ${global.prefix}𝗂𝗆𝖺𝗀𝖾𝗇
 ┃➜ ${global.prefix}𝗒𝗍𝗌
 ┃➜ ${global.prefix}𝗍𝗍𝗌𝖾𝖺𝗋𝖼𝗁
 ┃➜ ${global.prefix}𝗍𝗍𝗌𝗍𝖺𝗅𝗄
@@ -11880,7 +11883,7 @@ case 'topuser': {
 
         if (!rpgData.usuarios || Object.keys(rpgData.usuarios).length === 0) {
             await sock.sendMessage(msg.key.remoteJid, { 
-                text: "📜 *No hay miembros registrados en el Gremio Cortana 2.0.*" 
+                text: "📜 *No hay miembros registrados en el Gremio killuaBot.*" 
             }, { quoted: msg });
             return;
         }
@@ -11890,7 +11893,7 @@ case 'topuser': {
         // Ordenar por nivel de mayor a menor
         usuarios.sort((a, b) => b[1].nivel - a[1].nivel);
 
-        let ranking = `🏆 *rαทкiทg ∂є jυgα∂σrєs ∂єℓ grємiσ cσrταทα 2.0* 🏆\n\n`;
+        let ranking = `🏆 *rαทкiทg ∂є jυgα∂σrєs ∂єℓ grємiσ kíllմαճօԵ 2.0* 🏆\n\n`;
         let mentions = [];
 
         usuarios.forEach(([userId, usuario], index) => {
@@ -12278,7 +12281,7 @@ case 'alaventa': {
             return;
         }
 
-        let mensaje = `🏪 *Mercado de Personajes - Cortana 2.0* 🏪\n\n`;
+        let mensaje = `🏪 *Mercado de Personajes - 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍 🏪\n\n`;
         mensaje += `🎭 *Aquí puedes comprar personajes puestos a la venta por otros jugadores.*\n`;
         mensaje += `🛒 *Para comprar usa:* \n`;
         mensaje += `   📌 \`${global.prefix}comprar2 <nombre_personaje>\`\n\n`;
@@ -12334,7 +12337,7 @@ case 'mascota': {
             await sock.sendMessage(
                 msg.key.remoteJid,
                 {
-                    text: `❌ *No tienes una cuenta en el gremio Azura Ultra.*\n\n📜 Usa \`${global.prefix}rpg <nombre> <edad>\` para registrarte.`
+                    text: `❌ *No tienes una cuenta en el gremio 𝖱𝗉𝗀𝗄𝗂𝗅𝗅𝗎𝖺.\n📜 Usa \`${global.prefix}rpg <nombre> <edad>\` para registrarte.`
                 },
                 { quoted: msg }
             );
@@ -12596,7 +12599,7 @@ case 'rpg': {
     try { 
         if (args.length < 2) { 
             await sock.sendMessage(msg.key.remoteJid, { 
-                text: `⚠️ *Uso incorrecto.*\nEjemplo: \`${global.prefix}rpg Russell 26\`` 
+                text: `⚠️ *Uso incorrecto.*\nEjemplo: \`${global.prefix}𝗋𝗉𝗀 𝖼𝗁𝗈𝗅𝗂𝗍𝗈 𝟣𝟩\`` 
             }, { quoted: msg });
             return; 
         }
@@ -12617,13 +12620,13 @@ case 'rpg': {
 
         if (rpgData.usuarios[userId]) { 
             await sock.sendMessage(msg.key.remoteJid, { 
-                text: `⚠️ *Ya estás registrado en el gremio Azura Ultra.*\n\n📜 Usa \`${global.prefix}menurpg\` para ver tus opciones.` 
+                text: `⚠️ *𝖸𝖺 𝖾𝗌𝗍𝖺́𝗌 𝗋𝖾𝗀𝗂𝗌𝗍𝗋𝖺𝖽𝗈 𝖾𝗇 𝖾𝗅 𝗀𝗋𝖾𝗆𝗂𝗈 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍.*\n\n📜 Usa \`${global.prefix}menurpg\` 𝗉𝖺𝗋𝖺 𝗏𝖾𝗋 𝗍𝗎𝗌 𝗈𝗉𝖼𝗂𝗈𝗇𝖾𝗌.` 
             }, { quoted: msg });
             return; 
         }
 
         await sock.sendMessage(msg.key.remoteJid, { react: { text: "⏳", key: msg.key } }); 
-        let registroMensaje = await sock.sendMessage(msg.key.remoteJid, { text: `📝 *Registrando en el Gremio Azura Ultra...*` }, { quoted: msg }); 
+        let registroMensaje = await sock.sendMessage(msg.key.remoteJid, { text: `📝 *Registrando en el Gremio 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍...*` }, { quoted: msg }); 
 
         await new Promise(resolve => setTimeout(resolve, 1500)); 
         await sock.sendMessage(msg.key.remoteJid, { edit: registroMensaje.key, text: `📜 *Nombre:* ${nombreUsuario}\n🎂 *Edad:* ${edadUsuario}\n\n⏳ *Procesando...*` }); 
@@ -12807,7 +12810,7 @@ case 'vermascotas': {
         // 📜 **Explicación Final**  
         mensaje += `📜 **Estos son los comandos para subir de nivel a tu mascota:**\n`;  
         mensaje += `   🛠️ *${global.prefix}daragua*, *${global.prefix}darcomida*, *${global.prefix}darcariño*, *${global.prefix}pasear*, *${global.prefix}cazar*, *${global.prefix}entrenar*, *${global.prefix}presumir*, *${global.prefix}supermascota*\n\n`;  
-        mensaje += `🚀 **¡Sigue entrenando a tus mascotas en el Gremio Azura Ultra!** 🏆`;  
+        mensaje += `🚀 **¡Sigue entrenando a tus mascotas en el Gremio 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍** 🏆`;  
 
 // 🖼️ Enviar mensaje con imagen en lugar de GIF
 await sock.sendMessage(msg.key.remoteJid, {  
@@ -13399,7 +13402,7 @@ case 'dame': {
         let userId = msg.key.participant || msg.key.remoteJid;
         if (!rpgData.usuarios[userId]) {
             await sock.sendMessage(msg.key.remoteJid, {
-                text: `❌ *No tienes una cuenta en el gremio Azura Ultra.*\n\n📜 Usa \`${global.prefix}rpg <nombre> <edad>\` para registrarte.`
+                text: `❌ *No tienes una cuenta en el gremio 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍.*\n\n📜 Usa \`${global.prefix}rpg <nombre> <edad>\` para registrarte.`
             }, { quoted: msg });
             return;
         }
@@ -13459,7 +13462,7 @@ case 'tiendamascotas': {
         }
 
         // Explicación sobre la compra de mascotas 📜
-        let mensaje = `🏪 *Եíҽղժɑ ժҽ ʍɑՏϲօԵɑՏ - 𝐂𝐎𝐑𝐓𝐀𝐍𝐀 𝟐.𝟎* 🏪\n\n`;
+        let mensaje = `🏪 *Եíҽղժɑ ժҽ ʍɑՏϲօԵɑՏ - 𝖪𝗂𝗅𝗅𝗎𝖺𝖡𝗈𝗍* 🏪\n\n`;
         mensaje += `🐶 *Aquí puedes comprar mascotas para mejorar tu equipo.*\n`;
         mensaje += `🛍️ *Para comprar una mascota, usa:* \n`;
         mensaje += `   📌 \`${global.prefix}compra <nombre_mascota>\`\n`;
@@ -14433,7 +14436,7 @@ case "ping":
                      `•  *𝖳𝖮𝖳𝖠𝖫:* ${totalMemGB}GB\n\n` +
                      `💽 *𝖣𝖨𝖲𝖢𝖮:* ${diskUsage}\n\n` +
                      `🌐 *𝖠𝖫𝖮𝖩𝖠𝖣𝖮 𝖤𝖭:* *Sky Ultra Plus* 🚀\n` +
-                     `📌 *𝖯𝗋𝗈𝗏𝖾𝖾𝖽𝗈𝗋𝖾 𝖽𝖾 𝖧𝗈𝗌𝗍𝗂𝗇𝗀 𝖽𝖾 𝖢𝗈𝗇𝖿𝗂́𝖺𝗇𝗓𝖺*`,
+                     `📌 *𝖯𝗋𝗈𝗏𝖾𝖾𝖽𝗈𝗋 𝖽𝖾 𝖧𝗈𝗌𝗍𝗂𝗇𝗀 𝖽𝖾 𝖢𝗈𝗇𝖿𝗂́𝖺𝗇𝗓𝖺*`,
             quoted: msg
         });
 
@@ -15113,7 +15116,7 @@ break;
             msg.key.remoteJid,
             {
                 text:
-`「 𝗢𝗿𝗱𝗲𝗻 𝗲𝗷𝗲𝗰𝘂𝘁𝗮𝗱𝗮  ⚙️ 」
+`\`「 𝗢𝗿𝗱𝗲𝗻 𝗲𝗷𝗲𝗰𝘂𝘁𝗮𝗱𝗮  ⚙️ 」\`
 
 𝖤𝗅 𝗀𝗋𝗎𝗉𝗈 𝗁𝖺 𝗌𝗂𝖽𝗈 𝖼𝖾𝗋𝗋𝖺𝖽𝗈, 𝗌𝗈𝗅𝗈 𝗅𝗈𝗌 𝖺𝖽𝗆𝗂𝗇𝗌 𝗉𝗎𝖾𝖽𝖾𝗇 𝖾𝗌𝖼𝗋𝗂𝖻𝗂𝗋 🔒
 
