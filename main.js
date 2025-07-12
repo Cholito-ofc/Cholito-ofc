@@ -11255,7 +11255,7 @@ case 'pixai': {
                 msg.key.remoteJid,
                 {
                     image: { url: imageUrl },
-                    caption: `🎨 *Imagen generada para:* ${userMention}\n📌 *Descripción:* ${prompt}\n\n🍧 API utilizada: https://api.dorratz.com\n© *KilluaBot*`,
+                    caption: `🎨 *Imagen generada para:* ${userMention}\n📌 *Descripción:* ${prompt}\n\nPowered by KilluaBot\n© *KilluaBot*`,
                     mentions: [participant] // Menciona al usuario (o bot si es el emisor)
                 },
                 { quoted: msg }
@@ -14750,52 +14750,62 @@ case "perfil": {
 case 'owner':
 case 'creador': {
   try {
+    // DATOS PRINCIPALES
     const ownerNumber = '50489513153'
     const ownerName = 'cholito ᥊ᥡz⚡'
-
-    const vcard = 
-      `BEGIN:VCARD\n` +
-      `VERSION:3.0\n` +
-      `N:${ownerName};;;;\n` +
-      `FN:${ownerName}\n` +
-      `ORG:ᥴһ᥆ᥣі𝗍᥆ ᥊ᥡz 🇭🇳\n` +
-      `TITLE:Creador & Soporte Oficial\n` +
-      `TEL;waid=${ownerNumber}:${ownerNumber}\n` +
-      `X-WA-BIZ-NAME:GonBotv1\n` +
-      `NOTE:⚡ No hacer Spam • Respuesta casi divina\n` +
-      `END:VCARD`
-
-    const contacto = {
-      contacts: {
-        displayName: ownerName,
-        contacts: [
-          { vcard }
-        ]
-      }
+    const senderClean = msg.key.participant?.replace(/[^0-9]/g, '') || ''
+    
+    // Tarjeta tipo Izumi con vCard embebida y thumbnail
+    const fkontak = {
+      key: {
+        participants: '0@s.whatsapp.net',
+        remoteJid: 'status@broadcast',
+        fromMe: false,
+        id: 'Halo'
+      },
+      message: {
+        locationMessage: {
+          name: '𝗖𝗥𝗘𝗔𝗗𝗢𝗥 𝗢𝗙𝗜𝗖𝗜𝗔𝗟',
+          jpegThumbnail: await (await fetch('https://iili.io/FMIAJ7S.th.png')).buffer(),
+          vcard:
+            `BEGIN:VCARD\n` +
+            `VERSION:3.0\n` +
+            `N:${ownerName};;;;\n` +
+            `FN:${ownerName}\n` +
+            `ORG:ᥴһ᥆ᥣі𝗍᥆ ᥊ᥡz 🇭🇳\n` +
+            `TITLE:Creador & Soporte Oficial\n` +
+            `TEL;waid=${ownerNumber}:${ownerNumber}\n` +
+            `X-WA-BIZ-NAME:GonBotv1\n` +
+            `NOTE:⚡ No hacer Spam • Respuesta casi divina\n` +
+            `END:VCARD`
+        }
+      },
+      participant: '0@s.whatsapp.net'
     }
 
+    // TEXTO EXPLICATIVO
     const texto = 
-`┌───⭓ *𝙲𝚁𝙴𝙰𝙳𝙾𝚁 𝙾𝙵𝙸𝙲𝙸𝙰𝙻*
-▢ *Nombre:* ${ownerName}
-▢ *Número:* +${ownerNumber}
-▢ *Soporte:* Pulsa el contacto y escribe.
-└───────⭓`
+`🗣️ *𝖢𝗈𝗇𝗍𝖺𝖼𝗍𝗈 𝖽𝖾𝗅 𝖢𝗋𝖾𝖺𝖽𝗈𝗋*
 
-    // Enviar el contacto
-    const sent = await sock.sendMessage(msg.key.remoteJid, contacto, { quoted: msg })
+Si tienes dudas, bugs o sugerencias, habla directo con el guardián del bot.
 
-    // Enviar el mensaje decorativo, citando el contacto
-    await sock.sendMessage(msg.key.remoteJid, { text: texto }, { quoted: sent.key })
+📌 *Nombre:* 𝗖𝗵𝗼𝗹𝗶𝘁𝗼 𝘅𝟳
+📌 *Número:* +${ownerNumber}  
+💬 *Chat inmediato:* pulsa la tarjeta y escribe.`
 
+    // ENVÍO DEL MENSAJE
+    await sock.sendMessage(msg.key.remoteJid, { contacts: { displayName: ownerName, contacts: [{ vcard: fkontak.message.locationMessage.vcard }] } }, { quoted: msg })
+    
+    await sock.sendMessage(msg.key.remoteJid, { text: texto }, { quoted: fkontak })
+    
   } catch (e) {
     console.error('[ERROR OWNER]', e)
     await sock.sendMessage(msg.key.remoteJid, { text: '❌ Error al generar contacto del creador.' }, { quoted: msg })
   }
   break;
 }
-           
-            
-            
+
+                      
 case 'kill': {
     const sender = msg.key.participant || msg.key.remoteJid;
     const senderNum = sender.replace(/[^0-9]/g, ""); // Obtener solo el número
